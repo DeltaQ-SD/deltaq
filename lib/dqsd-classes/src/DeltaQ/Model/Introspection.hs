@@ -44,10 +44,10 @@ class (DeltaQ irv) => DeltaQIntrospection irv where
   probTimedout irv to = complement $ cumulativeMass irv to
 
   pointSlackHazard irv (t,p)
+    -- There must exist a non-negative time difference.
     | dp >= 0      = Slack  dt (fromMassModel dp)
-    -- ^ There must exist a non-negative time difference.
+    -- There is no upper bound on the time.
     | isNothing t' = Hazard Nothing (fromMassModel $ negate dp)
-    -- ^ There is no upper bound on the time.
     | otherwise    = Hazard (Just $ negate dt) (fromMassModel $ negate dp)
     where
       dp = toMassModel p' - toMassModel p
