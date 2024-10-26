@@ -211,9 +211,9 @@ shiftedHeaviside = shifted𝛩
 
 -- | Those models that support construction through use of uniform distributions
 class (DeltaQ𝛩 icdf) => DeltaQUniform icdf where
--- | Uniform distribution from 0
+  -- | Uniform distribution from 0
   uniform0 :: Time icdf -> icdf
--- | Uniform distribution over a range
+  -- | Uniform distribution over a range
   uniform  :: Time icdf -> Time icdf -> icdf
 
   uniform0  b = uniform 0 b
