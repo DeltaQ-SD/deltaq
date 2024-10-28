@@ -1,3 +1,2 @@
-module DeltaQ.Classes
-()
+module DeltaQ.Classes ()
 where
