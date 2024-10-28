@@ -95,45 +95,40 @@ cumulativeMass
     -> a
 cumulativeMass x p = last $ evaluate p (makeCDF x)
 
+-- | Make a delta and convolve with it
 shiftIRV
     :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistH a) (DistD a))
     => a
     -> IRV a
     -> IRV a
-
--- | Make a delta and convolve with it
 shiftIRV s x = constructDelta s PWPs.IRVs.<+> PDF (makePDF x)
 
+-- | Force an IRV into a PDF by differentiating if necessary
 makePDF
     :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistH a) (DistD a))
     => IRV a
     -> DistD a
-
--- | Force an IRV into a PDF by differentiating if necessary
 makePDF (PDF x) = x
 makePDF (CDF x) = differentiate x
 
+-- | Force an IRV into a CDF by integrating if necessary
 makeCDF
     :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistH a))
     => IRV a
     -> DistH a
-
--- | Force an IRV into a CDF by integrating if necessary
 makeCDF (CDF x) = x
 -- assume PDFs are 0 at 0
 makeCDF (PDF x) = integrate x
 
-constructUniform :: MyConstraints a => a -> IRV a
-
 -- | Construct a PDF with uniform probability from 0 to the given value
+constructUniform :: MyConstraints a => a -> IRV a
 constructUniform x =
     if x <= 0
         then error "Invalid interval"
         else PDF (makePieces [(0, Pd (makePoly (1 / x))), (x, Pd 0)])
 
-constructDelta :: MyConstraints a => a -> IRV a
-
 -- | Construct a PDF that is a delta function at the given value
+constructDelta :: MyConstraints a => a -> IRV a
 constructDelta x
     | x < 0 = error "Invalid value"
     | x == 0 = PDF (makePieces [(0, D 1), (0, Pd 0)])
@@ -149,13 +144,12 @@ monotonicFromZero xs = if null xs then error "Empty list" else head xs == 0 && m
 repeatedPoint :: Eq a => [a] -> Bool
 repeatedPoint as = and $ zipWith (==) as (tail as)
 
-constructGeneralCDF :: MyConstraints a => [(a, a)] -> IRV a
-
 {-| Construct a CDF from a list of (time, probability) pairs, which start at (0,0) and are monotonic.
      If the next time is strictly greater than the previous one, construct a linear interpolation between
      the two probabilities. If the next time is the same as the previous one, construct a Heaviside step
      between the two probabilities.
 -}
+constructGeneralCDF :: MyConstraints a => [(a, a)] -> IRV a
 constructGeneralCDF xs
     | length xs < 2 = error "Insufficient points"
     | not (monotonicFromZero (map fst xs)) = error "Basepoints not monotonic"
@@ -184,11 +178,10 @@ constructGeneralCDF xs
             -- we know b1 /= b0 so the division is safe
             s = (p1 - p0) / (b1 - b0)
 
-constructCDF :: MyConstraints a => [(a, a)] -> IRV a
-
 {-| Construct a CDF from a list of values, treating each new value as a step up from the one before, assuming we start at 0
 | First interval is a zero polynomial: subsequent intervals start with a delta and then have a constant polynomial.
 -}
+constructCDF :: MyConstraints a => [(a, a)] -> IRV a
 constructCDF xs
     | length xs < 2 = error "Insufficient points"
     | not (monotonicFromZero basepoints) = error "Basepoints not monotonic"
@@ -212,9 +205,8 @@ constructCDF xs
     interleave _ [] = []
     interleave (x' : xs') (y' : ys') = x' : y' : interleave xs' ys'
 
-constructLinearCDF :: MyConstraints a => [(a, a)] -> IRV a
-
 -- | Construct a CDF from a list of values, interpolating linearly between each pair of points
+constructLinearCDF :: MyConstraints a => [(a, a)] -> IRV a
 constructLinearCDF xs
     | length xs < 2 = error "Insufficient points"
     | not (monotonicFromZero basepoints) = error "Basepoints not monotonic"
@@ -243,11 +235,10 @@ constructLinearCDF xs
             )
     makeSegment y x s = Poly [y - x * s, s]
 
-asDiscreteCDF :: MyConstraints a => IRV a -> Int -> [Either (a, a) [(a, a)]]
-
 {-| Return a sequence of (Left) step base (the lower value of the Heaviside function at that point)
      or (Right) a sequence of Time and Probability. The sequence is monotonically increasing in Time.
 -}
+asDiscreteCDF :: MyConstraints a => IRV a -> Int -> [Either (a, a) [(a, a)]]
 asDiscreteCDF x n =
     if n <= 0
         then error "Invalid number of points"
@@ -256,12 +247,11 @@ asDiscreteCDF x n =
     width = snd (support x) - fst (support x)
     spacing = width / Prelude.fromIntegral n
 
-asDiscretePDF :: MyConstraints a => IRV a -> Int -> [Either (a, a) [(a, a)]]
-
 {-| Return a sequence of (Left) Impulse Probablity mass (equivalent to the
      integral of the Heaviside function at that point) or (Right) a sequence
      of Time and Probability Density. The sequence is monotonically increasing in Time.
 -}
+asDiscretePDF :: MyConstraints a => IRV a -> Int -> [Either (a, a) [(a, a)]]
 asDiscretePDF x n =
     if n <= 0
         then error "Invalid number of points"
@@ -276,11 +266,10 @@ firstToFinish x y = CDF (cdfOfx + cdfOfy - (cdfOfx * cdfOfy))
     cdfOfx = makeCDF x
     cdfOfy = makeCDF y
 
-multiFtF :: MyConstraints a => [IRV a] -> IRV a
-
 {-| Compute the first-to-finsh of a list of IRVs by multiplying inverse CDFs then inverting
 If there is nothing finish the result is bottom
 -}
+multiFtF :: MyConstraints a => [IRV a] -> IRV a
 multiFtF [] = bottom
 multiFtF [x] = x
 -- now know we have at least two, so head and tail are safe
@@ -292,9 +281,8 @@ multiFtF xs = CDF $ invert $ foldr (*) (head icdfs) (tail icdfs)
 allToFinish :: MyConstraints a => IRV a -> IRV a -> IRV a
 allToFinish x y = CDF (makeCDF x * makeCDF y)
 
-multiAtF :: MyConstraints a => [IRV a] -> IRV a
-
 -- | Compute the last-to-finsh of a list of IRVs: if we have nothing to wait for the result is top
+multiAtF :: MyConstraints a => [IRV a] -> IRV a
 multiAtF [] = top
 multiAtF [x] = x
 -- now know we have at least two, so head and tail are safe
@@ -302,13 +290,12 @@ multiAtF xs = CDF $ foldr (*) (head cdfs) (tail cdfs)
   where
     cdfs = map makeCDF xs
 
-probChoice :: MyConstraints a => a -> IRV a -> IRV a -> IRV a
-
 {-|
     The probability is for choosing the left branch.
     We can do this on either PDFs or CDFs; if we have CDFs deliver a CDF,
     if we have both PDFs or one of each, deliver a PDF.
 -}
+probChoice :: MyConstraints a => a -> IRV a -> IRV a -> IRV a
 probChoice p x y =
     if (p < 0) || (p > 1)
         then error "Invalid probability value"
@@ -326,39 +313,35 @@ multiWeightedChoice xs = PDF (sum (zipWith adjust weights pdfs))
     pdfs = map (makePDF . snd) xs -- :: [DistD a]
     adjust x y = (x / sum weights) >< y
 
--- | To convolve, force into PDFs and then invoke piecewise convolution
 infix 7 <+> -- same as *
 
+-- | To convolve, force into PDFs and then invoke piecewise convolution
 (<+>) :: MyConstraints a => IRV a -> IRV a -> IRV a
 x <+> y = PDF (makePDF x PWPs.Piecewise.<+> makePDF y)
 
-probMass :: MyConstraints a => IRV a -> a
-
 -- | Just extract the final value of the CDF
+probMass :: MyConstraints a => IRV a -> a
 probMass = piecesFinalValue . makeCDF
-
-compareIRVs :: MyConstraints a => IRV a -> IRV a -> Maybe Ordering
 
 {-|
     If the two IRVs are partially ordered, return an ordering, otherwise return Nothing.
 -}
+compareIRVs :: MyConstraints a => IRV a -> IRV a -> Maybe Ordering
 compareIRVs x y = comparePW (makeCDF x) (makeCDF y)
 
-support :: (Eq a, Fractional a) => IRV a -> (a, a)
-
 -- | return the first and last basepoints for which the value is significant
+support :: (Eq a, Fractional a) => IRV a -> (a, a)
 support (PDF x) = piecewiseSupport x
 support (CDF x) = piecewiseSupport x
 
+{-| Given an ordered list of probabiity values, return the times at which each value is reached;
+if it is never reached, return Nothing in that position
+-}
 centiles
     :: (Fractional a, Ord a, Num a, Enum a, Eq a, Evaluable a (PolyHeaviside a))
     => [a]
     -> IRV a
     -> [Maybe a]
-
-{-| Given an ordered list of probabiity values, return the times at which each value is reached;
-if it is never reached, return Nothing in that position
--}
 centiles probabilities dQ
     | null probabilities = error "Empty probability list"
     | not (monotonic probabilities) = error "Probabilities not monotonic"
@@ -399,6 +382,8 @@ data Moments a = Moments
     , kurtosis :: a
     }
     deriving (Eq, Show)
+
+-- | Compute the first five moments of a given distribution
 moments
     :: ( Fractional a
        , Ord a
@@ -411,8 +396,6 @@ moments
        )
     => IRV a
     -> Moments a
-
--- | Compute the first five moments of a given distribution
 moments f =
     Moments
         { tangibleMass = tau

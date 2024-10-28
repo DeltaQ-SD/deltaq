@@ -173,9 +173,8 @@ alignPieces x' y' = Pieces (doAlign (getPieces x') (getPieces y'))
     -- all cases should have been covered
     doAlign _ _ = error "Unexpected alignment case"
 
-monotonic :: Ord a => [a] -> Bool
-
 -- | Check that a list of values is monotonic (not strict to allow deltas)
+monotonic :: Ord a => [a] -> Bool
 monotonic ys = and (zipWith (<=) ys (tail ys))
 
 makePieces :: (Num a, Eq a, Ord a) => [(a, o)] -> Pieces a o
@@ -240,14 +239,13 @@ integratePieces ps = Pieces (goInt 0 (disaggregate (getPieces ps)))
         integratedPiece = makePiece (fp, boost offset integratedObject) -- correct the constant
         newIntegral = finalValue + offset
 
-evaluateAtApoint :: (Num a, Ord a, Evaluable a b) => a -> Pieces a b -> [a]
-
 {-|
 To evaluate a piecewise object at a point we need to find the interval the point is in,
 (i.e. find i s.t. basepoint(i) <= p < basepoint(i+1)) and then evaluate the corresponding object.
 Our point may be beyond the last basepoint, in which case we take the final value,
 or it may be before the first basepoint, in which case we evaluate the presumed zero object (to 0).
 -}
+evaluateAtApoint :: (Num a, Ord a, Evaluable a b) => a -> Pieces a b -> [a]
 evaluateAtApoint point as
     | null pas = error "Empty piece list"
     | point < basepoint (head pas) = [0]
@@ -271,6 +269,8 @@ instance (Num a, Eq a, Ord a, Evaluable a b) => Evaluable a (Pieces a b) where
     boost = fmap . boost
     scale = (><)
 
+infix 7 <+>
+
 {-|
 Piecwise convolution requires convolving the pieces pairwise and then summing the results,
 i.e. convolve every piece with every other piece and combine the results.
@@ -288,8 +288,6 @@ i.e. convolve every piece with every other piece and combine the results.
     => Pieces a b
     -> Pieces a b
     -> Pieces a b
-
-infix 7 <+>
 (<+>) (Pieces []) _ = error "Empty piece list"
 (<+>) _ (Pieces []) = error "Empty piece list"
 (<+>) as bs = sum [Pieces (map makePiece (convolveIntervals a b)) | a <- das, b <- dbs]
@@ -310,20 +308,18 @@ displayPolyDeltaIntervals
     -> [Either (a, a) [(a, a)]]
 displayPolyDeltaIntervals as spacing = map (displayObject spacing) $ disaggregate (getPieces as)
 
-(><) :: (Eq a, Num a, Evaluable a b) => a -> Pieces a b -> Pieces a b
-
--- | multiply by a constant piecewise
 infix 7 ><
 
+-- | multiply by a constant piecewise
+(><) :: (Eq a, Num a, Evaluable a b) => a -> Pieces a b -> Pieces a b
 (><) = fmap . scale
 
+-- | Check whether the pieces are all comparable, and if so if all compare the same way
 comparePW
     :: (Fractional a, Eq a, Ord a, Comparable a b, Num b, Mergeable b, Evaluable a b)
     => Pieces a b
     -> Pieces a b
     -> Maybe Ordering
-
--- | Check whether the pieces are all comparable, and if so if all compare the same way
 comparePW x' y' = goCompare (Just EQ) $ disaggregate $ getPieces $ alignPieces x' y'
   where
     goCompare
@@ -340,9 +336,8 @@ comparePW x' y' = goCompare (Just EQ) $ disaggregate $ getPieces $ alignPieces x
       where
         next = compareObjects x
 
-piecewiseSupport :: (Mergeable b, Eq b) => Pieces a b -> (a, a)
-
 -- | Return the aggregate interval over which the pieces are not zero
+piecewiseSupport :: (Mergeable b, Eq b) => Pieces a b -> (a, a)
 piecewiseSupport x = (start, end)
   where
     xs = getPieces x -- reduce to a list
@@ -352,9 +347,8 @@ piecewiseSupport x = (start, end)
             else basepoint (head (dropWhile (\y -> object y == zero) xs))
     end = basepoint $ last xs
 
-applyObject :: (b -> b -> b) -> b -> Pieces a b -> Pieces a b
-
 -- | Combine a single object with every object in a set of pieces
+applyObject :: (b -> b -> b) -> b -> Pieces a b -> Pieces a b
 applyObject f o = fmap (f o)
 
 piecewiseComplexity :: ComplexityMeasureable b => Pieces a b -> Int

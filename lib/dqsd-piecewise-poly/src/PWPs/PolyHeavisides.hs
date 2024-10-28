@@ -61,6 +61,7 @@ timesPH (Ph x) (Ph y) = Ph (x * y)
 timesPH (Ph _) (H x y) = H x y
 timesPH (H x y) (Ph _) = H x y
 timesPH (H x y) (H x' y') = H (x * x') (y * y')
+
 instance MyConstraints a => Num (PolyHeaviside a) where
     (+) = plusPH
     (*) = timesPH

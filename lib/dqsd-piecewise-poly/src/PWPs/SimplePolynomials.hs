@@ -40,9 +40,8 @@ instance Eq a => Eq (Poly a) where
 
 type EqNum a = (Eq a, Num a)
 
-makePoly :: Eq a => a -> Poly a
-
 -- | turn a constant into a constant polynomial
+makePoly :: Eq a => a -> Poly a
 makePoly x = Poly [x]
 
 zeroPoly :: EqNum a => Poly a
@@ -53,46 +52,39 @@ degreePoly :: EqNum a => Poly a -> Int
 -- degree of the zero polynomial to be negative
 degreePoly x = if trimPoly x == zeroPoly then -1 else length (trimPoly x) - 1
 
-trimPoly :: EqNum a => Poly a -> Poly a
-
 -- | remove top zeroes
+trimPoly :: EqNum a => Poly a -> Poly a
 trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
   where
     goTrim [] = error "Empty polynomial"
     goTrim xss@[_] = xss -- can't use dropWhile as it would remove the last zero
     goTrim xss@(x : xs) = if x == 0 then goTrim xs else xss
 
-makeMonomial :: EqNum a => Int -> a -> Poly a
-
 -- | put a coefficient in the nth place only
+makeMonomial :: EqNum a => Int -> a -> Poly a
 makeMonomial n x = if x == 0 then zeroPoly else Poly (reverse (x : replicate n 0))
 
-shiftPolyUp :: EqNum a => Poly a -> Poly a
-
 -- | effectively multiply the polynomial by x by shifting all the coefficients up one place.
+shiftPolyUp :: EqNum a => Poly a -> Poly a
 shiftPolyUp (Poly xs)
     | xs == [0] = Poly xs -- don't shift up zero
     | otherwise = Poly (0 : xs)
 
-scalePoly :: EqNum a => a -> Poly a -> Poly a
-
 -- | scale a polynomial by a constant: more efficient than multiplying by a constant polynomial
+scalePoly :: EqNum a => a -> Poly a -> Poly a
 scalePoly x (Poly xs) = Poly (map (* x) xs)
-
-addPolys :: EqNum a => Poly a -> Poly a -> Poly a
 
 {-|
    Add polynomials by simply adding their coefficients as long as both lists continue.
    When one list runs out we take the tail of the longer list (this prevents us from just using zipWith!).
    Addtion might cancel out the highest order terms, so need to trim just in case.
 -}
+addPolys :: EqNum a => Poly a -> Poly a -> Poly a
 addPolys (Poly as) (Poly bs) = trimPoly (Poly (go as bs))
   where
     go [] ys = ys
     go xs [] = xs
     go (x : xs) (y : ys) = (x + y) : go xs ys
-
-mulPolys :: EqNum a => Poly a -> Poly a -> Poly a
 
 {-|
     multiply term-wise and then add (very simple - FFTs might be faster, but not for today)
@@ -103,6 +95,7 @@ mulPolys :: EqNum a => Poly a -> Poly a -> Poly a
                          + ...
     (may be an optimisation to be done by getting the shortest poly in the right place)
 -}
+mulPolys :: EqNum a => Poly a -> Poly a -> Poly a
 mulPolys as bs = sum (intermediateSums as bs)
   where
     intermediateSums :: EqNum a => Poly a -> Poly a -> [Poly a]
@@ -119,46 +112,41 @@ instance EqNum a => Num (Poly a) where
     signum = undefined
     fromInteger n = Poly [Prelude.fromInteger n]
 
-integratePoly :: (Eq a, Fractional a) => Poly a -> Poly a
-
 {-|
     Integrate by puting a zero constant term at the bottom and converting ax^n into ax^(n+1)/(n+1).
     0 -> 0x is the first non-constant term, so we start at 1.
     When integrating a zero polynomial with a zero constant we get [0,0] so need to trim
 -}
+integratePoly :: (Eq a, Fractional a) => Poly a -> Poly a
 integratePoly (Poly as) = trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))
 
-differentiatePoly :: EqNum a => Poly a -> Poly a
-
 -- | Simply use dx^n/dx = nx^(n-1)
+differentiatePoly :: EqNum a => Poly a -> Poly a
 differentiatePoly (Poly []) = error "Polynomial was empty"
 differentiatePoly (Poly [_]) = zeroPoly -- constant differentiates to zero
 differentiatePoly (Poly (_ : as)) = Poly (zipWith (*) as (iterate (+ 1) 1)) -- discard the constant term, everything else noves down one
-
-evaluatePoly :: EqNum p => p -> Poly p -> p
 
 {-|
     Evaluate a polynomial at a point.
     Minimise the number of multiplications to evaluate the polynomial by starting from the highest coefficient
     and multiply and add alternately: a0 + a1x + a2x^2 + ... + anx^n = (((anx + an-1)x + an-2)x + ... + a0
 -}
+evaluatePoly :: EqNum p => p -> Poly p -> p
 evaluatePoly point (Poly as) = foldr (\x acc -> point * acc + x) 0 as
-
-choose :: Int -> Int -> Int
 
 {-|
     Binomial coefficients: simple definition is n `choose` k ~ factorial n `div` (factorial k * factorial (n-k))
     Faster implementation available in math.combinatorics.exact.binomial
 -}
+choose :: Int -> Int -> Int
 n `choose` k
     | k <= 0 = 1
     | k >= n = 1
     | otherwise = (n - 1) `choose` (k - 1) + (n - 1) `choose` k -- recursive definition
 
+-- | Take two polynomials f and g defined on bounded intervals and produce three contiguous pieces as a result
 convolvePolys
     :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> (a, a, Poly a) -> [(a, Poly a)]
-
--- | Take two polynomials f and g defined on bounded intervals and produce three contiguous pieces as a result
 convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
     | (lf < 0) || (lg < 0) = error "Interval bounds cannot be negative"
     | (lf >= uf) || (lg >= ug) = error "Invalid interval" -- upper bounds should be strictly greater than lower bounds
@@ -214,9 +202,8 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
                     , (uf + ug, zeroPoly)
                     ]
 
-shiftPoly :: (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
-
 -- | Shift a polynomial p(x) -> p(x - y) by summing binomial expansions of each term
+shiftPoly :: (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
 shiftPoly s (Poly ps) = sum [b `scalePoly` binomialExpansion n s | (n, b) <- zip [0 ..] ps]
   where
     -- the binomial expansion of each power of x is a new polynomial whose coefficients are the product of
@@ -226,12 +213,11 @@ shiftPoly s (Poly ps) = sum [b `scalePoly` binomialExpansion n s | (n, b) <- zip
     binomialExpansion :: EqNum a => Int -> a -> Poly a
     binomialExpansion n y = Poly (map (binomialTerm y n) [0 .. n])
 
-displayPoly :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
-
 {-| Create a given uniform spacing s over a range (l, u) return a list of (x, y) values of poly p over that range
 First point will be at the base of the range, and then we increment the bottom of the interval by s
 until it reaches the top of the interval
 -}
+displayPoly :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
 displayPoly p (l, u) s
     | s == 0 = [(l, evaluatePoly l p)]
     | otherwise = goDisplay l
@@ -290,9 +276,6 @@ countPolyRoots (l, r, p) = case degreePoly p of
             polyRemainder = snd (euclidianDivision (xIminusOne, xI))
         doSeq _ = error "List too short" -- prevent warning about missing cases
 
-euclidianDivision
-    :: (Fractional a, Eq a, Ord a) => (Poly a, Poly a) -> (Poly a, Poly a)
-
 {-|
 See https://en.wikipedia.org/wiki/Polynomial_greatest_common_divisor#Euclidean_division
 Take a pair of polynomials a, b, and produce the quotient and remainder q and r s.t. a = bq + r
@@ -311,6 +294,8 @@ Pseudocode:
         return (q, r)
     end
 -}
+euclidianDivision
+    :: (Fractional a, Eq a, Ord a) => (Poly a, Poly a) -> (Poly a, Poly a)
 euclidianDivision (pa, pb) =
     if pb == zeroPoly
         then error "Division by zero polynomial"
@@ -325,12 +310,11 @@ euclidianDivision (pa, pb) =
       where
         s = makeMonomial (degreePoly r - degB) (leadingCoefficient r / lcB)
 
-compareToZero :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Maybe Ordering
-
 {-|
     We measure whether or not a polynomial is consistently above or below zero, or equals zero
     Need to consider special cases where there is a root at a boundary point
 -}
+compareToZero :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Maybe Ordering
 compareToZero (l, u, p)
     | l >= u = error "Invalid interval"
     | p == zeroPoly = Just EQ
@@ -345,14 +329,13 @@ compareToZero (l, u, p)
     lower = evaluatePoly l p
     upper = evaluatePoly u p
 
-findPolyRoot
-    :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
-
 {-|
 This is only called when there is known to be a root in the given interval, so we simply have to find it.
 We do this by repeatedly halving the interval in which the root must lie.
 If degree p <=1 (poly is constant or linear) we treat these as special cases
 -}
+findPolyRoot
+    :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
 findPolyRoot precision (l, u) p
     | precision <= 0 = error "Invalid precision value"
     | degp < 0 = Just l -- the poly is zero, so the whole interval is a root, so return the basepoint
