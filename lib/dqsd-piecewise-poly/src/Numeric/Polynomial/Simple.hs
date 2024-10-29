@@ -23,7 +23,7 @@ module Numeric.Polynomial.Simple
     , makeMonomial
     , shiftPolyUp
     , scalePoly
-    , evaluatePoly
+    , eval
     , displayPoly
 
     -- * Advanced operations
@@ -43,6 +43,8 @@ module Numeric.Polynomial.Simple
 ------------------------------------------------------------------------------}
 
 -- | Polynomial with coefficients in @a@.
+--
+-- The list starts with the coefficient of lowest degree.
 newtype Poly a = Poly [a]
     deriving (Show, Functor, Foldable)
 
@@ -129,13 +131,13 @@ Evaluate a polynomial at a point.
 Uses Horner's method to minimise the number of multiplications.
 
 @
-a0 + a1x + a2x^2 + ... + anx^n
-  = (((anx + an-1)x + an-2)x + ... + a0
+a0 + a1·x + a2·x^2 + ... + a{n-1}·x^{n-1} + an·x^n
+  = a0 + x·(a1 + x·(a2 + x·(… + x·(a{n-1} + x·an)) ))
 @
 
 -}
-evaluatePoly :: EqNum p => p -> Poly p -> p
-evaluatePoly x (Poly as) = foldr (\ai result -> x * result + ai) 0 as
+eval :: Num a => Poly a -> a -> a
+eval (Poly as) x = foldr (\ai result -> x * result + ai) 0 as
 
 {-| Create a given uniform spacing s over a range (l, u) return a list of (x, y) values of poly p over that range
 First point will be at the base of the range, and then we increment the bottom of the interval by s
@@ -143,10 +145,10 @@ until it reaches the top of the interval
 -}
 displayPoly :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
 displayPoly p (l, u) s
-    | s == 0 = [(l, evaluatePoly l p)]
+    | s == 0 = [(l, eval p l)]
     | otherwise = goDisplay l
   where
-    goDisplay x = if x >= u then [] else (x, evaluatePoly x p) : goDisplay (x + s)
+    goDisplay x = if x >= u then [] else (x, eval p x) : goDisplay (x + s)
 
 {-----------------------------------------------------------------------------
     Advanced Operations
@@ -268,7 +270,7 @@ countPolyRoots (l, r, p) = case degreePoly p of
     -- p is a non-zero constant polynomial - no root
     0 -> 0
     -- p is a linear polynomial, which has a root iff it has a different sign at each end of the interval
-    1 -> if evaluatePoly l p * evaluatePoly r p < 0 then 1 else 0
+    1 -> if eval p l * eval p r < 0 then 1 else 0
     -- p has degree 2 or more so we can construct the Sturm sequence
     _ -> signVariations (sturmSequence l p) - signVariations (sturmSequence r p)
   where
@@ -284,7 +286,7 @@ countPolyRoots (l, r, p) = case degreePoly p of
         -- TODO: deal with all zero corner case
         pairsMultiplied = zipWith (*) zeroesRemoved (tail zeroesRemoved)
     sturmSequence :: (Fractional a, Eq a, Ord a) => a -> Poly a -> [a]
-    sturmSequence x q = map (evaluatePoly x) (doSeq [differentiatePoly q, q])
+    sturmSequence x q = map (flip eval x) (doSeq [differentiatePoly q, q])
       where
         doSeq :: (Fractional a, Eq a, Ord a) => [Poly a] -> [Poly a]
         {-
@@ -347,8 +349,8 @@ compareToZero (l, u, p)
     | lower > 0 = Just GT -- upper must also be > 0 due to the lack of roots
     | otherwise = Just LT -- upper and lower both < 0 due to the lack of roots
   where
-    lower = evaluatePoly l p
-    upper = evaluatePoly u p
+    lower = eval p l
+    upper = eval p u
 
 {-|
 This is only called when there is known to be a root in the given interval, so we simply have to find it.
@@ -366,13 +368,13 @@ findPolyRoot precision (l, u) p
   where
     Poly ps = p
     degp = degreePoly p
-    pu = evaluatePoly u p
-    pl = evaluatePoly l p
+    pu = eval p u
+    pl = eval p l
     halveInterval eps x y px py =
         let
             width = y - x
             mid = x + width / 2
-            pmid = evaluatePoly mid p
+            pmid = eval p mid
         in
             -- when the interval is small enough, stop: the root is in this interval, so take the mid point
             if width <= eps

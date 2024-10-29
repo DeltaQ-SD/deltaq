@@ -75,7 +75,7 @@ scalePH x (Ph a) = Ph (SP.scalePoly x a)
 scalePH x (H y z) = H (x * y) (x * z)
 
 evaluatePH :: EqNum a => a -> PolyHeaviside a -> [a]
-evaluatePH point (Ph x) = [SP.evaluatePoly point x]
+evaluatePH point (Ph x) = [SP.eval x point]
 evaluatePH _ (H x y) = [x, y]
 
 boostPH :: MyConstraints a => a -> PolyHeaviside a -> PolyHeaviside a
@@ -108,7 +108,7 @@ comparePHs (lf, uf, (H x y, Ph f))
     | y <= fx = Just LT
     | otherwise = Nothing
   where
-    fx = evaluatePoly lf f
+    fx = SP.eval f lf
 -- if the Heaviside and the polynomial are the other way round, swap them and reverse the ordering
 comparePHs (lf, uf, (Ph f, H x y)) = reverseOrder $ comparePHs (lf, uf, (H x y, Ph f))
   where

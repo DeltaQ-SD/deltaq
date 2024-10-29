@@ -71,7 +71,7 @@ scalePD x (Pd a) = Pd (SP.scalePoly x a)
 scalePD x (D y) = D (x * y)
 
 evaluatePD :: EqNum a => a -> PolyDelta a -> [a]
-evaluatePD point (Pd x) = [SP.evaluatePoly point x]
+evaluatePD point (Pd x) = [SP.eval x point]
 evaluatePD _ (D x) = [x]
 
 boostPD :: MyConstraints a => a -> PolyDelta a -> PolyDelta a
