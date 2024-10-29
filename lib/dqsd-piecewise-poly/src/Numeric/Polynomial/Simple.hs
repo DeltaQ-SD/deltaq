@@ -16,8 +16,8 @@ module Numeric.Polynomial.Simple
       Poly (..)
     , constant
     , zero
-    , degreePoly
     , makeMonomial
+    , degree
     , shiftPolyUp
     , scalePoly
     , eval
@@ -56,10 +56,12 @@ constant x = Poly [x]
 zero :: Num a => Poly a
 zero = constant 0
 
-degreePoly :: (Eq a, Num a) => Poly a -> Int
--- a constant polynomial has one coefficient and has degree 0; for Euclidian division we want the
--- degree of the zero polynomial to be negative
-degreePoly x = if trimPoly x == zero then -1 else length (trimPoly x) - 1
+-- | Degree of a polynomial.
+--
+-- The degree of a constant polynomial is @0@, but
+-- the degree of the zero polynomial is @-1@ for Euclidean division.
+degree :: (Eq a, Num a) => Poly a -> Int
+degree x = if trimPoly x == zero then -1 else length (trimPoly x) - 1
 
 -- | remove top zeroes
 trimPoly :: (Eq a, Num a) => Poly a -> Poly a
@@ -260,7 +262,7 @@ multiple root of p (a circumstance we shall ignore)
 We start from the tuple that emerges from disagregation.
 -}
 countPolyRoots :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Int
-countPolyRoots (l, r, p) = case degreePoly p of
+countPolyRoots (l, r, p) = case degree p of
     -- p is the zero polynomial, so it doesn't *cross* zero
     -1 -> 0
     -- p is a non-zero constant polynomial - no root
@@ -320,14 +322,14 @@ euclidianDivision (pa, pb) =
         then error "Division by zero polynomial"
         else goDivide (zero, pa)
   where
-    degB = degreePoly pb
+    degB = degree pb
     leadingCoefficient :: Eq a => Poly a -> a -- coefficient of the highest power term of the poly
     leadingCoefficient (Poly x) = last x
     lcB = leadingCoefficient pb
     -- goDivide :: (Fractional a, Eq a, Ord a) => (Poly a, Poly a) -> (Poly a, Poly a)
-    goDivide (q, r) = if degreePoly r < degB then (q, r) else goDivide (q + s, r - s * pb)
+    goDivide (q, r) = if degree r < degB then (q, r) else goDivide (q + s, r - s * pb)
       where
-        s = makeMonomial (degreePoly r - degB) (leadingCoefficient r / lcB)
+        s = makeMonomial (degree r - degB) (leadingCoefficient r / lcB)
 
 {-|
     We measure whether or not a polynomial is consistently above or below zero, or equals zero
@@ -363,7 +365,7 @@ findPolyRoot precision (l, u) p
     | otherwise = Just (halveInterval precision l u pl pu)
   where
     Poly ps = p
-    degp = degreePoly p
+    degp = degree p
     pu = eval p u
     pl = eval p l
     halveInterval eps x y px py =
