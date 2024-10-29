@@ -1,7 +1,4 @@
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 {-|
 Description : Polynomials as lists of coefficients
@@ -51,22 +48,20 @@ newtype Poly a = Poly [a]
 instance Eq a => Eq (Poly a) where
     Poly x == Poly y = x == y
 
-type EqNum a = (Eq a, Num a)
-
 -- | turn a constant into a constant polynomial
-makePoly :: Eq a => a -> Poly a
+makePoly :: a -> Poly a
 makePoly x = Poly [x]
 
-zeroPoly :: EqNum a => Poly a
+zeroPoly :: Num a => Poly a
 zeroPoly = makePoly 0
 
-degreePoly :: EqNum a => Poly a -> Int
+degreePoly :: (Eq a, Num a) => Poly a -> Int
 -- a constant polynomial has one coefficient and has degree 0; for Euclidian division we want the
 -- degree of the zero polynomial to be negative
 degreePoly x = if trimPoly x == zeroPoly then -1 else length (trimPoly x) - 1
 
 -- | remove top zeroes
-trimPoly :: EqNum a => Poly a -> Poly a
+trimPoly :: (Eq a, Num a) => Poly a -> Poly a
 trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
   where
     goTrim [] = error "Empty polynomial"
@@ -74,17 +69,17 @@ trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
     goTrim xss@(x : xs) = if x == 0 then goTrim xs else xss
 
 -- | put a coefficient in the nth place only
-makeMonomial :: EqNum a => Int -> a -> Poly a
+makeMonomial :: (Eq a, Num a) => Int -> a -> Poly a
 makeMonomial n x = if x == 0 then zeroPoly else Poly (reverse (x : replicate n 0))
 
 -- | effectively multiply the polynomial by x by shifting all the coefficients up one place.
-shiftPolyUp :: EqNum a => Poly a -> Poly a
+shiftPolyUp :: (Eq a, Num a) => Poly a -> Poly a
 shiftPolyUp (Poly xs)
     | xs == [0] = Poly xs -- don't shift up zero
     | otherwise = Poly (0 : xs)
 
 -- | scale a polynomial by a constant: more efficient than multiplying by a constant polynomial
-scalePoly :: EqNum a => a -> Poly a -> Poly a
+scalePoly :: Num a => a -> Poly a -> Poly a
 scalePoly x (Poly xs) = Poly (map (* x) xs)
 
 {-|
@@ -92,7 +87,7 @@ scalePoly x (Poly xs) = Poly (map (* x) xs)
    When one list runs out we take the tail of the longer list (this prevents us from just using zipWith!).
    Addtion might cancel out the highest order terms, so need to trim just in case.
 -}
-addPolys :: EqNum a => Poly a -> Poly a -> Poly a
+addPolys :: (Eq a, Num a) => Poly a -> Poly a -> Poly a
 addPolys (Poly as) (Poly bs) = trimPoly (Poly (go as bs))
   where
     go [] ys = ys
@@ -108,16 +103,16 @@ addPolys (Poly as) (Poly bs) = trimPoly (Poly (go as bs))
                          + ...
     (may be an optimisation to be done by getting the shortest poly in the right place)
 -}
-mulPolys :: EqNum a => Poly a -> Poly a -> Poly a
+mulPolys :: (Eq a, Num a) => Poly a -> Poly a -> Poly a
 mulPolys as bs = sum (intermediateSums as bs)
   where
-    intermediateSums :: EqNum a => Poly a -> Poly a -> [Poly a]
+    intermediateSums :: (Eq a, Num a) => Poly a -> Poly a -> [Poly a]
     intermediateSums _ (Poly []) = error "Second polynomial was empty"
     intermediateSums (Poly []) _ = [] -- stop when we exhaust the first list
     -- as we consume the coeffecients of the first list, we shift up the second list to increase the power under consideration
     intermediateSums (Poly (x : xs)) ys = scalePoly x ys : intermediateSums (Poly xs) (shiftPolyUp ys)
 
-instance EqNum a => Num (Poly a) where
+instance (Eq a, Num a) => Num (Poly a) where
     (+) = addPolys
     (*) = mulPolys
     negate (Poly a) = Poly (map negate a)
@@ -163,7 +158,7 @@ integratePoly :: (Eq a, Fractional a) => Poly a -> Poly a
 integratePoly (Poly as) = trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))
 
 -- | Simply use dx^n/dx = nx^(n-1)
-differentiatePoly :: EqNum a => Poly a -> Poly a
+differentiatePoly :: Num a => Poly a -> Poly a
 differentiatePoly (Poly []) = error "Polynomial was empty"
 differentiatePoly (Poly [_]) = zeroPoly -- constant differentiates to zero
 differentiatePoly (Poly (_ : as)) = Poly (zipWith (*) as (iterate (+ 1) 1)) -- discard the constant term, everything else noves down one
@@ -244,7 +239,7 @@ shiftPoly s (Poly ps) = sum [b `scalePoly` binomialExpansion n s | (n, b) <- zip
     -- a binomial coefficient and the shift value raised to a reducing power
     binomialTerm :: Num a => a -> Int -> Int -> a
     binomialTerm y n k = fromIntegral (n `choose` k) * (-y) ^ (n - k)
-    binomialExpansion :: EqNum a => Int -> a -> Poly a
+    binomialExpansion :: Num a => Int -> a -> Poly a
     binomialExpansion n y = Poly (map (binomialTerm y n) [0 .. n])
 
 {-|
