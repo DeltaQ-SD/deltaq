@@ -15,22 +15,32 @@ of that type for increasing powers of the variable.
 An empty list is not allowed: a zero polynomical must have at least one (zero) element.
 -}
 module Numeric.Polynomial.Simple
-    ( Poly (..)
+    ( -- * Basic operations
+      Poly (..)
     , makePoly
     , zeroPoly
     , degreePoly
     , makeMonomial
     , shiftPolyUp
     , scalePoly
+    , evaluatePoly
+    , displayPoly
+
+    -- * Advanced operations
+    -- ** Algebraic
+    , shiftPoly
     , integratePoly
     , differentiatePoly
-    , evaluatePoly
     , convolvePolys
+
+    -- ** Numerical
     , compareToZero
     , findPolyRoot
-    , shiftPoly
-    , displayPoly
     ) where
+
+{-----------------------------------------------------------------------------
+    Basic operations
+------------------------------------------------------------------------------}
 
 -- | Polynomial with coefficients in @a@.
 newtype Poly a = Poly [a]
@@ -114,6 +124,35 @@ instance EqNum a => Num (Poly a) where
     fromInteger n = Poly [Prelude.fromInteger n]
 
 {-|
+Evaluate a polynomial at a point.
+
+Uses Horner's method to minimise the number of multiplications.
+
+@
+a0 + a1x + a2x^2 + ... + anx^n
+  = (((anx + an-1)x + an-2)x + ... + a0
+@
+
+-}
+evaluatePoly :: EqNum p => p -> Poly p -> p
+evaluatePoly x (Poly as) = foldr (\ai result -> x * result + ai) 0 as
+
+{-| Create a given uniform spacing s over a range (l, u) return a list of (x, y) values of poly p over that range
+First point will be at the base of the range, and then we increment the bottom of the interval by s
+until it reaches the top of the interval
+-}
+displayPoly :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
+displayPoly p (l, u) s
+    | s == 0 = [(l, evaluatePoly l p)]
+    | otherwise = goDisplay l
+  where
+    goDisplay x = if x >= u then [] else (x, evaluatePoly x p) : goDisplay (x + s)
+
+{-----------------------------------------------------------------------------
+    Advanced Operations
+------------------------------------------------------------------------------}
+
+{-|
     Integrate by puting a zero constant term at the bottom and converting ax^n into ax^(n+1)/(n+1).
     0 -> 0x is the first non-constant term, so we start at 1.
     When integrating a zero polynomial with a zero constant we get [0,0] so need to trim
@@ -126,14 +165,6 @@ differentiatePoly :: EqNum a => Poly a -> Poly a
 differentiatePoly (Poly []) = error "Polynomial was empty"
 differentiatePoly (Poly [_]) = zeroPoly -- constant differentiates to zero
 differentiatePoly (Poly (_ : as)) = Poly (zipWith (*) as (iterate (+ 1) 1)) -- discard the constant term, everything else noves down one
-
-{-|
-    Evaluate a polynomial at a point.
-    Minimise the number of multiplications to evaluate the polynomial by starting from the highest coefficient
-    and multiply and add alternately: a0 + a1x + a2x^2 + ... + anx^n = (((anx + an-1)x + an-2)x + ... + a0
--}
-evaluatePoly :: EqNum p => p -> Poly p -> p
-evaluatePoly point (Poly as) = foldr (\x acc -> point * acc + x) 0 as
 
 {-|
     Binomial coefficients: simple definition is n `choose` k ~ factorial n `div` (factorial k * factorial (n-k))
@@ -213,17 +244,6 @@ shiftPoly s (Poly ps) = sum [b `scalePoly` binomialExpansion n s | (n, b) <- zip
     binomialTerm y n k = fromIntegral (n `choose` k) * (-y) ^ (n - k)
     binomialExpansion :: EqNum a => Int -> a -> Poly a
     binomialExpansion n y = Poly (map (binomialTerm y n) [0 .. n])
-
-{-| Create a given uniform spacing s over a range (l, u) return a list of (x, y) values of poly p over that range
-First point will be at the base of the range, and then we increment the bottom of the interval by s
-until it reaches the top of the interval
--}
-displayPoly :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
-displayPoly p (l, u) s
-    | s == 0 = [(l, evaluatePoly l p)]
-    | otherwise = goDisplay l
-  where
-    goDisplay x = if x >= u then [] else (x, evaluatePoly x p) : goDisplay (x + s)
 
 {-|
 We use Sturm's Theorem to count the number of roots of a polynomial in a given interval.
