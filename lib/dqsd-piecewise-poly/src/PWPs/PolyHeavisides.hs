@@ -23,6 +23,7 @@ where
 
 import PWPs.PiecewiseClasses
 import Numeric.Polynomial.Simple as SP
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-|
 A PolyHeaviside is either a polynomial or a (shifted, scaled) Heaviside.
@@ -68,7 +69,7 @@ instance MyConstraints a => Num (PolyHeaviside a) where
     negate = fmap negate
     abs = undefined
     signum = undefined
-    fromInteger n = Ph $ makePoly $ Prelude.fromInteger n
+    fromInteger n = Ph $ Poly.constant $ Prelude.fromInteger n
 
 scalePH :: EqNum a => a -> PolyHeaviside a -> PolyHeaviside a
 scalePH x (Ph a) = Ph (SP.scalePoly x a)
@@ -79,7 +80,7 @@ evaluatePH point (Ph x) = [SP.eval x point]
 evaluatePH _ (H x y) = [x, y]
 
 boostPH :: MyConstraints a => a -> PolyHeaviside a -> PolyHeaviside a
-boostPH x (Ph y) = Ph y + Ph (makePoly x)
+boostPH x (Ph y) = Ph y + Ph (Poly.constant x)
 boostPH x (H y z) = H (x + y) (x + z)
 
 instance MyConstraints a => Evaluable a (PolyHeaviside a) where
@@ -152,7 +153,7 @@ polyHeavisideRoot
 -- If we have a step, the interval is zero width so this is the root
 polyHeavisideRoot _ _ (l, u) (H _ _) = if l /= u then error "Non-zero Heaviside interval" else Just l
 -- otherwise we have a polynomial: subtract the value we are looking for so that we seek a zero crossing
-polyHeavisideRoot e x (l, u) (Ph p) = findPolyRoot e (l, u) (p - makePoly x)
+polyHeavisideRoot e x (l, u) (Ph p) = findPolyRoot e (l, u) (p - Poly.constant x)
 
 displayPolyHeaviside
     :: OrdNumEqFrac a => a -> (a, a, PolyHeaviside a) -> Either (a, a) [(a, a)]

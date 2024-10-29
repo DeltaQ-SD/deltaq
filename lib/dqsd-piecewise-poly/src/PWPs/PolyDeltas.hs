@@ -24,6 +24,7 @@ where
 
 import PWPs.PiecewiseClasses
 import Numeric.Polynomial.Simple as SP
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-|
 A PolyDelta is either a polynomial or a (shifted, scaled) Delta with a mass.
@@ -64,7 +65,7 @@ instance MyConstraints a => Num (PolyDelta a) where
     negate = fmap negate
     abs = undefined
     signum = undefined
-    fromInteger n = Pd $ makePoly $ Prelude.fromInteger n
+    fromInteger n = Pd $ Poly.constant $ Prelude.fromInteger n
 
 scalePD :: EqNum a => a -> PolyDelta a -> PolyDelta a
 scalePD x (Pd a) = Pd (SP.scalePoly x a)
@@ -75,7 +76,7 @@ evaluatePD point (Pd x) = [SP.eval x point]
 evaluatePD _ (D x) = [x]
 
 boostPD :: MyConstraints a => a -> PolyDelta a -> PolyDelta a
-boostPD x (Pd y) = Pd y + Pd (makePoly x)
+boostPD x (Pd y) = Pd y + Pd (Poly.constant x)
 boostPD _ (D y) = D y
 instance MyConstraints a => Evaluable a (PolyDelta a) where
     evaluate = evaluatePD

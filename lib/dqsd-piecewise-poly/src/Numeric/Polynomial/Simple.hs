@@ -14,7 +14,7 @@ An empty list is not allowed: a zero polynomical must have at least one (zero) e
 module Numeric.Polynomial.Simple
     ( -- * Basic operations
       Poly (..)
-    , makePoly
+    , constant
     , zeroPoly
     , degreePoly
     , makeMonomial
@@ -48,12 +48,12 @@ newtype Poly a = Poly [a]
 instance Eq a => Eq (Poly a) where
     Poly x == Poly y = x == y
 
--- | turn a constant into a constant polynomial
-makePoly :: a -> Poly a
-makePoly x = Poly [x]
+-- | The constant polynomial.
+constant :: a -> Poly a
+constant x = Poly [x]
 
 zeroPoly :: Num a => Poly a
-zeroPoly = makePoly 0
+zeroPoly = constant 0
 
 degreePoly :: (Eq a, Num a) => Poly a -> Int
 -- a constant polynomial has one coefficient and has degree 0; for Euclidian division we want the

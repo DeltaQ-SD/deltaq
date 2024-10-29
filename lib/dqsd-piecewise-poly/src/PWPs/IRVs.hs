@@ -67,7 +67,8 @@ import PWPs.Piecewise
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas
 import PWPs.PolyHeavisides
-import Numeric.Polynomial.Simple (Poly (..), makeMonomial, makePoly)
+import Numeric.Polynomial.Simple (Poly (..), makeMonomial)
+import qualified Numeric.Polynomial.Simple as Poly
 
 type MyConstraints a = (Fractional a, Ord a, Num a, Enum a, Eq a)
 type DistD a = Pieces a (PolyDelta a)
@@ -125,7 +126,7 @@ constructUniform :: MyConstraints a => a -> IRV a
 constructUniform x =
     if x <= 0
         then error "Invalid interval"
-        else PDF (makePieces [(0, Pd (makePoly (1 / x))), (x, Pd 0)])
+        else PDF (makePieces [(0, Pd (Poly.constant (1 / x))), (x, Pd 0)])
 
 -- | Construct a PDF that is a delta function at the given value
 constructDelta :: MyConstraints a => a -> IRV a
@@ -198,7 +199,7 @@ constructCDF xs
         zip
             (tail basepoints)
             (zipWith (curry makeStep) probabilities (tail probabilities))
-    treads = zip basepoints (map (Ph . makePoly) probabilities) -- always have one more tread than riser
+    treads = zip basepoints (map (Ph . Poly.constant) probabilities) -- always have one more tread than riser
     interleave :: [b] -> [b] -> [b]
     interleave [] _ = []
     interleave [x] [] = [x] -- keep the last tread
@@ -231,7 +232,7 @@ constructLinearCDF xs
         map
             Ph
             ( zipWith3 makeSegment probabilities basepoints slopes
-                ++ [makePoly (last probabilities)]
+                ++ [Poly.constant (last probabilities)]
             )
     makeSegment y x s = Poly [y - x * s, s]
 
@@ -275,7 +276,7 @@ multiFtF [x] = x
 -- now know we have at least two, so head and tail are safe
 multiFtF xs = CDF $ invert $ foldr (*) (head icdfs) (tail icdfs)
   where
-    invert = applyObject (-) (Ph $ makePoly 1)
+    invert = applyObject (-) (Ph $ Poly.constant 1)
     icdfs = map (invert . makeCDF) xs
 
 allToFinish :: MyConstraints a => IRV a -> IRV a -> IRV a
