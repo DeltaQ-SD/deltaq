@@ -67,7 +67,7 @@ import PWPs.Piecewise
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas
 import PWPs.PolyHeavisides
-import PWPs.SimplePolynomials (Poly (..), makeMonomial, makePoly)
+import Numeric.Polynomial.Simple (Poly (..), makeMonomial, makePoly)
 
 type MyConstraints a = (Fractional a, Ord a, Num a, Enum a, Eq a)
 type DistD a = Pieces a (PolyDelta a)

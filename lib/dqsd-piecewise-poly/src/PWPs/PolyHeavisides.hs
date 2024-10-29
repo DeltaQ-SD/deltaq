@@ -22,7 +22,7 @@ module PWPs.PolyHeavisides
 where
 
 import PWPs.PiecewiseClasses
-import PWPs.SimplePolynomials as SP
+import Numeric.Polynomial.Simple as SP
 
 {-|
 A PolyHeaviside is either a polynomial or a (shifted, scaled) Heaviside.

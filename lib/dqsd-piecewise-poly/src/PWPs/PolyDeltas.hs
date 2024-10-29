@@ -23,7 +23,7 @@ module PWPs.PolyDeltas
 where
 
 import PWPs.PiecewiseClasses
-import PWPs.SimplePolynomials as SP
+import Numeric.Polynomial.Simple as SP
 
 {-|
 A PolyDelta is either a polynomial or a (shifted, scaled) Delta with a mass.

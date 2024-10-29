@@ -20,7 +20,7 @@ where
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas as PD
 import PWPs.PolyHeavisides as PH
-import PWPs.SimplePolynomials as SP
+import Numeric.Polynomial.Simple as SP
 
 type MyConstraints a = (Eq a, Num a, Fractional a)
 

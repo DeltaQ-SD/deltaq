@@ -46,6 +46,7 @@ library
 
   exposed-modules:
     DeltaQ.PWPs
+    Numeric.Polynomial.Simple
     PWPs.IRVs
 
   other-modules:
