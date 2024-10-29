@@ -143,7 +143,7 @@ instance (Num a, Eq a, Fractional a) => Mergeable (PolyHeaviside a) where
         -- Merge two Heavisides if they stack correctly
         (H x y, H x' y') -> if y == x' then Just (H x y') else Nothing
         (_, _) -> Nothing
-    zero = Ph zeroPoly
+    zero = Ph Poly.zero
 
 {-|
     Given an interval containing a given value of a PolyHeaviside, find its location

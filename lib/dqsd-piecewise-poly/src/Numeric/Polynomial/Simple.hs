@@ -15,7 +15,7 @@ module Numeric.Polynomial.Simple
     ( -- * Basic operations
       Poly (..)
     , constant
-    , zeroPoly
+    , zero
     , degreePoly
     , makeMonomial
     , shiftPolyUp
@@ -52,13 +52,14 @@ instance Eq a => Eq (Poly a) where
 constant :: a -> Poly a
 constant x = Poly [x]
 
-zeroPoly :: Num a => Poly a
-zeroPoly = constant 0
+-- | The zero polynomial.
+zero :: Num a => Poly a
+zero = constant 0
 
 degreePoly :: (Eq a, Num a) => Poly a -> Int
 -- a constant polynomial has one coefficient and has degree 0; for Euclidian division we want the
 -- degree of the zero polynomial to be negative
-degreePoly x = if trimPoly x == zeroPoly then -1 else length (trimPoly x) - 1
+degreePoly x = if trimPoly x == zero then -1 else length (trimPoly x) - 1
 
 -- | remove top zeroes
 trimPoly :: (Eq a, Num a) => Poly a -> Poly a
@@ -70,7 +71,7 @@ trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
 
 -- | put a coefficient in the nth place only
 makeMonomial :: (Eq a, Num a) => Int -> a -> Poly a
-makeMonomial n x = if x == 0 then zeroPoly else Poly (reverse (x : replicate n 0))
+makeMonomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
 
 -- | effectively multiply the polynomial by x by shifting all the coefficients up one place.
 shiftPolyUp :: (Eq a, Num a) => Poly a -> Poly a
@@ -160,7 +161,7 @@ integratePoly (Poly as) = trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))
 -- | Simply use dx^n/dx = nx^(n-1)
 differentiatePoly :: Num a => Poly a -> Poly a
 differentiatePoly (Poly []) = error "Polynomial was empty"
-differentiatePoly (Poly [_]) = zeroPoly -- constant differentiates to zero
+differentiatePoly (Poly [_]) = zero -- constant differentiates to zero
 differentiatePoly (Poly (_ : as)) = Poly (zipWith (*) as (iterate (+ 1) 1)) -- discard the constant term, everything else noves down one
 
 {-|
@@ -223,12 +224,12 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
                 we need to test for a redundant middle interval
             -}
             if lf + ug == uf + lg
-                then [(lf + lg, firstTerm), (uf + lg, thirdTerm), (uf + ug, zeroPoly)]
+                then [(lf + lg, firstTerm), (uf + lg, thirdTerm), (uf + ug, zero)]
                 else
                     [ (lf + lg, firstTerm)
                     , (lf + ug, secondTerm)
                     , (uf + lg, thirdTerm)
-                    , (uf + ug, zeroPoly)
+                    , (uf + ug, zero)
                     ]
 
 -- | Shift a polynomial p(x) -> p(x - y) by summing binomial expansions of each term
@@ -289,7 +290,7 @@ countPolyRoots (l, r, p) = case degreePoly p of
            Note that we build this backwards to avoid use of append, but this doesn't affect the number of
            sign variations so there's no need to reverse it.
         -}
-        doSeq x'@(xI : xIminusOne : _) = if polyRemainder == zeroPoly then x' else doSeq (negate polyRemainder : x')
+        doSeq x'@(xI : xIminusOne : _) = if polyRemainder == zero then x' else doSeq (negate polyRemainder : x')
           where
             polyRemainder = snd (euclidianDivision (xIminusOne, xI))
         doSeq _ = error "List too short" -- prevent warning about missing cases
@@ -315,9 +316,9 @@ Pseudocode:
 euclidianDivision
     :: (Fractional a, Eq a, Ord a) => (Poly a, Poly a) -> (Poly a, Poly a)
 euclidianDivision (pa, pb) =
-    if pb == zeroPoly
+    if pb == zero
         then error "Division by zero polynomial"
-        else goDivide (zeroPoly, pa)
+        else goDivide (zero, pa)
   where
     degB = degreePoly pb
     leadingCoefficient :: Eq a => Poly a -> a -- coefficient of the highest power term of the poly
@@ -335,7 +336,7 @@ euclidianDivision (pa, pb) =
 compareToZero :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Maybe Ordering
 compareToZero (l, u, p)
     | l >= u = error "Invalid interval"
-    | p == zeroPoly = Just EQ
+    | p == zero = Just EQ
     | lower * upper < 0 = Nothing -- quick test to eliminate simple cases
     | countPolyRoots (l, u, p) > 0 = Nothing -- polynomial crosses zero
     -- since the polynomial has no roots, the comparison is detmined by the boundary values

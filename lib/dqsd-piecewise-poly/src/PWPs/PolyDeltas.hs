@@ -111,25 +111,25 @@ convolvePolyDeltas (lf, uf, D f) (lg, ug, Pd g)
     | lf /= uf = error "Non-zero delta interval"
     | ug < lg = error "Negative interval width"
     -- convolving with a zero-sized delta gives nothing
-    | f == 0 = [(0, Pd zeroPoly)]
+    | f == 0 = [(0, Pd Poly.zero)]
     -- degenerate case of delta at zero: don't shift but scale by the mass of the delta
-    | lf == 0 = [(lg, scalePD f (Pd g)), (ug, Pd zeroPoly)]
+    | lf == 0 = [(lg, scalePD f (Pd g)), (ug, Pd Poly.zero)]
     | otherwise =
         aggregate
-            [ (0, Pd zeroPoly)
+            [ (0, Pd Poly.zero)
             , (lg + lf, scalePD f (Pd (shiftPoly lf g)))
-            , (ug + lf, Pd zeroPoly)
+            , (ug + lf, Pd Poly.zero)
             ]
 convolvePolyDeltas (lf, uf, Pd f) (lg, ug, D g) = convolvePolyDeltas (lg, ug, D g) (lf, uf, Pd f) -- commutative
 convolvePolyDeltas (lf, uf, D f) (lg, ug, D g) -- both deltas
     | lf /= uf || lg /= ug = error "Non-zero delta interval"
     -- convolving with a zero-sized delta gives nothing
-    | f * g == 0 = [(0, Pd zeroPoly)]
+    | f * g == 0 = [(0, Pd Poly.zero)]
     -- degenerate case of deltas at zero: no shifting but mutiply the masses
-    | lg + lf == 0 = [(0, D (f * g)), (0, Pd zeroPoly)]
+    | lg + lf == 0 = [(0, D (f * g)), (0, Pd Poly.zero)]
     -- Shift by the sum of the basepoints, multiply the masses, and insert a new initial zero interval
     | otherwise =
-        [(0, Pd zeroPoly), (lg + lf, D (f * g)), (lg + lf, Pd zeroPoly)]
+        [(0, Pd Poly.zero), (lg + lf, D (f * g)), (lg + lf, Pd Poly.zero)]
 
 instance (Num a, Fractional a, Ord a) => CompactConvolvable a (PolyDelta a) where
     convolveIntervals = convolvePolyDeltas
@@ -144,7 +144,7 @@ instance (Num a, Eq a, Fractional a) => Mergeable (PolyDelta a) where
         (D x, Pd y) -> if x == 0 then Just (Pd y) else Nothing
         (D x, D y) -> Just (D (x + y))
         (_, _) -> Nothing
-    zero = Pd zeroPoly
+    zero = Pd Poly.zero
 
 displayPolyDelta
     :: OrdNumEqFrac a => a -> (a, a, PolyDelta a) -> Either (a, a) [(a, a)]
