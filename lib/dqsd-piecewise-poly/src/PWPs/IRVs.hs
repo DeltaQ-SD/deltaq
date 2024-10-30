@@ -67,7 +67,7 @@ import PWPs.Piecewise
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas
 import PWPs.PolyHeavisides
-import Numeric.Polynomial.Simple (Poly (..), makeMonomial)
+import Numeric.Polynomial.Simple (Poly (..))
 import qualified Numeric.Polynomial.Simple as Poly
 
 type MyConstraints a = (Fractional a, Ord a, Num a, Enum a, Eq a)
@@ -411,7 +411,7 @@ moments f =
       where
         integralOfxToTheNtimesFx
             :: (Fractional a, Ord a, Num a, Enum a, Eq a) => Int -> IRV a -> DistH a
-        integralOfxToTheNtimesFx n' f' = integrate (applyObject (*) (Pd $ makeMonomial n' 1) $ makePDF f')
+        integralOfxToTheNtimesFx n' f' = integrate (applyObject (*) (Pd $ Poly.monomial n' 1) $ makePDF f')
     tau = xNIntegral 0 f
     -- catch case of bottom, otherwise scale back up to a proper distribution
     fHat = if tau == 0 then f else PDF ((1 / tau) >< makePDF f)

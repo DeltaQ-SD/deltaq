@@ -16,7 +16,7 @@ module Numeric.Polynomial.Simple
       Poly (..)
     , constant
     , zero
-    , makeMonomial
+    , monomial
     , degree
     , shiftPolyUp
     , scalePoly
@@ -71,9 +71,9 @@ trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
     goTrim xss@[_] = xss -- can't use dropWhile as it would remove the last zero
     goTrim xss@(x : xs) = if x == 0 then goTrim xs else xss
 
--- | put a coefficient in the nth place only
-makeMonomial :: (Eq a, Num a) => Int -> a -> Poly a
-makeMonomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
+-- | @monomial n a@ is the polynomial @a * x^n@.
+monomial :: (Eq a, Num a) => Int -> a -> Poly a
+monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
 
 -- | effectively multiply the polynomial by x by shifting all the coefficients up one place.
 shiftPolyUp :: (Eq a, Num a) => Poly a -> Poly a
@@ -191,7 +191,7 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
             sumSeries k mulFactor poly = sum [mulFactor n `scalePoly` poly n | n <- [0 .. k]]
 
             -- the inner summation has a similar structure each time
-            innerSum m n term k = sumSeries (m + k + 1) innerMult (\j -> makeMonomial (m + n + 1 - j) (term j))
+            innerSum m n term k = sumSeries (m + k + 1) innerMult (\j -> monomial (m + n + 1 - j) (term j))
               where
                 innerMult j =
                     fromIntegral
@@ -213,11 +213,11 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
                     [ (a * b) `scalePoly` convolveMonomials m n f | (m, a) <- zip [0 ..] fs, (n, b) <- zip [0 ..] gs
                     ]
 
-            firstTerm = makeTerm (\m n k -> innerSum m n (lg ^) k - makeMonomial (n - k) (lf ^ (m + k + 1)))
+            firstTerm = makeTerm (\m n k -> innerSum m n (lg ^) k - monomial (n - k) (lf ^ (m + k + 1)))
 
             secondTerm = makeTerm (\m n -> innerSum m n (\k -> lg ^ k - ug ^ k))
 
-            thirdTerm = makeTerm (\m n k -> makeMonomial (n - k) (uf ^ (m + k + 1)) - innerSum m n (ug ^) k)
+            thirdTerm = makeTerm (\m n k -> monomial (n - k) (uf ^ (m + k + 1)) - innerSum m n (ug ^) k)
         in
             {-
                 When convolving distributions, both distributions will start at 0 and so there will always be a pair of intervals
@@ -329,7 +329,7 @@ euclidianDivision (pa, pb) =
     -- goDivide :: (Fractional a, Eq a, Ord a) => (Poly a, Poly a) -> (Poly a, Poly a)
     goDivide (q, r) = if degree r < degB then (q, r) else goDivide (q + s, r - s * pb)
       where
-        s = makeMonomial (degree r - degB) (leadingCoefficient r / lcB)
+        s = monomial (degree r - degB) (leadingCoefficient r / lcB)
 
 {-|
     We measure whether or not a polynomial is consistently above or below zero, or equals zero
