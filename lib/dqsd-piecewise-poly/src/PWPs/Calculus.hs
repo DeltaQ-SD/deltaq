@@ -21,12 +21,13 @@ import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas as PD
 import PWPs.PolyHeavisides as PH
 import Numeric.Polynomial.Simple as SP
+import qualified Numeric.Polynomial.Simple as Poly
 
 type MyConstraints a = (Eq a, Num a, Fractional a)
 
 -- | We integrate PolyDeltas to get PolyHeavisides
 integratePD :: (Eq a, Fractional a) => PolyDelta a -> PolyHeaviside a
-integratePD (Pd x) = Ph (integratePoly x)
+integratePD (Pd x) = Ph (Poly.integrate x)
 integratePD (D x) = H 0 x
 
 -- | We differentiate PolyHeavisides to get PolyDeltas

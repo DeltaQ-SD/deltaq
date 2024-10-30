@@ -26,7 +26,7 @@ module Numeric.Polynomial.Simple
     -- * Advanced operations
     -- ** Algebraic
     , translate
-    , integratePoly
+    , integrate
     , differentiatePoly
     , convolvePolys
 
@@ -155,13 +155,20 @@ displayPoly p (l, u) s
     Advanced Operations
 ------------------------------------------------------------------------------}
 
-{-|
-    Integrate by puting a zero constant term at the bottom and converting ax^n into ax^(n+1)/(n+1).
-    0 -> 0x is the first non-constant term, so we start at 1.
-    When integrating a zero polynomial with a zero constant we get [0,0] so need to trim
--}
-integratePoly :: (Eq a, Fractional a) => Poly a -> Poly a
-integratePoly (Poly as) = trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))
+-- | Indefinite integral of a polynomial with constant term zero.
+--
+-- The integral of @x^n@ is @1/(n+1)·x^(n+1)@.
+--
+-- > eval (integrate p) 0 = 0
+-- > integrate (differentiate p) = p - constant (eval p 0)
+integrate :: (Eq a, Fractional a) => Poly a -> Poly a
+integrate (Poly as) =
+    -- Integrate by puting a zero constant term at the bottom and
+    -- converting a x^n into a/(n+1) x^(n+1).
+    -- 0 -> 0x is the first non-constant term, so we start at 1.
+    -- When integrating a zero polynomial with a zero constant
+    -- we get [0,0] so need to trim
+    trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))
 
 -- | Simply use dx^n/dx = nx^(n-1)
 differentiatePoly :: Num a => Poly a -> Poly a
