@@ -68,7 +68,7 @@ instance MyConstraints a => Num (PolyDelta a) where
     fromInteger n = Pd $ Poly.constant $ Prelude.fromInteger n
 
 scalePD :: EqNum a => a -> PolyDelta a -> PolyDelta a
-scalePD x (Pd a) = Pd (SP.scalePoly x a)
+scalePD x (Pd a) = Pd (Poly.scale x a)
 scalePD x (D y) = D (x * y)
 
 evaluatePD :: EqNum a => a -> PolyDelta a -> [a]

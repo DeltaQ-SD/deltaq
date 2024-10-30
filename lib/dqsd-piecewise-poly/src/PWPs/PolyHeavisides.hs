@@ -72,7 +72,7 @@ instance MyConstraints a => Num (PolyHeaviside a) where
     fromInteger n = Ph $ Poly.constant $ Prelude.fromInteger n
 
 scalePH :: EqNum a => a -> PolyHeaviside a -> PolyHeaviside a
-scalePH x (Ph a) = Ph (SP.scalePoly x a)
+scalePH x (Ph a) = Ph (Poly.scale x a)
 scalePH x (H y z) = H (x * y) (x * z)
 
 evaluatePH :: EqNum a => a -> PolyHeaviside a -> [a]

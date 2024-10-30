@@ -19,7 +19,7 @@ module Numeric.Polynomial.Simple
     , monomial
     , degree
     , shiftPolyUp
-    , scalePoly
+    , scale
     , eval
     , displayPoly
 
@@ -81,9 +81,11 @@ shiftPolyUp (Poly xs)
     | xs == [0] = Poly xs -- don't shift up zero
     | otherwise = Poly (0 : xs)
 
--- | scale a polynomial by a constant: more efficient than multiplying by a constant polynomial
-scalePoly :: Num a => a -> Poly a -> Poly a
-scalePoly x (Poly xs) = Poly (map (* x) xs)
+-- | Scale a polynomial by a scalar.
+-- More efficient than multiplying by a constant polynomial.
+scale :: Num a => a -> Poly a -> Poly a
+scale x (Poly xs) = Poly (map (* x) xs)
+    -- Does not agree with naming conventions in `Data.Poly`.
 
 {-|
    Add polynomials by simply adding their coefficients as long as both lists continue.
@@ -113,7 +115,8 @@ mulPolys as bs = sum (intermediateSums as bs)
     intermediateSums _ (Poly []) = error "Second polynomial was empty"
     intermediateSums (Poly []) _ = [] -- stop when we exhaust the first list
     -- as we consume the coeffecients of the first list, we shift up the second list to increase the power under consideration
-    intermediateSums (Poly (x : xs)) ys = scalePoly x ys : intermediateSums (Poly xs) (shiftPolyUp ys)
+    intermediateSums (Poly (x : xs)) ys =
+        scale x ys : intermediateSums (Poly xs) (shiftPolyUp ys)
 
 instance (Eq a, Num a) => Num (Poly a) where
     (+) = addPolys
@@ -188,7 +191,7 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
         let
             -- sum a set of terms depending on an iterator k (assumed to go down to 0), where each term is a k-dependent
             -- polynomial with a k-dependent multiplier
-            sumSeries k mulFactor poly = sum [mulFactor n `scalePoly` poly n | n <- [0 .. k]]
+            sumSeries k mulFactor poly = sum [mulFactor n `scale` poly n | n <- [0 .. k]]
 
             -- the inner summation has a similar structure each time
             innerSum m n term k = sumSeries (m + k + 1) innerMult (\j -> monomial (m + n + 1 - j) (term j))
@@ -210,7 +213,9 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
             -}
             makeTerm f =
                 sum
-                    [ (a * b) `scalePoly` convolveMonomials m n f | (m, a) <- zip [0 ..] fs, (n, b) <- zip [0 ..] gs
+                    [ (a * b) `scale` convolveMonomials m n f
+                    | (m, a) <- zip [0 ..] fs
+                    , (n, b) <- zip [0 ..] gs
                     ]
 
             firstTerm = makeTerm (\m n k -> innerSum m n (lg ^) k - monomial (n - k) (lf ^ (m + k + 1)))
@@ -236,9 +241,10 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
 
 -- | Shift a polynomial p(x) -> p(x - y) by summing binomial expansions of each term
 shiftPoly :: (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
-shiftPoly s (Poly ps) = sum [b `scalePoly` binomialExpansion n s | (n, b) <- zip [0 ..] ps]
+shiftPoly s (Poly ps) = sum [b `scale` binomialExpansion n s | (n, b) <- zip [0 ..] ps]
   where
-    -- the binomial expansion of each power of x is a new polynomial whose coefficients are the product of
+    -- the binomial expansion of each power of x is a new polynomial
+    -- whose coefficients are the product of
     -- a binomial coefficient and the shift value raised to a reducing power
     binomialTerm :: Num a => a -> Int -> Int -> a
     binomialTerm y n k = fromIntegral (n `choose` k) * (-y) ^ (n - k)
