@@ -27,7 +27,7 @@ module Numeric.Polynomial.Simple
     -- ** Algebraic
     , translate
     , integrate
-    , differentiatePoly
+    , differentiate
     , convolvePolys
 
     -- ** Numerical
@@ -170,11 +170,18 @@ integrate (Poly as) =
     -- we get [0,0] so need to trim
     trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))
 
--- | Simply use dx^n/dx = nx^(n-1)
-differentiatePoly :: Num a => Poly a -> Poly a
-differentiatePoly (Poly []) = error "Polynomial was empty"
-differentiatePoly (Poly [_]) = zero -- constant differentiates to zero
-differentiatePoly (Poly (_ : as)) = Poly (zipWith (*) as (iterate (+ 1) 1)) -- discard the constant term, everything else noves down one
+-- | Differentiate a polynomial.
+--
+-- We have @dx^n/dx = n·x^(n-1)@.
+--
+-- > differentiate (integrate p) = p
+-- > differentiate (p * q) = (differentiate p) * q + p * (differentiate q)
+differentiate :: Num a => Poly a -> Poly a
+differentiate (Poly []) = error "Polynomial was empty"
+differentiate (Poly [_]) = zero -- constant differentiates to zero
+differentiate (Poly (_ : as)) =
+    -- discard the constant term, everything else noves down one
+    Poly (zipWith (*) as (iterate (+ 1) 1))
 
 {-|
     Binomial coefficients: simple definition is n `choose` k ~ factorial n `div` (factorial k * factorial (n-k))
@@ -300,7 +307,7 @@ countPolyRoots (l, r, p) = case degree p of
         -- TODO: deal with all zero corner case
         pairsMultiplied = zipWith (*) zeroesRemoved (tail zeroesRemoved)
     sturmSequence :: (Fractional a, Eq a, Ord a) => a -> Poly a -> [a]
-    sturmSequence x q = map (flip eval x) (doSeq [differentiatePoly q, q])
+    sturmSequence x q = map (flip eval x) (doSeq [differentiate q, q])
       where
         doSeq :: (Fractional a, Eq a, Ord a) => [Poly a] -> [Poly a]
         {-
