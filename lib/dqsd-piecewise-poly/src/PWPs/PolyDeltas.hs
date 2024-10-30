@@ -117,7 +117,7 @@ convolvePolyDeltas (lf, uf, D f) (lg, ug, Pd g)
     | otherwise =
         aggregate
             [ (0, Pd Poly.zero)
-            , (lg + lf, scalePD f (Pd (shiftPoly lf g)))
+            , (lg + lf, scalePD f (Pd (Poly.translate lf g)))
             , (ug + lf, Pd Poly.zero)
             ]
 convolvePolyDeltas (lf, uf, Pd f) (lg, ug, D g) = convolvePolyDeltas (lg, ug, D g) (lf, uf, Pd f) -- commutative

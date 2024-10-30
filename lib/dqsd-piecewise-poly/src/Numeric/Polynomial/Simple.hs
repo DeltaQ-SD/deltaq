@@ -25,7 +25,7 @@ module Numeric.Polynomial.Simple
 
     -- * Advanced operations
     -- ** Algebraic
-    , shiftPoly
+    , translate
     , integratePoly
     , differentiatePoly
     , convolvePolys
@@ -239,9 +239,12 @@ convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
                     , (uf + ug, zero)
                     ]
 
--- | Shift a polynomial p(x) -> p(x - y) by summing binomial expansions of each term
-shiftPoly :: (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
-shiftPoly s (Poly ps) = sum [b `scale` binomialExpansion n s | (n, b) <- zip [0 ..] ps]
+-- | Translate the argument of a polynomial by summing binomial expansions.
+--
+-- > eval (translate y p) x = eval p (x - y)
+--
+translate :: (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
+translate s (Poly ps) = sum [b `scale` binomialExpansion n s | (n, b) <- zip [0 ..] ps]
   where
     -- the binomial expansion of each power of x is a new polynomial
     -- whose coefficients are the product of
