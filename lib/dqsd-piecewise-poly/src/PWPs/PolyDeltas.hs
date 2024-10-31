@@ -156,7 +156,7 @@ displayPolyDelta _ (l, u, D x)
     | otherwise = Left (l, x)
 displayPolyDelta s (l, u, Pd p)
     | l >= u = error "Invalid polynomial interval"
-    | otherwise = Right (displayPoly p (l, u) s)
+    | otherwise = Right (Poly.display p (l, u) s)
 instance OrdNumEqFrac a => Displayable a (PolyDelta a) where
     displayObject = displayPolyDelta
 

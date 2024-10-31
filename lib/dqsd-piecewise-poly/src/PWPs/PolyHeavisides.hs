@@ -160,7 +160,7 @@ displayPolyHeaviside
 displayPolyHeaviside s (l, u, Ph p) =
     if l >= u
         then error "Invalid polynomial interval"
-        else Right (displayPoly p (l, u) s)
+        else Right (Poly.display p (l, u) s)
 displayPolyHeaviside _ (l, u, H x _) =
     if l /= u
         then error "Non-zero heaviside interval"

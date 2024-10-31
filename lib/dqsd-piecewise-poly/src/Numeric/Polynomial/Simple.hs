@@ -21,7 +21,7 @@ module Numeric.Polynomial.Simple
     , shiftPolyUp
     , scale
     , eval
-    , displayPoly
+    , display
 
     -- * Advanced operations
     -- ** Algebraic
@@ -141,16 +141,24 @@ a0 + a1·x + a2·x^2 + ... + a{n-1}·x^{n-1} + an·x^n
 eval :: Num a => Poly a -> a -> a
 eval (Poly as) x = foldr (\ai result -> x * result + ai) 0 as
 
-{-| Create a given uniform spacing s over a range (l, u) return a list of (x, y) values of poly p over that range
-First point will be at the base of the range, and then we increment the bottom of the interval by s
-until it reaches the top of the interval
+{-|
+Return a list of pairs @(x, eval p x)@ from the graph of the polynomial.
+The values @x@ are from the range @(l, u)@ with uniform spacing @s@.
+
+Specifically,
+
+> map fst (display p (l, u) s) = [l, l+s, l + 2·s, … , u']
+
+where @u'@ is the largest number of the form @u' = l + s·k@, @k@ natural,
+that still satisfies @u' < l@.
 -}
-displayPoly :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
-displayPoly p (l, u) s
+display :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
+display p (l, u) s
     | s == 0 = [(l, eval p l)]
     | otherwise = goDisplay l
   where
     goDisplay x = if x >= u then [] else (x, eval p x) : goDisplay (x + s)
+    -- TODO: Off-by-one? What if x == u?
 
 {-----------------------------------------------------------------------------
     Advanced Operations
