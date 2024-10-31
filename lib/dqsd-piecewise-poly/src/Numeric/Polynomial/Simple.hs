@@ -371,10 +371,11 @@ euclidianDivision (pa, pb) =
       where
         s = monomial (degree r - degB) (leadingCoefficient r / lcB)
 
-{-|
-    We measure whether or not a polynomial is consistently above or below zero, or equals zero
-    Need to consider special cases where there is a root at a boundary point
--}
+-- |
+-- Measure whether or not a polynomial is consistently above or below zero,
+-- or equals zero.
+--
+-- Need to consider special cases where there is a root at a boundary point.
 compareToZero :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Maybe Ordering
 compareToZero (l, u, p)
     | l >= u = error "Invalid interval"
