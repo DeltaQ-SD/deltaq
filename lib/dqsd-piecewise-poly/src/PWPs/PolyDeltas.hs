@@ -23,14 +23,13 @@ module PWPs.PolyDeltas
 where
 
 import PWPs.PiecewiseClasses
-import Numeric.Polynomial.Simple as SP
 import qualified Numeric.Polynomial.Simple as Poly
 
 {-|
 A PolyDelta is either a polynomial or a (shifted, scaled) Delta with a mass.
 The position of a Delta is stored as its basepoint when doing piecewise operations.
 -}
-data PolyDelta a = Pd (Poly a) | D a
+data PolyDelta a = Pd (Poly.Poly a) | D a
     deriving (Show)
 
 instance Eq a => Eq (PolyDelta a) where
@@ -72,7 +71,7 @@ scalePD x (Pd a) = Pd (Poly.scale x a)
 scalePD x (D y) = D (x * y)
 
 evaluatePD :: EqNum a => a -> PolyDelta a -> [a]
-evaluatePD point (Pd x) = [SP.eval x point]
+evaluatePD point (Pd x) = [Poly.eval x point]
 evaluatePD _ (D x) = [x]
 
 boostPD :: MyConstraints a => a -> PolyDelta a -> PolyDelta a
@@ -162,6 +161,6 @@ instance OrdNumEqFrac a => Displayable a (PolyDelta a) where
 
 instance OrdNumEqFrac a => ComplexityMeasureable (PolyDelta a) where
     measureComplexity (Pd p)
-        | SP.degree p <= 0 = 1
-        | otherwise = SP.degree p
+        | Poly.degree p <= 0 = 1
+        | otherwise = Poly.degree p
     measureComplexity (D _) = 1
