@@ -98,15 +98,18 @@ convolvePolyDeltas
     -> [(a, PolyDelta a)]
 
 {-|
-When both arguments are polynomials, we check the intervals are non-zero then use convolvePolys and just map the type.
-For a delta, lower == upper (invariant to be checked), and the effect of the delta is to translate the other
-argument (whichever it is) along by this amount. Need to ensure there is still an initial interval based at zero.
+When both arguments are polynomials,
+we check the intervals are non-zero then use 'Poly.convolve' and just map the type.
+For a delta, lower == upper (invariant to be checked),
+and the effect of the delta is to translate the other
+argument (whichever it is) along by this amount.
+Need to ensure there is still an initial interval based at zero.
 -}
 convolvePolyDeltas (lf, uf, Pd f) (lg, ug, Pd g)
     | (uf <= lf) || (ug <= lg) = error "Invalid polynomial interval width"
     -- convolve the polynomials to get a list of intervals, put the type back and remove redundant intervals
     | otherwise =
-        aggregate $ map (\(x, p) -> (x, Pd p)) (convolvePolys (lf, uf, f) (lg, ug, g))
+        aggregate $ map (\(x, p) -> (x, Pd p)) (Poly.convolve (lf, uf, f) (lg, ug, g))
 convolvePolyDeltas (lf, uf, D f) (lg, ug, Pd g)
     | lf /= uf = error "Non-zero delta interval"
     | ug < lg = error "Negative interval width"

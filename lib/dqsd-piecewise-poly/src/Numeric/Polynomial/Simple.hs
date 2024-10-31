@@ -28,7 +28,7 @@ module Numeric.Polynomial.Simple
     , translate
     , integrate
     , differentiate
-    , convolvePolys
+    , convolve
 
     -- ** Numerical
     , compareToZero
@@ -193,13 +193,14 @@ n `choose` k
     | k >= n = 1
     | otherwise = (n - 1) `choose` (k - 1) + (n - 1) `choose` k -- recursive definition
 
--- | Take two polynomials f and g defined on bounded intervals and produce three contiguous pieces as a result
-convolvePolys
+-- | Convolution of two polynomials defined on bounded intervals.
+-- Produces three contiguous pieces as a result.
+convolve
     :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> (a, a, Poly a) -> [(a, Poly a)]
-convolvePolys (lf, uf, Poly fs) (lg, ug, Poly gs)
+convolve (lf, uf, Poly fs) (lg, ug, Poly gs)
     | (lf < 0) || (lg < 0) = error "Interval bounds cannot be negative"
     | (lf >= uf) || (lg >= ug) = error "Invalid interval" -- upper bounds should be strictly greater than lower bounds
-    | (ug - lg) > (uf - lf) = convolvePolys (lg, ug, Poly gs) (lf, uf, Poly fs) -- if g is wider than f, swap the terms
+    | (ug - lg) > (uf - lf) = convolve (lg, ug, Poly gs) (lf, uf, Poly fs) -- if g is wider than f, swap the terms
     | otherwise -- we know g is narrower than f
         =
         let
