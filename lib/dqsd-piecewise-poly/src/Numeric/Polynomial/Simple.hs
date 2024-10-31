@@ -1,12 +1,12 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 {-|
-Description : Polynomials as lists of coefficients
 Copyright   : (c) Peter Thompson, 2023
 License     : BSD-2-Clause
 Maintainer  : peter.thompson@pnsol.com
 Stability   : experimental
 
+Polynomials.
 -}
 module Numeric.Polynomial.Simple
     ( -- * Basic operations
@@ -20,10 +20,10 @@ module Numeric.Polynomial.Simple
     , toCoefficients
     , scale
     , scaleX
-    , display
 
     -- * Advanced operations
     -- ** Convenience
+    , display
     , lineFromTo
 
     -- ** Algebraic
@@ -53,6 +53,8 @@ instance Eq a => Eq (Poly a) where
     Poly x == Poly y = x == y
 
 -- | The constant polynomial.
+--
+-- > eval (constant a) = const a
 constant :: a -> Poly a
 constant x = Poly [x]
 
@@ -101,6 +103,8 @@ scaleX (Poly xs)
 
 -- | Scale a polynomial by a scalar.
 -- More efficient than multiplying by a constant polynomial.
+--
+-- > eval (scale a p) x = a * eval p x
 scale :: Num a => a -> Poly a -> Poly a
 scale x (Poly xs) = Poly (map (* x) xs)
     -- Does not agree with naming conventions in `Data.Poly`.
@@ -161,6 +165,9 @@ a0 + a1·x + a2·x^2 + ... + a{n-1}·x^{n-1} + an·x^n
 eval :: Num a => Poly a -> a -> a
 eval (Poly as) x = foldr (\ai result -> x * result + ai) 0 as
 
+{-----------------------------------------------------------------------------
+    Convenience operations
+------------------------------------------------------------------------------}
 {-|
 Return a list of pairs @(x, eval p x)@ from the graph of the polynomial.
 The values @x@ are from the range @(l, u)@ with uniform spacing @s@.
@@ -180,9 +187,6 @@ display p (l, u) s
     goDisplay x = if x >= u then [] else (x, eval p x) : goDisplay (x + s)
     -- TODO: Off-by-one? What if x == u?
 
-{-----------------------------------------------------------------------------
-    Convenience operations
-------------------------------------------------------------------------------}
 -- | Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
 -- assuming that @x1 ≠ x2@.
 --
