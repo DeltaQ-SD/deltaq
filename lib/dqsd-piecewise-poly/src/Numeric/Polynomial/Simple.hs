@@ -32,7 +32,8 @@ module Numeric.Polynomial.Simple
 
     -- ** Numerical
     , compareToZero
-    , findPolyRoot
+    , countRoots
+    , findRoot
     ) where
 
 {-----------------------------------------------------------------------------
@@ -375,16 +376,22 @@ compareToZero (l, u, p)
     upper = eval p u
 
 {-|
-This is only called when there is known to be a root in the given interval, so we simply have to find it.
-We do this by repeatedly halving the interval in which the root must lie.
-If degree p <=1 (poly is constant or linear) we treat these as special cases
+Find the root of a polynomial in a given interval,
+assuming that there is exactly one root in the given interval.
+This precondition has to be checked through other means,
+e.g. 'countRoots'.
+
+We find the root by repeatedly halving the interval in which the root must lie.
+Constant and linear polynomials, @degree p <= 1@, are treated as special cases.
 -}
-findPolyRoot
+findRoot
     :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
-findPolyRoot precision (l, u) p
+findRoot precision (l, u) p
     | precision <= 0 = error "Invalid precision value"
-    | degp < 0 = Just l -- the poly is zero, so the whole interval is a root, so return the basepoint
-    | degp == 0 = Nothing -- the poly is a non-zeo constant so no root is present
+        -- the polynomial is zero, so the whole interval is a root, so return the basepoint
+    | degp < 0 = Just l
+         -- the poly is a non-zero constant so no root is present
+    | degp == 0 = Nothing
     | degp == 1 = Just (-(head ps / last ps)) -- p0 + p1x = 0 => x = -p0/p1
     | otherwise = Just (halveInterval precision l u pl pu)
   where
@@ -392,18 +399,16 @@ findPolyRoot precision (l, u) p
     degp = degree p
     pu = eval p u
     pl = eval p l
-    halveInterval eps x y px py =
-        let
-            width = y - x
-            mid = x + width / 2
-            pmid = eval p mid
-        in
-            -- when the interval is small enough, stop: the root is in this interval, so take the mid point
-            if width <= eps
-                then mid
-                else -- otherwise, if the polynomial has different signs at the ends of the lower half, choose this
-
-                    if px * pmid < 0
-                        then halveInterval eps x mid px pmid
-                        else -- otherwise choose the upper interval and continue
-                            halveInterval eps mid y pmid py
+    halveInterval eps x y px py
+            -- when the interval is small enough, stop:
+            -- the root is in this interval, so take the mid point
+        | width <= eps = mid
+            -- choose the lower half,
+            -- as the polynomial has different signs at the ends
+        | px * pmid < 0 = halveInterval eps x mid px pmid
+            -- choose the upper half
+        | otherwise = halveInterval eps mid y pmid py
+      where
+        width = y - x
+        mid = x + width / 2
+        pmid = eval p mid

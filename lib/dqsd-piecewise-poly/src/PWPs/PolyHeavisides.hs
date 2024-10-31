@@ -153,7 +153,7 @@ polyHeavisideRoot
 -- If we have a step, the interval is zero width so this is the root
 polyHeavisideRoot _ _ (l, u) (H _ _) = if l /= u then error "Non-zero Heaviside interval" else Just l
 -- otherwise we have a polynomial: subtract the value we are looking for so that we seek a zero crossing
-polyHeavisideRoot e x (l, u) (Ph p) = findPolyRoot e (l, u) (p - Poly.constant x)
+polyHeavisideRoot e x (l, u) (Ph p) = Poly.findRoot e (l, u) (p - Poly.constant x)
 
 displayPolyHeaviside
     :: OrdNumEqFrac a => a -> (a, a, PolyHeaviside a) -> Either (a, a) [(a, a)]
