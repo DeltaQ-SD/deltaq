@@ -272,6 +272,7 @@ translate s (Poly ps) = sum [b `scale` binomialExpansion n s | (n, b) <- zip [0 
 
 {-|
 We use Sturm's Theorem to count the number of roots of a polynomial in a given interval.
+
 (See https://en.wikipedia.org/wiki/Sturm%27s_theorem)
 Starting from polynomial p, construct the Sturm sequence p0, p1, . . ., where:
 p0 = p
@@ -286,8 +287,8 @@ multiple root of p (a circumstance we shall ignore)
 
 We start from the tuple that emerges from disagregation.
 -}
-countPolyRoots :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Int
-countPolyRoots (l, r, p) = case degree p of
+countRoots :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Int
+countRoots (l, r, p) = case degree p of
     -- p is the zero polynomial, so it doesn't *cross* zero
     -1 -> 0
     -- p is a non-zero constant polynomial - no root
@@ -365,7 +366,7 @@ compareToZero (l, u, p)
     | l >= u = error "Invalid interval"
     | p == zero = Just EQ
     | lower * upper < 0 = Nothing -- quick test to eliminate simple cases
-    | countPolyRoots (l, u, p) > 0 = Nothing -- polynomial crosses zero
+    | countRoots (l, u, p) > 0 = Nothing -- polynomial crosses zero
     -- since the polynomial has no roots, the comparison is detmined by the boundary values
     | lower == 0 = Just (compare upper lower)
     | upper == 0 = Just (compare lower upper)
