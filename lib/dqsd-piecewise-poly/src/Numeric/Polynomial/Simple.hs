@@ -23,6 +23,9 @@ module Numeric.Polynomial.Simple
     , display
 
     -- * Advanced operations
+    -- ** Convenience
+    , lineFromTo
+
     -- ** Algebraic
     , translate
     , integrate
@@ -176,6 +179,28 @@ display p (l, u) s
   where
     goDisplay x = if x >= u then [] else (x, eval p x) : goDisplay (x + s)
     -- TODO: Off-by-one? What if x == u?
+
+{-----------------------------------------------------------------------------
+    Convenience operations
+------------------------------------------------------------------------------}
+-- | Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
+-- assuming that @x1 ≠ x2@.
+--
+-- > let p = lineFromTo (x1, y1) (x2, y2)
+-- > 
+-- > degree p <= 1
+-- > eval p x1 = y1
+-- > eval p x2 = y2
+lineFromTo :: (Eq a, Fractional a) => (a,a) -> (a,a) -> Poly a
+lineFromTo (x1, y1) (x2, y2)
+    | slope == 0 = constant y1
+    | otherwise = fromCoefficients [shift, slope]
+  where
+        -- slope of the linear function
+    slope = (y2 - y1) / (x2 - x1)
+        -- the constant shift is fixed by
+        -- the fact that the line needs to pass through (x1,y1)
+    shift = y1 - x1 * slope
 
 {-----------------------------------------------------------------------------
     Advanced Operations

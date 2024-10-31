@@ -164,21 +164,7 @@ constructGeneralCDF xs
     goCDF (bm, pm) ((bn, pn) : ys) =
         if bm == bn
             then (bm, H pm pn) : goCDF (bn, pn) ys
-            else (bm, Ph (slopeUp (bm, pm) (bn, pn))) : goCDF (bn, pn) ys
-      where
-        {-
-            Each linear polynomial has the form y = sx + c, where s is given by the difference
-            in successive probabilities divided by the difference in succesive basepoints.
-            The constant c is fixed by the constraint that we need to pass through the point (b0,p0),
-            so c = p0 - b0*s.
-            If the slope is zero we just have a constant polynomial.
-        -}
-        slopeUp (b0, p0) (b1, p1)
-            | s == 0 = Poly.constant p0
-            | otherwise = Poly.fromCoefficients [p0 - b0 * s, s]
-          where
-            -- we know b1 /= b0 so the division is safe
-            s = (p1 - p0) / (b1 - b0)
+            else (bm, Ph (Poly.lineFromTo (bm, pm) (bn, pn))) : goCDF (bn, pn) ys
 
 {-| Construct a CDF from a list of values, treating each new value as a step up from the one before, assuming we start at 0
 | First interval is a zero polynomial: subsequent intervals start with a delta and then have a constant polynomial.
