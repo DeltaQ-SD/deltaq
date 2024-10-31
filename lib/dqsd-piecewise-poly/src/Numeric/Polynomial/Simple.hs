@@ -14,13 +14,13 @@ An empty list is not allowed: a zero polynomical must have at least one (zero) e
 module Numeric.Polynomial.Simple
     ( -- * Basic operations
       Poly (..)
+    , eval
+    , degree
     , constant
     , zero
     , monomial
-    , degree
-    , shiftPolyUp
     , scale
-    , eval
+    , scaleX
     , display
 
     -- * Advanced operations
@@ -76,9 +76,12 @@ trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
 monomial :: (Eq a, Num a) => Int -> a -> Poly a
 monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
 
--- | effectively multiply the polynomial by x by shifting all the coefficients up one place.
-shiftPolyUp :: (Eq a, Num a) => Poly a -> Poly a
-shiftPolyUp (Poly xs)
+-- | Multiply the polynomial by the unknown @x@.
+--
+-- > eval (scaleX p) x = x * eval p x
+-- > degree (scaleX p) = 1 + degree p  if  degree p >= 0
+scaleX :: (Eq a, Num a) => Poly a -> Poly a
+scaleX (Poly xs)
     | xs == [0] = Poly xs -- don't shift up zero
     | otherwise = Poly (0 : xs)
 
@@ -117,7 +120,7 @@ mulPolys as bs = sum (intermediateSums as bs)
     intermediateSums (Poly []) _ = [] -- stop when we exhaust the first list
     -- as we consume the coeffecients of the first list, we shift up the second list to increase the power under consideration
     intermediateSums (Poly (x : xs)) ys =
-        scale x ys : intermediateSums (Poly xs) (shiftPolyUp ys)
+        scale x ys : intermediateSums (Poly xs) (scaleX ys)
 
 instance (Eq a, Num a) => Num (Poly a) where
     (+) = addPolys
