@@ -161,7 +161,7 @@ instance OrdNumEqFrac a => Displayable a (PolyDelta a) where
     displayObject = displayPolyDelta
 
 instance OrdNumEqFrac a => ComplexityMeasureable (PolyDelta a) where
-    measureComplexity (Pd (Poly a))
-        | SP.degree (Poly a) <= 0 = 1
-        | otherwise = SP.degree (Poly a)
+    measureComplexity (Pd p)
+        | SP.degree p <= 0 = 1
+        | otherwise = SP.degree p
     measureComplexity (D _) = 1

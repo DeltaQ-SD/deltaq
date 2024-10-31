@@ -67,7 +67,6 @@ import PWPs.Piecewise
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas
 import PWPs.PolyHeavisides
-import Numeric.Polynomial.Simple (Poly (..))
 import qualified Numeric.Polynomial.Simple as Poly
 
 type MyConstraints a = (Fractional a, Ord a, Num a, Enum a, Eq a)
@@ -161,7 +160,7 @@ constructGeneralCDF xs
     probabilities = map snd xs
     goCDF :: MyConstraints a => (a, a) -> [(a, a)] -> [(a, PolyHeaviside a)]
     -- construct a constant poly from last point
-    goCDF (bf, pf) [] = [(bf, Ph (Poly [pf]))]
+    goCDF (bf, pf) [] = [(bf, Ph (Poly.constant pf))]
     goCDF (bm, pm) ((bn, pn) : ys) =
         if bm == bn
             then (bm, H pm pn) : goCDF (bn, pn) ys
@@ -174,7 +173,9 @@ constructGeneralCDF xs
             so c = p0 - b0*s.
             If the slope is zero we just have a constant polynomial.
         -}
-        slopeUp (b0, p0) (b1, p1) = if s == 0 then Poly [p0] else Poly [p0 - b0 * s, s]
+        slopeUp (b0, p0) (b1, p1)
+            | s == 0 = Poly.constant p0
+            | otherwise = Poly.fromCoefficients [p0 - b0 * s, s]
           where
             -- we know b1 /= b0 so the division is safe
             s = (p1 - p0) / (b1 - b0)
@@ -234,7 +235,7 @@ constructLinearCDF xs
             ( zipWith3 makeSegment probabilities basepoints slopes
                 ++ [Poly.constant (last probabilities)]
             )
-    makeSegment y x s = Poly [y - x * s, s]
+    makeSegment y x s = Poly.fromCoefficients [y - x * s, s]
 
 {-| Return a sequence of (Left) step base (the lower value of the Heaviside function at that point)
      or (Right) a sequence of Time and Probability. The sequence is monotonically increasing in Time.

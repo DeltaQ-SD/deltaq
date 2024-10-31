@@ -7,18 +7,16 @@ License     : BSD-2-Clause
 Maintainer  : peter.thompson@pnsol.com
 Stability   : experimental
 
-We define a polynomial over a numeric type as a list of coefficients
-of that type for increasing powers of the variable.
-An empty list is not allowed: a zero polynomical must have at least one (zero) element.
 -}
 module Numeric.Polynomial.Simple
     ( -- * Basic operations
-      Poly (..)
+      Poly
     , eval
     , degree
     , constant
     , zero
     , monomial
+    , fromCoefficients
     , scale
     , scaleX
     , display
@@ -41,9 +39,10 @@ module Numeric.Polynomial.Simple
 ------------------------------------------------------------------------------}
 
 -- | Polynomial with coefficients in @a@.
---
--- The list starts with the coefficient of lowest degree.
 newtype Poly a = Poly [a]
+    -- INVARIANT: List of coefficients from lowest to highest degree.
+    -- INVARIANT: The empty list is not allowed,
+    -- the zero polynomial is represented as [0].
     deriving (Show, Functor, Foldable)
 
 instance Eq a => Eq (Poly a) where
@@ -75,6 +74,12 @@ trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
 -- | @monomial n a@ is the polynomial @a * x^n@.
 monomial :: (Eq a, Num a) => Int -> a -> Poly a
 monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
+
+-- | Construct a polynomial @a0 + a1·x + …@ from
+-- its list of coefficients @[a0, a1, …]@.
+fromCoefficients :: Num a => [a] -> Poly a
+fromCoefficients [] = zero
+fromCoefficients as = Poly as
 
 -- | Multiply the polynomial by the unknown @x@.
 --
