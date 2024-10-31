@@ -22,7 +22,8 @@ module PWPs.PolyHeavisides
 where
 
 import PWPs.PiecewiseClasses
-import PWPs.SimplePolynomials as SP
+import Numeric.Polynomial.Simple as SP
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-|
 A PolyHeaviside is either a polynomial or a (shifted, scaled) Heaviside.
@@ -68,18 +69,18 @@ instance MyConstraints a => Num (PolyHeaviside a) where
     negate = fmap negate
     abs = undefined
     signum = undefined
-    fromInteger n = Ph $ makePoly $ Prelude.fromInteger n
+    fromInteger n = Ph $ Poly.constant $ Prelude.fromInteger n
 
 scalePH :: EqNum a => a -> PolyHeaviside a -> PolyHeaviside a
-scalePH x (Ph a) = Ph (SP.scalePoly x a)
+scalePH x (Ph a) = Ph (Poly.scale x a)
 scalePH x (H y z) = H (x * y) (x * z)
 
 evaluatePH :: EqNum a => a -> PolyHeaviside a -> [a]
-evaluatePH point (Ph x) = [SP.evaluatePoly point x]
+evaluatePH point (Ph x) = [SP.eval x point]
 evaluatePH _ (H x y) = [x, y]
 
 boostPH :: MyConstraints a => a -> PolyHeaviside a -> PolyHeaviside a
-boostPH x (Ph y) = Ph y + Ph (makePoly x)
+boostPH x (Ph y) = Ph y + Ph (Poly.constant x)
 boostPH x (H y z) = H (x + y) (x + z)
 
 instance MyConstraints a => Evaluable a (PolyHeaviside a) where
@@ -108,7 +109,7 @@ comparePHs (lf, uf, (H x y, Ph f))
     | y <= fx = Just LT
     | otherwise = Nothing
   where
-    fx = evaluatePoly lf f
+    fx = SP.eval f lf
 -- if the Heaviside and the polynomial are the other way round, swap them and reverse the ordering
 comparePHs (lf, uf, (Ph f, H x y)) = reverseOrder $ comparePHs (lf, uf, (H x y, Ph f))
   where
@@ -142,7 +143,7 @@ instance (Num a, Eq a, Fractional a) => Mergeable (PolyHeaviside a) where
         -- Merge two Heavisides if they stack correctly
         (H x y, H x' y') -> if y == x' then Just (H x y') else Nothing
         (_, _) -> Nothing
-    zero = Ph zeroPoly
+    zero = Ph Poly.zero
 
 {-|
     Given an interval containing a given value of a PolyHeaviside, find its location
@@ -152,14 +153,14 @@ polyHeavisideRoot
 -- If we have a step, the interval is zero width so this is the root
 polyHeavisideRoot _ _ (l, u) (H _ _) = if l /= u then error "Non-zero Heaviside interval" else Just l
 -- otherwise we have a polynomial: subtract the value we are looking for so that we seek a zero crossing
-polyHeavisideRoot e x (l, u) (Ph p) = findPolyRoot e (l, u) (p - makePoly x)
+polyHeavisideRoot e x (l, u) (Ph p) = Poly.findRoot e (l, u) (p - Poly.constant x)
 
 displayPolyHeaviside
     :: OrdNumEqFrac a => a -> (a, a, PolyHeaviside a) -> Either (a, a) [(a, a)]
 displayPolyHeaviside s (l, u, Ph p) =
     if l >= u
         then error "Invalid polynomial interval"
-        else Right (displayPoly p (l, u) s)
+        else Right (Poly.display p (l, u) s)
 displayPolyHeaviside _ (l, u, H x _) =
     if l /= u
         then error "Non-zero heaviside interval"
@@ -169,5 +170,7 @@ instance OrdNumEqFrac a => Displayable a (PolyHeaviside a) where
     displayObject = displayPolyHeaviside
 
 instance OrdNumEqFrac a => ComplexityMeasureable (PolyHeaviside a) where
-    measureComplexity (Ph (Poly a)) = if SP.degreePoly (Poly a) <= 0 then 1 else SP.degreePoly (Poly a)
+    measureComplexity (Ph poly)
+        | SP.degree poly <= 0 = 1
+        | otherwise = SP.degree poly
     measureComplexity (H _ _) = 1

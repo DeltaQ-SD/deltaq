@@ -20,18 +20,18 @@ where
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas as PD
 import PWPs.PolyHeavisides as PH
-import PWPs.SimplePolynomials as SP
+import qualified Numeric.Polynomial.Simple as Poly
 
 type MyConstraints a = (Eq a, Num a, Fractional a)
 
 -- | We integrate PolyDeltas to get PolyHeavisides
 integratePD :: (Eq a, Fractional a) => PolyDelta a -> PolyHeaviside a
-integratePD (Pd x) = Ph (integratePoly x)
+integratePD (Pd x) = Ph (Poly.integrate x)
 integratePD (D x) = H 0 x
 
 -- | We differentiate PolyHeavisides to get PolyDeltas
 differentiatePH :: MyConstraints a => PolyHeaviside a -> PolyDelta a
-differentiatePH (Ph x) = Pd (differentiatePoly x)
+differentiatePH (Ph x) = Pd (Poly.differentiate x)
 differentiatePH (H x y) = D (y - x)
 
 instance MyConstraints a => Integrable (PolyDelta a) (PolyHeaviside a) where

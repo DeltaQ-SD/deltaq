@@ -23,7 +23,8 @@ module PWPs.PolyDeltas
 where
 
 import PWPs.PiecewiseClasses
-import PWPs.SimplePolynomials as SP
+import Numeric.Polynomial.Simple as SP
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-|
 A PolyDelta is either a polynomial or a (shifted, scaled) Delta with a mass.
@@ -64,18 +65,18 @@ instance MyConstraints a => Num (PolyDelta a) where
     negate = fmap negate
     abs = undefined
     signum = undefined
-    fromInteger n = Pd $ makePoly $ Prelude.fromInteger n
+    fromInteger n = Pd $ Poly.constant $ Prelude.fromInteger n
 
 scalePD :: EqNum a => a -> PolyDelta a -> PolyDelta a
-scalePD x (Pd a) = Pd (SP.scalePoly x a)
+scalePD x (Pd a) = Pd (Poly.scale x a)
 scalePD x (D y) = D (x * y)
 
 evaluatePD :: EqNum a => a -> PolyDelta a -> [a]
-evaluatePD point (Pd x) = [SP.evaluatePoly point x]
+evaluatePD point (Pd x) = [SP.eval x point]
 evaluatePD _ (D x) = [x]
 
 boostPD :: MyConstraints a => a -> PolyDelta a -> PolyDelta a
-boostPD x (Pd y) = Pd y + Pd (makePoly x)
+boostPD x (Pd y) = Pd y + Pd (Poly.constant x)
 boostPD _ (D y) = D y
 instance MyConstraints a => Evaluable a (PolyDelta a) where
     evaluate = evaluatePD
@@ -97,38 +98,41 @@ convolvePolyDeltas
     -> [(a, PolyDelta a)]
 
 {-|
-When both arguments are polynomials, we check the intervals are non-zero then use convolvePolys and just map the type.
-For a delta, lower == upper (invariant to be checked), and the effect of the delta is to translate the other
-argument (whichever it is) along by this amount. Need to ensure there is still an initial interval based at zero.
+When both arguments are polynomials,
+we check the intervals are non-zero then use 'Poly.convolve' and just map the type.
+For a delta, lower == upper (invariant to be checked),
+and the effect of the delta is to translate the other
+argument (whichever it is) along by this amount.
+Need to ensure there is still an initial interval based at zero.
 -}
 convolvePolyDeltas (lf, uf, Pd f) (lg, ug, Pd g)
     | (uf <= lf) || (ug <= lg) = error "Invalid polynomial interval width"
     -- convolve the polynomials to get a list of intervals, put the type back and remove redundant intervals
     | otherwise =
-        aggregate $ map (\(x, p) -> (x, Pd p)) (convolvePolys (lf, uf, f) (lg, ug, g))
+        aggregate $ map (\(x, p) -> (x, Pd p)) (Poly.convolve (lf, uf, f) (lg, ug, g))
 convolvePolyDeltas (lf, uf, D f) (lg, ug, Pd g)
     | lf /= uf = error "Non-zero delta interval"
     | ug < lg = error "Negative interval width"
     -- convolving with a zero-sized delta gives nothing
-    | f == 0 = [(0, Pd zeroPoly)]
+    | f == 0 = [(0, Pd Poly.zero)]
     -- degenerate case of delta at zero: don't shift but scale by the mass of the delta
-    | lf == 0 = [(lg, scalePD f (Pd g)), (ug, Pd zeroPoly)]
+    | lf == 0 = [(lg, scalePD f (Pd g)), (ug, Pd Poly.zero)]
     | otherwise =
         aggregate
-            [ (0, Pd zeroPoly)
-            , (lg + lf, scalePD f (Pd (shiftPoly lf g)))
-            , (ug + lf, Pd zeroPoly)
+            [ (0, Pd Poly.zero)
+            , (lg + lf, scalePD f (Pd (Poly.translate lf g)))
+            , (ug + lf, Pd Poly.zero)
             ]
 convolvePolyDeltas (lf, uf, Pd f) (lg, ug, D g) = convolvePolyDeltas (lg, ug, D g) (lf, uf, Pd f) -- commutative
 convolvePolyDeltas (lf, uf, D f) (lg, ug, D g) -- both deltas
     | lf /= uf || lg /= ug = error "Non-zero delta interval"
     -- convolving with a zero-sized delta gives nothing
-    | f * g == 0 = [(0, Pd zeroPoly)]
+    | f * g == 0 = [(0, Pd Poly.zero)]
     -- degenerate case of deltas at zero: no shifting but mutiply the masses
-    | lg + lf == 0 = [(0, D (f * g)), (0, Pd zeroPoly)]
+    | lg + lf == 0 = [(0, D (f * g)), (0, Pd Poly.zero)]
     -- Shift by the sum of the basepoints, multiply the masses, and insert a new initial zero interval
     | otherwise =
-        [(0, Pd zeroPoly), (lg + lf, D (f * g)), (lg + lf, Pd zeroPoly)]
+        [(0, Pd Poly.zero), (lg + lf, D (f * g)), (lg + lf, Pd Poly.zero)]
 
 instance (Num a, Fractional a, Ord a) => CompactConvolvable a (PolyDelta a) where
     convolveIntervals = convolvePolyDeltas
@@ -143,7 +147,7 @@ instance (Num a, Eq a, Fractional a) => Mergeable (PolyDelta a) where
         (D x, Pd y) -> if x == 0 then Just (Pd y) else Nothing
         (D x, D y) -> Just (D (x + y))
         (_, _) -> Nothing
-    zero = Pd zeroPoly
+    zero = Pd Poly.zero
 
 displayPolyDelta
     :: OrdNumEqFrac a => a -> (a, a, PolyDelta a) -> Either (a, a) [(a, a)]
@@ -152,10 +156,12 @@ displayPolyDelta _ (l, u, D x)
     | otherwise = Left (l, x)
 displayPolyDelta s (l, u, Pd p)
     | l >= u = error "Invalid polynomial interval"
-    | otherwise = Right (displayPoly p (l, u) s)
+    | otherwise = Right (Poly.display p (l, u) s)
 instance OrdNumEqFrac a => Displayable a (PolyDelta a) where
     displayObject = displayPolyDelta
 
 instance OrdNumEqFrac a => ComplexityMeasureable (PolyDelta a) where
-    measureComplexity (Pd (Poly a)) = if SP.degreePoly (Poly a) <= 0 then 1 else SP.degreePoly (Poly a)
+    measureComplexity (Pd (Poly a))
+        | SP.degree (Poly a) <= 0 = 1
+        | otherwise = SP.degree (Poly a)
     measureComplexity (D _) = 1

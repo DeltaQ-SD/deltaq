@@ -46,6 +46,7 @@ library
 
   exposed-modules:
     DeltaQ.PWPs
+    Numeric.Polynomial.Simple
     PWPs.IRVs
 
   other-modules:
@@ -54,7 +55,6 @@ library
     PWPs.PiecewiseClasses
     PWPs.PolyDeltas
     PWPs.PolyHeavisides
-    PWPs.SimplePolynomials
 
 test-suite dqsd-piecewise-poly-test
   import:           warnings
