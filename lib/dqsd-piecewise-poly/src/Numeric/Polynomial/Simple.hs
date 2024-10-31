@@ -17,6 +17,7 @@ module Numeric.Polynomial.Simple
     , zero
     , monomial
     , fromCoefficients
+    , toCoefficients
     , scale
     , scaleX
     , display
@@ -80,6 +81,11 @@ monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
 fromCoefficients :: Num a => [a] -> Poly a
 fromCoefficients [] = zero
 fromCoefficients as = Poly as
+
+-- | List the coefficients @[a0, a1, …]@
+-- of a polynomial @a0 + a1·x + …@.
+toCoefficients :: Poly a -> [a]
+toCoefficients (Poly as) = as
 
 -- | Multiply the polynomial by the unknown @x@.
 --
