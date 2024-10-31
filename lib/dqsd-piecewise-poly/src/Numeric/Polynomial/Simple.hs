@@ -122,6 +122,9 @@ mulPolys as bs = sum (intermediateSums as bs)
     intermediateSums (Poly (x : xs)) ys =
         scale x ys : intermediateSums (Poly xs) (scaleX ys)
 
+-- | Algebraic operations '(+)', '(*)' and 'negate' on polynomials.
+--
+-- The functions 'abs' and 'signum' are undefined.
 instance (Eq a, Num a) => Num (Poly a) where
     (+) = addPolys
     (*) = mulPolys
