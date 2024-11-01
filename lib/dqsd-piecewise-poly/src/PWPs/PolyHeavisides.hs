@@ -22,7 +22,6 @@ module PWPs.PolyHeavisides
 where
 
 import PWPs.PiecewiseClasses
-import Numeric.Polynomial.Simple as SP
 import qualified Numeric.Polynomial.Simple as Poly
 
 {-|
@@ -31,7 +30,7 @@ A Heaviside has a starting value and a rise;
 for probabilities all should be constrained between 0 and 1.
 The position of a Heavisides is stored as its basepoint when doing piecewise operations.
 -}
-data PolyHeaviside a = Ph (Poly a) | H a a
+data PolyHeaviside a = Ph (Poly.Poly a) | H a a
     deriving (Show)
 
 instance Eq a => Eq (PolyHeaviside a) where
@@ -76,7 +75,7 @@ scalePH x (Ph a) = Ph (Poly.scale x a)
 scalePH x (H y z) = H (x * y) (x * z)
 
 evaluatePH :: EqNum a => a -> PolyHeaviside a -> [a]
-evaluatePH point (Ph x) = [SP.eval x point]
+evaluatePH point (Ph x) = [Poly.eval x point]
 evaluatePH _ (H x y) = [x, y]
 
 boostPH :: MyConstraints a => a -> PolyHeaviside a -> PolyHeaviside a
@@ -96,7 +95,7 @@ comparePHs
     => (a, a, (PolyHeaviside a, PolyHeaviside a))
     -> Maybe Ordering
 -- simple polynomial case: f >= g <=> f - g >= 0
-comparePHs (lf, uf, (Ph f, Ph g)) = SP.compareToZero (lf, uf, f - g)
+comparePHs (lf, uf, (Ph f, Ph g)) = Poly.compareToZero (lf, uf, f - g)
 -- compare a Heaviside step to a polynomial at a point
 comparePHs (lf, uf, (H x y, Ph f))
     | lf /= uf =
@@ -109,7 +108,7 @@ comparePHs (lf, uf, (H x y, Ph f))
     | y <= fx = Just LT
     | otherwise = Nothing
   where
-    fx = SP.eval f lf
+    fx = Poly.eval f lf
 -- if the Heaviside and the polynomial are the other way round, swap them and reverse the ordering
 comparePHs (lf, uf, (Ph f, H x y)) = reverseOrder $ comparePHs (lf, uf, (H x y, Ph f))
   where
@@ -171,6 +170,6 @@ instance OrdNumEqFrac a => Displayable a (PolyHeaviside a) where
 
 instance OrdNumEqFrac a => ComplexityMeasureable (PolyHeaviside a) where
     measureComplexity (Ph poly)
-        | SP.degree poly <= 0 = 1
-        | otherwise = SP.degree poly
+        | Poly.degree poly <= 0 = 1
+        | otherwise = Poly.degree poly
     measureComplexity (H _ _) = 1

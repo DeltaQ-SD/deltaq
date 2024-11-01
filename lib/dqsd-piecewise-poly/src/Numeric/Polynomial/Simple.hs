@@ -1,29 +1,31 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 {-|
-Description : Polynomials as lists of coefficients
 Copyright   : (c) Peter Thompson, 2023
 License     : BSD-2-Clause
 Maintainer  : peter.thompson@pnsol.com
 Stability   : experimental
 
-We define a polynomial over a numeric type as a list of coefficients
-of that type for increasing powers of the variable.
-An empty list is not allowed: a zero polynomical must have at least one (zero) element.
+Polynomials.
 -}
 module Numeric.Polynomial.Simple
     ( -- * Basic operations
-      Poly (..)
+      Poly
     , eval
     , degree
     , constant
     , zero
     , monomial
+    , fromCoefficients
+    , toCoefficients
     , scale
     , scaleX
-    , display
 
     -- * Advanced operations
+    -- ** Convenience
+    , display
+    , lineFromTo
+
     -- ** Algebraic
     , translate
     , integrate
@@ -41,15 +43,18 @@ module Numeric.Polynomial.Simple
 ------------------------------------------------------------------------------}
 
 -- | Polynomial with coefficients in @a@.
---
--- The list starts with the coefficient of lowest degree.
 newtype Poly a = Poly [a]
+    -- INVARIANT: List of coefficients from lowest to highest degree.
+    -- INVARIANT: The empty list is not allowed,
+    -- the zero polynomial is represented as [0].
     deriving (Show, Functor, Foldable)
 
 instance Eq a => Eq (Poly a) where
     Poly x == Poly y = x == y
 
 -- | The constant polynomial.
+--
+-- > eval (constant a) = const a
 constant :: a -> Poly a
 constant x = Poly [x]
 
@@ -76,6 +81,17 @@ trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
 monomial :: (Eq a, Num a) => Int -> a -> Poly a
 monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
 
+-- | Construct a polynomial @a0 + a1·x + …@ from
+-- its list of coefficients @[a0, a1, …]@.
+fromCoefficients :: Num a => [a] -> Poly a
+fromCoefficients [] = zero
+fromCoefficients as = Poly as
+
+-- | List the coefficients @[a0, a1, …]@
+-- of a polynomial @a0 + a1·x + …@.
+toCoefficients :: Poly a -> [a]
+toCoefficients (Poly as) = as
+
 -- | Multiply the polynomial by the unknown @x@.
 --
 -- > eval (scaleX p) x = x * eval p x
@@ -87,6 +103,8 @@ scaleX (Poly xs)
 
 -- | Scale a polynomial by a scalar.
 -- More efficient than multiplying by a constant polynomial.
+--
+-- > eval (scale a p) x = a * eval p x
 scale :: Num a => a -> Poly a -> Poly a
 scale x (Poly xs) = Poly (map (* x) xs)
     -- Does not agree with naming conventions in `Data.Poly`.
@@ -147,6 +165,9 @@ a0 + a1·x + a2·x^2 + ... + a{n-1}·x^{n-1} + an·x^n
 eval :: Num a => Poly a -> a -> a
 eval (Poly as) x = foldr (\ai result -> x * result + ai) 0 as
 
+{-----------------------------------------------------------------------------
+    Convenience operations
+------------------------------------------------------------------------------}
 {-|
 Return a list of pairs @(x, eval p x)@ from the graph of the polynomial.
 The values @x@ are from the range @(l, u)@ with uniform spacing @s@.
@@ -165,6 +186,25 @@ display p (l, u) s
   where
     goDisplay x = if x >= u then [] else (x, eval p x) : goDisplay (x + s)
     -- TODO: Off-by-one? What if x == u?
+
+-- | Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
+-- assuming that @x1 ≠ x2@.
+--
+-- > let p = lineFromTo (x1, y1) (x2, y2)
+-- > 
+-- > degree p <= 1
+-- > eval p x1 = y1
+-- > eval p x2 = y2
+lineFromTo :: (Eq a, Fractional a) => (a,a) -> (a,a) -> Poly a
+lineFromTo (x1, y1) (x2, y2)
+    | slope == 0 = constant y1
+    | otherwise = fromCoefficients [shift, slope]
+  where
+        -- slope of the linear function
+    slope = (y2 - y1) / (x2 - x1)
+        -- the constant shift is fixed by
+        -- the fact that the line needs to pass through (x1,y1)
+    shift = y1 - x1 * slope
 
 {-----------------------------------------------------------------------------
     Advanced Operations
