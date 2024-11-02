@@ -36,6 +36,7 @@ library
     , Chart
 
   exposed-modules:
+    DeltaQ.Class
     DeltaQ.Model.DeltaQ
     DeltaQ.Model.Introspection
     DeltaQ.Model.Utilities
