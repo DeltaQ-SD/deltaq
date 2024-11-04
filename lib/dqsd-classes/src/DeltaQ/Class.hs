@@ -16,6 +16,7 @@ module DeltaQ.Class
     , (./\.)
 
     -- * DeltaQ
+    , Eventually (..)
     , DeltaQ (..)
 
     -- * Laws TODO
@@ -27,7 +28,7 @@ module DeltaQ.Class
 ------------------------------------------------------------------------------}
 
 -- | An 'Outcome' is the result of an activity that takes time,
--- such as a distributed computation, communication, or bus ride.
+-- such as a distributed computation, communication, bus ride, … .
 --
 -- 'Outcome's can be composed in sequence or in parallel.
 class (Ord (Duration o), Num (Duration o)) => Outcome o where
@@ -73,6 +74,43 @@ infixr 3 ./\. -- more tight
 (./\.) :: Outcome o => o -> o -> o
 (./\.) = lastToFinish
 
+
+{-----------------------------------------------------------------------------
+    Eventually
+------------------------------------------------------------------------------}
+-- | 'Eventually' represents a value that either eventually occurs
+-- or is eventually abandoned.
+--
+-- Similar to the 'Maybe' type, but with a different 'Ord' instance:
+-- @Occurs x < Abandoned@ for all @x@.
+--
+data Eventually a
+    = Occurs a
+    | Abandoned
+    deriving (Eq, Show)
+
+-- | For all @x@, we have @Occurs x < Abandoned@.
+instance Ord a => Ord (Eventually a) where
+    compare Abandoned Abandoned = EQ
+    compare Abandoned (Occurs _) = GT
+    compare (Occurs _) Abandoned = LT
+    compare (Occurs x) (Occurs y) = compare x y
+
+instance Functor Eventually where
+    fmap _ Abandoned = Abandoned
+    fmap f (Occurs x) = Occurs (f x)
+
+-- |
+-- > Abandoned <*> _ = Abandoned
+-- > _ <*> Abandoned = Abandoned
+instance Applicative Eventually where
+    pure = Occurs
+
+    Abandoned <*> Abandoned = Abandoned
+    Abandoned <*> (Occurs _) = Abandoned
+    (Occurs _) <*> Abandoned = Abandoned
+    (Occurs f) <*> (Occurs y) = Occurs (f y)
+
 {-----------------------------------------------------------------------------
     DeltaQ
 ------------------------------------------------------------------------------}
@@ -105,19 +143,19 @@ class (Num (Probability o), Outcome o) => DeltaQ o where
     -- such that the probability of completing within that time
     -- is at least @p@.
     --
-    -- Return 'Nothing' if the given probability
+    -- Return 'Abandoned' if the given probability
     -- exceeds the probability of finishing.
-    quantile :: Probability o -> o -> Maybe (Duration o)
+    quantile :: Probability o -> o -> Eventually (Duration o)
 
     -- | The earliest finish time with non-zero probability.
     --
-    -- Return 'Nothing' if the outcome is 'never'.
-    earliest :: o -> Maybe (Duration o)
+    -- Return 'Abandoned' if the outcome is 'never'.
+    earliest :: o -> Eventually (Duration o)
 
     -- | The last finish time which still has non-zero probability to occur.
     --
-    -- Return 'Nothing' if arbitrarily late times are possible.
-    deadline :: o -> Maybe (Duration o)
+    -- Return 'Abandoned' if arbitrarily late times are possible.
+    deadline :: o -> Eventually (Duration o)
 
 {-----------------------------------------------------------------------------
     Laws
@@ -137,24 +175,17 @@ TODO: Turn into property tests.
 > wait t ./\. wait s = wait (max t s)
 > wait t .\/. wait s = wait (min t s)
 
-> earliest never = Nothing
-> earliest (wait t) = Just t
+> earliest never = Abandoned
+> earliest (wait t) = Occurs t
 > earliest (x .>>. y) = (+) <$> earliest x <*> earliest y
-> earliest (x ./\. y) = max <$> earliest x <*> earliest y)
-> earliest (x .\/. y) = unionWith min (earliest x) (earliest y)
+> earliest (x ./\. y) = max (earliest x) (earliest y)
+> earliest (x .\/. y) = min (earliest x) (earliest y)
 
-> deadline never = Nothing
-> deadline (wait t) = Just t
+> deadline never = Abandoned
+> deadline (wait t) = Occurs t
 > deadline (x .>>. y) = (+) <$> deadline x <*> deadline y
-> deadline (x ./\. y) = max <$> deadline x <*> deadline y)
-> deadline (x .\/. y) = unionWith min (deadline x) (deadline y)
-
-Helper function
-
-> unionWith f Nothing Nothing = Nothing
-> unionWith f (Just x) Nothing = Just x
-> unionWith f Nothing (Just y) = Just y
-> unionWith f (Just x) (Just y) = Just (f x y)
+> deadline (x ./\. y) = max (deadline x) (deadline y)
+> deadline (x .\/. y) = min (deadline x) (deadline y)
 
 > failure never = 1
 > failure (wait t) = 0
@@ -167,8 +198,7 @@ Helper function
 >   deadline (uniform x y) = y
 >   quantile p (uniform x y) = x + p * (y-x)
 
-> quantile p = Just t, quantile q = Just s
->     and p <= q implies t <= s
+> p <= q  implies  quantile p o <= quantile q o
 
 > …
 
