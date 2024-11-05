@@ -45,6 +45,7 @@ library
     , dqsd-classes
 
   exposed-modules:
+    DeltaQ
     DeltaQ.PiecewisePolynomial
     DeltaQ.PWPs
     Numeric.Polynomial.Simple
