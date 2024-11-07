@@ -9,18 +9,25 @@ License: BSD-3-Clause
 Maintainer: neil.davies@pnsol.com
 -}
 module DeltaQ.Class
-    ( -- * Outcome
+    ( -- * Type classes
+      -- ** Outcome
       Outcome (..)
     , (.>>.)
     , (.\/.)
     , (./\.)
 
-    -- * DeltaQ
+    -- ** DeltaQ
     , Eventually (..)
     , DeltaQ (..)
 
-    -- * Laws TODO
-    -- $laws
+    -- * Properties
+    -- $properties
+
+    -- ** Outcome
+    -- $properties-outcome
+
+    -- ** DeltaQ
+    -- $properties-deltaq
     ) where
 
 {-----------------------------------------------------------------------------
@@ -158,48 +165,116 @@ class (Num (Probability o), Outcome o) => DeltaQ o where
     deadline :: o -> Eventually (Duration o)
 
 {-----------------------------------------------------------------------------
-    Laws
+    Properties
 ------------------------------------------------------------------------------}
+{-$properties
+All instances of the above type classes are expected to satisfy
+the following properties.
 
-{-$laws
+For instances that use approximate arithmetic
+such as floating point arithmetic or fixed precision arithmetic,
+equality may be up to numerical accuracy.
+-}
 
-Laws that we expect to hold.
+{-$properties-outcome
 
-TODO: Turn into property tests.
+'never'
 
-> never .>>. x = never
-> never ./\. x = never
-> never .\/. x = x
+> never .>>. y = never
+> never ./\. y = never
+> never .\/. y = y
+>
+> x .>>. never = never
+> x ./\. never = never
+> x .\/. never = x
 
-> wait t .>>. wait s = wait (t+s)
-> wait t ./\. wait s = wait (max t s)
-> wait t .\/. wait s = wait (min t s)
+'wait'
 
-> earliest never = Abandoned
-> earliest (wait t) = Occurs t
-> earliest (x .>>. y) = (+) <$> earliest x <*> earliest y
-> earliest (x ./\. y) = max (earliest x) (earliest y)
-> earliest (x .\/. y) = min (earliest x) (earliest y)
+> wait t .>>. wait s  =  wait (t+s)
+> wait t ./\. wait s  =  wait (max t s)
+> wait t .\/. wait s  =  wait (min t s)
 
-> deadline never = Abandoned
-> deadline (wait t) = Occurs t
-> deadline (x .>>. y) = (+) <$> deadline x <*> deadline y
-> deadline (x ./\. y) = max (deadline x) (deadline y)
-> deadline (x .\/. y) = min (deadline x) (deadline y)
+'(.>>.)'
 
-> failure never = 1
-> failure (wait t) = 0
+> (x .>>. y) .>>. z  =  x .>>. (y .>>. z)
+
+'(./\.)'
+
+> (x ./\. y) ./\. z  =  x ./\. (y ./\. z)
+
+'(.\/.)'
+
+> (x .\/. y) .\/. z  =  x .\/. (y .\/. z)
+
+-}
+
+{-$properties-deltaq
+
+'choice'
+
+> choice p x y .>>. z  =  choice p (x .>>. z) (y .>>. z)
+> choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
+> choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)
+
+'uniform'
+
+> wait t .>>. uniform r s  =  uniform (t+r) (t+s)
+> uniform r s .>>. wait t  =  uniform (r+t) (s+t)
+
+'failure'
+
+> failure never      = 1
+> failure (wait t)   = 0
 > failure (x .>>. y) = 1 - (1 - failure x) * (1 - failure y)
 > failure (x ./\. y) = 1 - (1 - failure x) * (1 - failure y)
 > failure (x .\/. y) = failure x * failure y
+>
+> failure (choice p x y) = p * failure x + (1-p) * failure y
+> failure (uniform r s)  = 0
 
-> if x <= y
->   earliest (uniform x y) = x
->   deadline (uniform x y) = y
->   quantile p (uniform x y) = x + p * (y-x)
+'successBefore'
+
+> successBefore t never    = 0
+> successBefore t (wait s) = if t <= s then 0 else 1
+>
+> successBefore t (x ./\. y) =
+>   successBefore t x * successBefore t y
+> successBefore t (x .\/. y) =
+>   1 - (1 - successBefore t x) * (1 - successBefore t y)
+>
+> successBefore t (choice p x y) =
+>   p * successBefore t x + (1-p) * successBefore t y
+> successBefore t (uniform r s)
+>   | t <= r          = 0
+>   | r < t && t <= s = (t-r) / (s-r)
+>   | s < t           = 1
+
+'quantile'
 
 > p <= q  implies  quantile p o <= quantile q o
+>
+> quantile p (uniform r s)  =  r + p*(s-t)  if r <= s
 
-> …
+'earliest'
+
+> earliest never      = Abandoned
+> earliest (wait t)   = Occurs t
+> earliest (x .>>. y) = (+) <$> earliest x <*> earliest y
+> earliest (x ./\. y) = max (earliest x) (earliest y)
+> earliest (x .\/. y) = min (earliest x) (earliest y)
+>
+> earliest (choice p x y) = min (earliest x) (earliest y)  if p ≠ 0, p ≠ 1
+> earliest (uniform r s)  = r   if r <= s
+
+'deadline'
+
+> deadline never      = Abandoned
+> deadline (wait t)   = Occurs t
+> deadline (x .>>. y) = (+) <$> deadline x <*> deadline y
+> deadline (x ./\. y) = max (deadline x) (deadline y)
+> deadline (x .\/. y) = min (deadline x) (deadline y)
+>
+> deadline (choice p x y) = max (deadline x) (deadline y)  if p ≠ 0, p ≠ 1
+> deadline (uniform r s)  = s   if r <= s
 
 -}
