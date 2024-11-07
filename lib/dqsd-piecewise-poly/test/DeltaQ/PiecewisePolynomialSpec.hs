@@ -20,7 +20,7 @@ import Test.Hspec
     ( Spec
     , describe
     , it
-    , pending
+    , xit
     )
 import Test.QuickCheck
     ( NonNegative (..)
@@ -38,9 +38,16 @@ import Test.QuickCheck
 
 spec :: Spec
 spec = do
-    describe "pending" $
-        it "pending" $
-            pending
+    describe "wait" $ do
+        it ".>>." $ property $
+            \(NonNegative t) (NonNegative s) ->
+                (wait t .>>. wait s) .=== wait (t+s)
+        xit "./\\." $ property $
+            \(NonNegative t) (NonNegative s) ->
+                (wait t ./\. wait s) .=== wait (max t s)
+        xit ".\\/." $ property $
+            \(NonNegative t) (NonNegative s) ->
+                (wait t .\/. wait s) .=== wait (min t s)
 
 {-----------------------------------------------------------------------------
     Random generators
