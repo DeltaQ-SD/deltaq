@@ -21,6 +21,13 @@ import qualified PWPs.IRVs as PWP
 
 -- | Probability distribution of durations.
 newtype Durations time = Durations {unDurations :: IRV time}
+    deriving (Show)
+
+instance Eq (Durations Rational) where
+    (Durations x) == (Durations y) =
+        case PWP.compareIRVs x y of
+            Just EQ -> True
+            _ -> False
 
 -- | Helper function for lifting a binary operation.
 lift2
@@ -28,8 +35,8 @@ lift2
     -> Durations a -> Durations a -> Durations a
 lift2 f (Durations x) (Durations y) = Durations (f x y)
 
-instance Outcome (Durations Double) where
-    type Duration (Durations Double) = Double
+instance Outcome (Durations Rational) where
+    type Duration (Durations Rational) = Rational
 
     never = Durations PWP.bottom
     wait t = Durations $ PWP.constructDelta t
@@ -37,8 +44,8 @@ instance Outcome (Durations Double) where
     firstToFinish = lift2 PWP.firstToFinish
     lastToFinish = lift2 PWP.allToFinish
 
-instance DeltaQ (Durations Double) where
-    type Probability (Durations Double) = Double
+instance DeltaQ (Durations Rational) where
+    type Probability (Durations Rational) = Rational
 
     choice p =
         lift2 (PWP.probChoice p)

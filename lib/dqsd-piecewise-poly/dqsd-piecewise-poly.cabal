@@ -58,11 +58,10 @@ library
     PWPs.PolyDeltas
     PWPs.PolyHeavisides
 
-test-suite dqsd-piecewise-poly-test
+test-suite test
   import:           warnings
   type:             exitcode-stdio-1.0
   hs-source-dirs:   test
-  main-is:          Main.hs
   default-language: Haskell2010
   other-extensions:
     AllowAmbiguousTypes
@@ -72,6 +71,17 @@ test-suite dqsd-piecewise-poly-test
     ScopedTypeVariables
     TypeSynonymInstances
 
+  build-tool-depends: hspec-discover:hspec-discover
+    
   build-depends:
     , base
+    , dqsd-classes
     , dqsd-piecewise-poly
+    , hspec ^>= 2.11.0
+    , QuickCheck
+  
+  main-is:
+    Spec.hs
+
+  other-modules:
+    DeltaQ.PiecewisePolynomialSpec
