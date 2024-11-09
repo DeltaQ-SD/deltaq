@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 {-|
@@ -38,6 +40,15 @@ module Numeric.Polynomial.Simple
     , findRoot
     ) where
 
+import Control.DeepSeq
+    ( NFData
+    , NFData1
+    )
+import GHC.Generics
+    ( Generic
+    , Generic1
+    ) -- needed to automatically derive NFData
+
 {-----------------------------------------------------------------------------
     Basic operations
 ------------------------------------------------------------------------------}
@@ -47,7 +58,10 @@ newtype Poly a = Poly [a]
     -- INVARIANT: List of coefficients from lowest to highest degree.
     -- INVARIANT: The empty list is not allowed,
     -- the zero polynomial is represented as [0].
-    deriving (Show, Functor, Foldable)
+    deriving (Show, Functor, Foldable, Generic, Generic1)
+
+instance NFData a => NFData (Poly a)
+instance NFData1 Poly
 
 instance Eq a => Eq (Poly a) where
     Poly x == Poly y = x == y
