@@ -42,7 +42,9 @@ library
 
   build-depends:
     , base
+    , deepseq
     , dqsd-classes
+    , exact-combinatorics > 0.2
 
   exposed-modules:
     DeltaQ
@@ -85,3 +87,16 @@ test-suite test
 
   other-modules:
     DeltaQ.PiecewisePolynomialSpec
+
+benchmark dqsd-piecewise-poly-benchmark
+  import:           warnings
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   benchmark
+  default-language: Haskell2010
+  main-is:          Main.hs
+
+  build-depends:
+    , base
+    , dqsd-piecewise-poly
+    , criterion > 1.6
+    , deepseq > 1.4

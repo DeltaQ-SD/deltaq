@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 {-|
@@ -38,6 +40,18 @@ module Numeric.Polynomial.Simple
     , findRoot
     ) where
 
+import Control.DeepSeq
+    ( NFData
+    , NFData1
+    )
+import GHC.Generics
+    ( Generic
+    , Generic1
+    ) -- needed to automatically derive NFData
+import Math.Combinatorics.Exact.Binomial
+    ( choose
+    )
+
 {-----------------------------------------------------------------------------
     Basic operations
 ------------------------------------------------------------------------------}
@@ -47,7 +61,10 @@ newtype Poly a = Poly [a]
     -- INVARIANT: List of coefficients from lowest to highest degree.
     -- INVARIANT: The empty list is not allowed,
     -- the zero polynomial is represented as [0].
-    deriving (Show, Functor, Foldable)
+    deriving (Show, Functor, Foldable, Generic, Generic1)
+
+instance NFData a => NFData (Poly a)
+instance NFData1 Poly
 
 instance Eq a => Eq (Poly a) where
     Poly x == Poly y = x == y
@@ -237,16 +254,6 @@ differentiate (Poly [_]) = zero -- constant differentiates to zero
 differentiate (Poly (_ : as)) =
     -- discard the constant term, everything else noves down one
     Poly (zipWith (*) as (iterate (+ 1) 1))
-
-{-|
-    Binomial coefficients: simple definition is n `choose` k ~ factorial n `div` (factorial k * factorial (n-k))
-    Faster implementation available in math.combinatorics.exact.binomial
--}
-choose :: Int -> Int -> Int
-n `choose` k
-    | k <= 0 = 1
-    | k >= n = 1
-    | otherwise = (n - 1) `choose` (k - 1) + (n - 1) `choose` k -- recursive definition
 
 -- | Convolution of two polynomials defined on bounded intervals.
 -- Produces three contiguous pieces as a result.
