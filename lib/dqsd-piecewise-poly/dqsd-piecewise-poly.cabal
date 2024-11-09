@@ -44,6 +44,7 @@ library
     , base
     , deepseq
     , dqsd-classes
+    , exact-combinatorics > 0.2
 
   exposed-modules:
     DeltaQ
