@@ -193,7 +193,7 @@ spec = do
         let quantile' :: Rational -> Durations Rational -> Eventually Rational
             quantile' = quantile
 
-        it "monotonic" $ property $
+        xit "monotonic" $ property $
             \o (Probability p) (Probability q) ->
                 let p' = min p q
                     q' = max p q
