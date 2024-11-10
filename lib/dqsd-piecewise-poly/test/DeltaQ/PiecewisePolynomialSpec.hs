@@ -153,6 +153,39 @@ spec = do
         xit "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 failure' (uniform r s)  ===  0
+
+    describe "successBefore" $ do
+        let successBefore' :: Durations Rational -> Rational -> Rational
+            successBefore' = successBefore
+
+        xit "never" $ property $
+            \(NonNegative t) ->
+                successBefore' never t  ===  0
+        xit "wait" $ property $
+            \(NonNegative t) (NonNegative s) ->
+                successBefore' (wait s) t  ===  if t <= s then 0 else 1
+        xit "./\\." $ property $
+            \(NonNegative t) x y ->
+                successBefore' (x ./\. y) t
+                    === successBefore' x t * successBefore' y t
+        xit ".\\/." $ property $
+            \(NonNegative t) x y ->
+                successBefore' (x .\/. y) t
+                    === 1 - (1 - successBefore' x t) * (1 - successBefore' y t)
+        xit "choice" $ property $
+            \(NonNegative t) (Probability p) x y ->
+                successBefore' (choice p x y) t
+                    ===  p * successBefore' x t + (1-p) * successBefore' y t
+        it "uniform" $ property $ 
+            let successBefore2 r s t
+                    | t <= r          = 0
+                    | r < t && t <= s = (t-r) / (s-r)
+                    | s < t           = 1
+                    | otherwise       = error "impossible"
+            in \(NonNegative t) (NonNegative r) (Positive d) ->
+                let s = r + d
+                in  successBefore' (uniform r s) t
+                        === successBefore2 r s t
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
