@@ -267,7 +267,7 @@ Important for delta functions.
 > earliest (x .\/. y) = min (earliest x) (earliest y)
 >
 > earliest (choice p x y) = min (earliest x) (earliest y)  if p ≠ 0, p ≠ 1
-> earliest (uniform r s)  = r   if r <= s
+> earliest (uniform r s)  = Occurs r   if r <= s
 
 'deadline'
 

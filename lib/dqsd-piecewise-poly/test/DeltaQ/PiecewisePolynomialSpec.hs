@@ -205,6 +205,36 @@ spec = do
                 let s = r + d
                 in  quantile' p (uniform r s) === Occurs (r + p*(s-r))
 
+    describe "earliest" $ do
+        let earliest' :: Durations Rational -> Eventually Rational
+            earliest' = earliest
+
+        xit "never" $ property $
+            earliest' never  ===  Abandoned
+        it "wait" $ property $
+            \(NonNegative t) ->
+                earliest' (wait t)  ===  Occurs t
+        xit ".>>." $ property $
+            \x y ->
+                earliest' (x .>>. y)
+                    ===  ((+) <$> earliest' x <*> earliest' y)
+        xit "./\\." $ property $
+            \x y ->
+                earliest' (x ./\. y)
+                    ===  max (earliest' x) (earliest' y)
+        xit ".\\/." $ property $
+            \x y ->
+                earliest' (x ./\. y)
+                    ===  min (earliest' x) (earliest' y)
+        xit "choice" $ property $
+            \(Probability p) x y ->
+                (0 < p && p < 1) ==>
+                    (earliest' (choice p x y)
+                        === min (earliest' x) (earliest' y))
+        xit "uniform" $ property $
+            \(NonNegative r) (NonNegative s) ->
+                earliest' (uniform r s)  ===  Occurs (min r s)
+
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
