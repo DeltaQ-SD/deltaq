@@ -106,6 +106,17 @@ spec = do
             \x y z ->
                 (x .\/. y) .\/. z .=== x .\/. (y .\/. z)
 
+    describe "choice" $ do
+        it ".>>." $ property $ mapSize (`div` 3) $
+            \(Probability p) x y z ->
+                choice p x y .>>. z  .===  choice p (x .>>. z) (y .>>. z)
+        xit "./\\." $ property $
+            \(Probability p) x y z ->
+                choice p x y ./\. z  .===  choice p (x ./\. z) (y ./\. z)
+        xit ".\\/." $ property $
+            \(Probability p) x y z ->
+                choice p x y .\/. z  .===  choice p (x .\/. z) (y .\/. z)
+
     describe "uniform" $ do
         xit "wait .>>. uniform" $ property $
             \(NonNegative r) (NonNegative s) (NonNegative t) ->
@@ -117,6 +128,12 @@ spec = do
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
+data Prob = Probability Rational
+    deriving (Eq, Show)
+
+instance Arbitrary Prob where
+    arbitrary = Probability <$> genProbability
+
 instance Arbitrary (Durations Rational) where
     arbitrary = scale (`div` 10) genDeltaQ
 
