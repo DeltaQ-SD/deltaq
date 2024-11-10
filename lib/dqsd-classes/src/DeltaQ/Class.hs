@@ -234,17 +234,20 @@ equality may be up to numerical accuracy.
 
 'successBefore'
 
-> successBefore t never    = 0
-> successBefore t (wait s) = if t <= s then 0 else 1
+TODO: Boundary point - distinguish \"before\" from \"not after".
+Important for delta functions.
+
+> successBefore never    t = 0
+> successBefore (wait s) t = if t <= s then 0 else 1
 >
-> successBefore t (x ./\. y) =
+> successBefore (x ./\. y) t =
 >   successBefore t x * successBefore t y
-> successBefore t (x .\/. y) =
+> successBefore (x .\/. y) t =
 >   1 - (1 - successBefore t x) * (1 - successBefore t y)
 >
-> successBefore t (choice p x y) =
+> successBefore (choice p x y) t =
 >   p * successBefore t x + (1-p) * successBefore t y
-> successBefore t (uniform r s)
+> successBefore (uniform r s) t
 >   | t <= r          = 0
 >   | r < t && t <= s = (t-r) / (s-r)
 >   | s < t           = 1
@@ -264,7 +267,7 @@ equality may be up to numerical accuracy.
 > earliest (x .\/. y) = min (earliest x) (earliest y)
 >
 > earliest (choice p x y) = min (earliest x) (earliest y)  if p ≠ 0, p ≠ 1
-> earliest (uniform r s)  = r   if r <= s
+> earliest (uniform r s)  = Occurs r   if r <= s
 
 'deadline'
 
@@ -275,6 +278,6 @@ equality may be up to numerical accuracy.
 > deadline (x .\/. y) = min (deadline x) (deadline y)
 >
 > deadline (choice p x y) = max (deadline x) (deadline y)  if p ≠ 0, p ≠ 1
-> deadline (uniform r s)  = s   if r <= s
+> deadline (uniform r s)  = Occurs s   if r <= s
 
 -}
