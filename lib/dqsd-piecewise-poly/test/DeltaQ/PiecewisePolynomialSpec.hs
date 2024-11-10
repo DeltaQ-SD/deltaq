@@ -15,6 +15,7 @@ import Data.Ratio
     )
 import DeltaQ.Class
     ( DeltaQ (..)
+    , Eventually (..)
     , Outcome (..)
     , (.>>.)
     , (./\.)
@@ -36,6 +37,7 @@ import Test.QuickCheck
     , Positive (..)
     , Property
     , (===)
+    , (==>)
     , arbitrary
     , choose
     , chooseInteger
@@ -186,6 +188,23 @@ spec = do
                 let s = r + d
                 in  successBefore' (uniform r s) t
                         === successBefore2 r s t
+
+    describe "quantile" $ do
+        let quantile' :: Rational -> Durations Rational -> Eventually Rational
+            quantile' = quantile
+
+        it "monotonic" $ property $
+            \o (Probability p) (Probability q) ->
+                let p' = min p q
+                    q' = max p q
+                in
+                    p' <= q'  ==>  quantile' p' o <= quantile' q' o
+
+        it "uniform" $ property $
+            \(Probability p) (NonNegative r) (Positive d) ->
+                let s = r + d
+                in  quantile' p (uniform r s) === Occurs (r + p*(s-r))
+
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
