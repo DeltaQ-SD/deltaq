@@ -58,6 +58,27 @@ infix 0 .===
 
 spec :: Spec
 spec = do
+    describe "never" $ do
+        it "x .>>. never" $ property $
+            \x ->
+                (x .>>. never) .=== never
+        xit "x ./\\. never" $ property $
+            \x ->
+                (x ./\. never) .=== never
+        xit "x .\\/. never" $ property $
+            \x ->
+                (x ./\. never) .=== x
+
+        it "never .>>. x" $ property $
+            \x ->
+                (never .>>. x) .=== never
+        xit "never ./\\. x" $ property $
+            \x ->
+                (never ./\. x) .=== never
+        xit "never .\\/. x" $ property $
+            \x ->
+                (never ./\. x) .=== x
+
     describe "wait" $ do
         it ".>>." $ property $
             \(NonNegative t) (NonNegative s) ->
