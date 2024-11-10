@@ -41,6 +41,7 @@ import Test.QuickCheck
     , chooseInteger
     , frequency
     , getSize
+    , mapSize
     , oneof
     , property
     , scale
@@ -89,6 +90,21 @@ spec = do
         xit ".\\/." $ property $
             \(NonNegative t) (NonNegative s) ->
                 (wait t .\/. wait s) .=== wait (min t s)
+
+    describe ".>>." $ do
+        it "associativity" $ property $ mapSize (`div` 3) $
+            \x y z ->
+                (x .>>. y) .>>. z .=== x .>>. (y .>>. z)
+
+    describe "./\\." $ do
+        xit "associativity" $ property $
+            \x y z ->
+                (x ./\. y) ./\. z .=== x ./\. (y ./\. z)
+
+    describe ".\\/." $ do
+        xit "associativity" $ property $
+            \x y z ->
+                (x .\/. y) .\/. z .=== x .\/. (y .\/. z)
 
     describe "uniform" $ do
         xit "wait .>>. uniform" $ property $
