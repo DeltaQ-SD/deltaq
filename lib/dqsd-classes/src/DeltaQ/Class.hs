@@ -278,6 +278,6 @@ Important for delta functions.
 > deadline (x .\/. y) = min (deadline x) (deadline y)
 >
 > deadline (choice p x y) = max (deadline x) (deadline y)  if p ≠ 0, p ≠ 1
-> deadline (uniform r s)  = s   if r <= s
+> deadline (uniform r s)  = Occurs s   if r <= s
 
 -}

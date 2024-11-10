@@ -235,6 +235,36 @@ spec = do
             \(NonNegative r) (NonNegative s) ->
                 earliest' (uniform r s)  ===  Occurs (min r s)
 
+    describe "deadline" $ do
+        let deadline' :: Durations Rational -> Eventually Rational
+            deadline' = deadline
+
+        xit "never" $ property $
+            deadline' never  ===  Abandoned
+        it "wait" $ property $
+            \(NonNegative t) ->
+                deadline' (wait t)  ===  Occurs t
+        xit ".>>." $ property $
+            \x y ->
+                deadline' (x .>>. y)
+                    ===  ((+) <$> deadline' x <*> deadline' y)
+        xit "./\\." $ property $
+            \x y ->
+                deadline' (x ./\. y)
+                    ===  max (deadline' x) (deadline' y)
+        xit ".\\/." $ property $
+            \x y ->
+                deadline' (x ./\. y)
+                    ===  min (deadline' x) (deadline' y)
+        xit "choice" $ property $
+            \(Probability p) x y ->
+                (0 < p && p < 1) ==>
+                    (deadline' (choice p x y)
+                        === max (deadline' x) (deadline' y))
+        xit "uniform" $ property $
+            \(NonNegative r) (NonNegative s) ->
+                deadline' (uniform r s)  ===  Occurs (max r s)
+
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
