@@ -125,6 +125,34 @@ spec = do
             \(NonNegative r) (NonNegative s) (NonNegative t) ->
                 (uniform r s .>>. wait t) .=== uniform (r+t) (s+t)
 
+    describe "failure" $ do
+        let failure' :: Durations Rational -> Rational
+            failure' = failure
+
+        it "never" $ property $
+            failure' never  ===  1
+        xit "wait" $ property $
+            \(NonNegative t) ->
+                failure' (wait t)  ===  1
+        xit ".>>." $ property $
+            \x y ->
+                failure' (x .>>. y)
+                    ===  1 - (1 - failure' x) * (1 - failure' y)
+        xit "./\\." $ property $
+            \x y ->
+                failure' (x ./\. y)
+                    ===  1 - (1 - failure' x) * (1 - failure' y)
+        xit ".\\/." $ property $
+            \x y ->
+                failure' (x .\/. y)
+                    ===  failure' x * failure' y
+        xit "choice" $ property $
+            \(Probability p) x y ->
+                failure' (choice p x y)
+                    ===  p * failure' x + (1-p) * failure' y
+        xit "uniform" $ property $
+            \(NonNegative r) (NonNegative s) ->
+                failure' (uniform r s)  ===  0
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
