@@ -17,9 +17,6 @@ import DeltaQ.Class
     ( DeltaQ (..)
     , Eventually (..)
     , Outcome (..)
-    , (.>>.)
-    , (./\.)
-    , (.\/.)
     )
 import DeltaQ.PiecewisePolynomial
     ( Durations
