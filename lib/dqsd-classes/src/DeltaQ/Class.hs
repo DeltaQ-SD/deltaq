@@ -12,9 +12,6 @@ module DeltaQ.Class
     ( -- * Type classes
       -- ** Outcome
       Outcome (..)
-    , (.>>.)
-    , (.\/.)
-    , (./\.)
 
     -- ** DeltaQ
     , Eventually (..)
@@ -33,6 +30,10 @@ module DeltaQ.Class
 {-----------------------------------------------------------------------------
     Outcome
 ------------------------------------------------------------------------------}
+
+infixl 1 .>>. -- less tight
+infixr 2 .\/.
+infixr 3 ./\. -- more tight
 
 -- | An 'Outcome' is the result of an activity that takes time,
 -- such as a distributed computation, communication, bus ride, … .
@@ -53,11 +54,19 @@ class (Ord (Duration o), Num (Duration o)) => Outcome o where
     -- then run the outcome on the right.
     sequentially :: o -> o -> o
 
+    -- | Infix operator synonym for 'sequentially'.
+    (.>>.) :: o -> o -> o
+    (.>>.) = sequentially
+
     -- | Parallel composition, first to finish:
     --
     -- Run two outcomes in parallel,
     -- finish as soon as any one of them finishes.
     firstToFinish :: o -> o -> o
+
+    -- | Infix operator synonym for 'firstToFinish'.
+    (.\/.) :: o -> o -> o
+    (.\/.) = firstToFinish
 
     -- | Parallel composiiton, last to finish:
     --
@@ -65,22 +74,9 @@ class (Ord (Duration o), Num (Duration o)) => Outcome o where
     -- finish after all of them have finished.
     lastToFinish :: o -> o -> o
 
-infixl 1 .>>. -- less tight
-infixr 2 .\/.
-infixr 3 ./\. -- more tight
-
--- | Infix operator synonym for 'sequentially'
-(.>>.) :: Outcome o => o -> o -> o
-(.>>.) = sequentially
-
--- | Infix operator synonym for 'firstToFinish'
-(.\/.) :: Outcome o => o -> o -> o
-(.\/.) = firstToFinish
-
--- | Infix operator synonym for 'lastToFinish'
-(./\.) :: Outcome o => o -> o -> o
-(./\.) = lastToFinish
-
+    -- | Infix operator synonym for 'lastToFinish'.
+    (./\.) :: o -> o -> o
+    (./\.) = lastToFinish
 
 {-----------------------------------------------------------------------------
     Eventually
