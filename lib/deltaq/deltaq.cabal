@@ -6,7 +6,7 @@ name:            deltaq
 --                 | | +----- non-breaking API additions
 --                 | | | +--- code changes with no API change
 version:         0.3.0.1
-synopsis:        ∆Q Systems Development, type classes
+synopsis:        ∆Q Systems Development
 
 -- description:
 

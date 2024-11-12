@@ -6,7 +6,7 @@ name:            probability-polynomial
 --                 | | +----- non-breaking API additions
 --                 | | | +--- code changes with no API change
 version:         4.2.0.0
-synopsis:        Probability distributions, represented by piecewise polynomials
+synopsis:        Probability distributions via piecewise polynomials
 
 -- description:
 
