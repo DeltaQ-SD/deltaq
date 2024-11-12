@@ -1,4 +1,4 @@
-# Revision history for dqsd-piecewise-poly
+# Revision history for deltaq
 
 ## 0.1.0.0 -- YYYY-mm-dd
 

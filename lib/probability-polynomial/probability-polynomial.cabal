@@ -1,12 +1,12 @@
 cabal-version:   3.0
-name:            dqsd-piecewise-poly
+name:            probability-polynomial
 
 -- Package Versioning Policy: https://pvp.haskell.org
 -- PVP summary:    +-+------- breaking API changes
 --                 | | +----- non-breaking API additions
 --                 | | | +--- code changes with no API change
 version:         4.2.0.0
-synopsis:        A piecewise polynomial implementation of dqsd-classes
+synopsis:        Probability distributions, represented by piecewise polynomials
 
 -- description:
 
@@ -43,7 +43,7 @@ library
   build-depends:
     , base
     , deepseq
-    , dqsd-classes
+    , deltaq
     , exact-combinatorics > 0.2
 
   exposed-modules:
@@ -77,8 +77,8 @@ test-suite test
     
   build-depends:
     , base
-    , dqsd-classes
-    , dqsd-piecewise-poly
+    , deltaq
+    , probability-polynomial
     , hspec ^>= 2.11.0
     , QuickCheck
   
@@ -88,7 +88,7 @@ test-suite test
   other-modules:
     DeltaQ.PiecewisePolynomialSpec
 
-benchmark dqsd-piecewise-poly-benchmark
+benchmark probability-polynomial-benchmark
   import:           warnings
   type:             exitcode-stdio-1.0
   hs-source-dirs:   benchmark
@@ -97,6 +97,6 @@ benchmark dqsd-piecewise-poly-benchmark
 
   build-depends:
     , base
-    , dqsd-piecewise-poly
+    , probability-polynomial
     , criterion > 1.6
     , deepseq > 1.4

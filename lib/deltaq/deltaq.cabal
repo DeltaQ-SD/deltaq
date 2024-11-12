@@ -1,5 +1,5 @@
 cabal-version:   3.0
-name:            dqsd-classes
+name:            deltaq
 
 -- Package Versioning Policy: https://pvp.haskell.org
 -- PVP summary:    +-+------- breaking API changes

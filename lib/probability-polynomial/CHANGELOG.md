@@ -1,4 +1,4 @@
-# Revision history for dqsd-classes
+# Revision history for probability-polynomial
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
