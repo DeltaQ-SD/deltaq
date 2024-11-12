@@ -2,7 +2,7 @@ index-state: 2024-10-26T10:13:37Z
 
 packages:
     lib/deltaq/
-    lib/dqsd-piecewise-poly/
+    lib/probability-polynomial/
 
 tests:
   True

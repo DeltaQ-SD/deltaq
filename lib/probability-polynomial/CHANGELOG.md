@@ -1,4 +1,4 @@
-# Revision history for dqsd-piecewise-poly
+# Revision history for probability-polynomial
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
