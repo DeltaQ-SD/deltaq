@@ -6,7 +6,7 @@ name:            probability-polynomial
 --                 | | +----- non-breaking API additions
 --                 | | | +--- code changes with no API change
 version:         4.2.0.0
-synopsis:        Probability distributions, represented by piecewise polynomials
+synopsis:        Probability distributions via piecewise polynomials
 
 -- description:
 
@@ -43,13 +43,9 @@ library
   build-depends:
     , base
     , deepseq
-    , deltaq
     , exact-combinatorics > 0.2
 
   exposed-modules:
-    DeltaQ
-    DeltaQ.PiecewisePolynomial
-    DeltaQ.PWPs
     Numeric.Polynomial.Simple
     PWPs.IRVs
 
@@ -77,16 +73,12 @@ test-suite test
     
   build-depends:
     , base
-    , deltaq
     , probability-polynomial
     , hspec ^>= 2.11.0
     , QuickCheck
   
   main-is:
     Spec.hs
-
-  other-modules:
-    DeltaQ.PiecewisePolynomialSpec
 
 benchmark probability-polynomial-benchmark
   import:           warnings

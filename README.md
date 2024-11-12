@@ -6,6 +6,11 @@
 
 ∆Q System Development represents performance as a probability distribution of the expected time to complete an outcome. This repository includes a Haskell package `probability-polynomial` to concretely represent and manipulate such distributions, and a package `deltaq` built on top of this for writing outcome expressions and evaluating their performance characteristics.
 
+For information on the ∆Q System Development paradigm, also consult
+
+* https://www.pnsol.com/publications.html
+* https://www.youtube.com/@pnsol
+
 # Contents
 
 This repository is structured as follows:

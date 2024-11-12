@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -8,7 +7,7 @@ License     : BSD-2-Clause
 Maintainer  : peter.thompson@pnsol.com
 Stability   : experimental
 
-Polynomials.
+Polynomials and computations with them.
 -}
 module Numeric.Polynomial.Simple
     ( -- * Basic operations
