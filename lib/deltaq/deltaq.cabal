@@ -34,9 +34,35 @@ library
   build-depends:
     , base
     , Chart
+    , probability-polynomial
 
   exposed-modules:
+    DeltaQ
     DeltaQ.Class
+    DeltaQ.PiecewisePolynomial
+  
+  other-modules:
     DeltaQ.Model.DeltaQ
     DeltaQ.Model.Introspection
     DeltaQ.Model.Utilities
+    DeltaQ.PWPs
+
+test-suite test
+  import:           warnings
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test
+  default-language: Haskell2010
+
+  build-tool-depends: hspec-discover:hspec-discover
+    
+  build-depends:
+    , base
+    , deltaq
+    , hspec ^>= 2.11.0
+    , QuickCheck
+  
+  main-is:
+    Spec.hs
+
+  other-modules:
+    DeltaQ.PiecewisePolynomialSpec
