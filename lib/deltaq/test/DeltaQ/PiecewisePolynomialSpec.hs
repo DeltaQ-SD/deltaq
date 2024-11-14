@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
@@ -115,6 +116,19 @@ spec = do
         xit ".\\/." $ property $
             \(Probability p) x y z ->
                 choice p x y .\/. z  .===  choice p (x .\/. z) (y .\/. z)
+
+    describe "choices" $ do
+        it "choices []" $ property $
+            (choices []  .===   never)
+        xit "choices ((w,o):wos)" $ property $
+            \(Positive (w :: Rational)) (o :: Durations Rational) ws' os ->
+                let unPositive (Positive x) = x
+                    ws = map unPositive ws'
+                    wos = zip ws os
+                    p = w / (w + sum ws)
+                in
+                    choices ((w,o):wos)
+                        .=== choice p o (choices wos)
 
     describe "uniform" $ do
         xit "wait .>>. uniform" $ property $

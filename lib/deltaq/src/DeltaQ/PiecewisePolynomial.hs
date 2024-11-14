@@ -8,6 +8,11 @@ License: BSD-3-Clause
 Maintainer: neil.davies@pnsol.com
 Description:
     Instances via piecewise polynomials.
+
+@'Durations' a@ is a probability distribution of completion time
+suing numeric type @a@.
+This type represents a mixed discrete / continuous probability distribution
+where the continuous part is represented in terms of piecewise polynomials.
 -}
 module DeltaQ.PiecewisePolynomial
     ( Durations (..)

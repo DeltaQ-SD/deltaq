@@ -9,6 +9,12 @@ License: BSD-3-Clause
 Maintainer: neil.davies@pnsol.com
 Description:
     Type classes for outcomes and their completion times.
+
+Type classes
+
+* 'Outcome' — outcomes their combinations.
+* 'DeltaQ' — probability distributions of completion times.
+
 -}
 module DeltaQ.Class
     ( -- * Type classes
@@ -42,6 +48,9 @@ infixr 3 ./\. -- more tight
 --
 -- 'Outcome's can be composed in sequence or in parallel.
 class (Ord (Duration o), Num (Duration o)) => Outcome o where
+    -- | Numerical type representing times in $[0,+∞)$.
+    --
+    -- For example 'Double' or 'Rational'.
     type Duration o
 
     -- | The outcome that never finishes.
@@ -126,7 +135,12 @@ instance Applicative Eventually where
 --
 -- Specifically, 'DeltaQ' is the probability distribution
 -- of finish times for an outcome.
-class (Num (Probability o), Outcome o) => DeltaQ o where
+class (Num (Probability o), Fractional (Probability o), Outcome o)
+    => DeltaQ o
+  where
+    -- | Numerical type representing probabilities in $[0,1]$.
+    --
+    -- For example 'Double' or 'Rational'.
     type Probability o
 
     -- | Left-biased random choice.
@@ -134,6 +148,19 @@ class (Num (Probability o), Outcome o) => DeltaQ o where
     -- @choice p@ chooses the left argument with probablity @p@
     -- and the right argument with probability @(1-p)@.
     choice :: Probability o -> o -> o -> o
+
+    -- | Random choice between multiple alternatives
+    --
+    -- @choices [(w_1, o_1), (w_2, o_2), …]@ chooses randomly between multiple
+    -- outcomes. The probability @p_i@ for choosing the outcome @o_i@ is
+    -- determined by the weights as @p_i = w_i / (w_1 + w_2 + …)@.
+    choices :: [(Probability o, o)] -> o
+    choices [] = never
+    choices wos =
+        foldr (uncurry choice) never
+        $ zipWith (\wtot (w, o) -> (w / wtot, o)) ws wos
+      where
+        ws = scanr1 (+) (map fst wos)
 
     -- | Uniform probability distribution on a time interval.
     uniform :: Duration o -> Duration o -> o
@@ -213,6 +240,12 @@ equality may be up to numerical accuracy.
 > choice p x y .>>. z  =  choice p (x .>>. z) (y .>>. z)
 > choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
 > choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)
+
+'choices;
+
+> choices [] = never
+> choices ((w,o) : wos) = choice p o (choices wos)
+>   where  p = w / (w + sum (map fst wos))
 
 'uniform'
 
