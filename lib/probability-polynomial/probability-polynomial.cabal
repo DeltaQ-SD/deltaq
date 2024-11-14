@@ -50,11 +50,9 @@ library
     PWPs.IRVs
 
   other-modules:
-    PWPs.Calculus
     PWPs.Piecewise
     PWPs.PiecewiseClasses
     PWPs.PolyDeltas
-    PWPs.PolyHeavisides
 
 test-suite test
   import:           warnings

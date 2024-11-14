@@ -1,7 +1,11 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Redundant bracket" #-}
 
 {-|
 Module      : IRVs
@@ -62,42 +66,43 @@ module PWPs.IRVs
     )
 where
 
-import PWPs.Calculus ()
+import Numeric.Polynomial.Simple
+    ( Poly
+    )
 import PWPs.Piecewise
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas
-import PWPs.PolyHeavisides
+
 import qualified Numeric.Polynomial.Simple as Poly
 
-type MyConstraints a = (Fractional a, Ord a, Num a, Enum a, Eq a)
 type DistD a = Pieces a (PolyDelta a)
-type DistH a = Pieces a (PolyHeaviside a)
+type DistP a = Pieces a (Poly a)
 
-data IRV a = PDF (DistD a) | CDF (DistH a)
+data IRV a = PDF (DistD a) | CDF (DistP a)
     deriving (Eq, Show)
 
 top :: (Ord a, Num a) => IRV a
 top = PDF (makePieces [(0, D 1), (0, Pd 0)])
 
 bottom :: (Ord a, Num a) => IRV a
-bottom = CDF (makePieces [(0, Ph 0)])
+bottom = CDF (makePieces [(0, 0)])
 
 cumulativeMass
     :: ( Ord a
        , Enum a
        , Num a
        , Fractional a
-       , Evaluable a (DistH a)
-       , Integrable (DistD a) (DistH a)
+       , Evaluable a (DistP a)
+       , Integrable (DistD a) (DistP a)
        )
     => IRV a
     -> a
     -> a
-cumulativeMass x p = last $ evaluate p (makeCDF x)
+cumulativeMass x p = evaluate p (makeCDF x)
 
 -- | Make a delta and convolve with it
 shiftIRV
-    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistH a) (DistD a))
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistP a) (DistD a))
     => a
     -> IRV a
     -> IRV a
@@ -105,37 +110,37 @@ shiftIRV s x = constructDelta s PWPs.IRVs.<+> PDF (makePDF x)
 
 -- | Force an IRV into a PDF by differentiating if necessary
 makePDF
-    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistH a) (DistD a))
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistP a) (DistD a))
     => IRV a
     -> DistD a
 makePDF (PDF x) = x
-makePDF (CDF x) = differentiate x
+makePDF (CDF x) = differentiatePieces x
 
 -- | Force an IRV into a CDF by integrating if necessary
 makeCDF
-    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistH a))
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
     => IRV a
-    -> DistH a
+    -> DistP a
 makeCDF (CDF x) = x
 -- assume PDFs are 0 at 0
-makeCDF (PDF x) = integrate x
+makeCDF (PDF x) = integratePieces x
 
 -- | Construct a PDF with uniform probability from 0 to the given value
-constructUniform :: MyConstraints a => a -> IRV a
+constructUniform :: (Fractional a, Ord a, Num a, Enum a, Eq a) => a -> IRV a
 constructUniform x =
     if x <= 0
         then error "Invalid interval"
         else PDF (makePieces [(0, Pd (Poly.constant (1 / x))), (x, Pd 0)])
 
 -- | Construct a PDF that is a delta function at the given value
-constructDelta :: MyConstraints a => a -> IRV a
+constructDelta :: (Fractional a, Ord a, Num a, Enum a, Eq a) => a -> IRV a
 constructDelta x
     | x < 0 = error "Invalid value"
     | x == 0 = PDF (makePieces [(0, D 1), (0, Pd 0)])
     | otherwise = PDF (makePieces [(0, Pd 0), (x, D 1), (x, Pd 0)])
 
 -- | PDF with zero value everywhere
-zeroPDF :: MyConstraints a => IRV a
+zeroPDF :: (Fractional a, Ord a, Num a, Enum a, Eq a) => IRV a
 zeroPDF = PDF (makePieces [(0, Pd 0)])
 
 monotonicFromZero :: (Ord a, Num a) => [a] -> Bool
@@ -149,7 +154,8 @@ repeatedPoint as = and $ zipWith (==) as (tail as)
      the two probabilities. If the next time is the same as the previous one, construct a Heaviside step
      between the two probabilities.
 -}
-constructGeneralCDF :: MyConstraints a => [(a, a)] -> IRV a
+constructGeneralCDF
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a) => [(a, a)] -> IRV a
 constructGeneralCDF xs
     | length xs < 2 = error "Insufficient points"
     | not (monotonicFromZero (map fst xs)) = error "Basepoints not monotonic"
@@ -158,43 +164,37 @@ constructGeneralCDF xs
     | otherwise = (CDF . mergePieces . makePieces) (goCDF (head xs) (tail xs))
   where
     probabilities = map snd xs
-    goCDF :: MyConstraints a => (a, a) -> [(a, a)] -> [(a, PolyHeaviside a)]
+    goCDF
+        :: (Fractional a, Ord a, Num a, Enum a, Eq a)
+        => (a, a)
+        -> [(a, a)]
+        -> [(a, Poly a)]
     -- construct a constant poly from last point
-    goCDF (bf, pf) [] = [(bf, Ph (Poly.constant pf))]
+    goCDF (bf, pf) [] = [(bf, Poly.constant pf)]
     goCDF (bm, pm) ((bn, pn) : ys) =
         if bm == bn
-            then (bm, H pm pn) : goCDF (bn, pn) ys
-            else (bm, Ph (Poly.lineFromTo (bm, pm) (bn, pn))) : goCDF (bn, pn) ys
+            then goCDF (bn, pn) ys
+            else (bm, Poly.lineFromTo (bm, pm) (bn, pn)) : goCDF (bn, pn) ys
 
 {-| Construct a CDF from a list of values, treating each new value as a step up from the one before, assuming we start at 0
-| First interval is a zero polynomial: subsequent intervals start with a delta and then have a constant polynomial.
+| First interval is a zero polynomial: subsequent intervals have a constant polynomial.
 -}
-constructCDF :: MyConstraints a => [(a, a)] -> IRV a
+constructCDF :: (Fractional a, Ord a, Num a, Enum a, Eq a) => [(a, a)] -> IRV a
 constructCDF xs
     | length xs < 2 = error "Insufficient points"
     | not (monotonicFromZero basepoints) = error "Basepoints not monotonic"
     | repeatedPoint basepoints = error "Repeated basepoint"
     | not (monotonicFromZero probabilities) = error "Probabilities not monotonic"
     | last probabilities > 1 = error "Probability exceeds one"
-    | otherwise = (CDF . makePieces) (interleave treads risers)
+    | otherwise =
+        (CDF . makePieces) (zip basepoints (map Poly.constant probabilities))
   where
     basepoints = map fst xs
     probabilities = map snd xs
-    -- Each step up corresponds to a delta of the difference with the previous value
-    makeStep (x, y) = H x y
-    risers =
-        zip
-            (tail basepoints)
-            (zipWith (curry makeStep) probabilities (tail probabilities))
-    treads = zip basepoints (map (Ph . Poly.constant) probabilities) -- always have one more tread than riser
-    interleave :: [b] -> [b] -> [b]
-    interleave [] _ = []
-    interleave [x] [] = [x] -- keep the last tread
-    interleave _ [] = []
-    interleave (x' : xs') (y' : ys') = x' : y' : interleave xs' ys'
 
 -- | Construct a CDF from a list of values, interpolating linearly between each pair of points
-constructLinearCDF :: MyConstraints a => [(a, a)] -> IRV a
+constructLinearCDF
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a) => [(a, a)] -> IRV a
 constructLinearCDF xs
     | length xs < 2 = error "Insufficient points"
     | not (monotonicFromZero basepoints) = error "Basepoints not monotonic"
@@ -216,30 +216,64 @@ constructLinearCDF xs
     stepUps = zipWith (-) (tail probabilities) probabilities -- increments in probabilities
     slopes = zipWith (/) stepUps steps -- slope of each segment
     segments =
-        map
-            Ph
-            ( zipWith3 makeSegment probabilities basepoints slopes
-                ++ [Poly.constant (last probabilities)]
-            )
+        ( zipWith3 makeSegment probabilities basepoints slopes
+            ++ [Poly.constant (last probabilities)]
+        )
     makeSegment y x s = Poly.fromCoefficients [y - x * s, s]
 
-{-| Return a sequence of (Left) step base (the lower value of the Heaviside function at that point)
-     or (Right) a sequence of Time and Probability. The sequence is monotonically increasing in Time.
+{-| Return a sequence of (Left) (time, step base) (the lower value of the jump at that point)
+     or (Right) a sequence of (Time, Probability). The sequence is monotonically increasing in Time.
 -}
-asDiscreteCDF :: MyConstraints a => IRV a -> Int -> [Either (a, a) [(a, a)]]
-asDiscreteCDF x n =
+asDiscreteCDF
+    :: forall a
+     . (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
+    => IRV a
+    -> Int
+    -> [Either (a, a) [(a, a)]]
+asDiscreteCDF xirv n =
     if n <= 0
         then error "Invalid number of points"
-        else displayPolyDeltaIntervals (makeCDF x) spacing
+        else processRepeatedPoints (displayPolyDeltaIntervals (makeCDF xirv) spacing)
   where
-    width = snd (support x) - fst (support x)
+    width = snd (support xirv) - fst (support xirv)
     spacing = width / Prelude.fromIntegral n
+    processRepeatedPoints :: [Either (a, a) [(a, a)]] -> [Either (a, a) [(a, a)]]
+    processRepeatedPoints [] = [] -- stop when list is empty
+    processRepeatedPoints [x] = [x] -- nothing to do when only one element left
+    processRepeatedPoints (x : xs) =
+        let
+            y = head xs
+        in
+            case (x, y) of
+                (Right x0, Right y0) ->
+                    -- both are just lists of points, assumed to be non-empty
+                    let
+                        (xLastPoint, xLastValue) = last x0
+                        (yFirstPoint, yFirstValue) = head y0
+                        xMinusLastPoint = (Right . init) x0
+                        yMinusFirstPoint = (Right . tail) y0
+                    in
+                        if xLastPoint /= yFirstPoint
+                            then x : processRepeatedPoints xs -- no repeated point, so nothing to do
+                            else
+                                if xLastValue /= yFirstValue -- we have a jump, so report it as a Left
+                                    then xMinusLastPoint : (Left (xLastPoint, xLastValue)) : processRepeatedPoints xs
+                                    else
+                                        if xs == [y] -- reached the end
+                                            then x : [yMinusFirstPoint]
+                                            else x : processRepeatedPoints (yMinusFirstPoint : tail xs)
+                -- if we have Lefts, just pass them through
+                (_, _) -> x : processRepeatedPoints xs
 
 {-| Return a sequence of (Left) Impulse Probablity mass (equivalent to the
      integral of the Heaviside function at that point) or (Right) a sequence
      of Time and Probability Density. The sequence is monotonically increasing in Time.
 -}
-asDiscretePDF :: MyConstraints a => IRV a -> Int -> [Either (a, a) [(a, a)]]
+asDiscretePDF
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistP a) (DistD a))
+    => IRV a
+    -> Int
+    -> [Either (a, a) [(a, a)]]
 asDiscretePDF x n =
     if n <= 0
         then error "Invalid number of points"
@@ -248,7 +282,11 @@ asDiscretePDF x n =
     width = snd (support x) - fst (support x)
     spacing = width / Prelude.fromIntegral n
 
-firstToFinish :: MyConstraints a => IRV a -> IRV a -> IRV a
+firstToFinish
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
+    => IRV a
+    -> IRV a
+    -> IRV a
 firstToFinish x y = CDF (cdfOfx + cdfOfy - (cdfOfx * cdfOfy))
   where
     cdfOfx = makeCDF x
@@ -257,20 +295,30 @@ firstToFinish x y = CDF (cdfOfx + cdfOfy - (cdfOfx * cdfOfy))
 {-| Compute the first-to-finsh of a list of IRVs by multiplying inverse CDFs then inverting
 If there is nothing finish the result is bottom
 -}
-multiFtF :: MyConstraints a => [IRV a] -> IRV a
+multiFtF
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
+    => [IRV a]
+    -> IRV a
 multiFtF [] = bottom
 multiFtF [x] = x
 -- now know we have at least two, so head and tail are safe
 multiFtF xs = CDF $ invert $ foldr (*) (head icdfs) (tail icdfs)
   where
-    invert = applyObject (-) (Ph $ Poly.constant 1)
+    invert = applyObject (-) (Poly.constant 1)
     icdfs = map (invert . makeCDF) xs
 
-allToFinish :: MyConstraints a => IRV a -> IRV a -> IRV a
+allToFinish
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
+    => IRV a
+    -> IRV a
+    -> IRV a
 allToFinish x y = CDF (makeCDF x * makeCDF y)
 
 -- | Compute the last-to-finsh of a list of IRVs: if we have nothing to wait for the result is top
-multiAtF :: MyConstraints a => [IRV a] -> IRV a
+multiAtF
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
+    => [IRV a]
+    -> IRV a
 multiAtF [] = top
 multiAtF [x] = x
 -- now know we have at least two, so head and tail are safe
@@ -283,7 +331,12 @@ multiAtF xs = CDF $ foldr (*) (head cdfs) (tail cdfs)
     We can do this on either PDFs or CDFs; if we have CDFs deliver a CDF,
     if we have both PDFs or one of each, deliver a PDF.
 -}
-probChoice :: MyConstraints a => a -> IRV a -> IRV a -> IRV a
+probChoice
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistP a) (DistD a))
+    => a
+    -> IRV a
+    -> IRV a
+    -> IRV a
 probChoice p x y =
     if (p < 0) || (p > 1)
         then error "Invalid probability value"
@@ -291,7 +344,10 @@ probChoice p x y =
             (CDF a, CDF b) -> CDF ((p >< a) + ((1 - p) >< b))
             _ -> PDF ((p >< makePDF x) + ((1 - p) >< makePDF y))
 
-multiWeightedChoice :: MyConstraints a => [(a, IRV a)] -> IRV a
+multiWeightedChoice
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistP a) (DistD a))
+    => [(a, IRV a)]
+    -> IRV a
 -- If we have nothing to choose from we get nothing
 multiWeightedChoice [] = bottom
 -- we'll force everything into PDFs and deliver a PDF
@@ -304,17 +360,28 @@ multiWeightedChoice xs = PDF (sum (zipWith adjust weights pdfs))
 infix 7 <+> -- same as *
 
 -- | To convolve, force into PDFs and then invoke piecewise convolution
-(<+>) :: MyConstraints a => IRV a -> IRV a -> IRV a
+(<+>)
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Differentiable (DistP a) (DistD a))
+    => IRV a
+    -> IRV a
+    -> IRV a
 x <+> y = PDF (makePDF x PWPs.Piecewise.<+> makePDF y)
 
 -- | Just extract the final value of the CDF
-probMass :: MyConstraints a => IRV a -> a
+probMass
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
+    => IRV a
+    -> a
 probMass = piecesFinalValue . makeCDF
 
 {-|
     If the two IRVs are partially ordered, return an ordering, otherwise return Nothing.
 -}
-compareIRVs :: MyConstraints a => IRV a -> IRV a -> Maybe Ordering
+compareIRVs
+    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Integrable (DistD a) (DistP a))
+    => IRV a
+    -> IRV a
+    -> Maybe Ordering
 compareIRVs x y = comparePW (makeCDF x) (makeCDF y)
 
 -- | return the first and last basepoints for which the value is significant
@@ -322,11 +389,23 @@ support :: (Eq a, Fractional a) => IRV a -> (a, a)
 support (PDF x) = piecewiseSupport x
 support (CDF x) = piecewiseSupport x
 
-{-| Given an ordered list of probabiity values, return the times at which each value is reached;
-if it is never reached, return Nothing in that position
+{-|
+Given an ordered list of probabiity values, return the time at which each value is reached;
+if it is never reached, return Nothing in that position.
+Where there is a step up in the CDF that includes the centile probability, we report the time
+for which the probability is exceeded.
+Centiles are not computed exactly, but to a given precision, currently set to 1/1000th of the
+support of the IRV.
 -}
 centiles
-    :: (Fractional a, Ord a, Num a, Enum a, Eq a, Evaluable a (PolyHeaviside a))
+    :: ( Fractional a
+       , Ord a
+       , Num a
+       , Enum a
+       , Eq a
+       , Evaluable a (Poly a)
+       , Integrable (DistD a) (DistP a)
+       )
     => [a]
     -> IRV a
     -> [Maybe a]
@@ -353,13 +432,13 @@ centiles probabilities dQ
         -- if the value is in the range of the current interval,
         | firstValue <= x && x <= secondValue =
             -- find the precise root, and carry on to the next centile
-            polyHeavisideRoot eps x (basepoint first, basepoint second) (object first)
+            Poly.root eps x (basepoint first, basepoint second) (object first)
                 : findCentiles maxProb xs remaining
         -- otherwise no further centiles can be in this piece, so move on to the next piece
         | otherwise = findCentiles maxProb cs rest
       where
-        firstValue = head $ evaluate (basepoint first) (object first)
-        secondValue = last $ evaluate (basepoint second) (object first)
+        firstValue = evaluate (basepoint first) (object first)
+        secondValue = evaluate (basepoint second) (object first)
     findCentiles _ _ _ = error "Unexpected centile case"
 
 data Moments a = Moments
@@ -373,14 +452,16 @@ data Moments a = Moments
 
 -- | Compute the first five moments of a given distribution
 moments
-    :: ( Fractional a
+    :: forall a
+     . ( Fractional a
        , Ord a
        , Num a
        , Enum a
        , Eq a
-       , Integrable (DistD a) (DistH a)
+       , Integrable (DistD a) (DistP a)
+       , Differentiable (DistP a) (DistD a)
        , Evaluable a (DistD a)
-       , Evaluable a (DistH a)
+       , Evaluable a (DistP a)
        )
     => IRV a
     -> Moments a
@@ -396,9 +477,8 @@ moments f =
     -- Compute the definite integral of x^nf(x)dx
     xNIntegral n g = piecesFinalValue (integralOfxToTheNtimesFx n g)
       where
-        integralOfxToTheNtimesFx
-            :: (Fractional a, Ord a, Num a, Enum a, Eq a) => Int -> IRV a -> DistH a
-        integralOfxToTheNtimesFx n' f' = integrate (applyObject (*) (Pd $ Poly.monomial n' 1) $ makePDF f')
+        integralOfxToTheNtimesFx :: Int -> IRV a -> DistP a
+        integralOfxToTheNtimesFx n' f' = integratePieces (applyObject (*) (Pd $ Poly.monomial n' 1) $ makePDF f')
     tau = xNIntegral 0 f
     -- catch case of bottom, otherwise scale back up to a proper distribution
     fHat = if tau == 0 then f else PDF ((1 / tau) >< makePDF f)
@@ -444,7 +524,7 @@ complexityOfIRV
        , Ord a
        , Num a
        , Enum a
-       , Differentiable (DistH a) (DistD a)
+       , Differentiable (DistP a) (DistD a)
        , ComplexityMeasureable (PolyDelta a)
        )
     => IRV a

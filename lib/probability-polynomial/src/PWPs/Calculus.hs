@@ -17,10 +17,10 @@ module PWPs.Calculus
     )
 where
 
+import qualified Numeric.Polynomial.Simple as Poly
 import PWPs.PiecewiseClasses
 import PWPs.PolyDeltas as PD
 import PWPs.PolyHeavisides as PH
-import qualified Numeric.Polynomial.Simple as Poly
 
 type MyConstraints a = (Eq a, Num a, Fractional a)
 

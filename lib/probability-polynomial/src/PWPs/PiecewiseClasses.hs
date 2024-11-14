@@ -17,6 +17,8 @@ We also want a convolution operator that behaves correctly.
 module PWPs.PiecewiseClasses
     ( Integrable (..)
     , Differentiable (..)
+    , StepIntegrable (..)
+    , StepDifferentiable (..)
     , Evaluable (..)
     , CompactConvolvable (..)
     , Comparable (..)
@@ -28,12 +30,17 @@ where
 
 class Integrable a b where
     integrate :: a -> b
+class StepIntegrable a b c where
+    integrateStep :: b -> Either a c
+
+class StepDifferentiable a b c where
+    differentiateStep :: (a, b) -> c
 
 class Differentiable a b where
     differentiate :: a -> b
 
 class Evaluable a b where
-    evaluate :: a -> b -> [a] -- evaluate b at point a
+    evaluate :: a -> b -> a -- evaluate b at point a
     boost :: a -> b -> b -- increment b by a
     scale :: a -> b -> b -- scale b by a
 

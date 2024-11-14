@@ -19,17 +19,16 @@ piecewise integration/differentiation work.
 -}
 module PWPs.PolyDeltas
     ( PolyDelta (..)
-    )
-where
+    ) where
 
+import Numeric.Polynomial.Simple as Poly
 import PWPs.PiecewiseClasses
-import qualified Numeric.Polynomial.Simple as Poly
 
 {-|
 A PolyDelta is either a polynomial or a (shifted, scaled) Delta with a mass.
 The position of a Delta is stored as its basepoint when doing piecewise operations.
 -}
-data PolyDelta a = Pd (Poly.Poly a) | D a
+data PolyDelta a = Pd (Poly a) | D a
     deriving (Show)
 
 instance Eq a => Eq (PolyDelta a) where
@@ -45,8 +44,8 @@ type MyConstraints a = (Eq a, Num a, Fractional a)
 type EqNum a = (Eq a, Num a)
 type OrdNumEqFrac a = (Ord a, Num a, Eq a, Fractional a)
 
-plusPD :: (Eq a, Fractional a) => PolyDelta a -> PolyDelta a -> PolyDelta a
 -- Polynomials have zero mass at a single point, so they are dominated by Ds and Hs
+plusPD :: (Eq a, Fractional a) => PolyDelta a -> PolyDelta a -> PolyDelta a
 plusPD (Pd x) (Pd y) = Pd (x + y)
 plusPD (Pd _) (D x) = D x
 plusPD (D x) (Pd _) = D x
@@ -70,9 +69,9 @@ scalePD :: EqNum a => a -> PolyDelta a -> PolyDelta a
 scalePD x (Pd a) = Pd (Poly.scale x a)
 scalePD x (D y) = D (x * y)
 
-evaluatePD :: EqNum a => a -> PolyDelta a -> [a]
-evaluatePD point (Pd x) = [Poly.eval x point]
-evaluatePD _ (D x) = [x]
+evaluatePD :: EqNum a => a -> PolyDelta a -> a
+evaluatePD point (Pd x) = Poly.eval x point
+evaluatePD _ (D x) = x
 
 boostPD :: MyConstraints a => a -> PolyDelta a -> PolyDelta a
 boostPD x (Pd y) = Pd y + Pd (Poly.constant x)
@@ -90,20 +89,16 @@ aggregate ((bx, x) : ys@((_, y) : xs))
     | x == y = aggregate ((bx, x) : xs) -- throw away the second basepoint
     | otherwise = (bx, x) : aggregate ys
 
+{-|
+When both arguments are polynomials, we check the intervals are non-zero then use convolvePolys and just map the type.
+For a delta, lower == upper (invariant to be checked), and the effect of the delta is to translate the other
+argument (whichever it is) along by this amount. Need to ensure there is still an initial interval based at zero.
+-}
 convolvePolyDeltas
     :: (Num a, Fractional a, Ord a)
     => (a, a, PolyDelta a)
     -> (a, a, PolyDelta a)
     -> [(a, PolyDelta a)]
-
-{-|
-When both arguments are polynomials,
-we check the intervals are non-zero then use 'Poly.convolve' and just map the type.
-For a delta, lower == upper (invariant to be checked),
-and the effect of the delta is to translate the other
-argument (whichever it is) along by this amount.
-Need to ensure there is still an initial interval based at zero.
--}
 convolvePolyDeltas (lf, uf, Pd f) (lg, ug, Pd g)
     | (uf <= lf) || (ug <= lg) = error "Invalid polynomial interval width"
     -- convolve the polynomials to get a list of intervals, put the type back and remove redundant intervals
@@ -111,7 +106,7 @@ convolvePolyDeltas (lf, uf, Pd f) (lg, ug, Pd g)
         aggregate $ map (\(x, p) -> (x, Pd p)) (Poly.convolve (lf, uf, f) (lg, ug, g))
 convolvePolyDeltas (lf, uf, D f) (lg, ug, Pd g)
     | lf /= uf = error "Non-zero delta interval"
-    | ug <= lg     = error "Invalid polynomial interval width"
+    | ug <= lg = error "Invalid polynomial interval width"
     -- convolving with a zero-sized delta or a zero polynomial gives nothing
     | f == 0 || g == Poly.zero = [(0, Pd Poly.zero)]
     -- degenerate case of delta at zero: don't shift but scale by the mass of the delta
@@ -161,7 +156,15 @@ instance OrdNumEqFrac a => Displayable a (PolyDelta a) where
     displayObject = displayPolyDelta
 
 instance OrdNumEqFrac a => ComplexityMeasureable (PolyDelta a) where
-    measureComplexity (Pd p)
-        | Poly.degree p <= 0 = 1
-        | otherwise = Poly.degree p
+    measureComplexity (Pd p) =
+        if Poly.degree p <= 0 then 1 else Poly.degree p
     measureComplexity (D _) = 1
+
+instance MyConstraints a => StepDifferentiable a (Poly a) (PolyDelta a) where
+    differentiateStep (x, y) = if x == 0 then (Pd . Poly.differentiate) y else D x
+
+integratePD :: (Eq a, Fractional a) => PolyDelta a -> Either a (Poly a)
+integratePD (Pd x) = Right (Poly.integrate x)
+integratePD (D x) = Left x
+instance MyConstraints a => StepIntegrable a (PolyDelta a) (Poly a) where
+    integrateStep = integratePD

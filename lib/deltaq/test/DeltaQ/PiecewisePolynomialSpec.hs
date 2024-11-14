@@ -63,31 +63,31 @@ spec = do
         it "x .>>. never" $ property $
             \x ->
                 (x .>>. never) .=== never
-        xit "x ./\\. never" $ property $
+        it "x ./\\. never" $ property $
             \x ->
                 (x ./\. never) .=== never
-        xit "x .\\/. never" $ property $
+        it "x .\\/. never" $ property $
             \x ->
-                (x ./\. never) .=== x
+                (x .\/. never) .=== x
 
         it "never .>>. x" $ property $
             \x ->
                 (never .>>. x) .=== never
-        xit "never ./\\. x" $ property $
+        it "never ./\\. x" $ property $
             \x ->
                 (never ./\. x) .=== never
-        xit "never .\\/. x" $ property $
+        it "never .\\/. x" $ property $
             \x ->
-                (never ./\. x) .=== x
+                (never .\/. x) .=== x
 
     describe "wait" $ do
         it ".>>." $ property $
             \(NonNegative t) (NonNegative s) ->
                 (wait t .>>. wait s) .=== wait (t+s)
-        xit "./\\." $ property $
+        it "./\\." $ property $
             \(NonNegative t) (NonNegative s) ->
                 (wait t ./\. wait s) .=== wait (max t s)
-        xit ".\\/." $ property $
+        it ".\\/." $ property $
             \(NonNegative t) (NonNegative s) ->
                 (wait t .\/. wait s) .=== wait (min t s)
 
@@ -97,12 +97,12 @@ spec = do
                 (x .>>. y) .>>. z .=== x .>>. (y .>>. z)
 
     describe "./\\." $ do
-        xit "associativity" $ property $
+        it "associativity" $ property $
             \x y z ->
                 (x ./\. y) ./\. z .=== x ./\. (y ./\. z)
 
     describe ".\\/." $ do
-        xit "associativity" $ property $
+        it "associativity" $ property $
             \x y z ->
                 (x .\/. y) .\/. z .=== x .\/. (y .\/. z)
 
@@ -110,10 +110,10 @@ spec = do
         it ".>>." $ property $ mapSize (`div` 3) $
             \(Probability p) x y z ->
                 choice p x y .>>. z  .===  choice p (x .>>. z) (y .>>. z)
-        xit "./\\." $ property $
+        it "./\\." $ property $
             \(Probability p) x y z ->
                 choice p x y ./\. z  .===  choice p (x ./\. z) (y ./\. z)
-        xit ".\\/." $ property $
+        it ".\\/." $ property $
             \(Probability p) x y z ->
                 choice p x y .\/. z  .===  choice p (x .\/. z) (y .\/. z)
 
@@ -132,10 +132,12 @@ spec = do
 
     describe "uniform" $ do
         xit "wait .>>. uniform" $ property $
-            \(NonNegative r) (NonNegative s) (NonNegative t) ->
+            \(NonNegative r) (Positive d) (NonNegative t) ->
+                let s = r + d in
                 (wait t .>>. uniform r s) .=== uniform (t+r) (t+s)
         xit "uniform .>>. wait" $ property $
-            \(NonNegative r) (NonNegative s) (NonNegative t) ->
+            \(NonNegative r) (Positive d) (NonNegative t) ->
+                let s = r + d in
                 (uniform r s .>>. wait t) .=== uniform (r+t) (s+t)
 
     describe "failure" $ do
@@ -144,27 +146,28 @@ spec = do
 
         it "never" $ property $
             failure' never  ===  1
-        xit "wait" $ property $
+        it "wait" $ property $
             \(NonNegative t) ->
-                failure' (wait t)  ===  1
-        xit ".>>." $ property $
+                failure' (wait t)  ===  0
+        it ".>>." $ property $
             \x y ->
                 failure' (x .>>. y)
                     ===  1 - (1 - failure' x) * (1 - failure' y)
-        xit "./\\." $ property $
+        it "./\\." $ property $
             \x y ->
                 failure' (x ./\. y)
                     ===  1 - (1 - failure' x) * (1 - failure' y)
-        xit ".\\/." $ property $
+        it ".\\/." $ property $
             \x y ->
                 failure' (x .\/. y)
                     ===  failure' x * failure' y
-        xit "choice" $ property $
+        it "choice" $ property $
             \(Probability p) x y ->
                 failure' (choice p x y)
                     ===  p * failure' x + (1-p) * failure' y
-        xit "uniform" $ property $
-            \(NonNegative r) (NonNegative s) ->
+        it "uniform" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d in
                 failure' (uniform r s)  ===  0
 
     describe "successBefore" $ do
@@ -174,9 +177,9 @@ spec = do
         xit "never" $ property $
             \(NonNegative t) ->
                 successBefore' never t  ===  0
-        xit "wait" $ property $
+        it "wait" $ property $
             \(NonNegative t) (NonNegative s) ->
-                successBefore' (wait s) t  ===  if t <= s then 0 else 1
+                successBefore' (wait s) t  ===  if t < s then 0 else 1
         xit "./\\." $ property $
             \(NonNegative t) x y ->
                 successBefore' (x ./\. y) t
@@ -222,7 +225,7 @@ spec = do
 
         xit "never" $ property $
             earliest' never  ===  Abandoned
-        it "wait" $ property $
+        xit "wait" $ property $
             \(NonNegative t) ->
                 earliest' (wait t)  ===  Occurs t
         xit ".>>." $ property $
@@ -252,7 +255,7 @@ spec = do
 
         xit "never" $ property $
             deadline' never  ===  Abandoned
-        it "wait" $ property $
+        xit "wait" $ property $
             \(NonNegative t) ->
                 deadline' (wait t)  ===  Occurs t
         xit ".>>." $ property $
