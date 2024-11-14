@@ -9,6 +9,12 @@ License: BSD-3-Clause
 Maintainer: neil.davies@pnsol.com
 Description:
     Type classes for outcomes and their completion times.
+
+Type classes
+
+* 'Outcome' — outcomes their combinations.
+* 'DeltaQ' — probability distributions of completion times.
+
 -}
 module DeltaQ.Class
     ( -- * Type classes
@@ -42,6 +48,9 @@ infixr 3 ./\. -- more tight
 --
 -- 'Outcome's can be composed in sequence or in parallel.
 class (Ord (Duration o), Num (Duration o)) => Outcome o where
+    -- | Numerical type representing times in $[0,+∞)$.
+    --
+    -- For example 'Double' or 'Rational'.
     type Duration o
 
     -- | The outcome that never finishes.
@@ -127,6 +136,9 @@ instance Applicative Eventually where
 -- Specifically, 'DeltaQ' is the probability distribution
 -- of finish times for an outcome.
 class (Num (Probability o), Outcome o) => DeltaQ o where
+    -- | Numerical type representing probabilities in $[0,1]$.
+    --
+    -- For example 'Double' or 'Rational'.
     type Probability o
 
     -- | Left-biased random choice.
