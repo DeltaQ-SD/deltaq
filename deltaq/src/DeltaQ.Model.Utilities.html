@@ -1,0 +1,1729 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleContexts #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html"><span class="hs-identifier">DeltaQ.Model.Utilities</span></a></span><span>
+</span><span id="line-4"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier">DeltaQVisualisation</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-5"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotCDF"><span class="hs-identifier">plotCDF</span></a></span><span>
+</span><span id="line-6"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotCDFs"><span class="hs-identifier">plotCDFs</span></a></span><span>
+</span><span id="line-7"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotCDFWithCentiles"><span class="hs-identifier">plotCDFWithCentiles</span></a></span><span>
+</span><span id="line-8"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotInverseCDF"><span class="hs-identifier">plotInverseCDF</span></a></span><span>
+</span><span id="line-9"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotPDF"><span class="hs-identifier">plotPDF</span></a></span><span>
+</span><span id="line-10"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotPDFs"><span class="hs-identifier">plotPDFs</span></a></span><span>
+</span><span id="line-11"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">where</span><span>
+</span><span id="line-13"></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html"><span class="hs-identifier">DeltaQ.Model.DeltaQ</span></a></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Graphics.Rendering.Chart.Easy</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Bifunctor</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">second</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span id="DeltaQVisualisation"><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-var">DeltaQVisualisation</span></a></span></span><span> </span><span id="local-6989586621679108687"><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-21"></span><span>    </span><span class="hs-comment">-- | Return a sequence of Time and Probability Mass points of a given length</span><span>
+</span><span id="line-22"></span><span>    </span><span class="hs-comment">--   over the support of the &#916;Q. The lower edge of a Heaviside is represented</span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-comment">--   through the use of `Left`. The sequence is monotonitically increasing in</span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-comment">--   both Time and Probablity Mass.</span><span>
+</span><span id="line-25"></span><span>    </span><span id="asDiscreteCDF"><span class="annot"><a href="DeltaQ.Model.Utilities.html#asDiscreteCDF"><span class="hs-identifier hs-type">asDiscreteCDF</span></a></span></span><span>
+</span><span id="line-26"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><span id="line-27"></span><span>
+</span><span id="line-28"></span><span>    </span><span class="hs-comment">-- | Return a sequence of (Left) Impulse Probablity mass (equivalent to the</span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-comment">--   integral of the Heaviside function at that point) or (Right) a sequence</span><span>
+</span><span id="line-30"></span><span>    </span><span class="hs-comment">--   of Time and Probability Density. The sequence is monotonitcally increasing in Time.</span><span>
+</span><span id="line-31"></span><span>    </span><span id="asDiscretePDF"><span class="annot"><a href="DeltaQ.Model.Utilities.html#asDiscretePDF"><span class="hs-identifier hs-type">asDiscretePDF</span></a></span></span><span>
+</span><span id="line-32"></span><span>        </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="hs-identifier hs-type">Either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><span id="line-33"></span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-comment">-- | Given a (monotonically increasing in both paramters) list of `Time`,</span><span>
+</span><span id="line-35"></span><span>    </span><span class="hs-comment">--   `ProbMass` pairs, create a stepwise QTA.</span><span>
+</span><span id="line-36"></span><span>    </span><span id="fromQTA"><span class="annot"><a href="DeltaQ.Model.Utilities.html#fromQTA"><span class="hs-identifier hs-type">fromQTA</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-37"></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-comment">-- | Given a (monotonically increasing in both paramters) list of `Time`,</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-comment">--   `ProbMass` pairs, create a linearaly interpolated improper random</span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-comment">--   variable. It is assumed that the first point is at (0,0).</span><span>
+</span><span id="line-41"></span><span>    </span><span id="fromEmpirical"><span class="annot"><a href="DeltaQ.Model.Utilities.html#fromEmpirical"><span class="hs-identifier hs-type">fromEmpirical</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679108687"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span id="local-6989586621679108690"><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotCDF"><span class="hs-identifier hs-type">plotCDF</span></a></span><span>
+</span><span id="line-44"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-type">DeltaQVisualisation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-49"></span><span>       </span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Layout</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108690"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-53"></span><span id="plotCDF"><span class="annot"><span class="annottext">plotCDF :: forall irv.
+(PlotValue (ProbMass irv), PlotValue (Time irv),
+ RealFloat (Time irv), Show (Time irv), DeltaQVisualisation irv) =&gt;
+String -&gt; irv -&gt; Layout (Time irv) (ProbMass irv)
+</span><a href="DeltaQ.Model.Utilities.html#plotCDF"><span class="hs-identifier hs-var hs-var">plotCDF</span></a></span></span><span> </span><span id="local-6989586621679108892"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679108892"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679108893"><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679108893"><span class="hs-identifier hs-var">irv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall l a. Default l =&gt; EC l a -&gt; l
+</span><span class="hs-identifier hs-var">execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout (Time irv) (ProbMass irv)) ()
+ -&gt; Layout (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-54"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679108892"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Time&quot;</span></span><span>
+</span><span id="line-56"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span>
+</span><span id="line-57"></span><span>        </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(AxisFn x -&gt; f (AxisFn x)) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_generate</span></span><span>
+</span><span id="line-58"></span><span>        </span><span class="annot"><span class="annottext">((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; AxisFn (Time irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+-&gt; (Time irv -&gt; AxisFn (Time irv))
+-&gt; Maybe (Time irv)
+-&gt; AxisFn (Time irv)
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+forall a. PlotValue a =&gt; AxisFn a
+</span><span class="hs-identifier hs-var">autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679108903"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108903"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+-&gt; (Time irv, Time irv) -&gt; AxisFn (Time irv)
+forall a. RealFloat a =&gt; LinearAxisParams a -&gt; (a, a) -&gt; AxisFn a
+</span><span class="hs-identifier hs-var">scaledAxis</span></span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+forall a. Default a =&gt; a
+</span><span class="hs-identifier hs-var">def</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108906"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108903"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679108908"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (ProbMass irv) -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis y -&gt; f (LayoutAxis y)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_y_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (ProbMass irv)
+  -&gt; Identity (LayoutAxis (ProbMass irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (ProbMass irv)
+    -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (ProbMass irv)
+-&gt; Identity (LayoutAxis (ProbMass irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Prob. Mass&quot;</span></span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><span class="annottext">EC
+  (Layout (Time irv) (ProbMass irv))
+  (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (p :: * -&gt; * -&gt; *) x y.
+ToPlot p =&gt;
+EC (Layout x y) (p x y) -&gt; EC (Layout x y) ()
+</span><span class="hs-identifier hs-var">plot</span></span><span>
+</span><span id="line-61"></span><span>        </span><span class="annot"><span class="annottext">(EC
+   (Layout (Time irv) (ProbMass irv))
+   (PlotLines (Time irv) (ProbMass irv))
+ -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [[(Time irv, ProbMass irv)]]
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
+</span><span class="hs-identifier hs-var">line</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679108912"><span class="hs-identifier hs-var">cdf</span></a></span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)]
+-&gt; (Time irv -&gt; [(Time irv, ProbMass irv)])
+-&gt; Maybe (Time irv)
+-&gt; [(Time irv, ProbMass irv)]
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679108913"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108913"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108906"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108913"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">irv -&gt; ProbMass irv
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; ProbMass icdf
+</span><a href="DeltaQ.Model.DeltaQ.html#tangibleMass"><span class="hs-identifier hs-var">tangibleMass</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679108893"><span class="hs-identifier hs-var">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679108908"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-62"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679108912"><span class="annot"><span class="annottext">cdf :: [(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679108912"><span class="hs-identifier hs-var hs-var">cdf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Time irv, ProbMass irv) -&gt; [(Time irv, ProbMass irv)])
+-&gt; ([(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)])
+-&gt; Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)]
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Time irv, ProbMass irv)
+-&gt; [(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+forall irv.
+DeltaQVisualisation irv =&gt;
+irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+</span><a href="DeltaQ.Model.Utilities.html#asDiscreteCDF"><span class="hs-identifier hs-var">asDiscreteCDF</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679108893"><span class="hs-identifier hs-var">irv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span>
+</span><span id="line-64"></span><span>    </span><span id="local-6989586621679108906"><span class="annot"><span class="annottext">factor :: Time irv
+</span><a href="#local-6989586621679108906"><span class="hs-identifier hs-var hs-var">factor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">1.1</span></span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679108908"><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679108908"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">irv -&gt; (Time irv, Maybe (Time irv))
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; (Time icdf, Maybe (Time icdf))
+</span><a href="DeltaQ.Model.DeltaQ.html#support"><span class="hs-identifier hs-var">support</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679108893"><span class="hs-identifier hs-var">irv</span></a></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span id="local-6989586621679108771"><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotCDFs"><span class="hs-identifier hs-type">plotCDFs</span></a></span><span>
+</span><span id="line-68"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-69"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-70"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-71"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-type">DeltaQVisualisation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-73"></span><span>       </span><span class="hs-special">)</span><span>
+</span><span id="line-74"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-75"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-76"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Layout</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108771"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-77"></span><span id="plotCDFs"><span class="annot"><span class="annottext">plotCDFs :: forall irv.
+(PlotValue (ProbMass irv), PlotValue (Time irv),
+ RealFloat (Time irv), Show (Time irv), DeltaQVisualisation irv) =&gt;
+String -&gt; [(String, irv)] -&gt; Layout (Time irv) (ProbMass irv)
+</span><a href="DeltaQ.Model.Utilities.html#plotCDFs"><span class="hs-identifier hs-var hs-var">plotCDFs</span></a></span></span><span> </span><span id="local-6989586621679108982"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679108982"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679108983"><span class="annot"><span class="annottext">[(String, irv)]
+</span><a href="#local-6989586621679108983"><span class="hs-identifier hs-var">irvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall l a. Default l =&gt; EC l a -&gt; l
+</span><span class="hs-identifier hs-var">execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout (Time irv) (ProbMass irv)) ()
+ -&gt; Layout (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-78"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679108982"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Time&quot;</span></span><span>
+</span><span id="line-80"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span>
+</span><span id="line-81"></span><span>        </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(AxisFn x -&gt; f (AxisFn x)) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_generate</span></span><span>
+</span><span id="line-82"></span><span>        </span><span class="annot"><span class="annottext">((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; AxisFn (Time irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+-&gt; (Time irv -&gt; AxisFn (Time irv))
+-&gt; Maybe (Time irv)
+-&gt; AxisFn (Time irv)
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+forall a. PlotValue a =&gt; AxisFn a
+</span><span class="hs-identifier hs-var">autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679108984"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108984"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+-&gt; (Time irv, Time irv) -&gt; AxisFn (Time irv)
+forall a. RealFloat a =&gt; LinearAxisParams a -&gt; (a, a) -&gt; AxisFn a
+</span><span class="hs-identifier hs-var">scaledAxis</span></span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+forall a. Default a =&gt; a
+</span><span class="hs-identifier hs-var">def</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108985"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108984"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679108986"><span class="hs-identifier hs-var">maxSupport</span></a></span><span>
+</span><span id="line-83"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (ProbMass irv) -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis y -&gt; f (LayoutAxis y)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_y_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (ProbMass irv)
+  -&gt; Identity (LayoutAxis (ProbMass irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (ProbMass irv)
+    -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (ProbMass irv)
+-&gt; Identity (LayoutAxis (ProbMass irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Prob. Mass&quot;</span></span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><span class="annottext">((String, irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; [(String, irv)] -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">(String, irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall {icdf}.
+(Time icdf ~ Time irv, DeltaQVisualisation icdf) =&gt;
+(String, icdf) -&gt; EC (Layout (Time irv) (ProbMass icdf)) ()
+</span><a href="#local-6989586621679108988"><span class="hs-identifier hs-var">plotOne</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, irv)]
+</span><a href="#local-6989586621679108983"><span class="hs-identifier hs-var">irvs</span></a></span><span>
+</span><span id="line-85"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-86"></span><span>    </span><span id="local-6989586621679108986"><span class="annot"><span class="annottext">maxSupport :: Maybe (Time irv)
+</span><a href="#local-6989586621679108986"><span class="hs-identifier hs-var hs-var">maxSupport</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Maybe (Time irv)] -&gt; Maybe (Time irv)
+forall a. Ord a =&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="annot"><span class="annottext">([Maybe (Time irv)] -&gt; Maybe (Time irv))
+-&gt; [Maybe (Time irv)] -&gt; Maybe (Time irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((String, irv) -&gt; Maybe (Time irv))
+-&gt; [(String, irv)] -&gt; [Maybe (Time irv)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Time irv, Maybe (Time irv)) -&gt; Maybe (Time irv)
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((Time irv, Maybe (Time irv)) -&gt; Maybe (Time irv))
+-&gt; ((String, irv) -&gt; (Time irv, Maybe (Time irv)))
+-&gt; (String, irv)
+-&gt; Maybe (Time irv)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">irv -&gt; (Time irv, Maybe (Time irv))
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; (Time icdf, Maybe (Time icdf))
+</span><a href="DeltaQ.Model.DeltaQ.html#support"><span class="hs-identifier hs-var">support</span></a></span><span> </span><span class="annot"><span class="annottext">(irv -&gt; (Time irv, Maybe (Time irv)))
+-&gt; ((String, irv) -&gt; irv)
+-&gt; (String, irv)
+-&gt; (Time irv, Maybe (Time irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String, irv) -&gt; irv
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(String, irv)]
+</span><a href="#local-6989586621679108983"><span class="hs-identifier hs-var">irvs</span></a></span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679108988"><span class="annot"><span class="annottext">plotOne :: (String, icdf) -&gt; EC (Layout (Time irv) (ProbMass icdf)) ()
+</span><a href="#local-6989586621679108988"><span class="hs-identifier hs-var hs-var">plotOne</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109032"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109032"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109033"><span class="annot"><span class="annottext">icdf
+</span><a href="#local-6989586621679109033"><span class="hs-identifier hs-var">irv</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-88"></span><span>        </span><span class="annot"><span class="annottext">EC
+  (Layout (Time irv) (ProbMass icdf))
+  (PlotLines (Time irv) (ProbMass icdf))
+-&gt; EC (Layout (Time irv) (ProbMass icdf)) ()
+forall (p :: * -&gt; * -&gt; *) x y.
+ToPlot p =&gt;
+EC (Layout x y) (p x y) -&gt; EC (Layout x y) ()
+</span><span class="hs-identifier hs-var">plot</span></span><span>
+</span><span id="line-89"></span><span>            </span><span class="annot"><span class="annottext">(EC
+   (Layout (Time irv) (ProbMass icdf))
+   (PlotLines (Time irv) (ProbMass icdf))
+ -&gt; EC (Layout (Time irv) (ProbMass icdf)) ())
+-&gt; EC
+     (Layout (Time irv) (ProbMass icdf))
+     (PlotLines (Time irv) (ProbMass icdf))
+-&gt; EC (Layout (Time irv) (ProbMass icdf)) ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [[(Time irv, ProbMass icdf)]]
+-&gt; EC
+     (Layout (Time irv) (ProbMass icdf))
+     (PlotLines (Time irv) (ProbMass icdf))
+forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
+</span><span class="hs-identifier hs-var">line</span></span><span>
+</span><span id="line-90"></span><span>                </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109032"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-91"></span><span>                </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">icdf -&gt; Int -&gt; [(Time icdf, ProbMass icdf)]
+forall {irv}.
+DeltaQVisualisation irv =&gt;
+irv -&gt; Int -&gt; [(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679109034"><span class="hs-identifier hs-var">cdf</span></a></span><span> </span><span class="annot"><span class="annottext">icdf
+</span><a href="#local-6989586621679109033"><span class="hs-identifier hs-var">irv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span>
+</span><span id="line-92"></span><span>                    </span><span class="annot"><span class="annottext">[(Time irv, ProbMass icdf)]
+-&gt; [(Time irv, ProbMass icdf)] -&gt; [(Time irv, ProbMass icdf)]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass icdf)]
+-&gt; (Time irv -&gt; [(Time irv, ProbMass icdf)])
+-&gt; Maybe (Time irv)
+-&gt; [(Time irv, ProbMass icdf)]
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679109035"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109035"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679108985"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109035"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">icdf -&gt; ProbMass icdf
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; ProbMass icdf
+</span><a href="DeltaQ.Model.DeltaQ.html#tangibleMass"><span class="hs-identifier hs-var">tangibleMass</span></a></span><span> </span><span class="annot"><span class="annottext">icdf
+</span><a href="#local-6989586621679109033"><span class="hs-identifier hs-var">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Time irv, Maybe (Time irv)) -&gt; Maybe (Time irv)
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((Time irv, Maybe (Time irv)) -&gt; Maybe (Time irv))
+-&gt; (Time irv, Maybe (Time irv)) -&gt; Maybe (Time irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">icdf -&gt; (Time icdf, Maybe (Time icdf))
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; (Time icdf, Maybe (Time icdf))
+</span><a href="DeltaQ.Model.DeltaQ.html#support"><span class="hs-identifier hs-var">support</span></a></span><span> </span><span class="annot"><span class="annottext">icdf
+</span><a href="#local-6989586621679109033"><span class="hs-identifier hs-var">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>                </span><span class="hs-special">]</span><span>
+</span><span id="line-94"></span><span>    </span><span id="local-6989586621679109034"><span class="annot"><span class="annottext">cdf :: irv -&gt; Int -&gt; [(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679109034"><span class="hs-identifier hs-var hs-var">cdf</span></a></span></span><span> </span><span id="local-6989586621679109053"><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109053"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679109054"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109054"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Time irv, ProbMass irv) -&gt; [(Time irv, ProbMass irv)])
+-&gt; ([(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)])
+-&gt; Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)]
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Time irv, ProbMass irv)
+-&gt; [(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+forall irv.
+DeltaQVisualisation irv =&gt;
+irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+</span><a href="DeltaQ.Model.Utilities.html#asDiscreteCDF"><span class="hs-identifier hs-var">asDiscreteCDF</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109053"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679109054"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679108985"><span class="annot"><span class="annottext">factor :: Time irv
+</span><a href="#local-6989586621679108985"><span class="hs-identifier hs-var hs-var">factor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">1.1</span></span><span>
+</span><span id="line-96"></span><span>
+</span><span id="line-97"></span><span id="local-6989586621679108788"><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotCDFWithCentiles"><span class="hs-identifier hs-type">plotCDFWithCentiles</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-100"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-101"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-102"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-type">DeltaQVisualisation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-103"></span><span>       </span><span class="hs-special">)</span><span>
+</span><span id="line-104"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-106"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-107"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Layout</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108788"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-108"></span><span id="plotCDFWithCentiles"><span class="annot"><span class="annottext">plotCDFWithCentiles :: forall irv.
+(PlotValue (ProbMass irv), PlotValue (Time irv),
+ RealFloat (Time irv), Show (Time irv), DeltaQVisualisation irv) =&gt;
+String -&gt; irv -&gt; [ProbMass irv] -&gt; Layout (Time irv) (ProbMass irv)
+</span><a href="DeltaQ.Model.Utilities.html#plotCDFWithCentiles"><span class="hs-identifier hs-var hs-var">plotCDFWithCentiles</span></a></span></span><span> </span><span id="local-6989586621679109102"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109102"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679109103"><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109103"><span class="hs-identifier hs-var">irv</span></a></span></span><span> </span><span id="local-6989586621679109104"><span class="annot"><span class="annottext">[ProbMass irv]
+</span><a href="#local-6989586621679109104"><span class="hs-identifier hs-var">cs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall l a. Default l =&gt; EC l a -&gt; l
+</span><span class="hs-identifier hs-var">execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout (Time irv) (ProbMass irv)) ()
+ -&gt; Layout (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-109"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109102"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><span id="line-110"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Time&quot;</span></span><span>
+</span><span id="line-111"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span>
+</span><span id="line-112"></span><span>        </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(AxisFn x -&gt; f (AxisFn x)) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_generate</span></span><span>
+</span><span id="line-113"></span><span>        </span><span class="annot"><span class="annottext">((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; AxisFn (Time irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+-&gt; (Time irv -&gt; AxisFn (Time irv))
+-&gt; Maybe (Time irv)
+-&gt; AxisFn (Time irv)
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+forall a. PlotValue a =&gt; AxisFn a
+</span><span class="hs-identifier hs-var">autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679109105"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109105"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+-&gt; (Time irv, Time irv) -&gt; AxisFn (Time irv)
+forall a. RealFloat a =&gt; LinearAxisParams a -&gt; (a, a) -&gt; AxisFn a
+</span><span class="hs-identifier hs-var">scaledAxis</span></span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+forall a. Default a =&gt; a
+</span><span class="hs-identifier hs-var">def</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109106"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109105"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109107"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-114"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (ProbMass irv) -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis y -&gt; f (LayoutAxis y)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_y_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (ProbMass irv)
+  -&gt; Identity (LayoutAxis (ProbMass irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (ProbMass irv)
+    -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (ProbMass irv)
+-&gt; Identity (LayoutAxis (ProbMass irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Prob. Mass&quot;</span></span><span>
+</span><span id="line-115"></span><span>    </span><span class="annot"><span class="annottext">EC
+  (Layout (Time irv) (ProbMass irv))
+  (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (p :: * -&gt; * -&gt; *) x y.
+ToPlot p =&gt;
+EC (Layout x y) (p x y) -&gt; EC (Layout x y) ()
+</span><span class="hs-identifier hs-var">plot</span></span><span>
+</span><span id="line-116"></span><span>        </span><span class="annot"><span class="annottext">(EC
+   (Layout (Time irv) (ProbMass irv))
+   (PlotLines (Time irv) (ProbMass irv))
+ -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [[(Time irv, ProbMass irv)]]
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
+</span><span class="hs-identifier hs-var">line</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679109108"><span class="hs-identifier hs-var">cdf</span></a></span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)]
+-&gt; (Time irv -&gt; [(Time irv, ProbMass irv)])
+-&gt; Maybe (Time irv)
+-&gt; [(Time irv, ProbMass irv)]
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679109109"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109109"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109106"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109109"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">irv -&gt; ProbMass irv
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; ProbMass icdf
+</span><a href="DeltaQ.Model.DeltaQ.html#tangibleMass"><span class="hs-identifier hs-var">tangibleMass</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109103"><span class="hs-identifier hs-var">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109107"><span class="hs-identifier hs-var">u</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-117"></span><span>    </span><span class="annot"><span class="annottext">(ProbMass irv -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; [ProbMass irv] -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+</span><a href="#local-6989586621679109110"><span class="hs-identifier hs-var">plotCentile</span></a></span><span> </span><span class="annot"><span class="annottext">[ProbMass irv]
+</span><a href="#local-6989586621679109104"><span class="hs-identifier hs-var">cs</span></a></span><span>
+</span><span id="line-118"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-119"></span><span>    </span><span id="local-6989586621679109108"><span class="annot"><span class="annottext">cdf :: [(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679109108"><span class="hs-identifier hs-var hs-var">cdf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Time irv, ProbMass irv) -&gt; [(Time irv, ProbMass irv)])
+-&gt; ([(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)])
+-&gt; Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)]
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Time irv, ProbMass irv)
+-&gt; [(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+forall irv.
+DeltaQVisualisation irv =&gt;
+irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+</span><a href="DeltaQ.Model.Utilities.html#asDiscreteCDF"><span class="hs-identifier hs-var">asDiscreteCDF</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109103"><span class="hs-identifier hs-var">irv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span>
+</span><span id="line-120"></span><span>    </span><span id="local-6989586621679109106"><span class="annot"><span class="annottext">factor :: Time irv
+</span><a href="#local-6989586621679109106"><span class="hs-identifier hs-var hs-var">factor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">1.1</span></span><span>
+</span><span id="line-121"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109107"><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109107"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">irv -&gt; (Time irv, Maybe (Time irv))
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; (Time icdf, Maybe (Time icdf))
+</span><a href="DeltaQ.Model.DeltaQ.html#support"><span class="hs-identifier hs-var">support</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109103"><span class="hs-identifier hs-var">irv</span></a></span><span>
+</span><span id="line-122"></span><span>    </span><span id="local-6989586621679109110"><span class="annot"><span class="annottext">plotCentile :: ProbMass irv -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+</span><a href="#local-6989586621679109110"><span class="hs-identifier hs-var hs-var">plotCentile</span></a></span></span><span> </span><span id="local-6989586621679109155"><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109155"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">irv -&gt; ProbMass irv -&gt; Maybe (Time irv)
+forall icdf.
+DeltaQ icdf =&gt;
+icdf -&gt; ProbMass icdf -&gt; Maybe (Time icdf)
+</span><a href="DeltaQ.Model.DeltaQ.html#centile"><span class="hs-identifier hs-var">centile</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109103"><span class="hs-identifier hs-var">irv</span></a></span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109155"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-123"></span><span>        </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall a.
+a -&gt; StateT (Layout (Time irv) (ProbMass irv)) (State CState) a
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-124"></span><span>        </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679109157"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109157"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EC
+  (Layout (Time irv) (ProbMass irv))
+  (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (p :: * -&gt; * -&gt; *) x y.
+ToPlot p =&gt;
+EC (Layout x y) (p x y) -&gt; EC (Layout x y) ()
+</span><span class="hs-identifier hs-var">plot</span></span><span> </span><span class="annot"><span class="annottext">(EC
+   (Layout (Time irv) (ProbMass irv))
+   (PlotLines (Time irv) (ProbMass irv))
+ -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">EC (PlotLines (Time irv) (ProbMass irv)) ()
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall l1 a l2. Default l1 =&gt; EC l1 a -&gt; EC l2 l1
+</span><span class="hs-identifier hs-var">liftEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (PlotLines (Time irv) (ProbMass irv)) ()
+ -&gt; EC
+      (Layout (Time irv) (ProbMass irv))
+      (PlotLines (Time irv) (ProbMass irv)))
+-&gt; EC (PlotLines (Time irv) (ProbMass irv)) ()
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-125"></span><span>            </span><span class="annot"><span class="annottext">(LineStyle -&gt; Identity LineStyle)
+-&gt; PlotLines (Time irv) (ProbMass irv)
+-&gt; Identity (PlotLines (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LineStyle -&gt; f LineStyle) -&gt; PlotLines x y -&gt; f (PlotLines x y)
+</span><span class="hs-identifier hs-var">plot_lines_style</span></span><span> </span><span class="annot"><span class="annottext">((LineStyle -&gt; Identity LineStyle)
+ -&gt; PlotLines (Time irv) (ProbMass irv)
+ -&gt; Identity (PlotLines (Time irv) (ProbMass irv)))
+-&gt; ((AlphaColour Double -&gt; Identity (AlphaColour Double))
+    -&gt; LineStyle -&gt; Identity LineStyle)
+-&gt; (AlphaColour Double -&gt; Identity (AlphaColour Double))
+-&gt; PlotLines (Time irv) (ProbMass irv)
+-&gt; Identity (PlotLines (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(AlphaColour Double -&gt; Identity (AlphaColour Double))
+-&gt; LineStyle -&gt; Identity LineStyle
+Lens' LineStyle (AlphaColour Double)
+</span><span class="hs-identifier hs-var">line_color</span></span><span> </span><span class="annot"><span class="annottext">((AlphaColour Double -&gt; Identity (AlphaColour Double))
+ -&gt; PlotLines (Time irv) (ProbMass irv)
+ -&gt; Identity (PlotLines (Time irv) (ProbMass irv)))
+-&gt; AlphaColour Double
+-&gt; EC (PlotLines (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">Colour Double -&gt; AlphaColour Double
+forall a. Num a =&gt; Colour a -&gt; AlphaColour a
+</span><span class="hs-identifier hs-var">opaque</span></span><span> </span><span class="annot"><span class="annottext">Colour Double
+forall a. Num a =&gt; Colour a
+</span><span class="hs-identifier hs-var">black</span></span><span>
+</span><span id="line-126"></span><span>            </span><span class="annot"><span class="annottext">(LineStyle -&gt; Identity LineStyle)
+-&gt; PlotLines (Time irv) (ProbMass irv)
+-&gt; Identity (PlotLines (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LineStyle -&gt; f LineStyle) -&gt; PlotLines x y -&gt; f (PlotLines x y)
+</span><span class="hs-identifier hs-var">plot_lines_style</span></span><span> </span><span class="annot"><span class="annottext">((LineStyle -&gt; Identity LineStyle)
+ -&gt; PlotLines (Time irv) (ProbMass irv)
+ -&gt; Identity (PlotLines (Time irv) (ProbMass irv)))
+-&gt; (([Double] -&gt; Identity [Double])
+    -&gt; LineStyle -&gt; Identity LineStyle)
+-&gt; ([Double] -&gt; Identity [Double])
+-&gt; PlotLines (Time irv) (ProbMass irv)
+-&gt; Identity (PlotLines (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">([Double] -&gt; Identity [Double]) -&gt; LineStyle -&gt; Identity LineStyle
+Lens' LineStyle [Double]
+</span><span class="hs-identifier hs-var">line_dashes</span></span><span> </span><span class="annot"><span class="annottext">(([Double] -&gt; Identity [Double])
+ -&gt; PlotLines (Time irv) (ProbMass irv)
+ -&gt; Identity (PlotLines (Time irv) (ProbMass irv)))
+-&gt; [Double] -&gt; EC (PlotLines (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">5</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double
+</span><span class="hs-number">5</span></span><span class="hs-special">]</span><span>
+</span><span id="line-127"></span><span>            </span><span class="annot"><span class="annottext">([[(Limit (Time irv), Limit (ProbMass irv))]]
+ -&gt; Identity [[(Limit (Time irv), Limit (ProbMass irv))]])
+-&gt; PlotLines (Time irv) (ProbMass irv)
+-&gt; Identity (PlotLines (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+([[(Limit x, Limit y)]] -&gt; f [[(Limit x, Limit y)]])
+-&gt; PlotLines x y -&gt; f (PlotLines x y)
+</span><span class="hs-identifier hs-var">plot_lines_limit_values</span></span><span>
+</span><span id="line-128"></span><span>                </span><span class="annot"><span class="annottext">(([[(Limit (Time irv), Limit (ProbMass irv))]]
+  -&gt; Identity [[(Limit (Time irv), Limit (ProbMass irv))]])
+ -&gt; PlotLines (Time irv) (ProbMass irv)
+ -&gt; Identity (PlotLines (Time irv) (ProbMass irv)))
+-&gt; [[(Limit (Time irv), Limit (ProbMass irv))]]
+-&gt; EC (PlotLines (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="hs-special">[</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Limit (Time irv)
+forall a. Limit a
+</span><span class="hs-identifier hs-var">LMin</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; Limit (ProbMass irv)
+forall a. a -&gt; Limit a
+</span><span class="hs-identifier hs-var">LValue</span></span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109155"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv -&gt; Limit (Time irv)
+forall a. a -&gt; Limit a
+</span><span class="hs-identifier hs-var">LValue</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109157"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; Limit (ProbMass irv)
+forall a. a -&gt; Limit a
+</span><span class="hs-identifier hs-var">LValue</span></span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109155"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-129"></span><span>                   </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv -&gt; Limit (Time irv)
+forall a. a -&gt; Limit a
+</span><span class="hs-identifier hs-var">LValue</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109157"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; Limit (ProbMass irv)
+forall a. a -&gt; Limit a
+</span><span class="hs-identifier hs-var">LValue</span></span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109155"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv -&gt; Limit (Time irv)
+forall a. a -&gt; Limit a
+</span><span class="hs-identifier hs-var">LValue</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109157"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Limit (ProbMass irv)
+forall a. Limit a
+</span><span class="hs-identifier hs-var">LMin</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-130"></span><span>                   </span><span class="hs-special">]</span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span id="local-6989586621679108811"><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotInverseCDF"><span class="hs-identifier hs-type">plotInverseCDF</span></a></span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-134"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-135"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-136"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-137"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-type">DeltaQVisualisation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-139"></span><span>       </span><span class="hs-special">)</span><span>
+</span><span id="line-140"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-141"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-142"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Layout</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108811"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-identifier hs-type">LogValue</span></span></span><span>
+</span><span id="line-143"></span><span id="plotInverseCDF"><span class="annot"><span class="annottext">plotInverseCDF :: forall irv.
+(PlotValue (ProbMass irv), PlotValue (Time irv),
+ RealFloat (Time irv), Show (Time irv), Real (ProbMass irv),
+ DeltaQVisualisation irv) =&gt;
+String -&gt; irv -&gt; Layout (Time irv) LogValue
+</span><a href="DeltaQ.Model.Utilities.html#plotInverseCDF"><span class="hs-identifier hs-var hs-var">plotInverseCDF</span></a></span></span><span> </span><span id="local-6989586621679109218"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109218"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679109219"><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109219"><span class="hs-identifier hs-var">irv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout (Time irv) LogValue) () -&gt; Layout (Time irv) LogValue
+forall l a. Default l =&gt; EC l a -&gt; l
+</span><span class="hs-identifier hs-var">execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout (Time irv) LogValue) () -&gt; Layout (Time irv) LogValue)
+-&gt; EC (Layout (Time irv) LogValue) () -&gt; Layout (Time irv) LogValue
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-144"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; Layout (Time irv) LogValue
+-&gt; Identity (Layout (Time irv) LogValue)
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) LogValue
+ -&gt; Identity (Layout (Time irv) LogValue))
+-&gt; String -&gt; EC (Layout (Time irv) LogValue) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109218"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><span id="line-145"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) LogValue
+-&gt; Identity (Layout (Time irv) LogValue)
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) LogValue
+ -&gt; Identity (Layout (Time irv) LogValue))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) LogValue
+-&gt; Identity (Layout (Time irv) LogValue)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) LogValue
+ -&gt; Identity (Layout (Time irv) LogValue))
+-&gt; String -&gt; EC (Layout (Time irv) LogValue) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Time&quot;</span></span><span>
+</span><span id="line-146"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) LogValue
+-&gt; Identity (Layout (Time irv) LogValue)
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span>
+</span><span id="line-147"></span><span>        </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) LogValue
+ -&gt; Identity (Layout (Time irv) LogValue))
+-&gt; ((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; Layout (Time irv) LogValue
+-&gt; Identity (Layout (Time irv) LogValue)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(AxisFn x -&gt; f (AxisFn x)) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_generate</span></span><span>
+</span><span id="line-148"></span><span>        </span><span class="annot"><span class="annottext">((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+ -&gt; Layout (Time irv) LogValue
+ -&gt; Identity (Layout (Time irv) LogValue))
+-&gt; AxisFn (Time irv) -&gt; EC (Layout (Time irv) LogValue) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+-&gt; (Time irv -&gt; AxisFn (Time irv))
+-&gt; Maybe (Time irv)
+-&gt; AxisFn (Time irv)
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+forall a. PlotValue a =&gt; AxisFn a
+</span><span class="hs-identifier hs-var">autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679109220"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109220"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+-&gt; (Time irv, Time irv) -&gt; AxisFn (Time irv)
+forall a. RealFloat a =&gt; LinearAxisParams a -&gt; (a, a) -&gt; AxisFn a
+</span><span class="hs-identifier hs-var">scaledAxis</span></span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+forall a. Default a =&gt; a
+</span><span class="hs-identifier hs-var">def</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109221"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109220"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109222"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis LogValue -&gt; Identity (LayoutAxis LogValue))
+-&gt; Layout (Time irv) LogValue
+-&gt; Identity (Layout (Time irv) LogValue)
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis y -&gt; f (LayoutAxis y)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_y_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis LogValue -&gt; Identity (LayoutAxis LogValue))
+ -&gt; Layout (Time irv) LogValue
+ -&gt; Identity (Layout (Time irv) LogValue))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis LogValue -&gt; Identity (LayoutAxis LogValue))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) LogValue
+-&gt; Identity (Layout (Time irv) LogValue)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis LogValue -&gt; Identity (LayoutAxis LogValue)
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) LogValue
+ -&gt; Identity (Layout (Time irv) LogValue))
+-&gt; String -&gt; EC (Layout (Time irv) LogValue) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Log Inv. Prob. Mass&quot;</span></span><span>
+</span><span id="line-150"></span><span>    </span><span class="annot"><span class="annottext">EC (Layout (Time irv) LogValue) (PlotLines (Time irv) LogValue)
+-&gt; EC (Layout (Time irv) LogValue) ()
+forall (p :: * -&gt; * -&gt; *) x y.
+ToPlot p =&gt;
+EC (Layout x y) (p x y) -&gt; EC (Layout x y) ()
+</span><span class="hs-identifier hs-var">plot</span></span><span>
+</span><span id="line-151"></span><span>        </span><span class="annot"><span class="annottext">(EC (Layout (Time irv) LogValue) (PlotLines (Time irv) LogValue)
+ -&gt; EC (Layout (Time irv) LogValue) ())
+-&gt; EC (Layout (Time irv) LogValue) (PlotLines (Time irv) LogValue)
+-&gt; EC (Layout (Time irv) LogValue) ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [[(Time irv, LogValue)]]
+-&gt; EC (Layout (Time irv) LogValue) (PlotLines (Time irv) LogValue)
+forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
+</span><span class="hs-identifier hs-var">line</span></span><span>
+</span><span id="line-152"></span><span>            </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-153"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">((Time irv, ProbMass irv) -&gt; (Time irv, LogValue))
+-&gt; [(Time irv, ProbMass irv)] -&gt; [(Time irv, LogValue)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(ProbMass irv -&gt; LogValue)
+-&gt; (Time irv, ProbMass irv) -&gt; (Time irv, LogValue)
+forall b c a. (b -&gt; c) -&gt; (a, b) -&gt; (a, c)
+forall (p :: * -&gt; * -&gt; *) b c a.
+Bifunctor p =&gt;
+(b -&gt; c) -&gt; p a b -&gt; p a c
+</span><span class="hs-identifier hs-var">second</span></span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; LogValue
+</span><a href="#local-6989586621679109223"><span class="hs-identifier hs-var">cv</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679109224"><span class="hs-identifier hs-var">cdf</span></a></span><span>
+</span><span id="line-154"></span><span>                </span><span class="annot"><span class="annottext">[(Time irv, LogValue)]
+-&gt; [(Time irv, LogValue)] -&gt; [(Time irv, LogValue)]
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">[(Time irv, LogValue)]
+-&gt; (Time irv -&gt; [(Time irv, LogValue)])
+-&gt; Maybe (Time irv)
+-&gt; [(Time irv, LogValue)]
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679109225"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109225"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">2</span></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109221"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109225"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; LogValue
+</span><a href="#local-6989586621679109223"><span class="hs-identifier hs-var">cv</span></a></span><span> </span><span class="annot"><span class="annottext">(ProbMass irv -&gt; LogValue) -&gt; ProbMass irv -&gt; LogValue
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">irv -&gt; ProbMass irv
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; ProbMass icdf
+</span><a href="DeltaQ.Model.DeltaQ.html#tangibleMass"><span class="hs-identifier hs-var">tangibleMass</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109219"><span class="hs-identifier hs-var">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109222"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-155"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-156"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-157"></span><span>    </span><span id="local-6989586621679109224"><span class="annot"><span class="annottext">cdf :: [(Time irv, ProbMass irv)]
+</span><a href="#local-6989586621679109224"><span class="hs-identifier hs-var hs-var">cdf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall (t :: * -&gt; *) a b. Foldable t =&gt; (a -&gt; [b]) -&gt; t a -&gt; [b]
+</span><span class="hs-identifier hs-var">concatMap</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Time irv, ProbMass irv) -&gt; [(Time irv, ProbMass irv)])
+-&gt; ([(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)])
+-&gt; Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)]
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Time irv, ProbMass irv)
+-&gt; [(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">([Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [(Time irv, ProbMass irv)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+forall irv.
+DeltaQVisualisation irv =&gt;
+irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+</span><a href="DeltaQ.Model.Utilities.html#asDiscreteCDF"><span class="hs-identifier hs-var">asDiscreteCDF</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109219"><span class="hs-identifier hs-var">irv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span>
+</span><span id="line-158"></span><span>    </span><span id="local-6989586621679109221"><span class="annot"><span class="annottext">factor :: Time irv
+</span><a href="#local-6989586621679109221"><span class="hs-identifier hs-var hs-var">factor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">1.1</span></span><span>
+</span><span id="line-159"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109222"><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109222"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">irv -&gt; (Time irv, Maybe (Time irv))
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; (Time icdf, Maybe (Time icdf))
+</span><a href="DeltaQ.Model.DeltaQ.html#support"><span class="hs-identifier hs-var">support</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109219"><span class="hs-identifier hs-var">irv</span></a></span><span>
+</span><span id="line-160"></span><span>    </span><span id="local-6989586621679109223"><span class="annot"><span class="annottext">cv :: ProbMass irv -&gt; LogValue
+</span><a href="#local-6989586621679109223"><span class="hs-identifier hs-var hs-var">cv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; LogValue
+forall a. Fractional a =&gt; Rational -&gt; a
+</span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; LogValue)
+-&gt; (ProbMass irv -&gt; Rational) -&gt; ProbMass irv -&gt; LogValue
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; Rational
+forall a. Real a =&gt; a -&gt; Rational
+</span><span class="hs-identifier hs-var">toRational</span></span><span> </span><span class="annot"><span class="annottext">(ProbMass irv -&gt; Rational)
+-&gt; (ProbMass irv -&gt; ProbMass irv) -&gt; ProbMass irv -&gt; Rational
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">ProbMass irv -&gt; ProbMass irv
+forall a. ProbabilityMass a =&gt; a -&gt; a
+</span><a href="DeltaQ.Model.DeltaQ.html#complement"><span class="hs-identifier hs-var">complement</span></a></span><span>
+</span><span id="line-161"></span><span>
+</span><span id="line-162"></span><span id="local-6989586621679109258"><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotPDF"><span class="hs-identifier hs-type">plotPDF</span></a></span><span>
+</span><span id="line-163"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-164"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-166"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-167"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-type">DeltaQVisualisation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-168"></span><span>       </span><span class="hs-special">)</span><span>
+</span><span id="line-169"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-170"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-171"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Layout</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109258"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-172"></span><span id="plotPDF"><span class="annot"><span class="annottext">plotPDF :: forall irv.
+(PlotValue (ProbMass irv), PlotValue (Time irv),
+ RealFloat (Time irv), Show (Time irv), DeltaQVisualisation irv) =&gt;
+String -&gt; irv -&gt; Layout (Time irv) (ProbMass irv)
+</span><a href="DeltaQ.Model.Utilities.html#plotPDF"><span class="hs-identifier hs-var hs-var">plotPDF</span></a></span></span><span> </span><span id="local-6989586621679109299"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109299"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679109300"><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109300"><span class="hs-identifier hs-var">irv</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall l a. Default l =&gt; EC l a -&gt; l
+</span><span class="hs-identifier hs-var">execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout (Time irv) (ProbMass irv)) ()
+ -&gt; Layout (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-173"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109299"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><span id="line-174"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Time&quot;</span></span><span>
+</span><span id="line-175"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span>
+</span><span id="line-176"></span><span>        </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(AxisFn x -&gt; f (AxisFn x)) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_generate</span></span><span>
+</span><span id="line-177"></span><span>        </span><span class="annot"><span class="annottext">((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; AxisFn (Time irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+-&gt; (Time irv -&gt; AxisFn (Time irv))
+-&gt; Maybe (Time irv)
+-&gt; AxisFn (Time irv)
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+forall a. PlotValue a =&gt; AxisFn a
+</span><span class="hs-identifier hs-var">autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679109301"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109301"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+-&gt; (Time irv, Time irv) -&gt; AxisFn (Time irv)
+forall a. RealFloat a =&gt; LinearAxisParams a -&gt; (a, a) -&gt; AxisFn a
+</span><span class="hs-identifier hs-var">scaledAxis</span></span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+forall a. Default a =&gt; a
+</span><span class="hs-identifier hs-var">def</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109302"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109301"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109303"><span class="hs-identifier hs-var">u</span></a></span><span>
+</span><span id="line-178"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (ProbMass irv) -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis y -&gt; f (LayoutAxis y)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_y_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (ProbMass irv)
+  -&gt; Identity (LayoutAxis (ProbMass irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (ProbMass irv)
+    -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (ProbMass irv)
+-&gt; Identity (LayoutAxis (ProbMass irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Prob. Density&quot;</span></span><span>
+</span><span id="line-179"></span><span>    </span><span class="annot"><span class="annottext">EC
+  (Layout (Time irv) (ProbMass irv))
+  (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (p :: * -&gt; * -&gt; *) x y.
+ToPlot p =&gt;
+EC (Layout x y) (p x y) -&gt; EC (Layout x y) ()
+</span><span class="hs-identifier hs-var">plot</span></span><span>
+</span><span id="line-180"></span><span>        </span><span class="annot"><span class="annottext">(EC
+   (Layout (Time irv) (ProbMass irv))
+   (PlotLines (Time irv) (ProbMass irv))
+ -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [[(Time irv, ProbMass irv)]]
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
+</span><span class="hs-identifier hs-var">line</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;&quot;</span></span><span>
+</span><span id="line-181"></span><span>        </span><span class="annot"><span class="annottext">([[(Time irv, ProbMass irv)]]
+ -&gt; EC
+      (Layout (Time irv) (ProbMass irv))
+      (PlotLines (Time irv) (ProbMass irv)))
+-&gt; [[(Time irv, ProbMass irv)]]
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [[(Time irv, ProbMass irv)]]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Time irv, ProbMass irv) -&gt; [(Time irv, ProbMass irv)])
+-&gt; ([(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)])
+-&gt; Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)]
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679109304"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109304"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109305"><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109305"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109304"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+forall a. ProbabilityMass a =&gt; a
+</span><a href="DeltaQ.Model.DeltaQ.html#never"><span class="hs-identifier hs-var">never</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109304"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109305"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span><span>
+</span><span id="line-182"></span><span>        </span><span class="annot"><span class="annottext">([Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+ -&gt; [[(Time irv, ProbMass irv)]])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [[(Time irv, ProbMass irv)]]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+forall irv.
+DeltaQVisualisation irv =&gt;
+irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+</span><a href="DeltaQ.Model.Utilities.html#asDiscretePDF"><span class="hs-identifier hs-var">asDiscretePDF</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109300"><span class="hs-identifier hs-var">irv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span>
+</span><span id="line-183"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-184"></span><span>    </span><span id="local-6989586621679109302"><span class="annot"><span class="annottext">factor :: Time irv
+</span><a href="#local-6989586621679109302"><span class="hs-identifier hs-var hs-var">factor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">1.1</span></span><span>
+</span><span id="line-185"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-identifier">_</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109303"><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109303"><span class="hs-identifier hs-var">u</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">irv -&gt; (Time irv, Maybe (Time irv))
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; (Time icdf, Maybe (Time icdf))
+</span><a href="DeltaQ.Model.DeltaQ.html#support"><span class="hs-identifier hs-var">support</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109300"><span class="hs-identifier hs-var">irv</span></a></span><span>
+</span><span id="line-186"></span><span>
+</span><span id="line-187"></span><span id="local-6989586621679109316"><span class="annot"><a href="DeltaQ.Model.Utilities.html#plotPDFs"><span class="hs-identifier hs-type">plotPDFs</span></a></span><span>
+</span><span id="line-188"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-189"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlotValue</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-190"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RealFloat</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-191"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Show</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-192"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-type">DeltaQVisualisation</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span>
+</span><span id="line-193"></span><span>       </span><span class="hs-special">)</span><span>
+</span><span id="line-194"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-195"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-196"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Layout</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-type">Time</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-type">ProbMass</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109316"><span class="hs-identifier hs-type">irv</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-197"></span><span id="plotPDFs"><span class="annot"><span class="annottext">plotPDFs :: forall irv.
+(PlotValue (ProbMass irv), PlotValue (Time irv),
+ RealFloat (Time irv), Show (Time irv), DeltaQVisualisation irv) =&gt;
+String -&gt; [(String, irv)] -&gt; Layout (Time irv) (ProbMass irv)
+</span><a href="DeltaQ.Model.Utilities.html#plotPDFs"><span class="hs-identifier hs-var hs-var">plotPDFs</span></a></span></span><span> </span><span id="local-6989586621679109359"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109359"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679109360"><span class="annot"><span class="annottext">[(String, irv)]
+</span><a href="#local-6989586621679109360"><span class="hs-identifier hs-var">irvs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall l a. Default l =&gt; EC l a -&gt; l
+</span><span class="hs-identifier hs-var">execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout (Time irv) (ProbMass irv)) ()
+ -&gt; Layout (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+-&gt; Layout (Time irv) (ProbMass irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-198"></span><span>    </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109359"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><span id="line-199"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Time&quot;</span></span><span>
+</span><span id="line-200"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis x -&gt; f (LayoutAxis x)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_x_axis</span></span><span>
+</span><span id="line-201"></span><span>        </span><span class="annot"><span class="annottext">((LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+    -&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv)))
+-&gt; (AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+-&gt; LayoutAxis (Time irv) -&gt; Identity (LayoutAxis (Time irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(AxisFn x -&gt; f (AxisFn x)) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_generate</span></span><span>
+</span><span id="line-202"></span><span>        </span><span class="annot"><span class="annottext">((AxisFn (Time irv) -&gt; Identity (AxisFn (Time irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; AxisFn (Time irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+-&gt; (Time irv -&gt; AxisFn (Time irv))
+-&gt; Maybe (Time irv)
+-&gt; AxisFn (Time irv)
+forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+</span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">AxisFn (Time irv)
+forall a. PlotValue a =&gt; AxisFn a
+</span><span class="hs-identifier hs-var">autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679109361"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109361"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+-&gt; (Time irv, Time irv) -&gt; AxisFn (Time irv)
+forall a. RealFloat a =&gt; LinearAxisParams a -&gt; (a, a) -&gt; AxisFn a
+</span><span class="hs-identifier hs-var">scaledAxis</span></span><span> </span><span class="annot"><span class="annottext">LinearAxisParams (Time irv)
+forall a. Default a =&gt; a
+</span><span class="hs-identifier hs-var">def</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109362"><span class="hs-identifier hs-var">factor</span></a></span><span> </span><span class="annot"><span class="annottext">Time irv -&gt; Time irv -&gt; Time irv
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109361"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe (Time irv)
+</span><a href="#local-6989586621679109363"><span class="hs-identifier hs-var">maxSupport</span></a></span><span>
+</span><span id="line-203"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis (ProbMass irv) -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall x y (f :: * -&gt; *).
+Functor f =&gt;
+(LayoutAxis y -&gt; f (LayoutAxis y)) -&gt; Layout x y -&gt; f (Layout x y)
+</span><span class="hs-identifier hs-var">layout_y_axis</span></span><span> </span><span class="annot"><span class="annottext">((LayoutAxis (ProbMass irv)
+  -&gt; Identity (LayoutAxis (ProbMass irv)))
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; ((String -&gt; Identity String)
+    -&gt; LayoutAxis (ProbMass irv)
+    -&gt; Identity (LayoutAxis (ProbMass irv)))
+-&gt; (String -&gt; Identity String)
+-&gt; Layout (Time irv) (ProbMass irv)
+-&gt; Identity (Layout (Time irv) (ProbMass irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Identity String)
+-&gt; LayoutAxis (ProbMass irv)
+-&gt; Identity (LayoutAxis (ProbMass irv))
+forall x (f :: * -&gt; *).
+Functor f =&gt;
+(String -&gt; f String) -&gt; LayoutAxis x -&gt; f (LayoutAxis x)
+</span><span class="hs-identifier hs-var">laxis_title</span></span><span> </span><span class="annot"><span class="annottext">((String -&gt; Identity String)
+ -&gt; Layout (Time irv) (ProbMass irv)
+ -&gt; Identity (Layout (Time irv) (ProbMass irv)))
+-&gt; String -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall s (m :: * -&gt; *) a b.
+MonadState s m =&gt;
+ASetter s s a b -&gt; b -&gt; m ()
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Prob. Density&quot;</span></span><span>
+</span><span id="line-204"></span><span>    </span><span class="annot"><span class="annottext">((String, irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; [(String, irv)] -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">(String, irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall {irv}.
+DeltaQVisualisation irv =&gt;
+(String, irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+</span><a href="#local-6989586621679109364"><span class="hs-identifier hs-var">plotOne</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, irv)]
+</span><a href="#local-6989586621679109360"><span class="hs-identifier hs-var">irvs</span></a></span><span>
+</span><span id="line-205"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-206"></span><span>    </span><span id="local-6989586621679109363"><span class="annot"><span class="annottext">maxSupport :: Maybe (Time irv)
+</span><a href="#local-6989586621679109363"><span class="hs-identifier hs-var hs-var">maxSupport</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[Maybe (Time irv)] -&gt; Maybe (Time irv)
+forall a. Ord a =&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a. (Foldable t, Ord a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">maximum</span></span><span> </span><span class="annot"><span class="annottext">([Maybe (Time irv)] -&gt; Maybe (Time irv))
+-&gt; [Maybe (Time irv)] -&gt; Maybe (Time irv)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((String, irv) -&gt; Maybe (Time irv))
+-&gt; [(String, irv)] -&gt; [Maybe (Time irv)]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(Time irv, Maybe (Time irv)) -&gt; Maybe (Time irv)
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((Time irv, Maybe (Time irv)) -&gt; Maybe (Time irv))
+-&gt; ((String, irv) -&gt; (Time irv, Maybe (Time irv)))
+-&gt; (String, irv)
+-&gt; Maybe (Time irv)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">irv -&gt; (Time irv, Maybe (Time irv))
+forall icdf. DeltaQ icdf =&gt; icdf -&gt; (Time icdf, Maybe (Time icdf))
+</span><a href="DeltaQ.Model.DeltaQ.html#support"><span class="hs-identifier hs-var">support</span></a></span><span> </span><span class="annot"><span class="annottext">(irv -&gt; (Time irv, Maybe (Time irv)))
+-&gt; ((String, irv) -&gt; irv)
+-&gt; (String, irv)
+-&gt; (Time irv, Maybe (Time irv))
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(String, irv) -&gt; irv
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(String, irv)]
+</span><a href="#local-6989586621679109360"><span class="hs-identifier hs-var">irvs</span></a></span><span>
+</span><span id="line-207"></span><span>    </span><span id="local-6989586621679109362"><span class="annot"><span class="annottext">factor :: Time irv
+</span><a href="#local-6989586621679109362"><span class="hs-identifier hs-var hs-var">factor</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Time irv
+</span><span class="hs-number">1.1</span></span><span>
+</span><span id="line-208"></span><span>    </span><span id="local-6989586621679109364"><span class="annot"><span class="annottext">plotOne :: (String, irv) -&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+</span><a href="#local-6989586621679109364"><span class="hs-identifier hs-var hs-var">plotOne</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109400"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109400"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109401"><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109401"><span class="hs-identifier hs-var">irv</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-209"></span><span>        </span><span class="annot"><span class="annottext">EC
+  (Layout (Time irv) (ProbMass irv))
+  (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall (p :: * -&gt; * -&gt; *) x y.
+ToPlot p =&gt;
+EC (Layout x y) (p x y) -&gt; EC (Layout x y) ()
+</span><span class="hs-identifier hs-var">plot</span></span><span>
+</span><span id="line-210"></span><span>            </span><span class="annot"><span class="annottext">(EC
+   (Layout (Time irv) (ProbMass irv))
+   (PlotLines (Time irv) (ProbMass irv))
+ -&gt; EC (Layout (Time irv) (ProbMass irv)) ())
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+-&gt; EC (Layout (Time irv) (ProbMass irv)) ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+-&gt; [[(Time irv, ProbMass irv)]]
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
+</span><span class="hs-identifier hs-var">line</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109400"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-211"></span><span>            </span><span class="annot"><span class="annottext">([[(Time irv, ProbMass irv)]]
+ -&gt; EC
+      (Layout (Time irv) (ProbMass irv))
+      (PlotLines (Time irv) (ProbMass irv)))
+-&gt; [[(Time irv, ProbMass irv)]]
+-&gt; EC
+     (Layout (Time irv) (ProbMass irv))
+     (PlotLines (Time irv) (ProbMass irv))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+ -&gt; [(Time irv, ProbMass irv)])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [[(Time irv, ProbMass irv)]]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">((Time irv, ProbMass irv) -&gt; [(Time irv, ProbMass irv)])
+-&gt; ([(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)])
+-&gt; Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]
+-&gt; [(Time irv, ProbMass irv)]
+forall a c b. (a -&gt; c) -&gt; (b -&gt; c) -&gt; Either a b -&gt; c
+</span><span class="hs-identifier hs-var">either</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679109402"><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109402"><span class="hs-identifier hs-var">t'</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109403"><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109403"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109402"><span class="hs-identifier hs-var">t'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+forall a. ProbabilityMass a =&gt; a
+</span><a href="DeltaQ.Model.DeltaQ.html#never"><span class="hs-identifier hs-var">never</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Time irv
+</span><a href="#local-6989586621679109402"><span class="hs-identifier hs-var">t'</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">ProbMass irv
+</span><a href="#local-6989586621679109403"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(Time irv, ProbMass irv)] -&gt; [(Time irv, ProbMass irv)]
+forall a. a -&gt; a
+</span><span class="hs-identifier hs-var">id</span></span><span class="hs-special">)</span><span>
+</span><span id="line-212"></span><span>            </span><span class="annot"><span class="annottext">([Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+ -&gt; [[(Time irv, ProbMass irv)]])
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+-&gt; [[(Time irv, ProbMass irv)]]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+forall irv.
+DeltaQVisualisation irv =&gt;
+irv
+-&gt; Int
+-&gt; [Either (Time irv, ProbMass irv) [(Time irv, ProbMass irv)]]
+</span><a href="DeltaQ.Model.Utilities.html#asDiscretePDF"><span class="hs-identifier hs-var">asDiscretePDF</span></a></span><span> </span><span class="annot"><span class="annottext">irv
+</span><a href="#local-6989586621679109401"><span class="hs-identifier hs-var">irv</span></a></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1000</span></span><span>
+</span><span id="line-213"></span></pre></body></html>
