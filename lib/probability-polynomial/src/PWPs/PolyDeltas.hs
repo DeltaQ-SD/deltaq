@@ -31,7 +31,7 @@ The position of a Delta is stored as its basepoint when doing piecewise operatio
 data PolyDelta a = Pd (Poly a) | D a
     deriving (Show)
 
-instance Eq a => Eq (PolyDelta a) where
+instance (Eq a, Num a) => Eq (PolyDelta a) where
     Pd x == Pd y = x == y
     D x == D y = x == y
     Pd _ == D _ = False
@@ -82,7 +82,7 @@ instance MyConstraints a => Evaluable a (PolyDelta a) where
     scale = scalePD
 
 -- | Removes excess basepoints if the objects on either side are the same
-aggregate :: Eq a => [(a, PolyDelta a)] -> [(a, PolyDelta a)]
+aggregate :: (Eq a, Num a) => [(a, PolyDelta a)] -> [(a, PolyDelta a)]
 aggregate [] = error "Empty list of polydeltas"
 aggregate [x] = [x] -- need at least two elements to do anything
 aggregate ((bx, x) : ys@((_, y) : xs))
