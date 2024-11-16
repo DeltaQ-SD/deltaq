@@ -17,6 +17,8 @@ import Prelude
 import Numeric.Polynomial.Simple
     ( Poly
     , constant
+    , convolve
+    , countRoots
     , degree
     , differentiate
     , eval
@@ -36,12 +38,15 @@ import Test.Hspec
     )
 import Test.QuickCheck
     ( Arbitrary
+    , NonNegative (..)
+    , Positive (..)
     , (===)
     , (==>)
     , (.&&.)
     , arbitrary
     , counterexample
     , listOf
+    , mapSize
     , property
     )
 
@@ -53,7 +58,7 @@ spec = do
     describe "constant" $ do
         it "eval" $ property $
             \c (x :: Rational) ->
-                eval (constant c) x  ===  c 
+                eval (constant c) x  ===  c
 
     describe "scale" $ do
         it "eval" $ property $
@@ -111,7 +116,7 @@ spec = do
         it "Leibniz rule" $ property $
             \(p :: Poly Rational) q ->
                 differentiate (p * q)
-                    ===  (differentiate p) * q + p * (differentiate q)
+                    ===  differentiate p * q + p * differentiate q
 
     describe "translate" $ do
         it "…" $ do
@@ -130,8 +135,63 @@ spec = do
                 $ differentiate (translate y p)
                     ===  translate y (differentiate p)
 
+    describe "convolve" $ do
+        it "product of integrals" $ property $ mapSize (`div` 6) $
+            \(NonNegative x1) (Positive d1) (NonNegative x2) (Positive d2)
+              p (q :: Poly Rational) ->
+                let p1 = (x1, x1 + d1, p)
+                    q1 = (x2, x2 + d2, q)
+                in
+                    integrateInterval p1 * integrateInterval q1
+                        === integratePieces (convolve p1 q1)
+
+    describe "countRoots" $ do
+        it "disjoint roots and interval" $ property $ mapSize (`div` 5) $
+            \(DisjointSorted roots) x (Positive d) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    -- Vieta's formula
+                    p = product $ map (\r -> xx - constant r) roots
+                    y = x + d
+                in
+                    (x `notElem` roots) && (y `notElem` roots)
+                    ==> (countRoots (x, y, p)
+                        ===  countIntervalMembers (x, y) roots)
+
+{-----------------------------------------------------------------------------
+    Helper functions
+------------------------------------------------------------------------------}
+-- | Definite integral of a polynomial over an interval.
+integrateInterval
+    :: (Eq a, Num a, Fractional a) => (a, a, Poly a) -> a
+integrateInterval (x, y, p) = eval pp y - eval pp x
+  where pp = integrate p
+
+-- | Definite integral of a sequence of polynomials over pieces.
+integratePieces
+    :: (Eq a, Num a, Fractional a) => [(a, Poly a)] -> a
+integratePieces = sum . map integrateInterval . intervals
+  where
+    intervals pieces =
+        [ (x, y, p)
+        | ((x, p), y) <- zip pieces $ drop 1 $ map fst pieces
+        ]
+
+-- | Count the number of list elements that fall in a given interval.
+countIntervalMembers :: Ord a => (a, a) -> [a] -> Int 
+countIntervalMembers (xl, xr) =
+    length . filter (\x -> xl < x && x <= xr)
+
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
 instance Arbitrary (Poly Rational) where
     arbitrary = fromCoefficients <$> listOf arbitrary
+
+-- | A list of disjoint and sorted elements.
+newtype DisjointSorted a = DisjointSorted [a]
+    deriving (Eq, Show)
+
+instance Arbitrary (DisjointSorted Rational) where
+    arbitrary =
+        DisjointSorted . drop 1 . scanl (\s (Positive d) -> s + d) 0
+            <$> listOf arbitrary
