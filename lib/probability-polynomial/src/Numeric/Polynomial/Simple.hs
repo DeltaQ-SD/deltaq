@@ -6,7 +6,7 @@
 
 {-|
 Copyright   : (c) Peter Thompson, 2023
-License     : BSD-2-Clause
+License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
 Stability   : experimental
 
@@ -70,8 +70,9 @@ newtype Poly a = Poly [a]
 instance NFData a => NFData (Poly a)
 instance NFData1 Poly
 
-instance Eq a => Eq (Poly a) where
-    Poly x == Poly y = x == y
+instance (Eq a, Num a) => Eq (Poly a) where
+    x == y =
+        toCoefficients (trimPoly x) == toCoefficients (trimPoly y)
 
 {-| The constant polynomial.
 
@@ -221,6 +222,8 @@ display p (l, u) s = (l, eval p l) : goDisplay (l + s)
 {-| Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
 assuming that @x1 ≠ x2@.
 
+If the points are equal, we return a constant polynomial.
+
 > let p = lineFromTo (x1, y1) (x2, y2)
 >
 > degree p <= 1
@@ -229,6 +232,7 @@ assuming that @x1 ≠ x2@.
 -}
 lineFromTo :: (Eq a, Fractional a) => (a, a) -> (a, a) -> Poly a
 lineFromTo (x1, y1) (x2, y2)
+    | x1 == x2 = constant y1
     | slope == 0 = constant y1
     | otherwise = fromCoefficients [shift, slope]
   where

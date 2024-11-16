@@ -77,6 +77,9 @@ test-suite test
   
   main-is:
     Spec.hs
+  
+  other-modules:
+    Numeric.Polynomial.SimpleSpec
 
 benchmark probability-polynomial-benchmark
   import:           warnings
