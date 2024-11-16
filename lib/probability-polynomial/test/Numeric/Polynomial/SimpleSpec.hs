@@ -18,6 +18,7 @@ import Numeric.Polynomial.Simple
     ( Poly
     , constant
     , convolve
+    , countRoots
     , degree
     , differentiate
     , eval
@@ -144,6 +145,18 @@ spec = do
                     integrateInterval p1 * integrateInterval q1
                         === integratePieces (convolve p1 q1)
 
+    describe "countRoots" $ do
+        it "disjoint roots and interval" $ property $ mapSize (`div` 5) $
+            \(DisjointSorted roots) x (Positive d) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    -- Vieta's formula
+                    p = product $ map (\r -> xx - constant r) roots
+                    y = x + d
+                in
+                    (x `notElem` roots) && (y `notElem` roots)
+                    ==> (countRoots (x, y, p)
+                        ===  countIntervalMembers (x, y) roots)
+
 {-----------------------------------------------------------------------------
     Helper functions
 ------------------------------------------------------------------------------}
@@ -163,8 +176,22 @@ integratePieces = sum . map integrateInterval . intervals
         | ((x, p), y) <- zip pieces $ drop 1 $ map fst pieces
         ]
 
+-- | Count the number of list elements that fall in a given interval.
+countIntervalMembers :: Ord a => (a, a) -> [a] -> Int 
+countIntervalMembers (xl, xr) =
+    length . filter (\x -> xl < x && x <= xr)
+
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
 instance Arbitrary (Poly Rational) where
     arbitrary = fromCoefficients <$> listOf arbitrary
+
+-- | A list of disjoint and sorted elements.
+newtype DisjointSorted a = DisjointSorted [a]
+    deriving (Eq, Show)
+
+instance Arbitrary (DisjointSorted Rational) where
+    arbitrary =
+        DisjointSorted . drop 1 . scanl (\s (Positive d) -> s + d) 0
+            <$> listOf arbitrary
