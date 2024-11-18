@@ -435,10 +435,14 @@ centiles probabilities dQ
             Poly.root eps x (basepoint first, basepoint second) (object first)
                 : findCentiles maxProb xs remaining
         -- otherwise no further centiles can be in this piece, so move on to the next piece
+        -- having first checked for a jump between the pieces
+        | secondValue <= x && x < nextValue
+            = Just (basepoint second) : findCentiles maxProb xs remaining
         | otherwise = findCentiles maxProb cs rest
-      where
-        firstValue = evaluate (basepoint first) (object first)
-        secondValue = evaluate (basepoint second) (object first)
+        where
+            firstValue  = evaluate (basepoint first) (object first)
+            secondValue = evaluate (basepoint second) (object first)
+            nextValue   = evaluate (basepoint second) (object second)
     findCentiles _ _ _ = error "Unexpected centile case"
 
 data Moments a = Moments
