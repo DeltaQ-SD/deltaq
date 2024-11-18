@@ -1,3 +1,8 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+
 {-|
 Copyright   : (c) Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
@@ -12,7 +17,10 @@ module Numeric.Function.Piecewise
     , toAscPieces
     , fromInterval
     , intervals
+    , evaluate
     ) where
+
+import qualified Data.Function.Class as Fun
 
 {-----------------------------------------------------------------------------
     Type
@@ -107,4 +115,29 @@ fromInterval (x,y) o = Pieces [Piece start o, Piece end 0]
 intervals :: Piecewise a o -> [(a,a)]
 intervals (Pieces ys) =
     zip (map basepoint ys) (drop 1 $ map basepoint ys)
+
+{-|
+Evaluate a polynomial at a point.
+
+> eval :: (Fun.Function o, Num o, Ord a, Num (Codomain o))
+>         => Piecewise a o -> a -> Codomain o
+-}
+instance (Fun.Function o, Num o, Ord a, a ~ Fun.Domain o, Num (Fun.Codomain o))
+    => Fun.Function (Piecewise a o)
+  where
+    type instance Domain (Piecewise a o) = a
+    type instance Codomain (Piecewise a o) = Fun.Codomain o
+    eval = evaluate
+
+-- | Evaluate the piecewise function at a point.
+-- See 'Piecewise' for the semantics.
+evaluate
+    :: (Fun.Function o, Num o, Ord a, Num (Fun.Codomain o), a ~ Fun.Domain o)
+    => Piecewise a o -> a -> Fun.Codomain o
+evaluate (Pieces pieces) x = go 0 pieces
+ where
+    go before [] = Fun.eval before x
+    go before (p:ps)
+        | basepoint p <= x = go (object p) ps
+        | otherwise = Fun.eval before x
 
