@@ -66,6 +66,11 @@ data Piecewise a o
     > f = Pieces [Piece x1 o1, Piece x2 o2, …, Piece xn on]
 -}
 
+-- | Internal.
+-- Map the objects of pieces.
+mapPieces :: (o -> o') -> Piecewise a o -> Piecewise a o'
+mapPieces f (Pieces ps) = Pieces [ Piece x (f o) | Piece x o <- ps ]
+
 {-----------------------------------------------------------------------------
     Operations
 ------------------------------------------------------------------------------}
