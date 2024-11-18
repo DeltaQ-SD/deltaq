@@ -476,12 +476,13 @@ Constant and linear polynomials, @degree p <= 1@, are treated as special cases.
 findRoot
     :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
 findRoot precision (l, u) p
-    | precision <= 0 = error "Invalid precision value"
-    -- the polynomial is zero, so the whole interval is a root, so return the basepoint
+    -- if the polynomial is zero, the whole interval is a root, so return the basepoint
     | degp < 0 = Just l
-    -- the poly is a non-zero constant so no root is present
+    -- if the poly is a non-zero constant, no root is present
     | degp == 0 = Nothing
+    -- if the polynomial has degree 1, can calculate the root exactly
     | degp == 1 = Just (-(head ps / last ps)) -- p0 + p1x = 0 => x = -p0/p1
+    | precision <= 0 = error "Invalid precision value"
     | otherwise = Just (halveInterval precision l u pl pu)
   where
     Poly ps = p
