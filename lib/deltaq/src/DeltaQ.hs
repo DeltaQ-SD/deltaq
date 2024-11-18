@@ -97,7 +97,7 @@ The distribution of delay times for a __sequence of hops__ is
 For example, the probability of five hops to succeed within 2 seconds
 is
 
-> > fromRational (successBefore (hops 5) 2) :: Double
+> > fromRational (successWithin (hops 5) 2) :: Double
 > 0.9547325102880658
 
 

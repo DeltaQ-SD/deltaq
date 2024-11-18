@@ -173,8 +173,11 @@ class   ( Eq (Probability o)
     -- | Probability of /not/ finishing.
     failure :: o -> Probability o
 
-    -- | Probability of finishing within the given time.
-    successBefore :: o -> Duration o -> Probability o
+    -- | Probability of finishing within the given time @t@.
+    --
+    -- \"Within\" is inclusive,
+    -- i.e. this returns the probability that the finishing time is @<= t@.
+    successWithin :: o -> Duration o -> Probability o
 
     -- | Given a probability @p@, return the smallest time @t@
     -- such that the probability of completing within that time
@@ -268,25 +271,22 @@ equality may be up to numerical accuracy.
 > failure (choice p x y) = p * failure x + (1-p) * failure y
 > failure (uniform r s)  = 0
 
-'successBefore'
+'successWithin'
 
-TODO: Boundary point - distinguish \"before\" from \"not after".
-Important for delta functions.
-
-> successBefore never    t = 0
-> successBefore (wait s) t = if t <= s then 0 else 1
+> successWithin never    t = 0
+> successWithin (wait s) t = if t < s then 0 else 1
 >
-> successBefore (x ./\. y) t =
->   successBefore t x * successBefore t y
-> successBefore (x .\/. y) t =
->   1 - (1 - successBefore t x) * (1 - successBefore t y)
+> successWithin (x ./\. y) t =
+>   successWithin t x * successWithin t y
+> successWithin (x .\/. y) t =
+>   1 - (1 - successWithin t x) * (1 - successWithin t y)
 >
-> successBefore (choice p x y) t =
->   p * successBefore t x + (1-p) * successBefore t y
-> successBefore (uniform r s) t
->   | t <= r          = 0
->   | r < t && t <= s = (t-r) / (s-r)
->   | s < t           = 1
+> successWithin (choice p x y) t =
+>   p * successWithin t x + (1-p) * successWithin t y
+> successWithin (uniform r s) t
+>   | t < r           = 0
+>   | r <= t && t < s = (t-r) / (s-r)
+>   | s <= t          = 1
 
 'quantile'
 

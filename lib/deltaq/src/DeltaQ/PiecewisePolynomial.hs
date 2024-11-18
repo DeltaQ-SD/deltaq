@@ -69,9 +69,9 @@ instance DeltaQ (Durations Rational) where
         start = min a b
         end = max a b
 
-    successBefore o t
+    successWithin o t
         | Occurs t < earliest o = 0
-        | deadline o < Occurs t = 1
+        | deadline o <= Occurs t = 1
         | otherwise = PWP.cumulativeMass (unDurations o) t
 
     failure (Durations x) =
