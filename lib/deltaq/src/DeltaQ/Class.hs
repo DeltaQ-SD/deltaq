@@ -135,7 +135,12 @@ instance Applicative Eventually where
 --
 -- Specifically, 'DeltaQ' is the probability distribution
 -- of finish times for an outcome.
-class (Num (Probability o), Fractional (Probability o), Outcome o)
+class   ( Eq (Probability o)
+        , Enum (Probability o)
+        , Num (Probability o)
+        , Fractional (Probability o)
+        , Outcome o
+        )
     => DeltaQ o
   where
     -- | Numerical type representing probabilities in $[0,1]$.
