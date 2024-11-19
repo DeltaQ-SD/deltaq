@@ -9,6 +9,7 @@ module Numeric.Function.Piecewise
     ( Piecewise
     , zero
     , fromAscPieces
+    , toAscPieces
     , fromInterval
     , intervals
     ) where
@@ -85,6 +86,11 @@ zero = Pieces []
 -- /The precondition (`map fst` of input list is ascending) is not checked./
 fromAscPieces :: Ord a => [(a,o)] -> Piecewise a o
 fromAscPieces = Pieces . map (uncurry Piece)
+
+-- | Convert the piecewise function to a list of contiguous pieces
+-- where the starting points of the pieces are in ascending order.
+toAscPieces :: Ord a => Piecewise a o -> [(a,o)]
+toAscPieces (Pieces xos) = [ (x, o) | Piece x o <- xos ]
 
 -- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
 -- from a single function @o@ by restricting it to the
