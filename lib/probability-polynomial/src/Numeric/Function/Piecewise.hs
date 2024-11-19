@@ -18,6 +18,7 @@ module Numeric.Function.Piecewise
     , fromInterval
     , intervals
     , evaluate
+    , zipPointwise
     ) where
 
 import qualified Data.Function.Class as Fun
@@ -141,3 +142,51 @@ evaluate (Pieces pieces) x = go 0 pieces
         | basepoint p <= x = go (object p) ps
         | otherwise = Fun.eval before x
 
+-- | Combine two piecewise functions by combining the pieces
+-- with a pointwise operation that preserves @0@.
+--
+-- For example, `(+)` and `(*)` are pointwise operations on functions,
+-- but convolution is not a pointwise operation.
+--
+-- Preconditions on the argument @f@:
+--
+-- * @f 0 0 = 0@
+-- * @f@ is a pointwise operations on functions,
+--   e.g. commutes with pointwise evaluation.
+--
+-- /The preconditions are not checked!/
+zipPointwise
+    :: (Ord a, Num o)
+    => (o -> o -> o)
+        -- ^ @f@
+    -> Piecewise a o -> Piecewise a o -> Piecewise a o
+zipPointwise f ps = mapPieces (uncurry f) . zipPieces ps
+
+-- | Internal.
+--
+-- Combine two 'Piecewise' by pairing pieces on the same intervals.
+-- It is usually necessary to split the intervals futher until
+-- the intervals align exactly.
+zipPieces
+    :: (Ord a, Num b, Num c)
+    => Piecewise a b -> Piecewise a c -> Piecewise a (b, c)
+zipPieces (Pieces xs') (Pieces ys') =
+    Pieces $ go 0 xs' 0 ys'
+  where
+    -- We split the intervals and combine the pieces in a single pass.
+    --
+    -- The algorithm is similar to mergesort:
+    -- We walk both lists in parallel and generate a new piece by
+    -- * taking the basepoint of the nearest piece
+    -- * and combining it with the object that was overhanging from
+    --   the previous piece (`xhang`, `yhang`)
+    go _ [] _ [] = []
+    go _ (Piece x ox : xstail) yhang [] =
+        Piece x (ox, yhang) : go ox xstail yhang []
+    go xhang [] _ (Piece y oy : ystail) =
+        Piece y (xhang, oy) : go xhang [] oy ystail
+    go xhang xs@(Piece x ox : xstail) yhang ys@(Piece y oy : ystail) =
+        case compare x y of
+            LT -> Piece x (ox, yhang) : go ox xstail yhang ys
+            EQ -> Piece x (ox, oy)    : go ox xstail oy ystail
+            GT -> Piece y (xhang, oy) : go xhang xs  oy ystail

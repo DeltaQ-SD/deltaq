@@ -24,6 +24,8 @@ import Numeric.Function.Piecewise
     , fromAscPieces
     , fromInterval
     , intervals
+    , toAscPieces
+    , zipPointwise
     )
 import Test.Hspec
     ( Spec
@@ -67,6 +69,21 @@ spec = do
             \x y z ->
                 member z (intersect x y)  ===  (member z x && member z y)
 
+    describe "zipPointwise" $ do
+        it "intersects intervals" $ property $
+            \p (q :: Piecewise Rational Integer) ->
+                allIntervals (zipPointwise (+) p q)
+                === [ i
+                    | ip <- allIntervals p
+                    , iq <- allIntervals q
+                    , let i = intersect ip iq
+                    , i /= Empty
+                    ]
+
+        it "eval" $ property $
+            \p (q :: Piecewise Rational Linear) x ->
+                eval (zipPointwise (+) p q) x
+                === (eval p x + eval q x)
 
 {-----------------------------------------------------------------------------
     Helper types
@@ -137,12 +154,13 @@ mkFromTo x y = if x < y then FromTo x y else Empty
 -- | Return all intervals, 
 allIntervals :: Piecewise Q o -> [Interval]
 allIntervals pieces
-    | null is = [All]
+    | null xs = [All]
     | otherwise = [Before xmin] <> map (uncurry FromTo) is <> [After xmax]
   where
-    is = intervals pieces
-    xmin = minimum (map fst is)
-    xmax = maximum (map snd is)
+    xs = map fst (toAscPieces pieces)
+    is = zip xs (drop 1 xs)
+    xmin = minimum xs
+    xmax = maximum xs
 
 {-----------------------------------------------------------------------------
     Random generators
