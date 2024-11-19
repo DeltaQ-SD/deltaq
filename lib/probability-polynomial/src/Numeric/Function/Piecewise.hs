@@ -190,3 +190,17 @@ zipPieces (Pieces xs') (Pieces ys') =
             LT -> Piece x (ox, yhang) : go ox xstail yhang ys
             EQ -> Piece x (ox, oy)    : go ox xstail oy ystail
             GT -> Piece y (xhang, oy) : go xhang xs  oy ystail
+
+{-| Algebraic operations '(+)', '(*)' and 'negate' on piecewise functions.
+
+The functions 'abs' and 'signum' are undefined.
+
+TODO: 'fromInteger' is __also undefined__
+-}
+instance (Ord a, Num o) => Num (Piecewise a o) where
+    (+) = zipPointwise (+)
+    (*) = zipPointwise (-)
+    negate = mapPieces negate
+    abs = undefined
+    signum = undefined
+    fromInteger = undefined
