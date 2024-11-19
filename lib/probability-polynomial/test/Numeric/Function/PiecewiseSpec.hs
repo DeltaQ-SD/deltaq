@@ -21,6 +21,7 @@ import Data.Function.Class
     )
 import Numeric.Function.Piecewise
     ( Piecewise
+    , fromAscPieces
     , fromInterval
     , intervals
     )
@@ -36,6 +37,7 @@ import Test.QuickCheck
     , (===)
     , arbitrary
     , frequency
+    , listOf
     , property
     )
 
@@ -165,3 +167,18 @@ instance Arbitrary Interval where
         , (3, After <$> arbitrary)
         , (20, genFromTo)
         ]
+
+-- | A list of disjoint and sorted elements.
+newtype DisjointSorted a = DisjointSorted [a]
+    deriving (Eq, Show)
+
+instance Arbitrary (DisjointSorted Rational) where
+    arbitrary =
+        DisjointSorted . drop 1 . scanl (\s (Positive d) -> s + d) 0
+            <$> listOf arbitrary
+
+instance Arbitrary o => Arbitrary (Piecewise Rational o) where
+    arbitrary = do
+        DisjointSorted xs <- arbitrary
+        os <- mapM (const arbitrary) xs
+        pure $ fromAscPieces $ zip xs os
