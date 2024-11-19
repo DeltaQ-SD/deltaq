@@ -8,6 +8,7 @@ Description : Piecewise functions on the number line.
 module Numeric.Function.Piecewise
     ( Piecewise
     , zero
+    , fromAscPieces
     , fromInterval
     , intervals
     ) where
@@ -78,6 +79,12 @@ mapPieces f (Pieces ps) = Pieces [ Piece x (f o) | Piece x o <- ps ]
 -- | The function which is zero everywhere.
 zero :: Piecewise a o
 zero = Pieces []
+
+-- | Build a piecewise function from an ascending list of contiguous pieces.
+--
+-- /The precondition (`map fst` of input list is ascending) is not checked./
+fromAscPieces :: Ord a => [(a,o)] -> Piecewise a o
+fromAscPieces = Pieces . map (uncurry Piece)
 
 -- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
 -- from a single function @o@ by restricting it to the
