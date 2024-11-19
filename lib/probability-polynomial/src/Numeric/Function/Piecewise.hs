@@ -7,6 +7,7 @@ Description : Piecewise functions on the number line.
 -}
 module Numeric.Function.Piecewise
     ( Piecewise
+    , zero
     , fromInterval
     , intervals
     ) where
@@ -74,6 +75,10 @@ mapPieces f (Pieces ps) = Pieces [ Piece x (f o) | Piece x o <- ps ]
 {-----------------------------------------------------------------------------
     Operations
 ------------------------------------------------------------------------------}
+-- | The function which is zero everywhere.
+zero :: Piecewise a o
+zero = Pieces []
+
 -- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
 -- from a single function @o@ by restricting it to the
 -- to half-open interval @x1 <= x < x2@.
