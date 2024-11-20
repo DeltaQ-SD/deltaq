@@ -3,6 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 
 {-|
 Copyright   : (c) Peter Thompson, 2023
@@ -54,6 +55,8 @@ import GHC.Generics
 import Math.Combinatorics.Exact.Binomial -- needed to automatically derive NFData
     ( choose
     )
+
+import qualified Data.Function.Class as Fun
 import qualified PWPs.PiecewiseClasses as Classes
 
 {-----------------------------------------------------------------------------
@@ -183,6 +186,18 @@ instance (Eq a, Num a) => Num (Poly a) where
 
 {-|
 Evaluate a polynomial at a point.
+
+> eval :: Poly a -> a -> a
+-}
+instance Num a => Fun.Function (Poly a) where
+    type instance Domain (Poly a) = a
+    type instance Codomain (Poly a) = a
+    eval = eval
+
+{-|
+Evaluate a polynomial at a point.
+
+> eval :: Poly a -> a -> a
 
 Uses Horner's method to minimise the number of multiplications.
 
