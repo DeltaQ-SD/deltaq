@@ -42,10 +42,12 @@ library
 
   build-depends:
     , base
+    , containers
     , deepseq
     , exact-combinatorics > 0.2
 
   exposed-modules:
+    Data.Function.Class
     Numeric.Polynomial.Simple
     PWPs.IRVs
 
