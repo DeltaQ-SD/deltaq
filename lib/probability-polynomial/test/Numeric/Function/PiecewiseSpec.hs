@@ -25,6 +25,7 @@ import Numeric.Function.Piecewise
     , fromInterval
     , intervals
     , toAscPieces
+    , trim
     , zipPointwise
     )
 import Test.Hspec
@@ -37,6 +38,7 @@ import Test.QuickCheck
     , Gen
     , Positive (..)
     , (===)
+    , (.&&.)
     , arbitrary
     , frequency
     , listOf
@@ -63,6 +65,13 @@ spec = do
                 in 
                     eval p z
                         === (if x <= z && z < y then eval o z else 0)
+
+    describe "mergeBy" $ do
+        it "(p + negate p) trims to 0" $ property $
+            \(p :: Piecewise Rational Linear) ->
+                let z = trim (p + negate p)
+                in  null (toAscPieces z) === True
+                    .&&. eval z 0 === 0
 
     describe "Interval" $ do
         it "member intersect" $ property $
@@ -97,6 +106,7 @@ data Linear = Linear Q Q
 
 instance Num Linear where
     Linear a1 b1 + Linear a2 b2 = Linear (a1 + a2) (b1 + b2)
+    negate (Linear a b) = Linear (negate a) (negate b)
     fromInteger n = Linear 0 (fromInteger n)
 
 instance Fun.Function Linear where

@@ -18,6 +18,8 @@ module Numeric.Function.Piecewise
     , fromInterval
     , intervals
     , evaluate
+    , mergeBy
+    , trim
     , zipPointwise
     ) where
 
@@ -141,6 +143,20 @@ evaluate (Pieces pieces) x = go 0 pieces
     go before (p:ps)
         | basepoint p <= x = go (object p) ps
         | otherwise = Fun.eval before x
+
+-- | Merge all adjacent pieces whose functions are considered
+-- equal by the given predicate.
+mergeBy :: Num o => (o -> o -> Bool) -> Piecewise a o -> Piecewise a o
+mergeBy eq (Pieces pieces) = Pieces $ go 0 pieces
+  where
+    go _ [] = []
+    go before (p : ps)
+        | before `eq` object p = go before ps
+        | otherwise = go (object p) ps
+
+-- | Merge all adjacent pieces whose functions are equal according to '(==)'.
+trim :: (Eq o, Num o) => Piecewise a o -> Piecewise a o
+trim = mergeBy (==)
 
 -- | Combine two piecewise functions by combining the pieces
 -- with a pointwise operation that preserves @0@.
