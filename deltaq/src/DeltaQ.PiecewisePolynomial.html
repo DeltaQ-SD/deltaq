@@ -33,9 +33,9 @@ where the continuous part is represented in terms of piecewise polynomials.
 ------------------------------------------------------------------------------}</span><span>
 </span><span id="line-34"></span><span>
 </span><span id="line-35"></span><span class="annot"><span class="hs-comment">-- | Probability distribution of durations.</span></span><span>
-</span><span id="line-36"></span><span class="hs-keyword">newtype</span><span> </span><span id="Durations"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span></span><span> </span><span id="local-6989586621679109939"><span class="annot"><a href="#local-6989586621679109939"><span class="hs-identifier hs-type">time</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Durations"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span></span><span> </span><span class="hs-special">{</span><span id="unDurations"><span class="annot"><span class="annottext">forall time. Durations time -&gt; IRV time
-</span><a href="DeltaQ.PiecewisePolynomial.html#unDurations"><span class="hs-identifier hs-var hs-var">unDurations</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679109939"><span class="hs-identifier hs-type">time</span></a></span><span class="hs-special">}</span><span>
-</span><span id="line-37"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679110025"><span id="local-6989586621679110031"><span id="local-6989586621679110035"><span class="annot"><span class="annottext">Int -&gt; Durations time -&gt; ShowS
+</span><span id="line-36"></span><span class="hs-keyword">newtype</span><span> </span><span id="Durations"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span></span><span> </span><span id="local-6989586621679108299"><span class="annot"><a href="#local-6989586621679108299"><span class="hs-identifier hs-type">time</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Durations"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span></span><span> </span><span class="hs-special">{</span><span id="unDurations"><span class="annot"><span class="annottext">forall time. Durations time -&gt; IRV time
+</span><a href="DeltaQ.PiecewisePolynomial.html#unDurations"><span class="hs-identifier hs-var hs-var">unDurations</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679108299"><span class="hs-identifier hs-type">time</span></a></span><span class="hs-special">}</span><span>
+</span><span id="line-37"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679108385"><span id="local-6989586621679108391"><span id="local-6989586621679108395"><span class="annot"><span class="annottext">Int -&gt; Durations time -&gt; ShowS
 [Durations time] -&gt; ShowS
 Durations time -&gt; String
 (Int -&gt; Durations time -&gt; ShowS)
@@ -55,19 +55,19 @@ $cshowList :: forall time. Show time =&gt; [Durations time] -&gt; ShowS
 showList :: [Durations time] -&gt; ShowS
 </span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
 </span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679110041"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-40"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679110068"><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110068"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679110069"><span class="annot"><span class="annottext">== :: Durations Rational -&gt; Durations Rational -&gt; Bool
-</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679110070"><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110070"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-39"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108401"><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679108428"><span class="annot"><span class="annottext">IRV Rational
+</span><a href="#local-6989586621679108428"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679108429"><span class="annot"><span class="annottext">== :: Durations Rational -&gt; Durations Rational -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679108430"><span class="annot"><span class="annottext">IRV Rational
+</span><a href="#local-6989586621679108430"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-41"></span><span>        </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">IRV Rational -&gt; IRV Rational -&gt; Maybe Ordering
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Integrable (DistD a) (DistP a)) =&gt;
 IRV a -&gt; IRV a -&gt; Maybe Ordering
 </span><span class="hs-identifier hs-var">PWP.compareIRVs</span></span><span> </span><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110068"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110070"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679108428"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">IRV Rational
+</span><a href="#local-6989586621679108430"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-42"></span><span>            </span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span class="annot"><span class="annottext">Ordering
 </span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">True</span></span><span>
@@ -76,34 +76,34 @@ IRV a -&gt; IRV a -&gt; Maybe Ordering
 </span><span class="hs-identifier hs-var">False</span></span><span>
 </span><span id="line-44"></span><span>
 </span><span id="line-45"></span><span class="annot"><span class="hs-comment">-- | Helper function for lifting a binary operation.</span></span><span>
-</span><span id="line-46"></span><span id="local-6989586621679109974"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#lift2"><span class="hs-identifier hs-type">lift2</span></a></span><span>
-</span><span id="line-47"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679109974"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679109974"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679109974"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-48"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109974"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109974"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109974"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-46"></span><span id="local-6989586621679108334"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#lift2"><span class="hs-identifier hs-type">lift2</span></a></span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679108334"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679108334"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><a href="#local-6989586621679108334"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108334"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108334"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108334"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-49"></span><span id="lift2"><span class="annot"><span class="annottext">lift2 :: forall a.
 (IRV a -&gt; IRV a -&gt; IRV a)
 -&gt; Durations a -&gt; Durations a -&gt; Durations a
-</span><a href="DeltaQ.PiecewisePolynomial.html#lift2"><span class="hs-identifier hs-var hs-var">lift2</span></a></span></span><span> </span><span id="local-6989586621679110073"><span class="annot"><span class="annottext">IRV a -&gt; IRV a -&gt; IRV a
-</span><a href="#local-6989586621679110073"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679110074"><span class="annot"><span class="annottext">IRV a
-</span><a href="#local-6989586621679110074"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679110075"><span class="annot"><span class="annottext">IRV a
-</span><a href="#local-6989586621679110075"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV a -&gt; Durations a
+</span><a href="DeltaQ.PiecewisePolynomial.html#lift2"><span class="hs-identifier hs-var hs-var">lift2</span></a></span></span><span> </span><span id="local-6989586621679108433"><span class="annot"><span class="annottext">IRV a -&gt; IRV a -&gt; IRV a
+</span><a href="#local-6989586621679108433"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679108434"><span class="annot"><span class="annottext">IRV a
+</span><a href="#local-6989586621679108434"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679108435"><span class="annot"><span class="annottext">IRV a
+</span><a href="#local-6989586621679108435"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV a -&gt; Durations a
 forall time. IRV time -&gt; Durations time
 </span><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">IRV a -&gt; IRV a -&gt; IRV a
-</span><a href="#local-6989586621679110073"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IRV a
-</span><a href="#local-6989586621679110074"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">IRV a
-</span><a href="#local-6989586621679110075"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679108433"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">IRV a
+</span><a href="#local-6989586621679108434"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">IRV a
+</span><a href="#local-6989586621679108435"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-50"></span><span>
-</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679110086"><span id="local-6989586621679110091"><span id="local-6989586621679110095"><span class="annot"><a href="DeltaQ.Class.html#Outcome"><span class="hs-identifier hs-type">Outcome</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-51"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108446"><span id="local-6989586621679108451"><span id="local-6989586621679108455"><span class="annot"><a href="DeltaQ.Class.html#Outcome"><span class="hs-identifier hs-type">Outcome</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-52"></span><span>    </span><span class="hs-keyword">type</span><span> </span><span id="Duration"><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-var">Duration</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
 </span><span id="line-53"></span><span>
-</span><span id="line-54"></span><span>    </span><span id="local-6989586621679110103"><span class="annot"><span class="annottext">never :: Durations Rational
-</span><a href="#local-6989586621679110103"><span class="hs-identifier hs-var hs-var hs-var">never</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Rational -&gt; Durations Rational
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679108463"><span class="annot"><span class="annottext">never :: Durations Rational
+</span><a href="#local-6989586621679108463"><span class="hs-identifier hs-var hs-var hs-var">never</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Rational -&gt; Durations Rational
 forall time. IRV time -&gt; Durations time
 </span><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span><span> </span><span class="annot"><span class="annottext">IRV Rational
 forall a. (Ord a, Num a) =&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.bottom</span></span><span>
-</span><span id="line-55"></span><span>    </span><span id="local-6989586621679110113"><span class="annot"><span class="annottext">wait :: Duration (Durations Rational) -&gt; Durations Rational
-</span><a href="#local-6989586621679110113"><span class="hs-identifier hs-var hs-var hs-var">wait</span></a></span></span><span> </span><span id="local-6989586621679110115"><span class="annot"><span class="annottext">Duration (Durations Rational)
-</span><a href="#local-6989586621679110115"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Rational -&gt; Durations Rational
+</span><span id="line-55"></span><span>    </span><span id="local-6989586621679108473"><span class="annot"><span class="annottext">wait :: Duration (Durations Rational) -&gt; Durations Rational
+</span><a href="#local-6989586621679108473"><span class="hs-identifier hs-var hs-var hs-var">wait</span></a></span></span><span> </span><span id="local-6989586621679108475"><span class="annot"><span class="annottext">Duration (Durations Rational)
+</span><a href="#local-6989586621679108475"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Rational -&gt; Durations Rational
 forall time. IRV time -&gt; Durations time
 </span><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; Durations Rational)
 -&gt; IRV Rational -&gt; Durations Rational
@@ -112,9 +112,9 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall a. (Fractional a, Ord a, Num a, Enum a, Eq a) =&gt; a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.constructDelta</span></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110115"><span class="hs-identifier hs-var">t</span></a></span><span>
-</span><span id="line-56"></span><span>    </span><span id="local-6989586621679110132"><span class="annot"><span class="annottext">sequentially :: Durations Rational -&gt; Durations Rational -&gt; Durations Rational
-</span><a href="#local-6989586621679110132"><span class="hs-identifier hs-var hs-var hs-var">sequentially</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational -&gt; IRV Rational)
+</span><a href="#local-6989586621679108475"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679108492"><span class="annot"><span class="annottext">sequentially :: Durations Rational -&gt; Durations Rational -&gt; Durations Rational
+</span><a href="#local-6989586621679108492"><span class="hs-identifier hs-var hs-var hs-var">sequentially</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational -&gt; IRV Rational)
 -&gt; Durations Rational -&gt; Durations Rational -&gt; Durations Rational
 forall a.
 (IRV a -&gt; IRV a -&gt; IRV a)
@@ -125,8 +125,8 @@ forall a.
  Differentiable (DistP a) (DistD a)) =&gt;
 IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-operator hs-var">(PWP.&lt;+&gt;)</span></span><span>
-</span><span id="line-57"></span><span>    </span><span id="local-6989586621679110147"><span class="annot"><span class="annottext">firstToFinish :: Durations Rational -&gt; Durations Rational -&gt; Durations Rational
-</span><a href="#local-6989586621679110147"><span class="hs-identifier hs-var hs-var hs-var">firstToFinish</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational -&gt; IRV Rational)
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679108507"><span class="annot"><span class="annottext">firstToFinish :: Durations Rational -&gt; Durations Rational -&gt; Durations Rational
+</span><a href="#local-6989586621679108507"><span class="hs-identifier hs-var hs-var hs-var">firstToFinish</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational -&gt; IRV Rational)
 -&gt; Durations Rational -&gt; Durations Rational -&gt; Durations Rational
 forall a.
 (IRV a -&gt; IRV a -&gt; IRV a)
@@ -137,8 +137,8 @@ forall a.
  Integrable (DistD a) (DistP a)) =&gt;
 IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.firstToFinish</span></span><span>
-</span><span id="line-58"></span><span>    </span><span id="local-6989586621679110162"><span class="annot"><span class="annottext">lastToFinish :: Durations Rational -&gt; Durations Rational -&gt; Durations Rational
-</span><a href="#local-6989586621679110162"><span class="hs-identifier hs-var hs-var hs-var">lastToFinish</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational -&gt; IRV Rational)
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679108522"><span class="annot"><span class="annottext">lastToFinish :: Durations Rational -&gt; Durations Rational -&gt; Durations Rational
+</span><a href="#local-6989586621679108522"><span class="hs-identifier hs-var hs-var hs-var">lastToFinish</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational -&gt; IRV Rational)
 -&gt; Durations Rational -&gt; Durations Rational -&gt; Durations Rational
 forall a.
 (IRV a -&gt; IRV a -&gt; IRV a)
@@ -150,13 +150,13 @@ forall a.
 IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.allToFinish</span></span><span>
 </span><span id="line-59"></span><span>
-</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679110181"><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-60"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108541"><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-61"></span><span>    </span><span class="hs-keyword">type</span><span> </span><span id="Probability"><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-var">Probability</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
 </span><span id="line-62"></span><span>
-</span><span id="line-63"></span><span>    </span><span id="local-6989586621679110207"><span class="annot"><span class="annottext">choice :: Probability (Durations Rational)
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679108567"><span class="annot"><span class="annottext">choice :: Probability (Durations Rational)
 -&gt; Durations Rational -&gt; Durations Rational -&gt; Durations Rational
-</span><a href="#local-6989586621679110207"><span class="hs-identifier hs-var hs-var hs-var">choice</span></a></span></span><span> </span><span id="local-6989586621679110209"><span class="annot"><span class="annottext">Probability (Durations Rational)
-</span><a href="#local-6989586621679110209"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679108567"><span class="hs-identifier hs-var hs-var hs-var">choice</span></a></span></span><span> </span><span id="local-6989586621679108569"><span class="annot"><span class="annottext">Probability (Durations Rational)
+</span><a href="#local-6989586621679108569"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-64"></span><span>        </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational -&gt; IRV Rational)
 -&gt; Durations Rational -&gt; Durations Rational -&gt; Durations Rational
 forall a.
@@ -169,13 +169,13 @@ forall a.
 a -&gt; IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.probChoice</span></span><span> </span><span class="annot"><span class="annottext">Rational
 Probability (Durations Rational)
-</span><a href="#local-6989586621679110209"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679108569"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-65"></span><span>
-</span><span id="line-66"></span><span>    </span><span id="local-6989586621679110231"><span class="annot"><span class="annottext">uniform :: Duration (Durations Rational)
+</span><span id="line-66"></span><span>    </span><span id="local-6989586621679108591"><span class="annot"><span class="annottext">uniform :: Duration (Durations Rational)
 -&gt; Duration (Durations Rational) -&gt; Durations Rational
-</span><a href="#local-6989586621679110231"><span class="hs-identifier hs-var hs-var hs-var">uniform</span></a></span></span><span> </span><span id="local-6989586621679110233"><span class="annot"><span class="annottext">Duration (Durations Rational)
-</span><a href="#local-6989586621679110233"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679110234"><span class="annot"><span class="annottext">Duration (Durations Rational)
-</span><a href="#local-6989586621679110234"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679108591"><span class="hs-identifier hs-var hs-var hs-var">uniform</span></a></span></span><span> </span><span id="local-6989586621679108593"><span class="annot"><span class="annottext">Duration (Durations Rational)
+</span><a href="#local-6989586621679108593"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679108594"><span class="annot"><span class="annottext">Duration (Durations Rational)
+</span><a href="#local-6989586621679108594"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-67"></span><span>        </span><span class="annot"><span class="annottext">IRV Rational -&gt; Durations Rational
 forall time. IRV time -&gt; Durations time
 </span><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-var">Durations</span></a></span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; Durations Rational)
@@ -187,61 +187,61 @@ forall a.
  Differentiable (DistP a) (DistD a)) =&gt;
 a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.shiftIRV</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679110236"><span class="hs-identifier hs-var">start</span></a></span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational) -&gt; IRV Rational -&gt; IRV Rational
+</span><a href="#local-6989586621679108596"><span class="hs-identifier hs-var">start</span></a></span><span> </span><span class="annot"><span class="annottext">(IRV Rational -&gt; IRV Rational) -&gt; IRV Rational -&gt; IRV Rational
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; IRV Rational
 forall a. (Fractional a, Ord a, Num a, Enum a, Eq a) =&gt; a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.constructUniform</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679110238"><span class="hs-identifier hs-var">end</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+</span><a href="#local-6989586621679108598"><span class="hs-identifier hs-var">end</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Rational
-</span><a href="#local-6989586621679110236"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679108596"><span class="hs-identifier hs-var">start</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-68"></span><span>      </span><span class="hs-keyword">where</span><span>
-</span><span id="line-69"></span><span>        </span><span id="local-6989586621679110236"><span class="annot"><span class="annottext">start :: Rational
-</span><a href="#local-6989586621679110236"><span class="hs-identifier hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+</span><span id="line-69"></span><span>        </span><span id="local-6989586621679108596"><span class="annot"><span class="annottext">start :: Rational
+</span><a href="#local-6989586621679108596"><span class="hs-identifier hs-var hs-var">start</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110233"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679108593"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110234"><span class="hs-identifier hs-var">b</span></a></span><span>
-</span><span id="line-70"></span><span>        </span><span id="local-6989586621679110238"><span class="annot"><span class="annottext">end :: Rational
-</span><a href="#local-6989586621679110238"><span class="hs-identifier hs-var hs-var">end</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+</span><a href="#local-6989586621679108594"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><span id="line-70"></span><span>        </span><span id="local-6989586621679108598"><span class="annot"><span class="annottext">end :: Rational
+</span><a href="#local-6989586621679108598"><span class="hs-identifier hs-var hs-var">end</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
 forall a. Ord a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110233"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679108593"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110234"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621679108594"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span>    </span><span id="local-6989586621679110263"><span class="annot"><span class="annottext">successWithin :: Durations Rational
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679108623"><span class="annot"><span class="annottext">successWithin :: Durations Rational
 -&gt; Duration (Durations Rational)
 -&gt; Probability (Durations Rational)
-</span><a href="#local-6989586621679110263"><span class="hs-identifier hs-var hs-var hs-var">successWithin</span></a></span></span><span> </span><span id="local-6989586621679110265"><span class="annot"><span class="annottext">Durations Rational
-</span><a href="#local-6989586621679110265"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679110266"><span class="annot"><span class="annottext">Duration (Durations Rational)
-</span><a href="#local-6989586621679110266"><span class="hs-identifier hs-var">t</span></a></span></span><span>
+</span><a href="#local-6989586621679108623"><span class="hs-identifier hs-var hs-var hs-var">successWithin</span></a></span></span><span> </span><span id="local-6989586621679108625"><span class="annot"><span class="annottext">Durations Rational
+</span><a href="#local-6989586621679108625"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span id="local-6989586621679108626"><span class="annot"><span class="annottext">Duration (Durations Rational)
+</span><a href="#local-6989586621679108626"><span class="hs-identifier hs-var">t</span></a></span></span><span>
 </span><span id="line-73"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Eventually Rational
 forall a. a -&gt; Eventually a
 </span><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-var">Occurs</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110266"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Eventually Rational -&gt; Eventually Rational -&gt; Bool
+</span><a href="#local-6989586621679108626"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Eventually Rational -&gt; Eventually Rational -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">Durations Rational -&gt; Eventually (Duration (Durations Rational))
 forall o. DeltaQ o =&gt; o -&gt; Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#earliest"><span class="hs-identifier hs-var">earliest</span></a></span><span> </span><span class="annot"><span class="annottext">Durations Rational
-</span><a href="#local-6989586621679110265"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679108625"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
 Probability (Durations Rational)
 </span><span class="hs-number">0</span></span><span>
 </span><span id="line-74"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Durations Rational -&gt; Eventually (Duration (Durations Rational))
 forall o. DeltaQ o =&gt; o -&gt; Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#deadline"><span class="hs-identifier hs-var">deadline</span></a></span><span> </span><span class="annot"><span class="annottext">Durations Rational
-</span><a href="#local-6989586621679110265"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Eventually Rational -&gt; Eventually Rational -&gt; Bool
+</span><a href="#local-6989586621679108625"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Eventually Rational -&gt; Eventually Rational -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Eventually Rational
 forall a. a -&gt; Eventually a
 </span><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-var">Occurs</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110266"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679108626"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
 Probability (Durations Rational)
 </span><span class="hs-number">1</span></span><span>
 </span><span id="line-75"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
@@ -253,13 +253,13 @@ IRV a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">PWP.cumulativeMass</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Durations Rational -&gt; IRV Rational
 forall time. Durations time -&gt; IRV time
 </span><a href="DeltaQ.PiecewisePolynomial.html#unDurations"><span class="hs-identifier hs-var">unDurations</span></a></span><span> </span><span class="annot"><span class="annottext">Durations Rational
-</span><a href="#local-6989586621679110265"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679108625"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rational
 Duration (Durations Rational)
-</span><a href="#local-6989586621679110266"><span class="hs-identifier hs-var">t</span></a></span><span>
+</span><a href="#local-6989586621679108626"><span class="hs-identifier hs-var">t</span></a></span><span>
 </span><span id="line-76"></span><span>
-</span><span id="line-77"></span><span>    </span><span id="local-6989586621679110287"><span class="annot"><span class="annottext">failure :: Durations Rational -&gt; Probability (Durations Rational)
-</span><a href="#local-6989586621679110287"><span class="hs-identifier hs-var hs-var hs-var">failure</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679110289"><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110289"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679108647"><span class="annot"><span class="annottext">failure :: Durations Rational -&gt; Probability (Durations Rational)
+</span><a href="#local-6989586621679108647"><span class="hs-identifier hs-var hs-var hs-var">failure</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679108649"><span class="annot"><span class="annottext">IRV Rational
+</span><a href="#local-6989586621679108649"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-78"></span><span>        </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
 forall a. Num a =&gt; a -&gt; a -&gt; a
@@ -269,13 +269,13 @@ forall a.
  Integrable (DistD a) (DistP a)) =&gt;
 IRV a -&gt; a
 </span><span class="hs-identifier hs-var">PWP.probMass</span></span><span> </span><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110289"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679108649"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-79"></span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679110305"><span class="annot"><span class="annottext">quantile :: Probability (Durations Rational)
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679108665"><span class="annot"><span class="annottext">quantile :: Probability (Durations Rational)
 -&gt; Durations Rational -&gt; Eventually (Duration (Durations Rational))
-</span><a href="#local-6989586621679110305"><span class="hs-identifier hs-var hs-var hs-var">quantile</span></a></span></span><span> </span><span id="local-6989586621679110307"><span class="annot"><span class="annottext">Probability (Durations Rational)
-</span><a href="#local-6989586621679110307"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679110308"><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110308"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679108665"><span class="hs-identifier hs-var hs-var hs-var">quantile</span></a></span></span><span> </span><span id="local-6989586621679108667"><span class="annot"><span class="annottext">Probability (Durations Rational)
+</span><a href="#local-6989586621679108667"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#Durations"><span class="hs-identifier hs-type">Durations</span></a></span><span> </span><span id="local-6989586621679108668"><span class="annot"><span class="annottext">IRV Rational
+</span><a href="#local-6989586621679108668"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-81"></span><span>        </span><span class="annot"><span class="annottext">Maybe (Duration (Durations Rational))
 -&gt; Eventually (Duration (Durations Rational))
 forall a. Maybe a -&gt; Eventually a
@@ -299,10 +299,10 @@ forall a.
 [a] -&gt; IRV a -&gt; [Maybe a]
 </span><span class="hs-identifier hs-var">PWP.centiles</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Rational
 Probability (Durations Rational)
-</span><a href="#local-6989586621679110307"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">IRV Rational
-</span><a href="#local-6989586621679110308"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679108667"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">IRV Rational
+</span><a href="#local-6989586621679108668"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-82"></span><span>
-</span><span id="line-83"></span><span>    </span><span id="local-6989586621679110316"><span class="annot"><span class="annottext">earliest :: Durations Rational -&gt; Eventually (Duration (Durations Rational))
+</span><span id="line-83"></span><span>    </span><span id="local-6989586621679108676"><span class="annot"><span class="annottext">earliest :: Durations Rational -&gt; Eventually (Duration (Durations Rational))
 </span><a href="DeltaQ.Class.html#earliest"><span class="hs-identifier hs-var hs-var hs-var">earliest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Eventually Rational
 forall a. a -&gt; Eventually a
 </span><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-var">Occurs</span></a></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Eventually Rational)
@@ -328,7 +328,7 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall time. Durations time -&gt; IRV time
 </span><a href="DeltaQ.PiecewisePolynomial.html#unDurations"><span class="hs-identifier hs-var">unDurations</span></a></span><span>
 </span><span id="line-84"></span><span>        </span><span class="hs-comment">-- FIXME: 'earliest' on 'never' is wrong</span><span>
-</span><span id="line-85"></span><span>    </span><span id="local-6989586621679110324"><span class="annot"><span class="annottext">deadline :: Durations Rational -&gt; Eventually (Duration (Durations Rational))
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621679108684"><span class="annot"><span class="annottext">deadline :: Durations Rational -&gt; Eventually (Duration (Durations Rational))
 </span><a href="DeltaQ.Class.html#deadline"><span class="hs-identifier hs-var hs-var hs-var">deadline</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Eventually Rational
 forall a. a -&gt; Eventually a
 </span><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-var">Occurs</span></a></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Eventually Rational)
@@ -358,15 +358,15 @@ forall time. Durations time -&gt; IRV time
 </span><span id="line-88"></span><span class="hs-comment">{-----------------------------------------------------------------------------
     Helper functions
 ------------------------------------------------------------------------------}</span><span>
-</span><span id="line-91"></span><span id="local-6989586621679110009"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#eventuallyFromMaybe"><span class="hs-identifier hs-type">eventuallyFromMaybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679110009"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Eventually"><span class="hs-identifier hs-type">Eventually</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679110009"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-91"></span><span id="local-6989586621679108369"><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#eventuallyFromMaybe"><span class="hs-identifier hs-type">eventuallyFromMaybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679108369"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Eventually"><span class="hs-identifier hs-type">Eventually</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679108369"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-92"></span><span id="eventuallyFromMaybe"><span class="annot"><span class="annottext">eventuallyFromMaybe :: forall a. Maybe a -&gt; Eventually a
 </span><a href="DeltaQ.PiecewisePolynomial.html#eventuallyFromMaybe"><span class="hs-identifier hs-var hs-var">eventuallyFromMaybe</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Eventually a
 forall a. Eventually a
 </span><a href="DeltaQ.Class.html#Abandoned"><span class="hs-identifier hs-var">Abandoned</span></a></span><span>
-</span><span id="line-93"></span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#eventuallyFromMaybe"><span class="hs-identifier hs-var">eventuallyFromMaybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679110327"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679110327"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eventually a
+</span><span id="line-93"></span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#eventuallyFromMaybe"><span class="hs-identifier hs-var">eventuallyFromMaybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679108687"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679108687"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eventually a
 forall a. a -&gt; Eventually a
 </span><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-var">Occurs</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679110327"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679108687"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-94"></span></pre></body></html>
