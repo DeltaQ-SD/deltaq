@@ -10,6 +10,7 @@ Description : Tests for polynomials.
 -}
 module Numeric.Polynomial.SimpleSpec
     ( spec
+    , genPoly
     ) where
 
 import Prelude
@@ -38,6 +39,7 @@ import Test.Hspec
     )
 import Test.QuickCheck
     ( Arbitrary
+    , Gen
     , NonNegative (..)
     , Positive (..)
     , (===)
@@ -184,8 +186,11 @@ countIntervalMembers (xl, xr) =
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
+genPoly :: Gen (Poly Rational)
+genPoly = fromCoefficients <$> listOf arbitrary
+
 instance Arbitrary (Poly Rational) where
-    arbitrary = fromCoefficients <$> listOf arbitrary
+    arbitrary = genPoly
 
 -- | A list of disjoint and sorted elements.
 newtype DisjointSorted a = DisjointSorted [a]

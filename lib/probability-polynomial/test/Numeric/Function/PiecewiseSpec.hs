@@ -12,6 +12,8 @@ Description : Tests for piecewise functions.
 -}
 module Numeric.Function.PiecewiseSpec
     ( spec
+    , genInterval
+    , genPiecewise
     ) where
 
 import Prelude
@@ -200,13 +202,19 @@ instance Arbitrary Interval where
 newtype DisjointSorted a = DisjointSorted [a]
     deriving (Eq, Show)
 
+genDisjointSorted :: Gen (DisjointSorted Rational)
+genDisjointSorted =
+    DisjointSorted . drop 1 . scanl (\s (Positive d) -> s + d) 0
+        <$> listOf arbitrary
+
 instance Arbitrary (DisjointSorted Rational) where
-    arbitrary =
-        DisjointSorted . drop 1 . scanl (\s (Positive d) -> s + d) 0
-            <$> listOf arbitrary
+    arbitrary = genDisjointSorted
+
+genPiecewise :: Gen o -> Gen (Piecewise Rational o)
+genPiecewise gen = do
+    DisjointSorted xs <- genDisjointSorted
+    os <- mapM (const gen) xs
+    pure $ fromAscPieces $ zip xs os
 
 instance Arbitrary o => Arbitrary (Piecewise Rational o) where
-    arbitrary = do
-        DisjointSorted xs <- arbitrary
-        os <- mapM (const arbitrary) xs
-        pure $ fromAscPieces $ zip xs os
+    arbitrary = genPiecewise arbitrary
