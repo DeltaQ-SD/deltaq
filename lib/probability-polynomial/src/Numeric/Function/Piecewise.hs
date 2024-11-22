@@ -152,7 +152,7 @@ mergeBy eq (Pieces pieces) = Pieces $ go 0 pieces
     go _ [] = []
     go before (p : ps)
         | before `eq` object p = go before ps
-        | otherwise = go (object p) ps
+        | otherwise = p : go (object p) ps
 
 -- | Merge all adjacent pieces whose functions are equal according to '(==)'.
 trim :: (Eq o, Num o) => Piecewise a o -> Piecewise a o
