@@ -12,6 +12,7 @@ Description : Piecewise functions on the number line.
 -}
 module Numeric.Function.Piecewise
     ( Piecewise
+    , mapPieces
     , zero
     , fromAscPieces
     , toAscPieces
