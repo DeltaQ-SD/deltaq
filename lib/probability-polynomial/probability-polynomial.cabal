@@ -49,6 +49,7 @@ library
   exposed-modules:
     Data.Function.Class
     Numeric.Function.Piecewise
+    Numeric.Measure.Discrete
     Numeric.Polynomial.Simple
     PWPs.IRVs
 
@@ -74,6 +75,7 @@ test-suite test
     
   build-depends:
     , base
+    , containers
     , probability-polynomial
     , hspec ^>= 2.11.0
     , QuickCheck
@@ -83,6 +85,7 @@ test-suite test
   
   other-modules:
     Numeric.Function.PiecewiseSpec
+    Numeric.Measure.DiscreteSpec
     Numeric.Polynomial.SimpleSpec
 
 benchmark probability-polynomial-benchmark
