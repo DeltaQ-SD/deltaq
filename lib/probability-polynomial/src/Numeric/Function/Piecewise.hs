@@ -28,6 +28,7 @@ module Numeric.Function.Piecewise
 
       -- * Numerical
     , evaluate
+    , translateWith
 
       -- * Zip
     , zipPointwise
@@ -174,6 +175,19 @@ evaluate (Pieces pieces) x = go 0 pieces
     go before (p:ps)
         | basepoint p <= x = go (object p) ps
         | otherwise = Fun.eval before x
+
+-- | Translate a piecewise function,
+-- given a way to translate each piece.
+--
+-- >  eval (translate' y o) = eval o (x - y)
+-- >    implies
+-- >    eval (translateWith translate' y p) = eval p (x - y)
+translateWith
+    :: (Ord a, Num a, Num o)
+    => (a -> o -> o)
+    -> a -> Piecewise a o -> Piecewise a o
+translateWith trans y (Pieces pieces) =
+    Pieces [ Piece (x + y) (trans y o) | Piece x o <- pieces ]
 
 {-----------------------------------------------------------------------------
     Operations

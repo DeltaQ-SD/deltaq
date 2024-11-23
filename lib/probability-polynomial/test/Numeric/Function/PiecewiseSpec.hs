@@ -27,6 +27,7 @@ import Numeric.Function.Piecewise
     , fromInterval
     , intervals
     , toAscPieces
+    , translateWith
     , trim
     , zipPointwise
     )
@@ -54,6 +55,18 @@ import qualified Data.Function.Class as Fun
 ------------------------------------------------------------------------------}
 spec :: Spec
 spec = do
+    describe "Test consistency" $ do
+      describe "Linear" $ do
+        it "eval . translate" $ property $
+            \p y x ->
+                evalLinear (translateLinear y p) x
+                    ===  evalLinear p (x - y)
+
+      describe "Interval" $ do
+        it "member intersect" $ property $
+            \x y z ->
+                member z (intersect x y)  ===  (member z x && member z y)
+
     describe "fromInterval" $ do
         it "intervals" $ property $
             \(x :: Rational) (Positive d) (o :: Rational) ->
@@ -75,10 +88,11 @@ spec = do
                 in  null (toAscPieces z) === True
                     .&&. eval z 0 === 0
 
-    describe "Interval" $ do
-        it "member intersect" $ property $
-            \x y z ->
-                member z (intersect x y)  ===  (member z x && member z y)
+    describe "translateWith" $ do
+        it "eval . translate" $ property $
+            \(p :: Piecewise Rational Linear) x y ->
+                eval (translateWith translateLinear y p) x
+                    === eval p (x - y)
 
     describe "zipPointwise" $ do
         it "intersects intervals" $ property $
@@ -115,6 +129,9 @@ instance Fun.Function Linear where
     type instance Domain Linear = Q
     type instance Codomain Linear = Q
     eval = evalLinear
+
+translateLinear :: Q -> Linear -> Linear
+translateLinear y (Linear a b) = Linear a (b - a*y)
 
 evalLinear :: Linear -> Q -> Q
 evalLinear (Linear a b) x = a*x + b
