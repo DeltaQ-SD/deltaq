@@ -258,4 +258,5 @@ instance (Ord a, Num o) => Num (Piecewise a o) where
     negate = mapPieces negate
     abs = undefined
     signum = undefined
-    fromInteger = undefined
+    fromInteger 0 = zero
+    fromInteger n = error "TODO: fromInteger not implemented"
