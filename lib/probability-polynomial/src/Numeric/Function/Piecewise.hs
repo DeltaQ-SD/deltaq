@@ -11,16 +11,25 @@ Description : Piecewise functions on the number line.
 
 -}
 module Numeric.Function.Piecewise
-    ( Piecewise
-    , mapPieces
+    ( -- * Type
+      Piecewise
+
+      -- * Basic operations
     , zero
+    , fromInterval
     , fromAscPieces
     , toAscPieces
-    , fromInterval
     , intervals
-    , evaluate
+
+      -- * Structure
+    , mapPieces
     , mergeBy
     , trim
+
+      -- * Numerical
+    , evaluate
+
+      -- * Zip
     , zipPointwise
     ) where
 
@@ -81,17 +90,22 @@ data Piecewise a o
     > f = Pieces [Piece x1 o1, Piece x2 o2, …, Piece xn on]
 -}
 
--- | Internal.
--- Map the objects of pieces.
-mapPieces :: (o -> o') -> Piecewise a o -> Piecewise a o'
-mapPieces f (Pieces ps) = Pieces [ Piece x (f o) | Piece x o <- ps ]
-
 {-----------------------------------------------------------------------------
     Operations
 ------------------------------------------------------------------------------}
 -- | The function which is zero everywhere.
 zero :: Piecewise a o
 zero = Pieces []
+
+-- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
+-- from a single function @o@ by restricting it to the
+-- to half-open interval @x1 <= x < x2@.
+-- The result is zero outside this interval.
+fromInterval :: (Ord a, Num o) => (a,a) -> o -> Piecewise a o
+fromInterval (x,y) o = Pieces [Piece start o, Piece end 0]
+  where
+    start = min x y
+    end = max x y
 
 -- | Build a piecewise function from an ascending list of contiguous pieces.
 --
@@ -104,24 +118,40 @@ fromAscPieces = Pieces . map (uncurry Piece)
 toAscPieces :: Ord a => Piecewise a o -> [(a,o)]
 toAscPieces (Pieces xos) = [ (x, o) | Piece x o <- xos ]
 
--- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
--- from a single function @o@ by restricting it to the
--- to half-open interval @x1 <= x < x2@.
--- The result is zero outside this interval.
-fromInterval :: (Ord a, Num o) => (a,a) -> o -> Piecewise a o
-fromInterval (x,y) o = Pieces [Piece start o, Piece end 0]
-  where
-    start = min x y
-    end = max x y
-
 -- | Intervals on which the piecewise function is defined, in sequence.
 -- The last half-open interval, @xn <= x < +∞@, is omitted.
 intervals :: Piecewise a o -> [(a,a)]
 intervals (Pieces ys) =
     zip (map basepoint ys) (drop 1 $ map basepoint ys)
 
+{-----------------------------------------------------------------------------
+    Operations
+    Structure
+------------------------------------------------------------------------------}
+-- | Map the objects of pieces.
+mapPieces :: (o -> o') -> Piecewise a o -> Piecewise a o'
+mapPieces f (Pieces ps) = Pieces [ Piece x (f o) | Piece x o <- ps ]
+
+-- | Merge all adjacent pieces whose functions are considered
+-- equal by the given predicate.
+mergeBy :: Num o => (o -> o -> Bool) -> Piecewise a o -> Piecewise a o
+mergeBy eq (Pieces pieces) = Pieces $ go 0 pieces
+  where
+    go _ [] = []
+    go before (p : ps)
+        | before `eq` object p = go before ps
+        | otherwise = p : go (object p) ps
+
+-- | Merge all adjacent pieces whose functions are equal according to '(==)'.
+trim :: (Eq o, Num o) => Piecewise a o -> Piecewise a o
+trim = mergeBy (==)
+
+{-----------------------------------------------------------------------------
+    Operations
+    Evaluation
+------------------------------------------------------------------------------}
 {-|
-Evaluate a polynomial at a point.
+Evaluate a piecewise function at a point.
 
 > eval :: (Fun.Function o, Num o, Ord a, Num (Codomain o))
 >         => Piecewise a o -> a -> Codomain o
@@ -145,20 +175,10 @@ evaluate (Pieces pieces) x = go 0 pieces
         | basepoint p <= x = go (object p) ps
         | otherwise = Fun.eval before x
 
--- | Merge all adjacent pieces whose functions are considered
--- equal by the given predicate.
-mergeBy :: Num o => (o -> o -> Bool) -> Piecewise a o -> Piecewise a o
-mergeBy eq (Pieces pieces) = Pieces $ go 0 pieces
-  where
-    go _ [] = []
-    go before (p : ps)
-        | before `eq` object p = go before ps
-        | otherwise = p : go (object p) ps
-
--- | Merge all adjacent pieces whose functions are equal according to '(==)'.
-trim :: (Eq o, Num o) => Piecewise a o -> Piecewise a o
-trim = mergeBy (==)
-
+{-----------------------------------------------------------------------------
+    Operations
+    Zip
+------------------------------------------------------------------------------}
 -- | Combine two piecewise functions by combining the pieces
 -- with a pointwise operation that preserves @0@.
 --
@@ -208,6 +228,10 @@ zipPieces (Pieces xs') (Pieces ys') =
             EQ -> Piece x (ox, oy)    : go ox xstail oy ystail
             GT -> Piece y (xhang, oy) : go xhang xs  oy ystail
 
+{-----------------------------------------------------------------------------
+    Operations
+    Numeric
+------------------------------------------------------------------------------}
 {-| Algebraic operations '(+)', '(*)' and 'negate' on piecewise functions.
 
 The functions 'abs' and 'signum' are undefined.
