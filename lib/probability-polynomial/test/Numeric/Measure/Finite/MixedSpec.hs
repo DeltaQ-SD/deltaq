@@ -78,7 +78,7 @@ spec = do
         it "distribution at midpoint" $ property $
             \(x :: Rational) (y :: Rational) ->
                 x /= y ==>
-                distribution (uniform x y) ((x+y)/2)  ===  1/2
+                eval (distribution (uniform x y)) ((x + y) / 2)  ===  1/2
 
     describe "==" $ do
         it "add m (scale (-1) m) == zero" $ property $
@@ -97,8 +97,8 @@ spec = do
 
         xit "distribution" $ property $
             \(m :: Measure Rational) y x ->
-                distribution (translate y m) x
-                    ===  distribution m (x - y)
+                eval (distribution (translate y m)) x
+                    ===  eval (distribution m) (x - y)
 
     describe "convolve" $ do
         it "dirac" $ property $

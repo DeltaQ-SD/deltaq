@@ -42,7 +42,7 @@ import qualified Numeric.Polynomial.Simple as Poly
 -- | A finite
 -- [signed measure](https://en.wikipedia.org/wiki/Signed_measure)
 -- on the number line.
-newtype Measure a = Measure { toDistribution :: Piecewise a (Poly a) }
+newtype Measure a = Measure (Piecewise a (Poly a))
     -- INVARIANT: Adjacent pieces contain distinct objects.
     -- INVARIANT: The last piece is a constant polynomial,
     --            so that the measure is finite.
@@ -119,12 +119,12 @@ total (Measure p) =
         [] -> 0
         ps -> eval (snd (last ps)) 0
 
--- | @distribution x@ is the measure of the interval $(-∞, x]$.
+-- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
 --
 -- This is known as the [distribution function
 -- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
-distribution :: (Ord a, Num a) => Measure a -> a -> a
-distribution (Measure p) x = eval p x
+distribution :: (Ord a, Num a) => Measure a -> Piecewise a (Poly a)
+distribution (Measure p) = p
 
 -- | Add two measures.
 --
