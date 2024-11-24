@@ -10,7 +10,7 @@ module Numeric.Measure.Discrete
     , toMap
     , dirac
     , total
-    , cumulative
+    , distribution
     , add
     , convolve
     ) where
@@ -38,7 +38,9 @@ trim m = Map.filter (/= 0) m
 
 -- | Two measures are equal if they yield the same measures on every set.
 --
--- @mx == my@ implies @forall t. cumulative mx t == cumulative my t@.
+-- > mx == my
+-- >   implies
+-- >   forall t. eval (distribution mx) t = eval (distribution my) t
 instance (Ord a, Num a) => Eq (Discrete a) where
     Discrete mx == Discrete my = mx == my
 
@@ -68,9 +70,12 @@ toMap (Discrete m) = m
 total :: Num a => Discrete a -> a
 total (Discrete m) = sum m
 
--- | @cumulative x@ is the measure of the interval $(-∞, x]$.
-cumulative :: (Ord a, Num a) => Discrete a -> a -> a
-cumulative (Discrete m) x = sum $ Map.takeWhileAntitone (<= x) m
+-- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
+--
+-- This is known as the [distribution function
+-- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
+distribution :: (Ord a, Num a) => Discrete a -> a -> a
+distribution (Discrete m) x = sum $ Map.takeWhileAntitone (<= x) m
 
 -- | Add two measures.
 --

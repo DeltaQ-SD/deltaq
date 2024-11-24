@@ -17,17 +17,20 @@ import Prelude
 import Data.Function.Class
     ( eval
     )
+import Data.Maybe
+    ( fromJust
+    )
 import Numeric.Measure.Finite.Mixed
     ( Measure
     , add
     , convolve
-    , cumulative
     , dirac
-    , uniform
+    , distribution
+    , fromDistribution
     , scale
     , total
     , translate
-    , unsafeFromCumulative
+    , uniform
     , zero
     )
 import Numeric.Function.PiecewiseSpec
@@ -72,10 +75,10 @@ spec = do
             \(x :: Rational) y ->
                 total (uniform x y)  ===  1
         
-        it "cumulative at midpoint" $ property $
+        it "distribution at midpoint" $ property $
             \(x :: Rational) (y :: Rational) ->
                 x /= y ==>
-                cumulative (uniform x y) ((x+y)/2)  ===  1/2
+                eval (distribution (uniform x y)) ((x + y) / 2)  ===  1/2
 
     describe "==" $ do
         it "add m (scale (-1) m) == zero" $ property $
@@ -92,9 +95,10 @@ spec = do
         it "…" $ do
             pendingWith "Failures in Poly.translate"
 
-        xit "cumulative" $ property $
+        xit "distribution" $ property $
             \(m :: Measure Rational) y x ->
-                cumulative (translate y m) x ===  cumulative m (x - y)
+                eval (distribution (translate y m)) x
+                    ===  eval (distribution m) (x - y)
 
     describe "convolve" $ do
         it "dirac" $ property $
@@ -122,7 +126,7 @@ spec = do
 ------------------------------------------------------------------------------}
 genMeasure :: Gen (Measure Rational)
 genMeasure =
-    unsafeFromCumulative . setLastPieceConstant <$> genPiecewise genPoly
+    fromJust . fromDistribution . setLastPieceConstant <$> genPiecewise genPoly
   where
     setLastPieceConstant =
         Piecewise.fromAscPieces
