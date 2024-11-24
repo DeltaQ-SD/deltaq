@@ -17,17 +17,20 @@ import Prelude
 import Data.Function.Class
     ( eval
     )
+import Data.Maybe
+    ( fromJust
+    )
 import Numeric.Measure.Finite.Mixed
     ( Measure
     , add
     , convolve
     , dirac
     , distribution
-    , uniform
+    , fromDistribution
     , scale
     , total
     , translate
-    , unsafeFromDistribution
+    , uniform
     , zero
     )
 import Numeric.Function.PiecewiseSpec
@@ -123,7 +126,7 @@ spec = do
 ------------------------------------------------------------------------------}
 genMeasure :: Gen (Measure Rational)
 genMeasure =
-    unsafeFromDistribution . setLastPieceConstant <$> genPiecewise genPoly
+    fromJust . fromDistribution . setLastPieceConstant <$> genPiecewise genPoly
   where
     setLastPieceConstant =
         Piecewise.fromAscPieces

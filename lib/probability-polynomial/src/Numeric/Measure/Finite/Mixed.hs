@@ -12,15 +12,13 @@ module Numeric.Measure.Finite.Mixed
     , uniform
     , total
     , distribution
+    , fromDistribution
 
       -- * Numerical operations
     , add
     , scale
     , translate
     , convolve
-
-    -- * Internal, for testing
-    , unsafeFromDistribution
     ) where
 
 import Data.Function.Class
@@ -50,13 +48,26 @@ newtype Measure a = Measure { toDistribution :: Piecewise a (Poly a) }
     --            so that the measure is finite.
     deriving (Show)
 
--- | Internal, for testing only.
---
--- Construct a signed measure from its
+-- | Construct a signed measure from its
 -- [distribution function
 -- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
-unsafeFromDistribution :: (Ord a, Num a) => Piecewise a (Poly a) -> Measure a
-unsafeFromDistribution = Measure . trim
+--
+-- Return 'Nothing' if the measure is not finite,
+-- that is if the last piece of the piecewise function is not constant.
+fromDistribution
+    :: (Ord a, Num a)
+    => Piecewise a (Poly a) -> Maybe (Measure a)
+fromDistribution pieces
+    | isEventuallyConstant pieces = Just $ Measure $ trim pieces
+    | otherwise = Nothing
+
+-- | Test whether a piecewise polynomial is consant as x -> ∞.
+isEventuallyConstant :: (Ord a, Num a) => Piecewise a (Poly a) -> Bool
+isEventuallyConstant pieces
+    | null xpolys = True
+    | otherwise = (<= 0) . Poly.degree . snd $ last xpolys
+  where
+    xpolys = Piecewise.toAscPieces pieces
 
 -- | Internal.
 -- Join all intervals whose polynomials are equal.
