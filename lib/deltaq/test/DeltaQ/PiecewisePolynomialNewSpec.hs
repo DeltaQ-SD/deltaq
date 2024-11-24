@@ -229,14 +229,14 @@ spec = do
         let quantile' :: Rational -> DQ -> Eventually Rational
             quantile' = quantile
 
-        xit "monotonic" $ property $
+        it "monotonic" $ property $
             \o (Probability p) (Probability q) ->
                 let p' = min p q
                     q' = max p q
                 in
                     p' <= q'  ==>  quantile' p' o <= quantile' q' o
 
-        xit "uniform" $ property $
+        it "uniform" $ property $
             \(Probability p) (NonNegative r) (Positive d) ->
                 let s = r + d
                 in  quantile' p (uniform r s) === Occurs (r + p*(s-r))
