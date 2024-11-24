@@ -264,7 +264,7 @@ spec = do
 
         xit ".\\/." $ property $
             \x y ->
-                earliest' (x ./\. y)
+                earliest' (x .\/. y)
                     ===  min (earliest' x) (earliest' y)
 
         xit "choice" $ property $
@@ -300,7 +300,7 @@ spec = do
 
         xit ".\\/." $ property $
             \x y ->
-                deadline' (x ./\. y)
+                deadline' (x .\/. y)
                     ===  min (deadline' x) (deadline' y)
 
         xit "choice" $ property $
