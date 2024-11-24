@@ -312,8 +312,11 @@ equality may be up to numerical accuracy.
 > deadline (x .>>. y) = (+) <$> deadline x <*> deadline y
 > deadline (x ./\. y) = max (deadline x) (deadline y)
 > deadline (x .\/. y) = min (deadline x) (deadline y)
+>  -- TODO: This property ^ is actually false!
 >
 > deadline (choice p x y) = max (deadline x) (deadline y)  if p ≠ 0, p ≠ 1
+>  -- TODO: This property ^ is actually false!
+>
 > deadline (uniform r s)  = Occurs s   if r <= s
 
 -}

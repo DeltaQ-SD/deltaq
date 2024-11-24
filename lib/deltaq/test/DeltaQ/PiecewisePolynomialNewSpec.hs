@@ -245,35 +245,35 @@ spec = do
         let earliest' :: DQ -> Eventually Rational
             earliest' = earliest
 
-        xit "never" $ property $
+        it "never" $ property $
             earliest' never  ===  Abandoned
 
-        xit "wait" $ property $
+        it "wait" $ property $
             \(NonNegative t) ->
                 earliest' (wait t)  ===  Occurs t
 
-        xit ".>>." $ property $
+        it ".>>." $ property $
             \x y ->
                 earliest' (x .>>. y)
                     ===  ((+) <$> earliest' x <*> earliest' y)
 
-        xit "./\\." $ property $
+        it "./\\." $ property $
             \x y ->
                 earliest' (x ./\. y)
                     ===  max (earliest' x) (earliest' y)
 
-        xit ".\\/." $ property $
+        it ".\\/." $ property $
             \x y ->
-                earliest' (x ./\. y)
+                earliest' (x .\/. y)
                     ===  min (earliest' x) (earliest' y)
 
-        xit "choice" $ property $
+        it "choice" $ property $
             \(Probability p) x y ->
                 (0 < p && p < 1) ==>
                     (earliest' (choice p x y)
                         === min (earliest' x) (earliest' y))
 
-        xit "uniform" $ property $
+        it "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 earliest' (uniform r s)  ===  Occurs (min r s)
 
@@ -281,35 +281,35 @@ spec = do
         let deadline' :: DQ -> Eventually Rational
             deadline' = deadline
 
-        xit "never" $ property $
+        it "never" $ property $
             deadline' never  ===  Abandoned
 
-        xit "wait" $ property $
+        it "wait" $ property $
             \(NonNegative t) ->
                 deadline' (wait t)  ===  Occurs t
 
-        xit ".>>." $ property $
+        it ".>>." $ property $
             \x y ->
                 deadline' (x .>>. y)
                     ===  ((+) <$> deadline' x <*> deadline' y)
 
-        xit "./\\." $ property $
+        it "./\\." $ property $
             \x y ->
                 deadline' (x ./\. y)
                     ===  max (deadline' x) (deadline' y)
 
         xit ".\\/." $ property $
             \x y ->
-                deadline' (x ./\. y)
+                deadline' (x .\/. y)
                     ===  min (deadline' x) (deadline' y)
 
         xit "choice" $ property $
             \(Probability p) x y ->
                 (0 < p && p < 1) ==>
-                    (deadline' (choice p x y)
-                        === max (deadline' x) (deadline' y))
+                    deadline' (choice p x y)
+                        === max (deadline' x) (deadline' y)
 
-        xit "uniform" $ property $
+        it "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 deadline' (uniform r s)  ===  Occurs (max r s)
 

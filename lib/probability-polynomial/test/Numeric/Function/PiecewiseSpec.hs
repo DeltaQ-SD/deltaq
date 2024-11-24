@@ -105,16 +105,36 @@ spec = do
                     , i /= Empty
                     ]
 
-        it "eval" $ property $
+        it "eval, +" $ property $
             \p (q :: Piecewise Rational Linear) x ->
                 eval (zipPointwise (+) p q) x
                 === (eval p x + eval q x)
 
+        it "eval, *" $ property $
+            \p (q :: Piecewise Rational Constant) x ->
+                eval (zipPointwise (*) p q) x
+                === (eval p x * eval q x)
+
 {-----------------------------------------------------------------------------
     Helper types
-    Linear functions
+    Constant and linear functions
 ------------------------------------------------------------------------------}
 type Q = Rational
+
+-- | Constant function
+data Constant = Constant Q
+    deriving (Eq, Show)
+
+instance Num Constant where
+    Constant a1 + Constant a2 = Constant (a1 + a2)
+    Constant a1 * Constant a2 = Constant (a1 * a2)
+    negate (Constant a) = Constant (negate a)
+    fromInteger n = Constant (fromInteger n)
+
+instance Fun.Function Constant where
+    type instance Domain Constant = Q
+    type instance Codomain Constant = Q
+    eval (Constant a) _ = a
 
 -- | Linear function with a constant and a slope
 data Linear = Linear Q Q
@@ -194,6 +214,9 @@ allIntervals pieces
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
+instance Arbitrary Constant where
+    arbitrary = Constant <$> arbitrary
+
 instance Arbitrary Linear where
     arbitrary = Linear <$> arbitrary <*> arbitrary
 

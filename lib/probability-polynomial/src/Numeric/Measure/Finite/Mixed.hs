@@ -11,6 +11,7 @@ module Numeric.Measure.Finite.Mixed
     , dirac
     , uniform
     , total
+    , support
     , distribution
     , fromDistribution
 
@@ -118,6 +119,16 @@ total (Measure p) =
     case Piecewise.toAscPieces p of
         [] -> 0
         ps -> eval (snd (last ps)) 0
+
+-- | The 'support' is the smallest closed, contiguous interval $[x,y]$
+-- outside of which the measure is zero.
+--
+-- Returns 'Nothing' if the interval is empty.
+support :: (Ord a, Num a) => Measure a -> Maybe (a, a)
+support (Measure pieces) =
+    case Piecewise.toAscPieces pieces of
+        [] -> Nothing
+        ps -> Just (fst $ head ps, fst $ last ps)
 
 -- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
 --

@@ -91,10 +91,9 @@ instance DeltaQ DQ where
     quantile p (DQ m) =
         eventuallyFromMaybe $ error "TODO: quantile"
 
-    earliest = error "TODO: earliest"
-        -- FIXME: 'earliest' on 'never' is wrong
-    deadline = error "TODO: deadline"
-        -- FIXME: 'deadline' on 'never' is wrong.
+    earliest (DQ m) = eventuallyFromMaybe $ fmap fst $ Measure.support m
+
+    deadline (DQ m)= eventuallyFromMaybe $ fmap snd $ Measure.support m
 
 {-----------------------------------------------------------------------------
     Helper functions
