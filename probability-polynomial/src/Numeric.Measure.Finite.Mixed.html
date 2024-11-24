@@ -1,0 +1,771 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">{-|
+Copyright   : (c) Predictable Network Solutions Ltd., 2024
+License     : BSD-3-Clause
+Maintainer  : peter.thompson@pnsol.com
+Description : Finite signed measures on the number line.
+-}</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html"><span class="hs-identifier">Numeric.Measure.Finite.Mixed</span></a></span><span>
+</span><span id="line-8"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Type</span></span><span>
+</span><span id="line-9"></span><span>      </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier">Measure</span></a></span><span>
+</span><span id="line-10"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier">zero</span></a></span><span>
+</span><span id="line-11"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#dirac"><span class="hs-identifier">dirac</span></a></span><span>
+</span><span id="line-12"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#uniform"><span class="hs-identifier">uniform</span></a></span><span>
+</span><span id="line-13"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#total"><span class="hs-identifier">total</span></a></span><span>
+</span><span id="line-14"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#cumulative"><span class="hs-identifier">cumulative</span></a></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span>      </span><span class="annot"><span class="hs-comment">-- * Numerical operations</span></span><span>
+</span><span id="line-17"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#add"><span class="hs-identifier">add</span></a></span><span>
+</span><span id="line-18"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#scale"><span class="hs-identifier">scale</span></a></span><span>
+</span><span id="line-19"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#translate"><span class="hs-identifier">translate</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#convolve"><span class="hs-identifier">convolve</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span>    </span><span class="annot"><span class="hs-comment">-- * Internal, for testing</span></span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#unsafeFromCumulative"><span class="hs-identifier">unsafeFromCumulative</span></a></span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>
+</span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Data.Function.Class.html"><span class="hs-identifier">Data.Function.Class</span></a></span><span>
+</span><span id="line-27"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Data.Function.Class.html#Function"><span class="hs-identifier">Function</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-28"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html"><span class="hs-identifier">Numeric.Function.Piecewise</span></a></span><span>
+</span><span id="line-30"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier">Piecewise</span></a></span><span>
+</span><span id="line-31"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Polynomial.Simple.html"><span class="hs-identifier">Numeric.Polynomial.Simple</span></a></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier">Poly</span></a></span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map.Strict</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Map</span></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html"><span class="hs-identifier">Numeric.Function.Piecewise</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Piecewise</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Numeric.Measure.Discrete.html"><span class="hs-identifier">Numeric.Measure.Discrete</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">D</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Numeric.Polynomial.Simple.html"><span class="hs-identifier">Numeric.Polynomial.Simple</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Poly</span></span><span>
+</span><span id="line-40"></span><span>
+</span><span id="line-41"></span><span class="hs-comment">{-----------------------------------------------------------------------------
+    Type
+------------------------------------------------------------------------------}</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- | A finite</span><span>
+</span><span id="line-45"></span><span class="hs-comment">-- [signed measure](https://en.wikipedia.org/wiki/Signed_measure)</span><span>
+</span><span id="line-46"></span><span class="hs-comment">-- on the number line.</span><span>
+</span><span id="line-47"></span><span class="hs-keyword">newtype</span><span> </span><span id="Measure"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span></span><span> </span><span id="local-6989586621679073995"><span class="annot"><a href="#local-6989586621679073995"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Measure"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="getCumulative"><span class="annot"><span class="annottext">forall a. Measure a -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#getCumulative"><span class="hs-identifier hs-var hs-var">getCumulative</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073995"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679073995"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-comment">-- INVARIANT: Adjacent pieces contain distinct objects.</span><span>
+</span><span id="line-49"></span><span>    </span><span class="hs-comment">-- INVARIANT: The last piece is a constant polynomial,</span><span>
+</span><span id="line-50"></span><span>    </span><span class="hs-comment">--            so that the measure is finite.</span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679074137"><span id="local-6989586621679074144"><span id="local-6989586621679074148"><span class="annot"><span class="annottext">Int -&gt; Measure a -&gt; ShowS
+[Measure a] -&gt; ShowS
+Measure a -&gt; String
+(Int -&gt; Measure a -&gt; ShowS)
+-&gt; (Measure a -&gt; String)
+-&gt; ([Measure a] -&gt; ShowS)
+-&gt; Show (Measure a)
+forall a. Show a =&gt; Int -&gt; Measure a -&gt; ShowS
+forall a. Show a =&gt; [Measure a] -&gt; ShowS
+forall a. Show a =&gt; Measure a -&gt; String
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: forall a. Show a =&gt; Int -&gt; Measure a -&gt; ShowS
+showsPrec :: Int -&gt; Measure a -&gt; ShowS
+$cshow :: forall a. Show a =&gt; Measure a -&gt; String
+show :: Measure a -&gt; String
+$cshowList :: forall a. Show a =&gt; [Measure a] -&gt; ShowS
+showList :: [Measure a] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-52"></span><span>
+</span><span id="line-53"></span><span class="hs-comment">-- | Internal, for testing only.</span><span>
+</span><span id="line-54"></span><span class="hs-comment">--</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- Construct a signed measure from its cumulative function.</span><span>
+</span><span id="line-56"></span><span id="local-6989586621679074007"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#unsafeFromCumulative"><span class="hs-identifier hs-type">unsafeFromCumulative</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074007"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074007"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074007"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074007"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074007"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-57"></span><span id="unsafeFromCumulative"><span class="annot"><span class="annottext">unsafeFromCumulative :: forall a. (Ord a, Num a) =&gt; Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#unsafeFromCumulative"><span class="hs-identifier hs-var hs-var">unsafeFromCumulative</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Measure a)
+-&gt; (Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; Piecewise a (Poly a)
+-&gt; Measure a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a.
+(Ord a, Num a) =&gt;
+Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#trim"><span class="hs-identifier hs-var">trim</span></a></span><span>
+</span><span id="line-58"></span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- | Internal.</span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- Join all intervals whose polynomials are equal.</span><span>
+</span><span id="line-61"></span><span id="local-6989586621679074012"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#trim"><span class="hs-identifier hs-type">trim</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074012"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074012"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074012"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074012"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074012"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074012"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-62"></span><span id="trim"><span class="annot"><span class="annottext">trim :: forall a.
+(Ord a, Num a) =&gt;
+Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#trim"><span class="hs-identifier hs-var hs-var">trim</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall o a. (Eq o, Num o) =&gt; Piecewise a o -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#trim"><span class="hs-identifier hs-var">Piecewise.trim</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-comment">-- | Two measures are equal if they yield the same measures on every set.</span><span>
+</span><span id="line-65"></span><span class="hs-comment">--</span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- @mx == my@ implies @forall t. cumulative mx t == cumulative my t@.</span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679074021"><span id="local-6989586621679074172"><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074021"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074021"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074021"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-68"></span><span>    </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074184"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074184"><span class="hs-identifier hs-var">mx</span></a></span></span><span> </span><span id="local-6989586621679074185"><span class="annot"><span class="annottext">== :: Measure a -&gt; Measure a -&gt; Bool
+</span><span class="hs-operator hs-var hs-var hs-var">==</span></span></span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074186"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074186"><span class="hs-identifier hs-var">my</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-69"></span><span>        </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; [(a, Poly a)]
+forall a o. Ord a =&gt; Piecewise a o -&gt; [(a, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">Piecewise.toAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074184"><span class="hs-identifier hs-var">mx</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; [(a, Poly a)] -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; [(a, Poly a)]
+forall a o. Ord a =&gt; Piecewise a o -&gt; [(a, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">Piecewise.toAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074186"><span class="hs-identifier hs-var">my</span></a></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span class="hs-comment">{-----------------------------------------------------------------------------
+    Operations
+------------------------------------------------------------------------------}</span><span>
+</span><span id="line-74"></span><span class="annot"><span class="hs-comment">-- | The measure that assigns @0@ to every set.</span></span><span>
+</span><span id="line-75"></span><span id="local-6989586621679074027"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier hs-type">zero</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074027"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074027"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-76"></span><span id="zero"><span class="annot"><span class="annottext">zero :: forall a. Num a =&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier hs-var hs-var">zero</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+forall a o. Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#zero"><span class="hs-identifier hs-var">Piecewise.zero</span></a></span><span>
+</span><span id="line-77"></span><span>
+</span><span id="line-78"></span><span class="hs-comment">-- | A</span><span>
+</span><span id="line-79"></span><span class="hs-comment">-- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)</span><span>
+</span><span id="line-80"></span><span class="hs-comment">-- at the given point @x@.</span><span>
+</span><span id="line-81"></span><span class="hs-comment">--</span><span>
+</span><span id="line-82"></span><span class="hs-comment">-- &gt; total (dirac x m) = m </span><span>
+</span><span id="line-83"></span><span id="local-6989586621679074031"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#dirac"><span class="hs-identifier hs-type">dirac</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074031"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074031"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074031"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074031"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074031"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-84"></span><span id="dirac"><span class="annot"><span class="annottext">dirac :: forall a. (Ord a, Num a) =&gt; a -&gt; a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#dirac"><span class="hs-identifier hs-var hs-var">dirac</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-identifier">_</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure a
+forall a. Num a =&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier hs-var">zero</span></a></span><span>
+</span><span id="line-85"></span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#dirac"><span class="hs-identifier hs-var">dirac</span></a></span><span> </span><span id="local-6989586621679074197"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074197"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679074198"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074198"><span class="hs-identifier hs-var">w</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Measure a)
+-&gt; Piecewise a (Poly a) -&gt; Measure a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Piecewise a (Poly a)
+forall a o. Ord a =&gt; [(a, o)] -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#fromAscPieces"><span class="hs-identifier hs-var">Piecewise.fromAscPieces</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074197"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a -&gt; Poly a
+forall a. a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#constant"><span class="hs-identifier hs-var">Poly.constant</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074198"><span class="hs-identifier hs-var">w</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span class="hs-comment">-- | The probability measure of a uniform probability distribution</span><span>
+</span><span id="line-88"></span><span class="hs-comment">-- in the interval $[x,y)$</span><span>
+</span><span id="line-89"></span><span class="hs-comment">--</span><span>
+</span><span id="line-90"></span><span class="hs-comment">-- &gt; total (uniform x y) = 1</span><span>
+</span><span id="line-91"></span><span id="local-6989586621679074041"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#uniform"><span class="hs-identifier hs-type">uniform</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074041"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074041"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679074041"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074041"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074041"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074041"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-92"></span><span id="uniform"><span class="annot"><span class="annottext">uniform :: forall a. (Ord a, Num a, Fractional a) =&gt; a -&gt; a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#uniform"><span class="hs-identifier hs-var hs-var">uniform</span></a></span></span><span> </span><span id="local-6989586621679074210"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074210"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679074211"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074211"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Measure a)
+-&gt; Piecewise a (Poly a) -&gt; Measure a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Ordering
+forall a. Ord a =&gt; a -&gt; a -&gt; Ordering
+</span><span class="hs-identifier hs-var">compare</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074210"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074211"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-93"></span><span>    </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier hs-var">EQ</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Piecewise a (Poly a)
+forall a o. Ord a =&gt; [(a, o)] -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#fromAscPieces"><span class="hs-identifier hs-var">Piecewise.fromAscPieces</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074210"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-94"></span><span>    </span><span class="annot"><span class="annottext">Ordering
+</span><span class="hs-identifier">_</span></span><span>  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Piecewise a (Poly a)
+forall a o. Ord a =&gt; [(a, o)] -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#fromAscPieces"><span class="hs-identifier hs-var">Piecewise.fromAscPieces</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074213"><span class="hs-identifier hs-var">low</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679074214"><span class="hs-identifier hs-var">poly</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074215"><span class="hs-identifier hs-var">high</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-95"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679074213"><span class="annot"><span class="annottext">low :: a
+</span><a href="#local-6989586621679074213"><span class="hs-identifier hs-var hs-var">low</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">min</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074210"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074211"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-97"></span><span>    </span><span id="local-6989586621679074215"><span class="annot"><span class="annottext">high :: a
+</span><a href="#local-6989586621679074215"><span class="hs-identifier hs-var hs-var">high</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Ord a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-identifier hs-var">max</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074210"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074211"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-98"></span><span>    </span><span id="local-6989586621679074214"><span class="annot"><span class="annottext">poly :: Poly a
+</span><a href="#local-6989586621679074214"><span class="hs-identifier hs-var hs-var">poly</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(a, a) -&gt; (a, a) -&gt; Poly a
+forall a. (Eq a, Fractional a) =&gt; (a, a) -&gt; (a, a) -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#lineFromTo"><span class="hs-identifier hs-var">Poly.lineFromTo</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074213"><span class="hs-identifier hs-var">low</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074215"><span class="hs-identifier hs-var">high</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">1</span></span><span class="hs-special">)</span><span>
+</span><span id="line-99"></span><span>
+</span><span id="line-100"></span><span class="annot"><span class="hs-comment">-- | The total of the measure applied to the set of real numbers.</span></span><span>
+</span><span id="line-101"></span><span id="local-6989586621679074044"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#total"><span class="hs-identifier hs-type">total</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074044"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074044"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074044"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074044"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-102"></span><span id="total"><span class="annot"><span class="annottext">total :: forall a. (Ord a, Num a) =&gt; Measure a -&gt; a
+</span><a href="Numeric.Measure.Finite.Mixed.html#total"><span class="hs-identifier hs-var hs-var">total</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074237"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074237"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-103"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; [(a, Poly a)]
+forall a o. Ord a =&gt; Piecewise a o -&gt; [(a, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">Piecewise.toAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074237"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-104"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-105"></span><span>        </span><span id="local-6989586621679074238"><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074238"><span class="hs-identifier hs-var">ps</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; Domain (Poly a) -&gt; Codomain (Poly a)
+forall f. Function f =&gt; f -&gt; Domain f -&gt; Codomain f
+</span><a href="Data.Function.Class.html#eval"><span class="hs-identifier hs-var">eval</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a, Poly a) -&gt; Poly a
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; (a, Poly a)
+forall a. HasCallStack =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">last</span></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074238"><span class="hs-identifier hs-var">ps</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a
+Domain (Poly a)
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-106"></span><span>
+</span><span id="line-107"></span><span class="annot"><span class="hs-comment">-- | @cumulative x@ is the measure of the interval $(-&#8734;, x]$.</span></span><span>
+</span><span id="line-108"></span><span id="local-6989586621679074055"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#cumulative"><span class="hs-identifier hs-type">cumulative</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074055"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074055"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074055"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074055"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074055"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-109"></span><span id="cumulative"><span class="annot"><span class="annottext">cumulative :: forall a. (Ord a, Num a) =&gt; Measure a -&gt; a -&gt; a
+</span><a href="Numeric.Measure.Finite.Mixed.html#cumulative"><span class="hs-identifier hs-var hs-var">cumulative</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074252"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074252"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679074253"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074253"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+-&gt; Domain (Piecewise a (Poly a)) -&gt; Codomain (Piecewise a (Poly a))
+forall f. Function f =&gt; f -&gt; Domain f -&gt; Codomain f
+</span><a href="Data.Function.Class.html#eval"><span class="hs-identifier hs-var">eval</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074252"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">a
+Domain (Piecewise a (Poly a))
+</span><a href="#local-6989586621679074253"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-110"></span><span>
+</span><span id="line-111"></span><span class="hs-comment">-- | Add two measures.</span><span>
+</span><span id="line-112"></span><span class="hs-comment">--</span><span>
+</span><span id="line-113"></span><span class="hs-comment">-- &gt; total (add mx my) = total mx + total my</span><span>
+</span><span id="line-114"></span><span id="local-6989586621679074062"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#add"><span class="hs-identifier hs-type">add</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074062"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074062"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074062"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074062"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074062"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-115"></span><span id="add"><span class="annot"><span class="annottext">add :: forall a. (Ord a, Num a) =&gt; Measure a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#add"><span class="hs-identifier hs-var hs-var">add</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074262"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074262"><span class="hs-identifier hs-var">mx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074263"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074263"><span class="hs-identifier hs-var">my</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-116"></span><span>    </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Measure a)
+-&gt; Piecewise a (Poly a) -&gt; Measure a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a.
+(Ord a, Num a) =&gt;
+Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#trim"><span class="hs-identifier hs-var">trim</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Poly a -&gt; Poly a -&gt; Poly a)
+-&gt; Piecewise a (Poly a)
+-&gt; Piecewise a (Poly a)
+-&gt; Piecewise a (Poly a)
+forall a o.
+(Ord a, Num o) =&gt;
+(o -&gt; o -&gt; o) -&gt; Piecewise a o -&gt; Piecewise a o -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#zipPointwise"><span class="hs-identifier hs-var">Piecewise.zipPointwise</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; Poly a -&gt; Poly a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(+)</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074262"><span class="hs-identifier hs-var">mx</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074263"><span class="hs-identifier hs-var">my</span></a></span><span>
+</span><span id="line-117"></span><span>
+</span><span id="line-118"></span><span class="hs-comment">-- | Scale a measure by a constant.</span><span>
+</span><span id="line-119"></span><span class="hs-comment">--</span><span>
+</span><span id="line-120"></span><span class="hs-comment">-- &gt; total (scale a mx) = a * total mx</span><span>
+</span><span id="line-121"></span><span id="local-6989586621679074066"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#scale"><span class="hs-identifier hs-type">scale</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074066"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074066"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074066"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074066"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-122"></span><span id="scale"><span class="annot"><span class="annottext">scale :: forall a. (Ord a, Num a) =&gt; a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#scale"><span class="hs-identifier hs-var hs-var">scale</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure a
+forall a. Num a =&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier hs-var">zero</span></a></span><span>
+</span><span id="line-123"></span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#scale"><span class="hs-identifier hs-var">scale</span></a></span><span> </span><span id="local-6989586621679074273"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074273"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074274"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074274"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Measure a)
+-&gt; Piecewise a (Poly a) -&gt; Measure a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Poly a -&gt; Poly a) -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall o o' a. (o -&gt; o') -&gt; Piecewise a o -&gt; Piecewise a o'
+</span><a href="Numeric.Function.Piecewise.html#mapPieces"><span class="hs-identifier hs-var">Piecewise.mapPieces</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Poly a -&gt; Poly a
+forall a. Num a =&gt; a -&gt; Poly a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#scale"><span class="hs-identifier hs-var">Poly.scale</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074273"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074274"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-124"></span><span>
+</span><span id="line-125"></span><span class="hs-comment">-- | Translate a measure along the number line.</span><span>
+</span><span id="line-126"></span><span class="hs-comment">--</span><span>
+</span><span id="line-127"></span><span class="hs-comment">-- &gt; cumulative (translate y m) x = cumulative m (x - y)</span><span>
+</span><span id="line-128"></span><span id="local-6989586621679074072"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#translate"><span class="hs-identifier hs-type">translate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074072"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074072"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679074072"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679074072"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074072"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074072"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-129"></span><span id="translate"><span class="annot"><span class="annottext">translate :: forall a.
+(Ord a, Num a, Fractional a) =&gt;
+a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#translate"><span class="hs-identifier hs-var hs-var">translate</span></a></span></span><span> </span><span id="local-6989586621679074287"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074287"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074288"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074288"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-130"></span><span>    </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Measure a)
+-&gt; Piecewise a (Poly a) -&gt; Measure a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Poly a -&gt; Poly a)
+-&gt; a -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a o.
+(Ord a, Num a, Num o) =&gt;
+(a -&gt; o -&gt; o) -&gt; a -&gt; Piecewise a o -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#translateWith"><span class="hs-identifier hs-var">Piecewise.translateWith</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Poly a -&gt; Poly a
+forall a. (Fractional a, Eq a, Num a) =&gt; a -&gt; Poly a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#translate"><span class="hs-identifier hs-var">Poly.translate</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074287"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074288"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-131"></span><span>
+</span><span id="line-132"></span><span class="hs-comment">{-----------------------------------------------------------------------------
+    Operations
+    Decomposition into continuous and discrete measures,
+    needed for convolution.
+------------------------------------------------------------------------------}</span><span>
+</span><span id="line-137"></span><span class="hs-comment">-- | Measure that is absolutely continuous</span><span>
+</span><span id="line-138"></span><span class="hs-comment">-- with respect to the Lebesgue measure,</span><span>
+</span><span id="line-139"></span><span class="hs-comment">-- Represented via its cumulative function.</span><span>
+</span><span id="line-140"></span><span class="hs-keyword">newtype</span><span> </span><span id="Continuous"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-var">Continuous</span></a></span></span><span> </span><span id="local-6989586621679074077"><span class="annot"><a href="#local-6989586621679074077"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Continuous"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-var">Continuous</span></a></span></span><span> </span><span class="hs-special">{</span><span> </span><span id="unContinuous"><span class="annot"><span class="annottext">forall a. Continuous a -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#unContinuous"><span class="hs-identifier hs-var hs-var">unContinuous</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074077"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074077"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><span id="line-141"></span><span>    </span><span class="hs-comment">-- INVARIANT: The last piece is @Poly.constant p@ for some @p :: a@.</span><span>
+</span><span id="line-142"></span><span>
+</span><span id="line-143"></span><span class="hs-comment">-- | Density function (Radon&#8211;Nikodym derivative) of an absolutely</span><span>
+</span><span id="line-144"></span><span class="hs-comment">-- continuous measure.</span><span>
+</span><span id="line-145"></span><span class="hs-keyword">newtype</span><span> </span><span id="Density"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Density"><span class="hs-identifier hs-var">Density</span></a></span></span><span> </span><span id="local-6989586621679074083"><span class="annot"><a href="#local-6989586621679074083"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Density"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Density"><span class="hs-identifier hs-var">Density</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074083"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074083"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>    </span><span class="hs-comment">-- INVARIANT: The last piece is @Poly.constant 0@.</span><span>
+</span><span id="line-147"></span><span>
+</span><span id="line-148"></span><span class="annot"><span class="hs-comment">-- | Density function of an absolutely continuous measure.</span></span><span>
+</span><span id="line-149"></span><span id="local-6989586621679074080"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#toDensity"><span class="hs-identifier hs-type">toDensity</span></a></span><span>
+</span><span id="line-150"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074080"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074080"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679074080"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-151"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-type">Continuous</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074080"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Density"><span class="hs-identifier hs-type">Density</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074080"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-152"></span><span id="toDensity"><span class="annot"><span class="annottext">toDensity :: forall a. (Ord a, Num a, Fractional a) =&gt; Continuous a -&gt; Density a
+</span><a href="Numeric.Measure.Finite.Mixed.html#toDensity"><span class="hs-identifier hs-var hs-var">toDensity</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Density a
+forall a. Piecewise a (Poly a) -&gt; Density a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Density"><span class="hs-identifier hs-var">Density</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Density a)
+-&gt; (Continuous a -&gt; Piecewise a (Poly a))
+-&gt; Continuous a
+-&gt; Density a
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Poly a -&gt; Poly a) -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall o o' a. (o -&gt; o') -&gt; Piecewise a o -&gt; Piecewise a o'
+</span><a href="Numeric.Function.Piecewise.html#mapPieces"><span class="hs-identifier hs-var">Piecewise.mapPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; Poly a
+forall a. Num a =&gt; Poly a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#differentiate"><span class="hs-identifier hs-var">Poly.differentiate</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; (Continuous a -&gt; Piecewise a (Poly a))
+-&gt; Continuous a
+-&gt; Piecewise a (Poly a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Continuous a -&gt; Piecewise a (Poly a)
+forall a. Continuous a -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#unContinuous"><span class="hs-identifier hs-var">unContinuous</span></a></span><span>
+</span><span id="line-153"></span><span>
+</span><span id="line-154"></span><span class="hs-comment">-- | Decompose a mixed measure into</span><span>
+</span><span id="line-155"></span><span class="hs-comment">-- a continuous measure and a discrete measure.</span><span>
+</span><span id="line-156"></span><span class="hs-comment">-- See also [Lebesgue's decomposition theorem</span><span>
+</span><span id="line-157"></span><span class="hs-comment">-- ](https://en.wikipedia.org/wiki/Lebesgue%27s_decomposition_theorem)</span><span>
+</span><span id="line-158"></span><span id="local-6989586621679074085"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#decompose"><span class="hs-identifier hs-type">decompose</span></a></span><span>
+</span><span id="line-159"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074085"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074085"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679074085"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-160"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074085"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-type">Continuous</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074085"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Measure.Discrete.html#Discrete"><span class="hs-identifier hs-type">D.Discrete</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074085"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-161"></span><span id="decompose"><span class="annot"><span class="annottext">decompose :: forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Measure a -&gt; (Continuous a, Discrete a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#decompose"><span class="hs-identifier hs-var hs-var">decompose</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074311"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074311"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-162"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Continuous a
+forall a. Piecewise a (Poly a) -&gt; Continuous a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-var">Continuous</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Continuous a)
+-&gt; Piecewise a (Poly a) -&gt; Continuous a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a.
+(Ord a, Num a) =&gt;
+Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#trim"><span class="hs-identifier hs-var">trim</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Piecewise a (Poly a)
+forall a o. Ord a =&gt; [(a, o)] -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#fromAscPieces"><span class="hs-identifier hs-var">Piecewise.fromAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074312"><span class="hs-identifier hs-var">withoutJumps</span></a></span><span>
+</span><span id="line-163"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Map a a -&gt; Discrete a
+forall a. (Ord a, Num a) =&gt; Map a a -&gt; Discrete a
+</span><a href="Numeric.Measure.Discrete.html#fromMap"><span class="hs-identifier hs-var">D.fromMap</span></a></span><span> </span><span class="annot"><span class="annottext">(Map a a -&gt; Discrete a) -&gt; Map a a -&gt; Discrete a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(a, a)] -&gt; Map a a
+forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
+</span><span class="hs-identifier hs-var">Map.fromList</span></span><span> </span><span class="annot"><span class="annottext">[(a, a)]
+</span><a href="#local-6989586621679074315"><span class="hs-identifier hs-var">jumps</span></a></span><span>
+</span><span id="line-164"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-165"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-166"></span><span>    </span><span id="local-6989586621679074318"><span class="annot"><span class="annottext">pieces :: [(a, Poly a)]
+</span><a href="#local-6989586621679074318"><span class="hs-identifier hs-var hs-var">pieces</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; [(a, Poly a)]
+forall a o. Ord a =&gt; Piecewise a o -&gt; [(a, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">Piecewise.toAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074311"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-167"></span><span>
+</span><span id="line-168"></span><span>    </span><span id="local-6989586621679074312"><span class="annot"><span class="annottext">withoutJumps :: [(a, Poly a)]
+</span><a href="#local-6989586621679074312"><span class="hs-identifier hs-var hs-var">withoutJumps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-169"></span><span>        </span><span class="annot"><span class="annottext">((a, Poly a) -&gt; a -&gt; (a, Poly a))
+-&gt; [(a, Poly a)] -&gt; [a] -&gt; [(a, Poly a)]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679074323"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074323"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679074324"><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679074324"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679074325"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074325"><span class="hs-identifier hs-var">j</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074323"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679074324"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; Poly a -&gt; Poly a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Poly a
+forall a. a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#constant"><span class="hs-identifier hs-var">Poly.constant</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074325"><span class="hs-identifier hs-var">j</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074318"><span class="hs-identifier hs-var">pieces</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679074326"><span class="hs-identifier hs-var">totalJumps</span></a></span><span>
+</span><span id="line-170"></span><span>    </span><span id="local-6989586621679074326"><span class="annot"><span class="annottext">totalJumps :: [a]
+</span><a href="#local-6989586621679074326"><span class="hs-identifier hs-var hs-var">totalJumps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[a] -&gt; [a]
+forall a. HasCallStack =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">tail</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; [a] -&gt; [a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; a -&gt; a) -&gt; a -&gt; [a] -&gt; [a]
+forall b a. (b -&gt; a -&gt; b) -&gt; b -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">scanl</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(+)</span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">([a] -&gt; [a]) -&gt; [a] -&gt; [a]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">((a, a) -&gt; a) -&gt; [(a, a)] -&gt; [a]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(a, a) -&gt; a
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">[(a, a)]
+</span><a href="#local-6989586621679074315"><span class="hs-identifier hs-var">jumps</span></a></span><span>
+</span><span id="line-171"></span><span>
+</span><span id="line-172"></span><span>    </span><span id="local-6989586621679074315"><span class="annot"><span class="annottext">jumps :: [(a, a)]
+</span><a href="#local-6989586621679074315"><span class="hs-identifier hs-var hs-var">jumps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; [(a, Poly a)] -&gt; [(a, a)]
+forall {b}. Num b =&gt; Poly b -&gt; [(b, Poly b)] -&gt; [(b, b)]
+</span><a href="#local-6989586621679074336"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><span class="hs-number">0</span></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074318"><span class="hs-identifier hs-var">pieces</span></a></span><span>
+</span><span id="line-173"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-174"></span><span>        </span><span id="local-6989586621679074336"><span class="annot"><span class="annottext">go :: Poly b -&gt; [(b, Poly b)] -&gt; [(b, b)]
+</span><a href="#local-6989586621679074336"><span class="hs-identifier hs-var hs-var">go</span></a></span></span><span> </span><span class="annot"><span class="annottext">Poly b
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-175"></span><span>        </span><span class="annot"><a href="#local-6989586621679074336"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span id="local-6989586621679074341"><span class="annot"><span class="annottext">Poly b
+</span><a href="#local-6989586621679074341"><span class="hs-identifier hs-var">prev</span></a></span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span id="local-6989586621679074342"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074342"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679074343"><span class="annot"><span class="annottext">Poly b
+</span><a href="#local-6989586621679074343"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679074344"><span class="annot"><span class="annottext">[(b, Poly b)]
+</span><a href="#local-6989586621679074344"><span class="hs-identifier hs-var">xos</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-176"></span><span>            </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074342"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Poly b -&gt; b -&gt; b
+forall a. Num a =&gt; Poly a -&gt; a -&gt; a
+</span><a href="Numeric.Polynomial.Simple.html#eval"><span class="hs-identifier hs-var">Poly.eval</span></a></span><span> </span><span class="annot"><span class="annottext">Poly b
+</span><a href="#local-6989586621679074343"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074342"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">b -&gt; b -&gt; b
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Poly b -&gt; b -&gt; b
+forall a. Num a =&gt; Poly a -&gt; a -&gt; a
+</span><a href="Numeric.Polynomial.Simple.html#eval"><span class="hs-identifier hs-var">Poly.eval</span></a></span><span> </span><span class="annot"><span class="annottext">Poly b
+</span><a href="#local-6989586621679074341"><span class="hs-identifier hs-var">prev</span></a></span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074342"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(b, b) -&gt; [(b, b)] -&gt; [(b, b)]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">Poly b -&gt; [(b, Poly b)] -&gt; [(b, b)]
+</span><a href="#local-6989586621679074336"><span class="hs-identifier hs-var">go</span></a></span><span> </span><span class="annot"><span class="annottext">Poly b
+</span><a href="#local-6989586621679074343"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">[(b, Poly b)]
+</span><a href="#local-6989586621679074344"><span class="hs-identifier hs-var">xos</span></a></span><span>
+</span><span id="line-177"></span><span>
+</span><span id="line-178"></span><span class="hs-comment">{-----------------------------------------------------------------------------
+    Operations
+    Convolution
+------------------------------------------------------------------------------}</span><span>
+</span><span id="line-182"></span><span class="annot"><span class="hs-comment">{-$ NOTE [Convolution]
+
+In order to compute a convolution,
+we convolve a density with the cumulative function.
+
+Let $f$ denote a density, which can be continuous or a Dirac delta.
+Let $G$ denote a cumulative function.
+Let $H = f * G$ be the result of the convolution.
+It can be shown that this is the cumulative function of the
+convolution of the densities, $h = f * g$.
+
+The formula for convolution is
+
+$ H(y) = &#8747; f(y - x) G(x) dx = &#8747; f (x) G(y - x) dx$.
+
+When $f$ is a sum of delta functions, $f = &#931; w_j delta_{x_j}(x)$,
+this integral becomes ($y - x = x_j$ =&gt; $x = y - x_j$)
+
+$ H(y) = &#931; w_j G(y - x_j) $.
+
+When $f$ is a piecewise polynomial, we can convolve the pieces.
+
+When convolving with a cumulative function, the final piece
+will be a constant $g_n$ on the interval $[x_n,&#8734;)$.
+In this case, the convolution is given by
+
+\[
+H(y)
+    = &#8747; f (x) G(y - x) dx
+    = &#8747;_{ -&#8734;}^{y-x_n} f(x) g_n dx
+    = g_n F(y-x_n)
+\]
+
+where $F$ is the cumulative function of the density $f$.
+-}</span></span><span>
+</span><span id="line-217"></span><span>
+</span><span id="line-218"></span><span class="hs-comment">-- | Convolve a discrete measure with a mixed measure.</span><span>
+</span><span id="line-219"></span><span class="hs-comment">--</span><span>
+</span><span id="line-220"></span><span class="hs-comment">-- See NOTE [Convolution].</span><span>
+</span><span id="line-221"></span><span id="local-6989586621679074102"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#convolveDiscrete"><span class="hs-identifier hs-type">convolveDiscrete</span></a></span><span>
+</span><span id="line-222"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074102"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074102"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679074102"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-223"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Discrete.html#Discrete"><span class="hs-identifier hs-type">D.Discrete</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074102"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074102"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074102"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-224"></span><span id="convolveDiscrete"><span class="annot"><span class="annottext">convolveDiscrete :: forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Discrete a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#convolveDiscrete"><span class="hs-identifier hs-var hs-var">convolveDiscrete</span></a></span></span><span> </span><span id="local-6989586621679074361"><span class="annot"><span class="annottext">Discrete a
+</span><a href="#local-6989586621679074361"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679074362"><span class="annot"><span class="annottext">Measure a
+</span><a href="#local-6989586621679074362"><span class="hs-identifier hs-var">gg</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-225"></span><span>    </span><span class="annot"><span class="annottext">(Measure a -&gt; Measure a -&gt; Measure a)
+-&gt; Measure a -&gt; [Measure a] -&gt; Measure a
+forall a b. (a -&gt; b -&gt; b) -&gt; b -&gt; [a] -&gt; b
+forall (t :: * -&gt; *) a b.
+Foldable t =&gt;
+(a -&gt; b -&gt; b) -&gt; b -&gt; t a -&gt; b
+</span><span class="hs-identifier hs-var">foldr</span></span><span> </span><span class="annot"><span class="annottext">Measure a -&gt; Measure a -&gt; Measure a
+forall a. (Ord a, Num a) =&gt; Measure a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#add"><span class="hs-identifier hs-var">add</span></a></span><span> </span><span class="annot"><span class="annottext">Measure a
+forall a. Num a =&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier hs-var">zero</span></a></span><span>
+</span><span id="line-226"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">a -&gt; Measure a -&gt; Measure a
+forall a. (Ord a, Num a) =&gt; a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#scale"><span class="hs-identifier hs-var">scale</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074364"><span class="hs-identifier hs-var">w</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Measure a -&gt; Measure a
+forall a.
+(Ord a, Num a, Fractional a) =&gt;
+a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#translate"><span class="hs-identifier hs-var">translate</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074365"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Measure a
+</span><a href="#local-6989586621679074362"><span class="hs-identifier hs-var">gg</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-227"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679074365"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074365"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679074364"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074364"><span class="hs-identifier hs-var">w</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Map a a -&gt; [(a, a)]
+forall k a. Map k a -&gt; [(k, a)]
+</span><span class="hs-identifier hs-var">Map.toAscList</span></span><span> </span><span class="annot"><span class="annottext">(Map a a -&gt; [(a, a)]) -&gt; Map a a -&gt; [(a, a)]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Discrete a -&gt; Map a a
+forall a. Num a =&gt; Discrete a -&gt; Map a a
+</span><a href="Numeric.Measure.Discrete.html#toMap"><span class="hs-identifier hs-var">D.toMap</span></a></span><span> </span><span class="annot"><span class="annottext">Discrete a
+</span><a href="#local-6989586621679074361"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-228"></span><span>        </span><span class="hs-special">]</span><span>
+</span><span id="line-229"></span><span>
+</span><span id="line-230"></span><span class="hs-comment">-- | Convolve an absolutely continuous measure with a mixed measure.</span><span>
+</span><span id="line-231"></span><span class="hs-comment">--</span><span>
+</span><span id="line-232"></span><span class="hs-comment">-- See NOTE [Convolution].</span><span>
+</span><span id="line-233"></span><span id="local-6989586621679074110"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#convolveContinuous"><span class="hs-identifier hs-type">convolveContinuous</span></a></span><span>
+</span><span id="line-234"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074110"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074110"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679074110"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-235"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-type">Continuous</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074110"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074110"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074110"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-236"></span><span id="convolveContinuous"><span class="annot"><span class="annottext">convolveContinuous :: forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Continuous a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#convolveContinuous"><span class="hs-identifier hs-var hs-var">convolveContinuous</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-type">Continuous</span></a></span><span> </span><span id="local-6989586621679074382"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074382"><span class="hs-identifier hs-var">ff</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span id="local-6989586621679074383"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074383"><span class="hs-identifier hs-var">gg</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-237"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Bool
+forall a. [a] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074385"><span class="hs-identifier hs-var">ffpieces</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure a
+forall a. Num a =&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier hs-var">zero</span></a></span><span>
+</span><span id="line-238"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Bool
+forall a. [a] -&gt; Bool
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">null</span></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074386"><span class="hs-identifier hs-var">ggpieces</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure a
+forall a. Num a =&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#zero"><span class="hs-identifier hs-var">zero</span></a></span><span>
+</span><span id="line-239"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Measure a
+forall a. Piecewise a (Poly a) -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-var">Measure</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Measure a)
+-&gt; Piecewise a (Poly a) -&gt; Measure a
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a.
+(Ord a, Num a) =&gt;
+Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#trim"><span class="hs-identifier hs-var">trim</span></a></span><span> </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074387"><span class="hs-identifier hs-var">boundedConvolutions</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+-&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074388"><span class="hs-identifier hs-var">lastConvolution</span></a></span><span>
+</span><span id="line-240"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-241"></span><span>    </span><span id="local-6989586621679074385"><span class="annot"><span class="annottext">ffpieces :: [(a, Poly a)]
+</span><a href="#local-6989586621679074385"><span class="hs-identifier hs-var hs-var">ffpieces</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; [(a, Poly a)]
+forall a o. Ord a =&gt; Piecewise a o -&gt; [(a, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">Piecewise.toAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074382"><span class="hs-identifier hs-var">ff</span></a></span><span>
+</span><span id="line-242"></span><span>    </span><span id="local-6989586621679074386"><span class="annot"><span class="annottext">ggpieces :: [(a, Poly a)]
+</span><a href="#local-6989586621679074386"><span class="hs-identifier hs-var hs-var">ggpieces</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; [(a, Poly a)]
+forall a o. Ord a =&gt; Piecewise a o -&gt; [(a, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">Piecewise.toAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074383"><span class="hs-identifier hs-var">gg</span></a></span><span>
+</span><span id="line-243"></span><span>
+</span><span id="line-244"></span><span>    </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Density"><span class="hs-identifier hs-type">Density</span></a></span><span> </span><span id="local-6989586621679074398"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074398"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Continuous a -&gt; Density a
+forall a. (Ord a, Num a, Fractional a) =&gt; Continuous a -&gt; Density a
+</span><a href="Numeric.Measure.Finite.Mixed.html#toDensity"><span class="hs-identifier hs-var">toDensity</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Continuous a
+forall a. Piecewise a (Poly a) -&gt; Continuous a
+</span><a href="Numeric.Measure.Finite.Mixed.html#Continuous"><span class="hs-identifier hs-var">Continuous</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074382"><span class="hs-identifier hs-var">ff</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-245"></span><span>    </span><span id="local-6989586621679074401"><span class="annot"><span class="annottext">fpieces :: [(a, Poly a)]
+</span><a href="#local-6989586621679074401"><span class="hs-identifier hs-var hs-var">fpieces</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; [(a, Poly a)]
+forall a o. Ord a =&gt; Piecewise a o -&gt; [(a, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">Piecewise.toAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074398"><span class="hs-identifier hs-var">f</span></a></span><span>
+</span><span id="line-246"></span><span>
+</span><span id="line-247"></span><span>    </span><span class="hs-comment">-- Pieces on the bounded intervals</span><span>
+</span><span id="line-248"></span><span>    </span><span id="local-6989586621679074402"><span class="annot"><span class="annottext">boundedPieces :: [(b, b)] -&gt; [(b, b, b)]
+</span><a href="#local-6989586621679074402"><span class="hs-identifier hs-var hs-var">boundedPieces</span></a></span></span><span> </span><span id="local-6989586621679074403"><span class="annot"><span class="annottext">[(b, b)]
+</span><a href="#local-6989586621679074403"><span class="hs-identifier hs-var">xos</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-249"></span><span>        </span><span class="annot"><span class="annottext">((b, b) -&gt; (b, b) -&gt; (b, b, b))
+-&gt; [(b, b)] -&gt; [(b, b)] -&gt; [(b, b, b)]
+forall a b c. (a -&gt; b -&gt; c) -&gt; [a] -&gt; [b] -&gt; [c]
+</span><span class="hs-identifier hs-var">zipWith</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679074404"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074404"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679074405"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074405"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679074406"><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074406"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">b
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074404"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074406"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">b
+</span><a href="#local-6989586621679074405"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[(b, b)]
+</span><a href="#local-6989586621679074403"><span class="hs-identifier hs-var">xos</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; [(b, b)] -&gt; [(b, b)]
+forall a. Int -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">drop</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">[(b, b)]
+</span><a href="#local-6989586621679074403"><span class="hs-identifier hs-var">xos</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-250"></span><span>
+</span><span id="line-251"></span><span>    </span><span id="local-6989586621679074387"><span class="annot"><span class="annottext">boundedConvolutions :: Piecewise a (Poly a)
+</span><a href="#local-6989586621679074387"><span class="hs-identifier hs-var hs-var">boundedConvolutions</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-252"></span><span>        </span><span class="annot"><span class="annottext">[Piecewise a (Poly a)] -&gt; Piecewise a (Poly a)
+forall a. Num a =&gt; [a] -&gt; a
+forall (t :: * -&gt; *) a. (Foldable t, Num a) =&gt; t a -&gt; a
+</span><span class="hs-identifier hs-var">sum</span></span><span> </span><span class="annot"><span class="annottext">([Piecewise a (Poly a)] -&gt; Piecewise a (Poly a))
+-&gt; [Piecewise a (Poly a)] -&gt; Piecewise a (Poly a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span>
+</span><span id="line-253"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Piecewise a (Poly a)
+forall a o. Ord a =&gt; [(a, o)] -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#fromAscPieces"><span class="hs-identifier hs-var">Piecewise.fromAscPieces</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">(a, a, Poly a) -&gt; (a, a, Poly a) -&gt; [(a, Poly a)]
+forall a.
+(Fractional a, Eq a, Ord a) =&gt;
+(a, a, Poly a) -&gt; (a, a, Poly a) -&gt; [(a, Poly a)]
+</span><a href="Numeric.Polynomial.Simple.html#convolve"><span class="hs-identifier hs-var">Poly.convolve</span></a></span><span> </span><span class="annot"><span class="annottext">(a, a, Poly a)
+</span><a href="#local-6989586621679074422"><span class="hs-identifier hs-var">fo</span></a></span><span> </span><span class="annot"><span class="annottext">(a, a, Poly a)
+</span><a href="#local-6989586621679074423"><span class="hs-identifier hs-var">ggo</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-254"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679074422"><span class="annot"><span class="annottext">(a, a, Poly a)
+</span><a href="#local-6989586621679074422"><span class="hs-identifier hs-var">fo</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; [(a, a, Poly a)]
+forall {b} {b}. [(b, b)] -&gt; [(b, b, b)]
+</span><a href="#local-6989586621679074402"><span class="hs-identifier hs-var">boundedPieces</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074401"><span class="hs-identifier hs-var">fpieces</span></a></span><span>
+</span><span id="line-255"></span><span>            </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679074423"><span class="annot"><span class="annottext">(a, a, Poly a)
+</span><a href="#local-6989586621679074423"><span class="hs-identifier hs-var">ggo</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; [(a, a, Poly a)]
+forall {b} {b}. [(b, b)] -&gt; [(b, b, b)]
+</span><a href="#local-6989586621679074402"><span class="hs-identifier hs-var">boundedPieces</span></a></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074386"><span class="hs-identifier hs-var">ggpieces</span></a></span><span>
+</span><span id="line-256"></span><span>            </span><span class="hs-special">]</span><span>
+</span><span id="line-257"></span><span>
+</span><span id="line-258"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679074426"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074426"><span class="hs-identifier hs-var">xlast</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679074427"><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679074427"><span class="hs-identifier hs-var">plast</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; (a, Poly a)
+forall a. HasCallStack =&gt; [a] -&gt; a
+</span><span class="hs-identifier hs-var">last</span></span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)]
+</span><a href="#local-6989586621679074386"><span class="hs-identifier hs-var">ggpieces</span></a></span><span>
+</span><span id="line-259"></span><span>    </span><span id="local-6989586621679074429"><span class="annot"><span class="annottext">glast :: a
+</span><a href="#local-6989586621679074429"><span class="hs-identifier hs-var hs-var">glast</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; [a]
+forall a. Poly a -&gt; [a]
+</span><a href="Numeric.Polynomial.Simple.html#toCoefficients"><span class="hs-identifier hs-var">Poly.toCoefficients</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679074427"><span class="hs-identifier hs-var">plast</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-260"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><span class="hs-number">0</span></span><span>
+</span><span id="line-261"></span><span>        </span><span class="hs-special">(</span><span id="local-6989586621679074431"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074431"><span class="hs-identifier hs-var">a0</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">[a]
+</span><span class="hs-identifier">_</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074431"><span class="hs-identifier hs-var">a0</span></a></span><span>
+</span><span id="line-262"></span><span>    </span><span id="local-6989586621679074388"><span class="annot"><span class="annottext">lastConvolution :: Piecewise a (Poly a)
+</span><a href="#local-6989586621679074388"><span class="hs-identifier hs-var hs-var">lastConvolution</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-263"></span><span>        </span><span class="annot"><span class="annottext">(Poly a -&gt; Poly a) -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall o o' a. (o -&gt; o') -&gt; Piecewise a o -&gt; Piecewise a o'
+</span><a href="Numeric.Function.Piecewise.html#mapPieces"><span class="hs-identifier hs-var">Piecewise.mapPieces</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a -&gt; Poly a -&gt; Poly a
+forall a. Num a =&gt; a -&gt; Poly a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#scale"><span class="hs-identifier hs-var">Poly.scale</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074429"><span class="hs-identifier hs-var">glast</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-264"></span><span>        </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(a -&gt; Poly a -&gt; Poly a)
+-&gt; a -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+forall a o.
+(Ord a, Num a, Num o) =&gt;
+(a -&gt; o -&gt; o) -&gt; a -&gt; Piecewise a o -&gt; Piecewise a o
+</span><a href="Numeric.Function.Piecewise.html#translateWith"><span class="hs-identifier hs-var">Piecewise.translateWith</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; Poly a -&gt; Poly a
+forall a. (Fractional a, Eq a, Num a) =&gt; a -&gt; Poly a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#translate"><span class="hs-identifier hs-var">Poly.translate</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679074426"><span class="hs-identifier hs-var">xlast</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+</span><a href="#local-6989586621679074382"><span class="hs-identifier hs-var">ff</span></a></span><span>
+</span><span id="line-265"></span><span>
+</span><span id="line-266"></span><span class="hs-comment">-- | Additive convolution of two measures.</span><span>
+</span><span id="line-267"></span><span class="hs-comment">--</span><span>
+</span><span id="line-268"></span><span class="hs-comment">-- &gt; convolve (dirac x wx) (dirac y wy) = dirac (x + y) (wx * wy)</span><span>
+</span><span id="line-269"></span><span class="hs-comment">-- &gt; convolve (add mx my) mz = add (convolve mx mz) (convolve my mz)</span><span>
+</span><span id="line-270"></span><span class="hs-comment">-- &gt; convolve mx (add my mz) = add (convolve mx my) (convolve mx mz)</span><span>
+</span><span id="line-271"></span><span class="hs-comment">-- &gt; total (convolve mx my) = total mx * total my</span><span>
+</span><span id="line-272"></span><span id="local-6989586621679074121"><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#convolve"><span class="hs-identifier hs-type">convolve</span></a></span><span>
+</span><span id="line-273"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679074121"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679074121"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679074121"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-274"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074121"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074121"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Measure.Finite.Mixed.html#Measure"><span class="hs-identifier hs-type">Measure</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679074121"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-275"></span><span id="convolve"><span class="annot"><span class="annottext">convolve :: forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Measure a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#convolve"><span class="hs-identifier hs-var hs-var">convolve</span></a></span></span><span> </span><span id="local-6989586621679074454"><span class="annot"><span class="annottext">Measure a
+</span><a href="#local-6989586621679074454"><span class="hs-identifier hs-var">mx</span></a></span></span><span> </span><span id="local-6989586621679074455"><span class="annot"><span class="annottext">Measure a
+</span><a href="#local-6989586621679074455"><span class="hs-identifier hs-var">my</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-276"></span><span>    </span><span class="annot"><span class="annottext">Measure a -&gt; Measure a -&gt; Measure a
+forall a. (Ord a, Num a) =&gt; Measure a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#add"><span class="hs-identifier hs-var">add</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Continuous a -&gt; Measure a -&gt; Measure a
+forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Continuous a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#convolveContinuous"><span class="hs-identifier hs-var">convolveContinuous</span></a></span><span> </span><span class="annot"><span class="annottext">Continuous a
+</span><a href="#local-6989586621679074456"><span class="hs-identifier hs-var">contx</span></a></span><span> </span><span class="annot"><span class="annottext">Measure a
+</span><a href="#local-6989586621679074455"><span class="hs-identifier hs-var">my</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Discrete a -&gt; Measure a -&gt; Measure a
+forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Discrete a -&gt; Measure a -&gt; Measure a
+</span><a href="Numeric.Measure.Finite.Mixed.html#convolveDiscrete"><span class="hs-identifier hs-var">convolveDiscrete</span></a></span><span> </span><span class="annot"><span class="annottext">Discrete a
+</span><a href="#local-6989586621679074457"><span class="hs-identifier hs-var">deltax</span></a></span><span> </span><span class="annot"><span class="annottext">Measure a
+</span><a href="#local-6989586621679074455"><span class="hs-identifier hs-var">my</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-277"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-278"></span><span>    </span><span class="hs-special">(</span><span id="local-6989586621679074456"><span class="annot"><span class="annottext">Continuous a
+</span><a href="#local-6989586621679074456"><span class="hs-identifier hs-var">contx</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679074457"><span class="annot"><span class="annottext">Discrete a
+</span><a href="#local-6989586621679074457"><span class="hs-identifier hs-var">deltax</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure a -&gt; (Continuous a, Discrete a)
+forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Measure a -&gt; (Continuous a, Discrete a)
+</span><a href="Numeric.Measure.Finite.Mixed.html#decompose"><span class="hs-identifier hs-var">decompose</span></a></span><span> </span><span class="annot"><span class="annottext">Measure a
+</span><a href="#local-6989586621679074454"><span class="hs-identifier hs-var">mx</span></a></span><span>
+</span><span id="line-279"></span></pre></body></html>
