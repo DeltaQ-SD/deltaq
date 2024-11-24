@@ -28,6 +28,7 @@ import Numeric.Measure.Finite.Mixed
     , distribution
     , fromDistribution
     , scale
+    , support
     , total
     , translate
     , uniform
@@ -74,7 +75,11 @@ spec = do
         it "total" $ property $
             \(x :: Rational) y ->
                 total (uniform x y)  ===  1
-        
+
+        it "support" $ property $
+            \(x :: Rational) y ->
+                support (uniform x y)  ===  Just (min x y, max x y)
+
         it "distribution at midpoint" $ property $
             \(x :: Rational) (y :: Rational) ->
                 x /= y ==>
