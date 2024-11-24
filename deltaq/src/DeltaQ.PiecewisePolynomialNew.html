@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="annot"><span class="hs-comment">{-|
+Copyright   : Predictable Network Solutions Ltd., 2024
+License     : BSD-3-Clause
+Maintainer  : neil.davies@pnsol.com
+Description : Instances via piecewise polynomials.
+
+@'DQ'@ is a probability distribution of completion time
+using the numeric type @Rational@.
+This type represents a mixed discrete / continuous probability distribution
+where the continuous part is represented in terms of piecewise polynomials.
+-}</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html"><span class="hs-identifier">DeltaQ.PiecewisePolynomialNew</span></a></span><span>
+</span><span id="line-16"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier">DQ</span></a></span><span>
+</span><span id="line-17"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-18"></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-20"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">fromMaybe</span></span><span>
+</span><span id="line-21"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="DeltaQ.Class.html"><span class="hs-identifier">DeltaQ.Class</span></a></span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier">DeltaQ</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Eventually"><span class="hs-identifier">Eventually</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-25"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Outcome"><span class="hs-identifier">Outcome</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Function.Piecewise</span></span><span>
+</span><span id="line-28"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Piecewise</span></span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-30"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Measure.Finite.Mixed</span></span><span>
+</span><span id="line-31"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Measure</span></span><span>
+</span><span id="line-32"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-33"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Polynomial.Simple</span></span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">Poly</span></span><span>
+</span><span id="line-35"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-36"></span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.Function.Class</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Function</span></span><span>
+</span><span id="line-38"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Function.Piecewise</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Piecewise</span></span><span>
+</span><span id="line-39"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Measure.Finite.Mixed</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Measure</span></span><span>
+</span><span id="line-40"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Numeric.Polynomial.Simple</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Poly</span></span><span>
+</span><span id="line-41"></span><span>
+</span><span id="line-42"></span><span class="hs-comment">{-----------------------------------------------------------------------------
+    Implementation
+------------------------------------------------------------------------------}</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Probability distribution of durations.</span></span><span>
+</span><span id="line-47"></span><span class="hs-keyword">newtype</span><span> </span><span id="DQ"><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="DQ"><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Measure</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679109721"><span id="local-6989586621679109728"><span class="annot"><span class="annottext">DQ -&gt; DQ -&gt; Bool
+(DQ -&gt; DQ -&gt; Bool) -&gt; (DQ -&gt; DQ -&gt; Bool) -&gt; Eq DQ
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: DQ -&gt; DQ -&gt; Bool
+== :: DQ -&gt; DQ -&gt; Bool
+$c/= :: DQ -&gt; DQ -&gt; Bool
+/= :: DQ -&gt; DQ -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679109742"><span id="local-6989586621679109749"><span id="local-6989586621679109753"><span class="annot"><span class="annottext">Int -&gt; DQ -&gt; ShowS
+[DQ] -&gt; ShowS
+DQ -&gt; String
+(Int -&gt; DQ -&gt; ShowS)
+-&gt; (DQ -&gt; String) -&gt; ([DQ] -&gt; ShowS) -&gt; Show DQ
+forall a.
+(Int -&gt; a -&gt; ShowS) -&gt; (a -&gt; String) -&gt; ([a] -&gt; ShowS) -&gt; Show a
+$cshowsPrec :: Int -&gt; DQ -&gt; ShowS
+showsPrec :: Int -&gt; DQ -&gt; ShowS
+$cshow :: DQ -&gt; String
+show :: DQ -&gt; String
+$cshowList :: [DQ] -&gt; ShowS
+showList :: [DQ] -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><span class="hs-comment">-- | Helper function for lifting a binary operation on distribution functions.</span></span><span>
+</span><span id="line-51"></span><span id="local-6989586621679109665"><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#onDistribution2"><span class="hs-identifier hs-type">onDistribution2</span></a></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679109665"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="annot"><span class="hs-operator hs-type">~</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-54"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Piecewise</span></span><span> </span><span class="annot"><a href="#local-6989586621679109665"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Poly</span></span><span> </span><span class="annot"><a href="#local-6989586621679109665"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Piecewise</span></span><span> </span><span class="annot"><a href="#local-6989586621679109665"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Poly</span></span><span> </span><span class="annot"><a href="#local-6989586621679109665"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Piecewise</span></span><span> </span><span class="annot"><a href="#local-6989586621679109665"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Poly</span></span><span> </span><span class="annot"><a href="#local-6989586621679109665"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span></span><span>
+</span><span id="line-56"></span><span id="onDistribution2"><span class="annot"><span class="annottext">onDistribution2 :: forall a.
+(a ~ Rational) =&gt;
+String
+-&gt; (Piecewise a (Poly a)
+    -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#onDistribution2"><span class="hs-identifier hs-var hs-var">onDistribution2</span></a></span></span><span> </span><span id="local-6989586621679109776"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109776"><span class="hs-identifier hs-var">err</span></a></span></span><span> </span><span id="local-6989586621679109777"><span class="annot"><span class="annottext">Piecewise a (Poly a)
+-&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+</span><a href="#local-6989586621679109777"><span class="hs-identifier hs-var">f</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679109778"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109778"><span class="hs-identifier hs-var">mx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679109779"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109779"><span class="hs-identifier hs-var">my</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-57"></span><span>    </span><span class="annot"><span class="annottext">Measure Rational -&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span><span>
+</span><span id="line-58"></span><span>    </span><span class="annot"><span class="annottext">(Measure Rational -&gt; DQ) -&gt; Measure Rational -&gt; DQ
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; Maybe (Measure Rational) -&gt; Measure Rational
+forall a. a -&gt; Maybe a -&gt; a
+</span><span class="hs-identifier hs-var">fromMaybe</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109780"><span class="hs-identifier hs-var">impossible</span></a></span><span>
+</span><span id="line-59"></span><span>    </span><span class="annot"><span class="annottext">(Maybe (Measure Rational) -&gt; Measure Rational)
+-&gt; Maybe (Measure Rational) -&gt; Measure Rational
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a) -&gt; Maybe (Measure a)
+forall a.
+(Ord a, Num a) =&gt;
+Piecewise a (Poly a) -&gt; Maybe (Measure a)
+</span><span class="hs-identifier hs-var">Measure.fromDistribution</span></span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><span class="annottext">(Piecewise a (Poly a) -&gt; Maybe (Measure a))
+-&gt; Piecewise a (Poly a) -&gt; Maybe (Measure a)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Piecewise a (Poly a)
+-&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+</span><a href="#local-6989586621679109777"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Measure a -&gt; Piecewise a (Poly a)
+forall a. (Ord a, Num a) =&gt; Measure a -&gt; Piecewise a (Poly a)
+</span><span class="hs-identifier hs-var">Measure.distribution</span></span><span> </span><span class="annot"><span class="annottext">Measure a
+Measure Rational
+</span><a href="#local-6989586621679109778"><span class="hs-identifier hs-var">mx</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Measure a -&gt; Piecewise a (Poly a)
+forall a. (Ord a, Num a) =&gt; Measure a -&gt; Piecewise a (Poly a)
+</span><span class="hs-identifier hs-var">Measure.distribution</span></span><span> </span><span class="annot"><span class="annottext">Measure a
+Measure Rational
+</span><a href="#local-6989586621679109779"><span class="hs-identifier hs-var">my</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-61"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621679109780"><span class="annot"><span class="annottext">impossible :: Measure Rational
+</span><a href="#local-6989586621679109780"><span class="hs-identifier hs-var hs-var">impossible</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; Measure Rational
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; Measure Rational) -&gt; String -&gt; Measure Rational
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;impossible: not a finite measure in &quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; ShowS
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679109776"><span class="hs-identifier hs-var">err</span></a></span><span>
+</span><span id="line-63"></span><span>
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109794"><span id="local-6989586621679109799"><span id="local-6989586621679109803"><span class="annot"><a href="DeltaQ.Class.html#Outcome"><span class="hs-identifier hs-type">Outcome</span></a></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>    </span><span class="hs-keyword">type</span><span> </span><span id="Duration"><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-var">Duration</span></a></span></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
+</span><span id="line-66"></span><span>
+</span><span id="line-67"></span><span>    </span><span id="local-6989586621679109810"><span class="annot"><span class="annottext">never :: DQ
+</span><a href="#local-6989586621679109810"><span class="hs-identifier hs-var hs-var hs-var">never</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span><span> </span><span class="annot"><span class="annottext">Measure Rational
+forall a. Num a =&gt; Measure a
+</span><span class="hs-identifier hs-var">Measure.zero</span></span><span>
+</span><span id="line-68"></span><span>
+</span><span id="line-69"></span><span>    </span><span id="local-6989586621679109817"><span class="annot"><span class="annottext">wait :: Duration DQ -&gt; DQ
+</span><a href="#local-6989586621679109817"><span class="hs-identifier hs-var hs-var hs-var">wait</span></a></span></span><span> </span><span id="local-6989586621679109819"><span class="annot"><span class="annottext">Duration DQ
+</span><a href="#local-6989586621679109819"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span><span> </span><span class="annot"><span class="annottext">(Measure Rational -&gt; DQ) -&gt; Measure Rational -&gt; DQ
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Measure Rational
+forall a. (Ord a, Num a) =&gt; a -&gt; a -&gt; Measure a
+</span><span class="hs-identifier hs-var">Measure.dirac</span></span><span> </span><span class="annot"><span class="annottext">Rational
+Duration DQ
+</span><a href="#local-6989586621679109819"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">1</span></span><span>
+</span><span id="line-70"></span><span>
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679109826"><span class="annot"><span class="annottext">sequentially :: DQ -&gt; DQ -&gt; DQ
+</span><a href="#local-6989586621679109826"><span class="hs-identifier hs-var hs-var hs-var">sequentially</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679109828"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109828"><span class="hs-identifier hs-var">mx</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679109829"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109829"><span class="hs-identifier hs-var">my</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Measure Rational -&gt; Measure Rational -&gt; Measure Rational
+forall a.
+(Ord a, Num a, Fractional a) =&gt;
+Measure a -&gt; Measure a -&gt; Measure a
+</span><span class="hs-identifier hs-var">Measure.convolve</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109828"><span class="hs-identifier hs-var">mx</span></a></span><span> </span><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109829"><span class="hs-identifier hs-var">my</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679109845"><span class="annot"><span class="annottext">firstToFinish :: DQ -&gt; DQ -&gt; DQ
+</span><a href="#local-6989586621679109845"><span class="hs-identifier hs-var hs-var hs-var">firstToFinish</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+forall a.
+(a ~ Rational) =&gt;
+String
+-&gt; (Piecewise a (Poly a)
+    -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#onDistribution2"><span class="hs-identifier hs-var">onDistribution2</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;firstToFinish&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Piecewise Rational (Poly Rational)
+  -&gt; Piecewise Rational (Poly Rational)
+  -&gt; Piecewise Rational (Poly Rational))
+ -&gt; DQ -&gt; DQ -&gt; DQ)
+-&gt; (Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679109847"><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109847"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679109848"><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109848"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109847"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109848"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109847"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109848"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-74"></span><span>
+</span><span id="line-75"></span><span>    </span><span id="local-6989586621679109859"><span class="annot"><span class="annottext">lastToFinish :: DQ -&gt; DQ -&gt; DQ
+</span><a href="#local-6989586621679109859"><span class="hs-identifier hs-var hs-var hs-var">lastToFinish</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+forall a.
+(a ~ Rational) =&gt;
+String
+-&gt; (Piecewise a (Poly a)
+    -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#onDistribution2"><span class="hs-identifier hs-var">onDistribution2</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;lastToFinish&quot;</span></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(*)</span></span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679109877"><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-78"></span><span>    </span><span class="hs-keyword">type</span><span> </span><span id="Probability"><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-var">Probability</span></a></span></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span>
+</span><span id="line-79"></span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679109902"><span class="annot"><span class="annottext">choice :: Probability DQ -&gt; DQ -&gt; DQ -&gt; DQ
+</span><a href="#local-6989586621679109902"><span class="hs-identifier hs-var hs-var hs-var">choice</span></a></span></span><span> </span><span id="local-6989586621679109904"><span class="annot"><span class="annottext">Probability DQ
+</span><a href="#local-6989586621679109904"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+forall a.
+(a ~ Rational) =&gt;
+String
+-&gt; (Piecewise a (Poly a)
+    -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#onDistribution2"><span class="hs-identifier hs-var">onDistribution2</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;choice&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Piecewise Rational (Poly Rational)
+  -&gt; Piecewise Rational (Poly Rational)
+  -&gt; Piecewise Rational (Poly Rational))
+ -&gt; DQ -&gt; DQ -&gt; DQ)
+-&gt; (Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational)
+    -&gt; Piecewise Rational (Poly Rational))
+-&gt; DQ
+-&gt; DQ
+-&gt; DQ
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679109905"><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109905"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span id="local-6989586621679109906"><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109906"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-81"></span><span>        </span><span class="annot"><span class="annottext">Rational
+-&gt; Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+forall {a}.
+Rational
+-&gt; Piecewise a (Poly Rational) -&gt; Piecewise a (Poly Rational)
+</span><a href="#local-6989586621679109907"><span class="hs-identifier hs-var">scale</span></a></span><span> </span><span class="annot"><span class="annottext">Rational
+Probability DQ
+</span><a href="#local-6989586621679109904"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109905"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Rational
+-&gt; Piecewise Rational (Poly Rational)
+-&gt; Piecewise Rational (Poly Rational)
+forall {a}.
+Rational
+-&gt; Piecewise a (Poly Rational) -&gt; Piecewise a (Poly Rational)
+</span><a href="#local-6989586621679109907"><span class="hs-identifier hs-var">scale</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Rational
+Probability DQ
+</span><a href="#local-6989586621679109904"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+</span><a href="#local-6989586621679109906"><span class="hs-identifier hs-var">y</span></a></span><span>
+</span><span id="line-82"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-83"></span><span>        </span><span id="local-6989586621679109907"><span class="annot"><span class="annottext">scale :: Rational
+-&gt; Piecewise a (Poly Rational) -&gt; Piecewise a (Poly Rational)
+</span><a href="#local-6989586621679109907"><span class="hs-identifier hs-var hs-var">scale</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Poly Rational -&gt; Poly Rational)
+-&gt; Piecewise a (Poly Rational) -&gt; Piecewise a (Poly Rational)
+forall o o' a. (o -&gt; o') -&gt; Piecewise a o -&gt; Piecewise a o'
+</span><span class="hs-identifier hs-var">Piecewise.mapPieces</span></span><span> </span><span class="annot"><span class="annottext">((Poly Rational -&gt; Poly Rational)
+ -&gt; Piecewise a (Poly Rational) -&gt; Piecewise a (Poly Rational))
+-&gt; (Rational -&gt; Poly Rational -&gt; Poly Rational)
+-&gt; Rational
+-&gt; Piecewise a (Poly Rational)
+-&gt; Piecewise a (Poly Rational)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Poly Rational -&gt; Poly Rational
+forall a. Num a =&gt; a -&gt; Poly a -&gt; Poly a
+</span><span class="hs-identifier hs-var">Poly.scale</span></span><span>
+</span><span id="line-84"></span><span>
+</span><span id="line-85"></span><span>    </span><span id="local-6989586621679109916"><span class="annot"><span class="annottext">uniform :: Duration DQ -&gt; Duration DQ -&gt; DQ
+</span><a href="#local-6989586621679109916"><span class="hs-identifier hs-var hs-var hs-var">uniform</span></a></span></span><span> </span><span id="local-6989586621679109918"><span class="annot"><span class="annottext">Duration DQ
+</span><a href="#local-6989586621679109918"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; DQ
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span><span> </span><span class="annot"><span class="annottext">(Measure Rational -&gt; DQ)
+-&gt; (Rational -&gt; Measure Rational) -&gt; Rational -&gt; DQ
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Measure Rational
+forall a. (Ord a, Num a, Fractional a) =&gt; a -&gt; a -&gt; Measure a
+</span><span class="hs-identifier hs-var">Measure.uniform</span></span><span> </span><span class="annot"><span class="annottext">Rational
+Duration DQ
+</span><a href="#local-6989586621679109918"><span class="hs-identifier hs-var">a</span></a></span><span>
+</span><span id="line-86"></span><span>
+</span><span id="line-87"></span><span>    </span><span id="local-6989586621679109935"><span class="annot"><span class="annottext">successWithin :: DQ -&gt; Duration DQ -&gt; Probability DQ
+</span><a href="#local-6989586621679109935"><span class="hs-identifier hs-var hs-var hs-var">successWithin</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679109937"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109937"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Piecewise Rational (Poly Rational)
+-&gt; Domain (Piecewise Rational (Poly Rational))
+-&gt; Codomain (Piecewise Rational (Poly Rational))
+forall f. Function f =&gt; f -&gt; Domain f -&gt; Codomain f
+</span><span class="hs-identifier hs-var">Function.eval</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Measure Rational -&gt; Piecewise Rational (Poly Rational)
+forall a. (Ord a, Num a) =&gt; Measure a -&gt; Piecewise a (Poly a)
+</span><span class="hs-identifier hs-var">Measure.distribution</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109937"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-88"></span><span>
+</span><span id="line-89"></span><span>    </span><span id="local-6989586621679109944"><span class="annot"><span class="annottext">failure :: DQ -&gt; Probability DQ
+</span><a href="#local-6989586621679109944"><span class="hs-identifier hs-var hs-var hs-var">failure</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679109946"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109946"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Rational
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; Rational
+forall a. (Ord a, Num a) =&gt; Measure a -&gt; a
+</span><span class="hs-identifier hs-var">Measure.total</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109946"><span class="hs-identifier hs-var">m</span></a></span><span>
+</span><span id="line-90"></span><span>
+</span><span id="line-91"></span><span>    </span><span id="local-6989586621679109950"><span class="annot"><span class="annottext">quantile :: Probability DQ -&gt; DQ -&gt; Eventually (Duration DQ)
+</span><a href="#local-6989586621679109950"><span class="hs-identifier hs-var hs-var hs-var">quantile</span></a></span></span><span> </span><span id="local-6989586621679109952"><span class="annot"><span class="annottext">Probability DQ
+</span><a href="#local-6989586621679109952"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679109953"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679109953"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-92"></span><span>        </span><span class="annot"><span class="annottext">Maybe (Duration DQ) -&gt; Eventually (Duration DQ)
+forall a. Maybe a -&gt; Eventually a
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#eventuallyFromMaybe"><span class="hs-identifier hs-var">eventuallyFromMaybe</span></a></span><span> </span><span class="annot"><span class="annottext">(Maybe (Duration DQ) -&gt; Eventually (Duration DQ))
+-&gt; Maybe (Duration DQ) -&gt; Eventually (Duration DQ)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Maybe Rational
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;TODO: quantile&quot;</span></span><span>
+</span><span id="line-93"></span><span>
+</span><span id="line-94"></span><span>    </span><span id="local-6989586621679109957"><span class="annot"><span class="annottext">earliest :: DQ -&gt; Eventually (Duration DQ)
+</span><a href="#local-6989586621679109957"><span class="hs-identifier hs-var hs-var hs-var">earliest</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; DQ -&gt; Eventually Rational
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;TODO: earliest&quot;</span></span><span>
+</span><span id="line-95"></span><span>        </span><span class="hs-comment">-- FIXME: 'earliest' on 'never' is wrong</span><span>
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679109961"><span class="annot"><span class="annottext">deadline :: DQ -&gt; Eventually (Duration DQ)
+</span><a href="#local-6989586621679109961"><span class="hs-identifier hs-var hs-var hs-var">deadline</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; DQ -&gt; Eventually Rational
+forall a. HasCallStack =&gt; String -&gt; a
+</span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;TODO: deadline&quot;</span></span><span>
+</span><span id="line-97"></span><span>        </span><span class="hs-comment">-- FIXME: 'deadline' on 'never' is wrong.</span><span>
+</span><span id="line-98"></span><span>
+</span><span id="line-99"></span><span class="hs-comment">{-----------------------------------------------------------------------------
+    Helper functions
+------------------------------------------------------------------------------}</span><span>
+</span><span id="line-102"></span><span id="local-6989586621679109715"><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#eventuallyFromMaybe"><span class="hs-identifier hs-type">eventuallyFromMaybe</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Maybe</span></span><span> </span><span class="annot"><a href="#local-6989586621679109715"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Eventually"><span class="hs-identifier hs-type">Eventually</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679109715"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-103"></span><span id="eventuallyFromMaybe"><span class="annot"><span class="annottext">eventuallyFromMaybe :: forall a. Maybe a -&gt; Eventually a
+</span><a href="DeltaQ.PiecewisePolynomialNew.html#eventuallyFromMaybe"><span class="hs-identifier hs-var hs-var">eventuallyFromMaybe</span></a></span></span><span> </span><span class="annot"><span class="annottext">Maybe a
+</span><span class="hs-identifier hs-var">Nothing</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Eventually a
+forall a. Eventually a
+</span><a href="DeltaQ.Class.html#Abandoned"><span class="hs-identifier hs-var">Abandoned</span></a></span><span>
+</span><span id="line-104"></span><span class="annot"><a href="DeltaQ.PiecewisePolynomialNew.html#eventuallyFromMaybe"><span class="hs-identifier hs-var">eventuallyFromMaybe</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Just</span></span><span> </span><span id="local-6989586621679109964"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679109964"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; Eventually a
+forall a. a -&gt; Eventually a
+</span><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-var">Occurs</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679109964"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-105"></span></pre></body></html>

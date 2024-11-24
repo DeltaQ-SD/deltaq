@@ -619,7 +619,9 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 forall a o.
 (Ord a, Num o) =&gt;
 (o -&gt; o -&gt; o) -&gt; Piecewise a o -&gt; Piecewise a o -&gt; Piecewise a o
-</span><a href="Numeric.Function.Piecewise.html#zipPointwise"><span class="hs-identifier hs-var">zipPointwise</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">-</span><span class="hs-special">)</span><span>
+</span><a href="Numeric.Function.Piecewise.html#zipPointwise"><span class="hs-identifier hs-var">zipPointwise</span></a></span><span> </span><span class="annot"><span class="annottext">o -&gt; o -&gt; o
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">(*)</span></span><span>
 </span><span id="line-258"></span><span>    </span><span id="local-6989586621679071773"><span class="annot"><span class="annottext">negate :: Piecewise a o -&gt; Piecewise a o
 </span><span class="hs-identifier hs-var hs-var hs-var">negate</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(o -&gt; o) -&gt; Piecewise a o -&gt; Piecewise a o
 forall o o' a. (o -&gt; o') -&gt; Piecewise a o -&gt; Piecewise a o'
