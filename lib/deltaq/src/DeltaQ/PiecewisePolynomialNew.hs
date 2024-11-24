@@ -89,11 +89,64 @@ instance DeltaQ DQ where
     failure (DQ m) = 1 - Measure.total m
 
     quantile p (DQ m) =
-        eventuallyFromMaybe $ error "TODO: quantile"
+        eventuallyFromMaybe
+        $ quantileFromMonotone (Measure.distribution m) p
 
     earliest (DQ m) = eventuallyFromMaybe $ fmap fst $ Measure.support m
 
     deadline (DQ m)= eventuallyFromMaybe $ fmap snd $ Measure.support m
+
+{-----------------------------------------------------------------------------
+    Operations
+    quantile
+------------------------------------------------------------------------------}
+-- | Helper type for segements of a piecewise functions.
+data Segment a b
+    = Jump a (b,b)
+    | Polynomial (a,a) (b,b) (Poly a)
+    | End a b
+
+-- | Helper function that elaborates a piecewise function
+-- into a list of segments.
+toSegments :: (a ~ Rational) => Piecewise a (Poly a) -> [Segment a a]
+toSegments = goJump 0 . Piecewise.toAscPieces
+  where
+    goJump _ [] = []
+    goJump prev ((x1, o) : xos)
+        | y1 - y0 > 0 = Jump x1 (y0, y1) : nexts
+        | otherwise = nexts
+      where
+        y1 = Poly.eval o x1
+        y0 = Poly.eval prev x1
+        nexts = goPoly x1 y1 o xos
+
+    goPoly x1 y1 o [] =
+        End x1 y1 : goJump o []
+    goPoly x1 y1 o xos@((x2, _) : _) =
+        Polynomial (x1, x2) (y1, Poly.eval o x2) o : goJump o xos
+        -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
+
+-- | Compute a quantile from a monotonically increasing function.
+quantileFromMonotone :: (a ~ Rational) => Piecewise a (Poly a) -> a -> Maybe a
+quantileFromMonotone pieces = findInSegments segments
+  where
+    segments = toSegments pieces
+
+    findInSegments [] y
+        | y == 0 = Just 0
+        | otherwise = Nothing
+    findInSegments (Jump x1 (y1, y2) : xys) y
+        | y1 < y && y <= y2 = Just x1
+        | otherwise = findInSegments xys y
+    findInSegments (Polynomial (x1, x2) (y1, y2) o : xys) y
+        | y1 < y && y <= y2 = Poly.root precision y (x1, x2) o
+        | otherwise = findInSegments xys y
+    findInSegments (End x1 y1 : _) y
+        | y1 == y = Just x1
+        | otherwise = Nothing
+
+precision :: Rational
+precision = 1 / 10^(10 :: Integer)
 
 {-----------------------------------------------------------------------------
     Helper functions
