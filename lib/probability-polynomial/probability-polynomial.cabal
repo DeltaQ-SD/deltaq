@@ -50,6 +50,7 @@ library
     Data.Function.Class
     Numeric.Function.Piecewise
     Numeric.Measure.Discrete
+    Numeric.Measure.Finite.Mixed
     Numeric.Polynomial.Simple
     PWPs.IRVs
 
@@ -86,6 +87,7 @@ test-suite test
   other-modules:
     Numeric.Function.PiecewiseSpec
     Numeric.Measure.DiscreteSpec
+    Numeric.Measure.Finite.MixedSpec
     Numeric.Polynomial.SimpleSpec
 
 benchmark probability-polynomial-benchmark
