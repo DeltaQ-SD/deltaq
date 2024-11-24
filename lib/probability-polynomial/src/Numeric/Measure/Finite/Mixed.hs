@@ -11,7 +11,7 @@ module Numeric.Measure.Finite.Mixed
     , dirac
     , uniform
     , total
-    , cumulative
+    , distribution
 
       -- * Numerical operations
     , add
@@ -20,7 +20,7 @@ module Numeric.Measure.Finite.Mixed
     , convolve
 
     -- * Internal, for testing
-    , unsafeFromCumulative
+    , unsafeFromDistribution
     ) where
 
 import Data.Function.Class
@@ -44,7 +44,7 @@ import qualified Numeric.Polynomial.Simple as Poly
 -- | A finite
 -- [signed measure](https://en.wikipedia.org/wiki/Signed_measure)
 -- on the number line.
-newtype Measure a = Measure { getCumulative :: Piecewise a (Poly a) }
+newtype Measure a = Measure { toDistribution :: Piecewise a (Poly a) }
     -- INVARIANT: Adjacent pieces contain distinct objects.
     -- INVARIANT: The last piece is a constant polynomial,
     --            so that the measure is finite.
@@ -52,9 +52,11 @@ newtype Measure a = Measure { getCumulative :: Piecewise a (Poly a) }
 
 -- | Internal, for testing only.
 --
--- Construct a signed measure from its cumulative function.
-unsafeFromCumulative :: (Ord a, Num a) => Piecewise a (Poly a) -> Measure a
-unsafeFromCumulative = Measure . trim
+-- Construct a signed measure from its
+-- [distribution function
+-- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
+unsafeFromDistribution :: (Ord a, Num a) => Piecewise a (Poly a) -> Measure a
+unsafeFromDistribution = Measure . trim
 
 -- | Internal.
 -- Join all intervals whose polynomials are equal.
@@ -63,7 +65,9 @@ trim = Piecewise.trim
 
 -- | Two measures are equal if they yield the same measures on every set.
 --
--- @mx == my@ implies @forall t. cumulative mx t == cumulative my t@.
+-- > mx == my
+-- >   implies
+-- >   forall t. eval (distribution mx) t = eval (distribution my) t
 instance (Ord a, Num a) => Eq (Measure a) where
     Measure mx == Measure my =
         Piecewise.toAscPieces mx == Piecewise.toAscPieces my
@@ -104,9 +108,12 @@ total (Measure p) =
         [] -> 0
         ps -> eval (snd (last ps)) 0
 
--- | @cumulative x@ is the measure of the interval $(-∞, x]$.
-cumulative :: (Ord a, Num a) => Measure a -> a -> a
-cumulative (Measure p) x = eval p x
+-- | @distribution x@ is the measure of the interval $(-∞, x]$.
+--
+-- This is known as the [distribution function
+-- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
+distribution :: (Ord a, Num a) => Measure a -> a -> a
+distribution (Measure p) x = eval p x
 
 -- | Add two measures.
 --
@@ -124,7 +131,8 @@ scale x (Measure m) = Measure $ Piecewise.mapPieces (Poly.scale x) m
 
 -- | Translate a measure along the number line.
 --
--- > cumulative (translate y m) x = cumulative m (x - y)
+-- > eval (distribution (translate y m)) x
+-- >    = eval (distribution m) (x - y)
 translate :: (Ord a, Num a, Fractional a) => a -> Measure a -> Measure a
 translate y (Measure m) =
     Measure $ Piecewise.translateWith Poly.translate y m
@@ -136,7 +144,7 @@ translate y (Measure m) =
 ------------------------------------------------------------------------------}
 -- | Measure that is absolutely continuous
 -- with respect to the Lebesgue measure,
--- Represented via its cumulative function.
+-- Represented via its distribution function.
 newtype Continuous a = Continuous { unContinuous :: Piecewise a (Poly a) }
     -- INVARIANT: The last piece is @Poly.constant p@ for some @p :: a@.
 
@@ -182,12 +190,12 @@ decompose (Measure m) =
 {-$ NOTE [Convolution]
 
 In order to compute a convolution,
-we convolve a density with the cumulative function.
+we convolve a density with the distribution function.
 
 Let $f$ denote a density, which can be continuous or a Dirac delta.
-Let $G$ denote a cumulative function.
+Let $G$ denote a distribution function.
 Let $H = f * G$ be the result of the convolution.
-It can be shown that this is the cumulative function of the
+It can be shown that this is the distribution function of the
 convolution of the densities, $h = f * g$.
 
 The formula for convolution is
@@ -201,7 +209,7 @@ $ H(y) = Σ w_j G(y - x_j) $.
 
 When $f$ is a piecewise polynomial, we can convolve the pieces.
 
-When convolving with a cumulative function, the final piece
+When convolving with a distribution function, the final piece
 will be a constant $g_n$ on the interval $[x_n,∞)$.
 In this case, the convolution is given by
 
@@ -212,7 +220,7 @@ H(y)
     = g_n F(y-x_n)
 \]
 
-where $F$ is the cumulative function of the density $f$.
+where $F$ is the distribution function of the density $f$.
 -}
 
 -- | Convolve a discrete measure with a mixed measure.
