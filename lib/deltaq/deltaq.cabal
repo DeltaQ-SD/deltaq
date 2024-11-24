@@ -51,7 +51,8 @@ library
     DeltaQ
     DeltaQ.Class
     DeltaQ.PiecewisePolynomial
-  
+    DeltaQ.PiecewisePolynomialNew
+
   other-modules:
     DeltaQ.Model.DeltaQ
     DeltaQ.Model.Introspection
@@ -77,3 +78,4 @@ test-suite test
 
   other-modules:
     DeltaQ.PiecewisePolynomialSpec
+    DeltaQ.PiecewisePolynomialNewSpec

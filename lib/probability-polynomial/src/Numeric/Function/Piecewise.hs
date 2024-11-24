@@ -254,7 +254,7 @@ TODO: 'fromInteger' is __also undefined__
 -}
 instance (Ord a, Num o) => Num (Piecewise a o) where
     (+) = zipPointwise (+)
-    (*) = zipPointwise (-)
+    (*) = zipPointwise (*)
     negate = mapPieces negate
     abs = undefined
     signum = undefined

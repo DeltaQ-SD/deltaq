@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module DeltaQ.PiecewisePolynomialSpec
+module DeltaQ.PiecewisePolynomialNewSpec
     ( spec
     ) where
 
@@ -19,8 +19,8 @@ import DeltaQ.Class
     , Eventually (..)
     , Outcome (..)
     )
-import DeltaQ.PiecewisePolynomial
-    ( Durations
+import DeltaQ.PiecewisePolynomialNew
+    ( DQ
     )
 import Test.Hspec
     ( Spec
@@ -54,7 +54,7 @@ import Test.QuickCheck
 infix 0 .===
 
 -- | '(===)' with constrained types.
-(.===) :: Durations Rational -> Durations Rational -> Property
+(.===) :: DQ -> DQ -> Property
 (.===) = (===)
 
 spec :: Spec
@@ -128,11 +128,11 @@ spec = do
     describe "choices" $ do
         it "choices []" $ property $
             (choices []  .===   never)
-        
+
         it "choices ((w,o):wos)" $ property $ mapSize (`div` 2) $
             \ (Positive (w :: Rational))
-              (o :: Durations Rational)
-              (wos' :: [(Positive Rational, Durations Rational)]) ->
+              (o :: DQ)
+              (wos' :: [(Positive Rational, DQ)]) ->
                 let wos = map (\(Positive w', o') -> (w',o')) wos'
                     ws = map fst wos
                     p = w / (w + sum ws)
@@ -141,18 +141,18 @@ spec = do
                         .=== choice p o (choices wos)
 
     describe "uniform" $ do
-        xit "wait .>>. uniform" $ property $
+        it "wait .>>. uniform" $ property $
             \(NonNegative r) (Positive d) (NonNegative t) ->
                 let s = r + d in
                 (wait t .>>. uniform r s) .=== uniform (t+r) (t+s)
 
-        xit "uniform .>>. wait" $ property $
+        it "uniform .>>. wait" $ property $
             \(NonNegative r) (Positive d) (NonNegative t) ->
                 let s = r + d in
                 (uniform r s .>>. wait t) .=== uniform (r+t) (s+t)
 
     describe "failure" $ do
-        let failure' :: Durations Rational -> Rational
+        let failure' :: DQ -> Rational
             failure' = failure
 
         it "never" $ property $
@@ -188,28 +188,28 @@ spec = do
                 failure' (uniform r s)  ===  0
 
     describe "successWithin" $ do
-        let successWithin' :: Durations Rational -> Rational -> Rational
+        let successWithin' :: DQ -> Rational -> Rational
             successWithin' = successWithin
 
-        xit "never" $ property $
+        it "never" $ property $
             \(NonNegative t) ->
-
                 successWithin' never t  ===  0
+
         it "wait" $ property $
             \(NonNegative t) (NonNegative s) ->
                 successWithin' (wait s) t  ===  if t < s then 0 else 1
 
-        xit "./\\." $ property $
+        it "./\\." $ property $
             \(NonNegative t) x y ->
                 successWithin' (x ./\. y) t
                     === successWithin' x t * successWithin' y t
 
-        xit ".\\/." $ property $
+        it ".\\/." $ property $
             \(NonNegative t) x y ->
                 successWithin' (x .\/. y) t
                     === 1 - (1 - successWithin' x t) * (1 - successWithin' y t)
 
-        xit "choice" $ property $
+        it "choice" $ property $
             \(NonNegative t) (Probability p) x y ->
                 successWithin' (choice p x y) t
                     ===  p * successWithin' x t + (1-p) * successWithin' y t
@@ -226,7 +226,7 @@ spec = do
                         === successWithin2 r s t
 
     describe "quantile" $ do
-        let quantile' :: Rational -> Durations Rational -> Eventually Rational
+        let quantile' :: Rational -> DQ -> Eventually Rational
             quantile' = quantile
 
         xit "monotonic" $ property $
@@ -236,13 +236,13 @@ spec = do
                 in
                     p' <= q'  ==>  quantile' p' o <= quantile' q' o
 
-        it "uniform" $ property $
+        xit "uniform" $ property $
             \(Probability p) (NonNegative r) (Positive d) ->
                 let s = r + d
                 in  quantile' p (uniform r s) === Occurs (r + p*(s-r))
 
     describe "earliest" $ do
-        let earliest' :: Durations Rational -> Eventually Rational
+        let earliest' :: DQ -> Eventually Rational
             earliest' = earliest
 
         xit "never" $ property $
@@ -278,7 +278,7 @@ spec = do
                 earliest' (uniform r s)  ===  Occurs (min r s)
 
     describe "deadline" $ do
-        let deadline' :: Durations Rational -> Eventually Rational
+        let deadline' :: DQ -> Eventually Rational
             deadline' = deadline
 
         xit "never" $ property $
@@ -322,7 +322,7 @@ data Prob = Probability Rational
 instance Arbitrary Prob where
     arbitrary = Probability <$> genProbability
 
-instance Arbitrary (Durations Rational) where
+instance Arbitrary DQ where
     arbitrary = scale (`div` 10) genDeltaQ
 
 -- | Generate a random 'DeltaQ' by generating a random expression.
