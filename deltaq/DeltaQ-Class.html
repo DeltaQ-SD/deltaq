@@ -63,6 +63,9 @@ deadline (wait t)   = Occurs t
 deadline (x .&gt;&gt;. y) = (+) &lt;$&gt; deadline x &lt;*&gt; deadline y
 deadline (x ./\. y) = max (deadline x) (deadline y)
 deadline (x .\/. y) = min (deadline x) (deadline y)
+ -- TODO: This property ^ is actually false!
 
 deadline (choice p x y) = max (deadline x) (deadline y)  if p &#8800; 0, p &#8800; 1
+ -- TODO: This property ^ is actually false!
+
 deadline (uniform r s)  = Occurs s   if r &lt;= s</pre></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.28.0</p></div></body></html>
