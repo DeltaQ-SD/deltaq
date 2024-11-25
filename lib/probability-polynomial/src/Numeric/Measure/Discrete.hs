@@ -12,14 +12,26 @@ module Numeric.Measure.Discrete
     , total
     , distribution
     , add
+    , scale
     , convolve
     ) where
 
+import Data.List
+    ( scanl'
+    )
 import Data.Map
     ( Map
     )
+import Numeric.Function.Piecewise
+    ( Piecewise
+    )
+import Numeric.Polynomial.Simple
+    ( Poly
+    )
 
 import qualified Data.Map.Strict as Map
+import qualified Numeric.Function.Piecewise as Piecewise
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-----------------------------------------------------------------------------
     Type
@@ -73,9 +85,14 @@ total (Discrete m) = sum m
 -- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
 --
 -- This is known as the [distribution function
--- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
-distribution :: (Ord a, Num a) => Discrete a -> a -> a
-distribution (Discrete m) x = sum $ Map.takeWhileAntitone (<= x) m
+-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
+distribution :: (Ord a, Num a) => Discrete a -> Piecewise a (Poly a)
+distribution (Discrete m) =
+    Piecewise.fromAscPieces
+    $ zipWith (\(x,_) s -> (x,Poly.constant s)) diracs steps
+  where
+    diracs = Map.toAscList m
+    steps = tail $ scanl' (+) 0 $ map snd diracs
 
 -- | Add two measures.
 --
@@ -83,6 +100,13 @@ distribution (Discrete m) x = sum $ Map.takeWhileAntitone (<= x) m
 add :: (Ord a, Num a) => Discrete a -> Discrete a -> Discrete a
 add (Discrete mx) (Discrete my) =
     Discrete $ trim $ Map.unionWith (+) mx my
+
+-- | Scale a measure by a constant.
+--
+-- > total (scale a mx) = a * total mx
+scale :: (Ord a, Num a) => a -> Discrete a -> Discrete a
+scale 0 (Discrete _) = Discrete Map.empty
+scale s (Discrete m) = Discrete $ Map.map (s *) m
 
 -- | Additive convolution of two measures.
 --

@@ -13,12 +13,18 @@ module Numeric.Measure.DiscreteSpec
 
 import Prelude
 
+import Data.Function.Class
+    ( eval
+    )
 import Numeric.Measure.Discrete
     ( Discrete
     , add
     , convolve
     , dirac
+    , distribution
     , fromMap
+    , scale
+    , toMap
     , total
     )
 import Test.Hspec
@@ -40,6 +46,18 @@ import qualified Data.Map.Strict as Map
 ------------------------------------------------------------------------------}
 spec :: Spec
 spec = do
+    describe "distribution" $ do
+        it "eval and total" $ property $
+            \(m :: Discrete Rational) ->
+                let xlast = maybe 0 fst $ Map.lookupMax $ toMap m
+                in  total m
+                        === eval (distribution m) xlast
+
+        it "eval and scale" $ property $
+            \(m :: Discrete Rational) x s->
+                eval (distribution (scale s m)) x
+                    === s * eval (distribution m) x
+
     describe "convolve" $ do
         it "dirac" $ property $
             \(x :: Rational) wx y wy ->
