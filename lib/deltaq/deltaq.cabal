@@ -51,7 +51,6 @@ library
     DeltaQ
     DeltaQ.Class
     DeltaQ.PiecewisePolynomial
-    DeltaQ.PiecewisePolynomialNew
 
   other-modules:
     DeltaQ.Model.DeltaQ
@@ -78,4 +77,3 @@ test-suite test
 
   other-modules:
     DeltaQ.PiecewisePolynomialSpec
-    DeltaQ.PiecewisePolynomialNewSpec
