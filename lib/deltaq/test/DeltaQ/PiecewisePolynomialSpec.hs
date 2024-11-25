@@ -107,10 +107,18 @@ spec = do
             \x y z ->
                 (x ./\. y) ./\. z .=== x ./\. (y ./\. z)
 
+        it "commutativity" $ property $
+            \x y ->
+                x ./\. y  .===  y ./\. x
+
     describe ".\\/." $ do
         it "associativity" $ property $
             \x y z ->
                 (x .\/. y) .\/. z .=== x .\/. (y .\/. z)
+
+        it "commutativity" $ property $
+            \x y ->
+                x .\/. y  .===  y .\/. x
 
     describe "choice" $ do
         it ".>>." $ property $ mapSize (`div` 3) $

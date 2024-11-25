@@ -234,10 +234,14 @@ equality may be up to numerical accuracy.
 '(./\.)'
 
 > (x ./\. y) ./\. z  =  x ./\. (y ./\. z)
+>
+> x ./\. y  =  y ./\. x
 
 '(.\/.)'
 
 > (x .\/. y) .\/. z  =  x .\/. (y .\/. z)
+>
+> x .\/. y  =  y .\/. x
 
 -}
 
