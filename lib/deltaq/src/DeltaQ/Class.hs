@@ -249,11 +249,14 @@ equality may be up to numerical accuracy.
 
 'choice'
 
+> choice 1 x y = x
+> choice 0 x y = y
+>
 > choice p x y .>>. z  =  choice p (x .>>. z) (y .>>. z)
 > choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
 > choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)
 
-'choices;
+'choices'
 
 > choices [] = never
 > choices ((w,o) : wos) = choice p o (choices wos)

@@ -121,6 +121,14 @@ spec = do
                 x .\/. y  .===  y .\/. x
 
     describe "choice" $ do
+        it "choice 1" $ property $
+            \x y ->
+                choice 1 x y  .===  x
+
+        it "choice 0" $ property $
+            \x y ->
+                choice 0 x y  .===  y
+
         it ".>>." $ property $ mapSize (`div` 3) $
             \(Probability p) x y z ->
                 choice p x y .>>. z  .===  choice p (x .>>. z) (y .>>. z)
