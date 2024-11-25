@@ -248,15 +248,16 @@ zipPieces (Pieces xs') (Pieces ys') =
 ------------------------------------------------------------------------------}
 {-| Algebraic operations '(+)', '(*)' and 'negate' on piecewise functions.
 
-The functions 'abs' and 'signum' are undefined.
+The functions 'abs' and 'signum' are defined using 'abs' and 'signum'
+for every piece.
 
-TODO: 'fromInteger' is __also undefined__
+TODO: 'fromInteger' is __undefined__
 -}
 instance (Ord a, Num o) => Num (Piecewise a o) where
     (+) = zipPointwise (+)
     (*) = zipPointwise (*)
     negate = mapPieces negate
-    abs = undefined
-    signum = undefined
+    abs = mapPieces abs
+    signum = mapPieces signum
     fromInteger 0 = zero
     fromInteger n = error "TODO: fromInteger not implemented"
