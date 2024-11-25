@@ -14,7 +14,7 @@ suing numeric type @a@.
 This type represents a mixed discrete / continuous probability distribution
 where the continuous part is represented in terms of piecewise polynomials.
 -}
-module DeltaQ.PiecewisePolynomial
+module DeltaQ.PiecewisePolynomialOld
     ( Durations (..)
     ) where
 

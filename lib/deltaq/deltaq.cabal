@@ -50,8 +50,8 @@ library
   exposed-modules:
     DeltaQ
     DeltaQ.Class
-    DeltaQ.PiecewisePolynomial
     DeltaQ.PiecewisePolynomialNew
+    DeltaQ.PiecewisePolynomialOld
 
   other-modules:
     DeltaQ.Model.DeltaQ
@@ -77,5 +77,5 @@ test-suite test
     Spec.hs
 
   other-modules:
-    DeltaQ.PiecewisePolynomialSpec
     DeltaQ.PiecewisePolynomialNewSpec
+    DeltaQ.PiecewisePolynomialOldSpec
