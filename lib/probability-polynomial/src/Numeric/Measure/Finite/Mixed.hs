@@ -25,6 +25,9 @@ module Numeric.Measure.Finite.Mixed
 import Data.Function.Class
     ( Function (..)
     )
+import Data.List
+    ( scanl'
+    )
 import Numeric.Function.Piecewise
     ( Piecewise
     )
@@ -197,7 +200,7 @@ decompose (Measure m) =
 
     withoutJumps =
         zipWith (\(x,o) j -> (x, o - Poly.constant j)) pieces totalJumps
-    totalJumps = tail $ scanl (+) 0 $ map snd jumps
+    totalJumps = tail $ scanl' (+) 0 $ map snd jumps
 
     jumps = go 0 pieces
       where
