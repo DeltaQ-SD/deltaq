@@ -15,11 +15,22 @@ module Numeric.Measure.Discrete
     , convolve
     ) where
 
+import Data.List
+    ( scanl'
+    )
 import Data.Map
     ( Map
     )
+import Numeric.Function.Piecewise
+    ( Piecewise
+    )
+import Numeric.Polynomial.Simple
+    ( Poly
+    )
 
 import qualified Data.Map.Strict as Map
+import qualified Numeric.Function.Piecewise as Piecewise
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-----------------------------------------------------------------------------
     Type
@@ -74,8 +85,13 @@ total (Discrete m) = sum m
 --
 -- This is known as the [distribution function
 -- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
-distribution :: (Ord a, Num a) => Discrete a -> a -> a
-distribution (Discrete m) x = sum $ Map.takeWhileAntitone (<= x) m
+distribution :: (Ord a, Num a) => Discrete a -> Piecewise a (Poly a)
+distribution (Discrete m) =
+    Piecewise.fromAscPieces
+    $ zipWith (\(x,_) s -> (x,Poly.constant s)) diracs steps
+  where
+    diracs = Map.toAscList m
+    steps = tail $ scanl' (+) 0 $ map snd diracs
 
 -- | Add two measures.
 --
