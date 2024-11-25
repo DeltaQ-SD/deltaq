@@ -23,6 +23,7 @@ import Numeric.Measure.Discrete
     , dirac
     , distribution
     , fromMap
+    , scale
     , toMap
     , total
     )
@@ -45,12 +46,17 @@ import qualified Data.Map.Strict as Map
 ------------------------------------------------------------------------------}
 spec :: Spec
 spec = do
-    describe "toDistribution" $ do
+    describe "distribution" $ do
         it "eval and total" $ property $
             \(m :: Discrete Rational) ->
                 let xlast = maybe 0 fst $ Map.lookupMax $ toMap m
                 in  total m
                         === eval (distribution m) xlast
+
+        it "eval and scale" $ property $
+            \(m :: Discrete Rational) x s->
+                eval (distribution (scale s m)) x
+                    === s * eval (distribution m) x
 
     describe "convolve" $ do
         it "dirac" $ property $

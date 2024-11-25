@@ -12,6 +12,7 @@ module Numeric.Measure.Discrete
     , total
     , distribution
     , add
+    , scale
     , convolve
     ) where
 
@@ -99,6 +100,13 @@ distribution (Discrete m) =
 add :: (Ord a, Num a) => Discrete a -> Discrete a -> Discrete a
 add (Discrete mx) (Discrete my) =
     Discrete $ trim $ Map.unionWith (+) mx my
+
+-- | Scale a measure by a constant.
+--
+-- > total (scale a mx) = a * total mx
+scale :: (Ord a, Num a) => a -> Discrete a -> Discrete a
+scale 0 (Discrete _) = Discrete Map.empty
+scale s (Discrete m) = Discrete $ Map.map (s *) m
 
 -- | Additive convolution of two measures.
 --
