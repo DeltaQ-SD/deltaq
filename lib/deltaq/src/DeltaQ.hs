@@ -1,7 +1,6 @@
 {-|
-Copyright:
-    Predictable Network Solutions Ltd., 2024
-License: BSD-3-Clause
+Copyright : Predictable Network Solutions Ltd., 2024
+License   : BSD-3-Clause
 Maintainer: neil.davies@pnsol.com
 
 This module brings data types and functions
@@ -16,7 +15,7 @@ Specifically,
 
     * type class instance in "DeltaQ.PiecewisePolynomial"
 
-        * @'Durations' a@ for a probability distribution with numeric type @a@.
+        * @'DQ'@ for a probability distribution with numeric type @Rational@.
         This type represents a mixed discrete / continuous probability distribution
         where the continuous part is represented in terms of piecewise polynomials.
 -}
@@ -72,7 +71,7 @@ We distinguish between `short`, `medium` and `long` distance.
 For sending a block of 64k bytes of data,
 representative times are (in seconds)
 
-> short, medium, long :: Durations Rational
+> short, medium, long :: DQ
 > short  = wait 0.024 -- seconds
 > medium = wait 0.143 -- seconds
 > long   = wait 0.531 -- seconds
@@ -85,12 +84,12 @@ If we assume that a direct TCP/IP connection between computers has
 an equal probability of being `short`, `medium`, or `long`,
 the probability distribution of delay times for a __single hop__ is
 
-> hop :: Durations Rational
+> hop :: DQ
 > hop = choices [(1/3, short), (1/3, medium), (1/3, long)]
 
 The distribution of delay times for a __sequence of hops__ is
 
-> hops :: Int -> Durations Rational
+> hops :: Int -> DQ
 > hops 1 = hop
 > hops n = hop .>>. hops (n-1)
 
