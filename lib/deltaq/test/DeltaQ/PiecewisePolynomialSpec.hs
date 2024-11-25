@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module DeltaQ.PiecewisePolynomialNewSpec
+module DeltaQ.PiecewisePolynomialSpec
     ( spec
     ) where
 
@@ -19,7 +19,7 @@ import DeltaQ.Class
     , Eventually (..)
     , Outcome (..)
     )
-import DeltaQ.PiecewisePolynomialNew
+import DeltaQ.PiecewisePolynomial
     ( DQ
     )
 import Test.Hspec

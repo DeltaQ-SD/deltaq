@@ -12,7 +12,7 @@ using the numeric type @Rational@.
 This type represents a mixed discrete / continuous probability distribution
 where the continuous part is represented in terms of piecewise polynomials.
 -}
-module DeltaQ.PiecewisePolynomialNew
+module DeltaQ.PiecewisePolynomial
     ( DQ
     ) where
 
