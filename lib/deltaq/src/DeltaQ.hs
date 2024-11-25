@@ -26,11 +26,11 @@ module DeltaQ
 
       -- * Modules
       module DeltaQ.Class
-    , module DeltaQ.PiecewisePolynomialOld
+    , module DeltaQ.PiecewisePolynomial
     ) where
 
 import DeltaQ.Class
-import DeltaQ.PiecewisePolynomialOld
+import DeltaQ.PiecewisePolynomial
 
 {-$example
 
