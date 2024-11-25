@@ -26,47 +26,47 @@
 </span><span id="line-26"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">PWPs.IRVs</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">IRV</span></span><span class="hs-special">)</span><span>
 </span><span id="line-27"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">PWPs.IRVs</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">PWP</span></span><span>
 </span><span id="line-28"></span><span>
-</span><span id="line-29"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108704"><span id="local-6989586621679108708"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbabilityMass"><span class="hs-identifier hs-type">ProbabilityMass</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-29"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108695"><span id="local-6989586621679108699"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbabilityMass"><span class="hs-identifier hs-type">ProbabilityMass</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-30"></span><span>    </span><span class="hs-keyword">type</span><span> </span><span id="ProbMassModel"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMassModel"><span class="hs-identifier hs-var">ProbMassModel</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
-</span><span id="line-31"></span><span>    </span><span id="local-6989586621679108716"><span class="annot"><span class="annottext">toMassModel :: Double -&gt; ProbMassModel Double
-</span><a href="#local-6989586621679108716"><span class="hs-identifier hs-var hs-var hs-var">toMassModel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><span id="line-31"></span><span>    </span><span id="local-6989586621679108707"><span class="annot"><span class="annottext">toMassModel :: Double -&gt; ProbMassModel Double
+</span><a href="#local-6989586621679108707"><span class="hs-identifier hs-var hs-var hs-var">toMassModel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
 Double -&gt; ProbMassModel Double
 forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span>
-</span><span id="line-32"></span><span>    </span><span id="local-6989586621679108719"><span class="annot"><span class="annottext">fromMassModel :: ProbMassModel Double -&gt; Double
-</span><a href="#local-6989586621679108719"><span class="hs-identifier hs-var hs-var hs-var">fromMassModel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
+</span><span id="line-32"></span><span>    </span><span id="local-6989586621679108710"><span class="annot"><span class="annottext">fromMassModel :: ProbMassModel Double -&gt; Double
+</span><a href="#local-6989586621679108710"><span class="hs-identifier hs-var hs-var hs-var">fromMassModel</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double
 ProbMassModel Double -&gt; Double
 forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span>
-</span><span id="line-33"></span><span>    </span><span id="local-6989586621679108724"><span class="annot"><span class="annottext">complement :: Double -&gt; Double
-</span><a href="#local-6989586621679108724"><span class="hs-identifier hs-var hs-var hs-var">complement</span></a></span></span><span> </span><span id="local-6989586621679108726"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679108726"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double
+</span><span id="line-33"></span><span>    </span><span id="local-6989586621679108715"><span class="annot"><span class="annottext">complement :: Double -&gt; Double
+</span><a href="#local-6989586621679108715"><span class="hs-identifier hs-var hs-var hs-var">complement</span></a></span></span><span> </span><span id="local-6989586621679108717"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679108717"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679108726"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><a href="#local-6989586621679108717"><span class="hs-identifier hs-var">x</span></a></span><span>
 </span><span id="line-34"></span><span>
-</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108740"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108731"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-36"></span><span>    </span><span class="hs-keyword">type</span><span> </span><span id="ProbMass"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#ProbMass"><span class="hs-identifier hs-var">ProbMass</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
 </span><span id="line-37"></span><span>    </span><span class="hs-keyword">type</span><span> </span><span id="Time"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#Time"><span class="hs-identifier hs-var">Time</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span>
 </span><span id="line-38"></span><span>
-</span><span id="line-39"></span><span>    </span><span id="local-6989586621679108747"><span class="annot"><span class="annottext">perfection :: IRV Double
-</span><a href="#local-6989586621679108747"><span class="hs-identifier hs-var hs-var hs-var">perfection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double
+</span><span id="line-39"></span><span>    </span><span id="local-6989586621679108738"><span class="annot"><span class="annottext">perfection :: IRV Double
+</span><a href="#local-6989586621679108738"><span class="hs-identifier hs-var hs-var hs-var">perfection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double
 forall a. (Ord a, Num a) =&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.top</span></span><span>
-</span><span id="line-40"></span><span>    </span><span id="local-6989586621679108752"><span class="annot"><span class="annottext">bottom :: IRV Double
-</span><a href="#local-6989586621679108752"><span class="hs-identifier hs-var hs-var hs-var">bottom</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621679108743"><span class="annot"><span class="annottext">bottom :: IRV Double
+</span><a href="#local-6989586621679108743"><span class="hs-identifier hs-var hs-var hs-var">bottom</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double
 forall a. (Ord a, Num a) =&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.bottom</span></span><span>
 </span><span id="line-41"></span><span>
-</span><span id="line-42"></span><span>    </span><span id="local-6989586621679108758"><span class="annot"><span class="annottext">support :: IRV Double -&gt; (Time (IRV Double), Maybe (Time (IRV Double)))
-</span><a href="#local-6989586621679108758"><span class="hs-identifier hs-var hs-var hs-var">support</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679108760"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679108760"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679108761"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679108761"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679108760"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Maybe Double
+</span><span id="line-42"></span><span>    </span><span id="local-6989586621679108749"><span class="annot"><span class="annottext">support :: IRV Double -&gt; (Time (IRV Double), Maybe (Time (IRV Double)))
+</span><a href="#local-6989586621679108749"><span class="hs-identifier hs-var hs-var hs-var">support</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span class="hs-special">(</span><span id="local-6989586621679108751"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679108751"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679108752"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679108752"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679108751"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Double -&gt; Maybe Double
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679108761"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Double, Double) -&gt; (Double, Maybe Double))
+</span><a href="#local-6989586621679108752"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((Double, Double) -&gt; (Double, Maybe Double))
 -&gt; (IRV Double -&gt; (Double, Double))
 -&gt; IRV Double
 -&gt; (Double, Maybe Double)
@@ -75,8 +75,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 forall a. (Eq a, Fractional a) =&gt; IRV a -&gt; (a, a)
 </span><span class="hs-identifier hs-var">PWP.support</span></span><span>
 </span><span id="line-43"></span><span>
-</span><span id="line-44"></span><span>    </span><span id="local-6989586621679108779"><span class="annot"><span class="annottext">tangibleMass :: IRV Double -&gt; ProbMass (IRV Double)
-</span><a href="#local-6989586621679108779"><span class="hs-identifier hs-var hs-var hs-var">tangibleMass</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Double
+</span><span id="line-44"></span><span>    </span><span id="local-6989586621679108770"><span class="annot"><span class="annottext">tangibleMass :: IRV Double -&gt; ProbMass (IRV Double)
+</span><a href="#local-6989586621679108770"><span class="hs-identifier hs-var hs-var hs-var">tangibleMass</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Double
 IRV Double -&gt; ProbMass (IRV Double)
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
@@ -84,8 +84,8 @@ forall a.
 IRV a -&gt; a
 </span><span class="hs-identifier hs-var">PWP.probMass</span></span><span>
 </span><span id="line-45"></span><span>
-</span><span id="line-46"></span><span>    </span><span id="local-6989586621679108794"><span class="annot"><span class="annottext">cumulativeMass :: IRV Double -&gt; Time (IRV Double) -&gt; ProbMass (IRV Double)
-</span><a href="#local-6989586621679108794"><span class="hs-identifier hs-var hs-var hs-var">cumulativeMass</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Double -&gt; Double
+</span><span id="line-46"></span><span>    </span><span id="local-6989586621679108785"><span class="annot"><span class="annottext">cumulativeMass :: IRV Double -&gt; Time (IRV Double) -&gt; ProbMass (IRV Double)
+</span><a href="#local-6989586621679108785"><span class="hs-identifier hs-var hs-var hs-var">cumulativeMass</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Double -&gt; Double
 IRV Double -&gt; Time (IRV Double) -&gt; ProbMass (IRV Double)
 forall a.
 (Ord a, Enum a, Num a, Fractional a, Evaluable a (DistP a),
@@ -93,10 +93,10 @@ forall a.
 IRV a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">PWP.cumulativeMass</span></span><span>
 </span><span id="line-47"></span><span>
-</span><span id="line-48"></span><span>    </span><span id="local-6989586621679108808"><span class="annot"><span class="annottext">cumulativeMass' :: IRV Double -&gt; Time (IRV Double) -&gt; Maybe (ProbMass (IRV Double))
-</span><a href="#local-6989586621679108808"><span class="hs-identifier hs-var hs-var hs-var">cumulativeMass'</span></a></span></span><span> </span><span id="local-6989586621679108810"><span class="annot"><span class="annottext">IRV Double
-</span><a href="#local-6989586621679108810"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679108811"><span class="annot"><span class="annottext">Time (IRV Double)
-</span><a href="#local-6989586621679108811"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProbMass (IRV Double) -&gt; Maybe (ProbMass (IRV Double))
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679108799"><span class="annot"><span class="annottext">cumulativeMass' :: IRV Double -&gt; Time (IRV Double) -&gt; Maybe (ProbMass (IRV Double))
+</span><a href="#local-6989586621679108799"><span class="hs-identifier hs-var hs-var hs-var">cumulativeMass'</span></a></span></span><span> </span><span id="local-6989586621679108801"><span class="annot"><span class="annottext">IRV Double
+</span><a href="#local-6989586621679108801"><span class="hs-identifier hs-var">a</span></a></span></span><span> </span><span id="local-6989586621679108802"><span class="annot"><span class="annottext">Time (IRV Double)
+</span><a href="#local-6989586621679108802"><span class="hs-identifier hs-var">b</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ProbMass (IRV Double) -&gt; Maybe (ProbMass (IRV Double))
 forall a. a -&gt; Maybe a
 </span><span class="hs-identifier hs-var">Just</span></span><span> </span><span class="annot"><span class="annottext">(ProbMass (IRV Double) -&gt; Maybe (ProbMass (IRV Double)))
 -&gt; ProbMass (IRV Double) -&gt; Maybe (ProbMass (IRV Double))
@@ -107,13 +107,13 @@ forall a.
  Integrable (DistD a) (DistP a)) =&gt;
 IRV a -&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">PWP.cumulativeMass</span></span><span> </span><span class="annot"><span class="annottext">IRV Double
-</span><a href="#local-6989586621679108810"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679108801"><span class="hs-identifier hs-var">a</span></a></span><span> </span><span class="annot"><span class="annottext">Double
 Time (IRV Double)
-</span><a href="#local-6989586621679108811"><span class="hs-identifier hs-var">b</span></a></span><span>
+</span><a href="#local-6989586621679108802"><span class="hs-identifier hs-var">b</span></a></span><span>
 </span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span>    </span><span id="local-6989586621679108822"><span class="annot"><span class="annottext">centiles :: IRV Double
+</span><span id="line-50"></span><span>    </span><span id="local-6989586621679108813"><span class="annot"><span class="annottext">centiles :: IRV Double
 -&gt; [ProbMass (IRV Double)] -&gt; [Maybe (Time (IRV Double))]
-</span><a href="#local-6989586621679108822"><span class="hs-identifier hs-var hs-var hs-var">centiles</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Double] -&gt; IRV Double -&gt; [Maybe Double])
+</span><a href="#local-6989586621679108813"><span class="hs-identifier hs-var hs-var hs-var">centiles</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">([Double] -&gt; IRV Double -&gt; [Maybe Double])
 -&gt; IRV Double -&gt; [Double] -&gt; [Maybe Double]
 forall a b c. (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c
 </span><span class="hs-identifier hs-var">flip</span></span><span> </span><span class="annot"><span class="annottext">[Double] -&gt; IRV Double -&gt; [Maybe Double]
@@ -123,17 +123,17 @@ forall a.
 [a] -&gt; IRV a -&gt; [Maybe a]
 </span><span class="hs-identifier hs-var">PWP.centiles</span></span><span>
 </span><span id="line-51"></span><span>
-</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108829"><span id="local-6989586621679108836"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQOps"><span class="hs-identifier hs-type">DeltaQOps</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-53"></span><span>    </span><span id="local-6989586621679108856"><span class="annot"><span class="annottext">choice :: ProbMass (IRV Double) -&gt; IRV Double -&gt; IRV Double -&gt; IRV Double
-</span><a href="#local-6989586621679108856"><span class="hs-identifier hs-var hs-var hs-var">choice</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108820"><span id="local-6989586621679108827"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQOps"><span class="hs-identifier hs-type">DeltaQOps</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-53"></span><span>    </span><span id="local-6989586621679108847"><span class="annot"><span class="annottext">choice :: ProbMass (IRV Double) -&gt; IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><a href="#local-6989586621679108847"><span class="hs-identifier hs-var hs-var hs-var">choice</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; IRV Double -&gt; IRV Double -&gt; IRV Double
 ProbMass (IRV Double) -&gt; IRV Double -&gt; IRV Double -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Differentiable (DistP a) (DistD a)) =&gt;
 a -&gt; IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.probChoice</span></span><span>
-</span><span id="line-54"></span><span>    </span><span id="local-6989586621679108869"><span class="annot"><span class="annottext">nWayChoice :: [(ProbMassModel (ProbMass (IRV Double)), IRV Double)] -&gt; IRV Double
-</span><a href="#local-6989586621679108869"><span class="hs-identifier hs-var hs-var hs-var">nWayChoice</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Double, IRV Double)] -&gt; IRV Double
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679108860"><span class="annot"><span class="annottext">nWayChoice :: [(ProbMassModel (ProbMass (IRV Double)), IRV Double)] -&gt; IRV Double
+</span><a href="#local-6989586621679108860"><span class="hs-identifier hs-var hs-var hs-var">nWayChoice</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Double, IRV Double)] -&gt; IRV Double
 [(ProbMassModel (ProbMass (IRV Double)), IRV Double)] -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
@@ -141,63 +141,63 @@ forall a.
 [(a, IRV a)] -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.multiWeightedChoice</span></span><span>
 </span><span id="line-55"></span><span>
-</span><span id="line-56"></span><span>    </span><span id="local-6989586621679108882"><span class="annot"><span class="annottext">convolve :: IRV Double -&gt; IRV Double -&gt; IRV Double
-</span><a href="#local-6989586621679108882"><span class="hs-identifier hs-var hs-var hs-var">convolve</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679108873"><span class="annot"><span class="annottext">convolve :: IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><a href="#local-6989586621679108873"><span class="hs-identifier hs-var hs-var hs-var">convolve</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Differentiable (DistP a) (DistD a)) =&gt;
 IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-operator hs-var">(PWP.&lt;+&gt;)</span></span><span>
 </span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span>    </span><span id="local-6989586621679108895"><span class="annot"><span class="annottext">ftf :: IRV Double -&gt; IRV Double -&gt; IRV Double
-</span><a href="#local-6989586621679108895"><span class="hs-identifier hs-var hs-var hs-var">ftf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><span id="line-58"></span><span>    </span><span id="local-6989586621679108886"><span class="annot"><span class="annottext">ftf :: IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><a href="#local-6989586621679108886"><span class="hs-identifier hs-var hs-var hs-var">ftf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Integrable (DistD a) (DistP a)) =&gt;
 IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.firstToFinish</span></span><span>
-</span><span id="line-59"></span><span>    </span><span id="local-6989586621679108908"><span class="annot"><span class="annottext">nWayFtf :: [IRV Double] -&gt; IRV Double
-</span><a href="#local-6989586621679108908"><span class="hs-identifier hs-var hs-var hs-var">nWayFtf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[IRV Double] -&gt; IRV Double
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679108899"><span class="annot"><span class="annottext">nWayFtf :: [IRV Double] -&gt; IRV Double
+</span><a href="#local-6989586621679108899"><span class="hs-identifier hs-var hs-var hs-var">nWayFtf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[IRV Double] -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Integrable (DistD a) (DistP a)) =&gt;
 [IRV a] -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.multiFtF</span></span><span>
 </span><span id="line-60"></span><span>
-</span><span id="line-61"></span><span>    </span><span id="local-6989586621679108921"><span class="annot"><span class="annottext">ltf :: IRV Double -&gt; IRV Double -&gt; IRV Double
-</span><a href="#local-6989586621679108921"><span class="hs-identifier hs-var hs-var hs-var">ltf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><span id="line-61"></span><span>    </span><span id="local-6989586621679108912"><span class="annot"><span class="annottext">ltf :: IRV Double -&gt; IRV Double -&gt; IRV Double
+</span><a href="#local-6989586621679108912"><span class="hs-identifier hs-var hs-var hs-var">ltf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Integrable (DistD a) (DistP a)) =&gt;
 IRV a -&gt; IRV a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.allToFinish</span></span><span>
-</span><span id="line-62"></span><span>    </span><span id="local-6989586621679108934"><span class="annot"><span class="annottext">nWayLtf :: [IRV Double] -&gt; IRV Double
-</span><a href="#local-6989586621679108934"><span class="hs-identifier hs-var hs-var hs-var">nWayLtf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[IRV Double] -&gt; IRV Double
+</span><span id="line-62"></span><span>    </span><span id="local-6989586621679108925"><span class="annot"><span class="annottext">nWayLtf :: [IRV Double] -&gt; IRV Double
+</span><a href="#local-6989586621679108925"><span class="hs-identifier hs-var hs-var hs-var">nWayLtf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[IRV Double] -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Integrable (DistD a) (DistP a)) =&gt;
 [IRV a] -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.multiAtF</span></span><span>
 </span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108940"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQ%1D6E9"><span class="hs-identifier hs-type">DeltaQ&#120553;</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-65"></span><span>    </span><span id="local-6989586621679108950"><span class="annot"><span class="annottext">shifted&#120553; :: Time (IRV Double) -&gt; IRV Double
-</span><a href="#local-6989586621679108950"><span class="hs-identifier hs-var hs-var hs-var">shifted&#120553;</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; IRV Double
+</span><span id="line-64"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108931"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQ%1D6E9"><span class="hs-identifier hs-type">DeltaQ&#120553;</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-65"></span><span>    </span><span id="local-6989586621679108941"><span class="annot"><span class="annottext">shifted&#120553; :: Time (IRV Double) -&gt; IRV Double
+</span><a href="#local-6989586621679108941"><span class="hs-identifier hs-var hs-var hs-var">shifted&#120553;</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; IRV Double
 Time (IRV Double) -&gt; IRV Double
 forall a. (Fractional a, Ord a, Num a, Enum a, Eq a) =&gt; a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.constructDelta</span></span><span>
 </span><span id="line-66"></span><span>
-</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108956"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQTimeout"><span class="hs-identifier hs-type">DeltaQTimeout</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span>
+</span><span id="line-67"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108947"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQTimeout"><span class="hs-identifier hs-type">DeltaQTimeout</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span>
 </span><span id="line-68"></span><span>
-</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108964"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQUniform"><span class="hs-identifier hs-type">DeltaQUniform</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679108973"><span class="annot"><span class="annottext">uniform0 :: Time (IRV Double) -&gt; IRV Double
-</span><a href="#local-6989586621679108973"><span class="hs-identifier hs-var hs-var hs-var">uniform0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; IRV Double
+</span><span id="line-69"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108955"><span class="annot"><a href="DeltaQ.Model.DeltaQ.html#DeltaQUniform"><span class="hs-identifier hs-type">DeltaQUniform</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679108964"><span class="annot"><span class="annottext">uniform0 :: Time (IRV Double) -&gt; IRV Double
+</span><a href="#local-6989586621679108964"><span class="hs-identifier hs-var hs-var hs-var">uniform0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Double -&gt; IRV Double
 Time (IRV Double) -&gt; IRV Double
 forall a. (Fractional a, Ord a, Num a, Enum a, Eq a) =&gt; a -&gt; IRV a
 </span><span class="hs-identifier hs-var">PWP.constructUniform</span></span><span>
 </span><span id="line-71"></span><span>
-</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108979"><span id="local-6989586621679108983"><span class="annot"><a href="DeltaQ.Model.Introspection.html#DeltaQIntrospection"><span class="hs-identifier hs-type">DeltaQIntrospection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-73"></span><span>    </span><span id="local-6989586621679108997"><span class="annot"><span class="annottext">partialOrdering :: IRV Double -&gt; IRV Double -&gt; Maybe Ordering
-</span><a href="#local-6989586621679108997"><span class="hs-identifier hs-var hs-var hs-var">partialOrdering</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; Maybe Ordering
+</span><span id="line-72"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679108970"><span id="local-6989586621679108974"><span class="annot"><a href="DeltaQ.Model.Introspection.html#DeltaQIntrospection"><span class="hs-identifier hs-type">DeltaQIntrospection</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-73"></span><span>    </span><span id="local-6989586621679108988"><span class="annot"><span class="annottext">partialOrdering :: IRV Double -&gt; IRV Double -&gt; Maybe Ordering
+</span><a href="#local-6989586621679108988"><span class="hs-identifier hs-var hs-var hs-var">partialOrdering</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; IRV Double -&gt; Maybe Ordering
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a,
  Integrable (DistD a) (DistP a)) =&gt;
@@ -205,12 +205,12 @@ IRV a -&gt; IRV a -&gt; Maybe Ordering
 </span><span class="hs-identifier hs-var">PWP.compareIRVs</span></span><span>
 </span><span id="line-74"></span><span>
 </span><span id="line-75"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><a href="DeltaQ.Model.Utilities.html#DeltaQVisualisation"><span class="hs-identifier hs-type">DeltaQVisualisation</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">IRV</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
-</span><span id="line-76"></span><span>    </span><span id="local-6989586621679109018"><span class="annot"><span class="annottext">asDiscreteCDF :: IRV Double
+</span><span id="line-76"></span><span>    </span><span id="local-6989586621679109009"><span class="annot"><span class="annottext">asDiscreteCDF :: IRV Double
 -&gt; Int
 -&gt; [Either
       (Time (IRV Double), ProbMass (IRV Double))
       [(Time (IRV Double), ProbMass (IRV Double))]]
-</span><a href="#local-6989586621679109018"><span class="hs-identifier hs-var hs-var hs-var">asDiscreteCDF</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Int -&gt; [Either (Double, Double) [(Double, Double)]]
+</span><a href="#local-6989586621679109009"><span class="hs-identifier hs-var hs-var hs-var">asDiscreteCDF</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Int -&gt; [Either (Double, Double) [(Double, Double)]]
 IRV Double
 -&gt; Int
 -&gt; [Either
@@ -221,12 +221,12 @@ forall a.
  Integrable (DistD a) (DistP a)) =&gt;
 IRV a -&gt; Int -&gt; [Either (a, a) [(a, a)]]
 </span><span class="hs-identifier hs-var">PWP.asDiscreteCDF</span></span><span>
-</span><span id="line-77"></span><span>    </span><span id="local-6989586621679109031"><span class="annot"><span class="annottext">asDiscretePDF :: IRV Double
+</span><span id="line-77"></span><span>    </span><span id="local-6989586621679109022"><span class="annot"><span class="annottext">asDiscretePDF :: IRV Double
 -&gt; Int
 -&gt; [Either
       (Time (IRV Double), ProbMass (IRV Double))
       [(Time (IRV Double), ProbMass (IRV Double))]]
-</span><a href="#local-6989586621679109031"><span class="hs-identifier hs-var hs-var hs-var">asDiscretePDF</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Int -&gt; [Either (Double, Double) [(Double, Double)]]
+</span><a href="#local-6989586621679109022"><span class="hs-identifier hs-var hs-var hs-var">asDiscretePDF</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">IRV Double -&gt; Int -&gt; [Either (Double, Double) [(Double, Double)]]
 IRV Double
 -&gt; Int
 -&gt; [Either
@@ -237,9 +237,9 @@ forall a.
  Differentiable (DistP a) (DistD a)) =&gt;
 IRV a -&gt; Int -&gt; [Either (a, a) [(a, a)]]
 </span><span class="hs-identifier hs-var">PWP.asDiscretePDF</span></span><span>
-</span><span id="line-78"></span><span>    </span><span id="local-6989586621679109040"><span class="annot"><span class="annottext">fromQTA :: [(Time (IRV Double), ProbMass (IRV Double))] -&gt; IRV Double
-</span><a href="#local-6989586621679109040"><span class="hs-identifier hs-var hs-var hs-var">fromQTA</span></a></span></span><span> </span><span id="local-6989586621679109042"><span class="annot"><span class="annottext">[(Time (IRV Double), ProbMass (IRV Double))]
-</span><a href="#local-6989586621679109042"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Double, Double)] -&gt; IRV Double
+</span><span id="line-78"></span><span>    </span><span id="local-6989586621679109031"><span class="annot"><span class="annottext">fromQTA :: [(Time (IRV Double), ProbMass (IRV Double))] -&gt; IRV Double
+</span><a href="#local-6989586621679109031"><span class="hs-identifier hs-var hs-var hs-var">fromQTA</span></a></span></span><span> </span><span id="local-6989586621679109033"><span class="annot"><span class="annottext">[(Time (IRV Double), ProbMass (IRV Double))]
+</span><a href="#local-6989586621679109033"><span class="hs-identifier hs-var">xs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Double, Double)] -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a) =&gt;
 [(a, a)] -&gt; IRV a
@@ -253,9 +253,9 @@ forall a. ProbabilityMass a =&gt; a
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">[(Double, Double)]
 [(Time (IRV Double), ProbMass (IRV Double))]
-</span><a href="#local-6989586621679109042"><span class="hs-identifier hs-var">xs</span></a></span><span>
-</span><span id="line-79"></span><span>    </span><span id="local-6989586621679109050"><span class="annot"><span class="annottext">fromEmpirical :: [(Time (IRV Double), ProbMass (IRV Double))] -&gt; IRV Double
-</span><a href="#local-6989586621679109050"><span class="hs-identifier hs-var hs-var hs-var">fromEmpirical</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Double, Double)] -&gt; IRV Double
+</span><a href="#local-6989586621679109033"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-79"></span><span>    </span><span id="local-6989586621679109041"><span class="annot"><span class="annottext">fromEmpirical :: [(Time (IRV Double), ProbMass (IRV Double))] -&gt; IRV Double
+</span><a href="#local-6989586621679109041"><span class="hs-identifier hs-var hs-var hs-var">fromEmpirical</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(Double, Double)] -&gt; IRV Double
 [(Time (IRV Double), ProbMass (IRV Double))] -&gt; IRV Double
 forall a.
 (Fractional a, Ord a, Num a, Enum a, Eq a) =&gt;
