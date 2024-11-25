@@ -51,7 +51,7 @@ newtype Measure a = Measure (Piecewise a (Poly a))
 
 -- | Construct a signed measure from its
 -- [distribution function
--- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
+-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
 --
 -- Return 'Nothing' if the measure is not finite,
 -- that is if the last piece of the piecewise function is not constant.
@@ -133,7 +133,7 @@ support (Measure pieces) =
 -- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
 --
 -- This is known as the [distribution function
--- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
+-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
 distribution :: (Ord a, Num a) => Measure a -> Piecewise a (Poly a)
 distribution (Measure p) = p
 

@@ -73,7 +73,7 @@ total (Discrete m) = sum m
 -- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
 --
 -- This is known as the [distribution function
--- ](https://en.wikipedia.org/wiki/Distribution_function_(measure_theory)).
+-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
 distribution :: (Ord a, Num a) => Discrete a -> a -> a
 distribution (Discrete m) x = sum $ Map.takeWhileAntitone (<= x) m
 
