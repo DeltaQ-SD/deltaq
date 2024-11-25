@@ -357,22 +357,29 @@ equality may be up to numerical accuracy.
 '(./\.)'
 
 &gt; (x ./\. y) ./\. z  =  x ./\. (y ./\. z)
+&gt;
+&gt; x ./\. y  =  y ./\. x
 
 '(.\/.)'
 
 &gt; (x .\/. y) .\/. z  =  x .\/. (y .\/. z)
+&gt;
+&gt; x .\/. y  =  y .\/. x
 
 -}</span></span><span>
-</span><span id="line-243"></span><span>
-</span><span id="line-244"></span><span class="annot"><span class="hs-comment">{-$properties-deltaq
+</span><span id="line-247"></span><span>
+</span><span id="line-248"></span><span class="annot"><span class="hs-comment">{-$properties-deltaq
 
 'choice'
 
+&gt; choice 1 x y = x
+&gt; choice 0 x y = y
+&gt;
 &gt; choice p x y .&gt;&gt;. z  =  choice p (x .&gt;&gt;. z) (y .&gt;&gt;. z)
 &gt; choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
 &gt; choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)
 
-'choices;
+'choices'
 
 &gt; choices [] = never
 &gt; choices ((w,o) : wos) = choice p o (choices wos)

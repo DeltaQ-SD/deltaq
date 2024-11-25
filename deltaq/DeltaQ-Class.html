@@ -24,9 +24,16 @@ x .&gt;&gt;. never = never
 x ./\. never = never
 x .\/. never = x</pre><p><code><a href="DeltaQ-Class.html#v:wait" title="DeltaQ.Class">wait</a></code></p><pre>wait t .&gt;&gt;. wait s  =  wait (t+s)
 wait t ./\. wait s  =  wait (max t s)
-wait t .\/. wait s  =  wait (min t s)</pre><p><code><a href="DeltaQ-Class.html#v:.-62--62-." title="DeltaQ.Class">(.&gt;&gt;.)</a></code></p><pre>(x .&gt;&gt;. y) .&gt;&gt;. z  =  x .&gt;&gt;. (y .&gt;&gt;. z)</pre><p><code><a href="DeltaQ-Class.html#v:.-47--92-." title="DeltaQ.Class">(./\.)</a></code></p><pre>(x ./\. y) ./\. z  =  x ./\. (y ./\. z)</pre><p><code><a href="DeltaQ-Class.html#v:.-92--47-." title="DeltaQ.Class">(.\/.)</a></code></p><pre>(x .\/. y) .\/. z  =  x .\/. (y .\/. z)</pre></div><a href="#g:6" id="g:6"><h2>DeltaQ</h2></a><div class="doc"><p><code><a href="DeltaQ-Class.html#v:choice" title="DeltaQ.Class">choice</a></code></p><pre>choice p x y .&gt;&gt;. z  =  choice p (x .&gt;&gt;. z) (y .&gt;&gt;. z)
+wait t .\/. wait s  =  wait (min t s)</pre><p><code><a href="DeltaQ-Class.html#v:.-62--62-." title="DeltaQ.Class">(.&gt;&gt;.)</a></code></p><pre>(x .&gt;&gt;. y) .&gt;&gt;. z  =  x .&gt;&gt;. (y .&gt;&gt;. z)</pre><p><code><a href="DeltaQ-Class.html#v:.-47--92-." title="DeltaQ.Class">(./\.)</a></code></p><pre>(x ./\. y) ./\. z  =  x ./\. (y ./\. z)
+
+x ./\. y  =  y ./\. x</pre><p><code><a href="DeltaQ-Class.html#v:.-92--47-." title="DeltaQ.Class">(.\/.)</a></code></p><pre>(x .\/. y) .\/. z  =  x .\/. (y .\/. z)
+
+x .\/. y  =  y .\/. x</pre></div><a href="#g:6" id="g:6"><h2>DeltaQ</h2></a><div class="doc"><p><code><a href="DeltaQ-Class.html#v:choice" title="DeltaQ.Class">choice</a></code></p><pre>choice 1 x y = x
+choice 0 x y = y
+
+choice p x y .&gt;&gt;. z  =  choice p (x .&gt;&gt;. z) (y .&gt;&gt;. z)
 choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
-choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)</pre><p>'choices;</p><pre>choices [] = never
+choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)</pre><p><code><a href="DeltaQ-Class.html#v:choices" title="DeltaQ.Class">choices</a></code></p><pre>choices [] = never
 choices ((w,o) : wos) = choice p o (choices wos)
   where  p = w / (w + sum (map fst wos))</pre><p><code><a href="DeltaQ-Class.html#v:uniform" title="DeltaQ.Class">uniform</a></code></p><pre>wait t .&gt;&gt;. uniform r s  =  uniform (t+r) (t+s)
 uniform r s .&gt;&gt;. wait t  =  uniform (r+t) (s+t)</pre><p><code><a href="DeltaQ-Class.html#v:failure" title="DeltaQ.Class">failure</a></code></p><pre>failure never      = 1
