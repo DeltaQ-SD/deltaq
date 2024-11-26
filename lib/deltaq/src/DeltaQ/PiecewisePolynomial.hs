@@ -14,6 +14,8 @@ where the continuous part is represented in terms of piecewise polynomials.
 -}
 module DeltaQ.PiecewisePolynomial
     ( DQ
+    , distribution
+    , fromPositiveMeasure
     ) where
 
 import Data.Maybe
@@ -46,6 +48,19 @@ import qualified Numeric.Polynomial.Simple as Poly
 -- | Probability distribution of durations.
 newtype DQ = DQ (Measure Rational)
     deriving (Eq, Show)
+
+-- | Get the distribution function as piecewise function of polynomials.
+distribution :: DQ -> Piecewise Rational (Poly Rational)
+distribution (DQ m) = Measure.distribution m
+
+-- | Interpret a finite, signed 'Measure' as a probability distribution.
+--
+-- In order to admit an interpretation as probability, the measure needs
+-- to be positive, if that is not the case, the function returns 'Nothing'.
+fromPositiveMeasure :: Measure Rational -> Maybe DQ
+fromPositiveMeasure m
+    | Measure.isPositive m = Just (DQ m)
+    | otherwise = Nothing
 
 -- | Helper function for lifting a binary operation on distribution functions.
 onDistribution2
