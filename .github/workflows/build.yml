@@ -123,7 +123,8 @@ jobs:
         run: >
           mkdir -p gh-pages
 
-          mv ${{ env.cabal-build-dir }}/build/*/*/*/doc/html/* gh-pages
+          mv ${{ env.cabal-build-dir }}/build/*/*/*/doc/html/* gh-pages/doc
+          mv ${{ env.cabal-build-dir }}/build/*/*/*/t/test/hpc/* gh-pages/hpc
 
           touch gh-pages/.nojekyll
 
