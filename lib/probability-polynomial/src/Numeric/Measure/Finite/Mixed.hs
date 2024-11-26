@@ -12,6 +12,7 @@ module Numeric.Measure.Finite.Mixed
     , uniform
     , total
     , support
+    , isPositive
     , distribution
     , fromDistribution
 
@@ -51,6 +52,13 @@ newtype Measure a = Measure (Piecewise a (Poly a))
     -- INVARIANT: The last piece is a constant polynomial,
     --            so that the measure is finite.
     deriving (Show)
+
+-- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
+--
+-- This is known as the [distribution function
+-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
+distribution :: (Ord a, Num a) => Measure a -> Piecewise a (Poly a)
+distribution (Measure p) = p
 
 -- | Construct a signed measure from its
 -- [distribution function
@@ -133,13 +141,30 @@ support (Measure pieces) =
         [] -> Nothing
         ps -> Just (fst $ head ps, fst $ last ps)
 
--- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
+-- | Check whether a signed measure is positive.
 --
--- This is known as the [distribution function
--- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
-distribution :: (Ord a, Num a) => Measure a -> Piecewise a (Poly a)
-distribution (Measure p) = p
+-- A signed measure is /positive/ if the measure of any set
+-- is nonnegative. In other words a positive signed measure
+-- is just a measure in the ordinary sense.
+--
+-- This test is nontrivial, as we have to check that the distribution
+-- function is monotonically increasing.
+isPositive :: (Ord a, Num a, Fractional a) => Measure a -> Bool
+isPositive (Measure m) = go 0 $ Piecewise.toAscPieces m
+  where
+    go _ [] =
+        True
+    go before ((x, o) : []) =
+        eval before x <= eval o x
+    go before ((x1, o) : xos@((x2, _) : _)) =
+        (eval before x1 <= eval o x1)
+        && Poly.isMonotonicallyIncreasingOn o (x1,x2)
+        && go o xos
 
+{-----------------------------------------------------------------------------
+    Operations
+    Numerical
+------------------------------------------------------------------------------}
 -- | Add two measures.
 --
 -- > total (add mx my) = total mx + total my
