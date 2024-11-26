@@ -28,7 +28,7 @@ jobs:
 #          - macOS-latest
 #          - windows-latest
         cabal:
-          - '3.10'
+          - '3.12'
         ghc:
 #          - '8.10'
 #          - '9.0'
@@ -123,7 +123,8 @@ jobs:
         run: >
           mkdir -p gh-pages
 
-          mv ${{ env.cabal-build-dir }}/build/*/*/*/doc/html/* gh-pages
+          mv ${{ env.cabal-build-dir }}/build/*/*/*/doc/html/* gh-pages/doc
+          mv ${{ env.cabal-build-dir }}/build/*/*/*/t/test/hpc/* gh-pages/hpc
 
           touch gh-pages/.nojekyll
 
