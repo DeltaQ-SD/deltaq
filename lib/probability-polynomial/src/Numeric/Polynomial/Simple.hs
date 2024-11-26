@@ -41,6 +41,7 @@ module Numeric.Polynomial.Simple
       -- ** Numerical
     , compareToZero
     , countRoots
+    , isMonotonicallyIncreasingOn
     , root
     ) where
 
@@ -456,6 +457,15 @@ euclidianDivision (pa, pb) =
     goDivide (q, r) = if degree r < degB then (q, r) else goDivide (q + s, r - s * pb)
       where
         s = monomial (degree r - degB) (leadingCoefficient r / lcB)
+
+-- | Check whether a polynomial is monotonically increasing on
+-- a given interval.
+isMonotonicallyIncreasingOn
+    :: (Fractional a, Eq a, Ord a) => Poly a -> (a,a) -> Bool
+isMonotonicallyIncreasingOn p (x1,x2) =
+    eval p x1 <= eval p x2
+    && countRoots (x1, x2, differentiate p) == 0
+    -- FIXME: What about double roots?
 
 {-|
 Measure whether or not a polynomial is consistently above or below zero,
