@@ -121,7 +121,8 @@ jobs:
             && matrix.os == 'ubuntu-latest'
             && matrix.ghc == '9.10'
         run: >
-          mkdir -p gh-pages
+          mkdir -p gh-pages/hpc
+          mkdir -p gh-pages/doc
 
           mv ${{ env.cabal-build-dir }}/build/*/*/*/doc/html/* gh-pages/doc
           mv ${{ env.cabal-build-dir }}/build/*/*/*/t/test/hpc/* gh-pages/hpc
