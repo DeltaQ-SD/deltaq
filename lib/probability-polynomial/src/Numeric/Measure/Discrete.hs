@@ -8,6 +8,7 @@ module Numeric.Measure.Discrete
     ( Discrete
     , fromMap
     , toMap
+    , zero
     , dirac
     , total
     , distribution
@@ -59,6 +60,10 @@ instance (Ord a, Num a) => Eq (Discrete a) where
 {-----------------------------------------------------------------------------
     Operations
 ------------------------------------------------------------------------------}
+-- | The measure that assigns @0@ to every set.
+zero :: Num a => Discrete a
+zero = Discrete Map.empty
+
 -- | A
 -- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)
 -- at the given point @x@.
