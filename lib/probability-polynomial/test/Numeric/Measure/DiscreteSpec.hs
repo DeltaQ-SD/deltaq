@@ -60,9 +60,9 @@ spec = do
 
     describe "convolve" $ do
         it "dirac" $ property $
-            \(x :: Rational) wx y wy ->
-                convolve (dirac x wx) (dirac y wy)
-                    ===  dirac (x + y) (wx * wy)
+            \(x :: Rational) y ->
+                convolve (dirac x) (dirac y)
+                    ===  dirac (x + y)
 
         it "distributes over `add`, left" $ property $
             \mx my (mz :: Discrete Rational) ->

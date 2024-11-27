@@ -68,8 +68,8 @@ spec :: Spec
 spec = do
     describe "dirac" $ do
         it "total" $ property $
-            \(x :: Rational) w ->
-                total (dirac x w)  ===  w
+            \(x :: Rational) ->
+                total (dirac x)  ===  1
 
     describe "uniform" $ do
         it "total" $ property $
@@ -107,9 +107,9 @@ spec = do
 
     describe "convolve" $ do
         it "dirac" $ property $
-            \(x :: Rational) wx y wy ->
-                convolve (dirac x wx) (dirac y wy)
-                    ===  dirac (x + y) (wx * wy)
+            \(x :: Rational) y ->
+                convolve (dirac x) (dirac y)
+                    ===  dirac (x + y)
 
         it "total" $ property $ mapSize (`div` 10) $
             \mx (my :: Measure Rational) ->

@@ -106,10 +106,9 @@ zero = Measure Piecewise.zero
 -- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)
 -- at the given point @x@.
 --
--- > total (dirac x m) = m 
-dirac :: (Ord a, Num a) => a -> a -> Measure a
-dirac _ 0 = zero
-dirac x w = Measure $ Piecewise.fromAscPieces [(x, Poly.constant w)]
+-- > total (dirac x) = 1
+dirac :: (Ord a, Num a) => a -> Measure a
+dirac x = Measure $ Piecewise.fromAscPieces [(x, Poly.constant 1)]
 
 -- | The probability measure of a uniform probability distribution
 -- in the interval $[x,y)$
@@ -323,7 +322,7 @@ convolveContinuous (Continuous ff) (Measure gg)
 
 -- | Additive convolution of two measures.
 --
--- > convolve (dirac x wx) (dirac y wy) = dirac (x + y) (wx * wy)
+-- > convolve (dirac x) (dirac y) = dirac (x + y)
 -- > convolve (add mx my) mz = add (convolve mx mz) (convolve my mz)
 -- > convolve mx (add my mz) = add (convolve mx my) (convolve mx mz)
 -- > total (convolve mx my) = total mx * total my
