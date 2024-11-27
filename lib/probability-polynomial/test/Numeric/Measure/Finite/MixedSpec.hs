@@ -85,11 +85,15 @@ spec = do
                 x /= y ==>
                 eval (distribution (uniform x y)) ((x + y) / 2)  ===  1/2
 
-    describe "==" $ do
+    describe "instance Eq" $ do
         it "add m (scale (-1) m) == zero" $ property $
             \(m :: Measure Rational) ->
                 cover 80 (total m /= 0) "nontrivial"
                 $ add m (scale (-1) m)  ===  zero
+        
+        it "dirac x /= dirac y" $ property $
+            \(x :: Rational) (y :: Rational) ->
+                x /= y  ==>  dirac x /= dirac y
 
     describe "add" $ do
         it "total" $ property $

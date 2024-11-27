@@ -26,6 +26,7 @@ import Numeric.Measure.Discrete
     , scale
     , toMap
     , total
+    , zero
     )
 import Test.Hspec
     ( Spec
@@ -35,7 +36,9 @@ import Test.Hspec
 import Test.QuickCheck
     ( Arbitrary
     , (===)
+    , (==>)
     , arbitrary
+    , cover
     , property
     )
 
@@ -46,6 +49,16 @@ import qualified Data.Map.Strict as Map
 ------------------------------------------------------------------------------}
 spec :: Spec
 spec = do
+    describe "instance Eq" $ do
+        it "add m (scale (-1) m) == zero" $ property $
+            \(m :: Discrete Rational) ->
+                cover 80 (total m /= 0) "nontrivial"
+                $ add m (scale (-1) m)  ===  zero
+
+        it "dirac x /= dirac y" $ property $
+            \(x :: Rational) (y :: Rational) ->
+                x /= y  ==>  dirac x /= dirac y
+
     describe "distribution" $ do
         it "eval and total" $ property $
             \(m :: Discrete Rational) ->
