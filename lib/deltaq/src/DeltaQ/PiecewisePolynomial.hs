@@ -81,7 +81,7 @@ instance Outcome DQ where
 
     never = DQ Measure.zero
 
-    wait t = DQ $ Measure.dirac t 1
+    wait t = DQ $ Measure.dirac t
 
     sequentially (DQ mx) (DQ my) = DQ (Measure.convolve mx my)
 

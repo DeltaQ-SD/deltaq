@@ -8,6 +8,7 @@ module Numeric.Measure.Discrete
     ( Discrete
     , fromMap
     , toMap
+    , zero
     , dirac
     , total
     , distribution
@@ -59,14 +60,17 @@ instance (Ord a, Num a) => Eq (Discrete a) where
 {-----------------------------------------------------------------------------
     Operations
 ------------------------------------------------------------------------------}
+-- | The measure that assigns @0@ to every set.
+zero :: Num a => Discrete a
+zero = Discrete Map.empty
+
 -- | A
 -- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)
 -- at the given point @x@.
 --
--- > total (dirac x m) = m 
-dirac :: (Ord a, Num a) => a -> a -> Discrete a
-dirac _ 0 = Discrete Map.empty
-dirac x m = Discrete (Map.singleton x m)
+-- > total (dirac x) = 1
+dirac :: (Ord a, Num a) => a -> Discrete a
+dirac x = Discrete (Map.singleton x 1)
 
 -- | Construct a discrete measure
 -- from a collection of points and their measures.
@@ -110,7 +114,7 @@ scale s (Discrete m) = Discrete $ Map.map (s *) m
 
 -- | Additive convolution of two measures.
 --
--- > convolve (dirac x wx) (dirac y wy) = dirac (x + y) (wx * wy)
+-- > convolve (dirac x) (dirac y) = dirac (x + y)
 -- > convolve (add mx my) mz = add (convolve mx mz) (convolve my mz)
 -- > convolve mx (add my mz) = add (convolve mx my) (convolve mx mz)
 -- > total (convolve mx my) = total mx * total my
