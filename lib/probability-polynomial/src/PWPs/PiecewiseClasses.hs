@@ -1,4 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 {-|
@@ -27,6 +29,9 @@ module PWPs.PiecewiseClasses
     , ComplexityMeasureable (..)
     )
 where
+
+import Numeric.Polynomial.Simple
+import qualified Numeric.Polynomial.Simple as Poly
 
 class Integrable a b where
     integrate :: a -> b
@@ -82,3 +87,28 @@ class ComplexityMeasureable a where
     integrate (f <+> g) == (integrate f) * (integrate g)
     operations maintain ordering, if present
 -}
+
+{-----------------------------------------------------------------------------
+    Class instances for polynomials
+------------------------------------------------------------------------------}
+instance (Eq a, Num a, Fractional a) => Evaluable a (Poly a) where
+    evaluate x p = eval p x
+    boost :: (Eq a, Num a, Fractional a) => a -> Poly a -> Poly a
+    boost x y = y + constant x
+    scale = Poly.scale
+
+instance (Fractional a, Eq a, Ord a) => Comparable a (Poly a) where
+    compareObjects (lf, uf, (f, g)) = compareToZero (lf, uf, f - g)
+
+instance (Num a, Eq a, Fractional a) => Mergeable (Poly a) where
+    mergeObject x y = if x == y then Just y else Nothing
+    zero = Poly.zero
+
+instance (Ord a, Num a, Eq a, Fractional a) => Displayable a (Poly a) where
+    displayObject s (l, u, p) =
+        if l >= u
+            then error "Invalid polynomial interval"
+            else Right (display p (l, u) s)
+
+instance (Ord a, Num a, Eq a, Fractional a) => ComplexityMeasureable (Poly a) where
+    measureComplexity x = if degree x <= 0 then 1 else degree x

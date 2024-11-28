@@ -56,7 +56,6 @@ library
     DeltaQ.Model.DeltaQ
     DeltaQ.Model.Introspection
     DeltaQ.Model.Utilities
-    DeltaQ.PWPs
 
 test-suite test
   import:           warnings

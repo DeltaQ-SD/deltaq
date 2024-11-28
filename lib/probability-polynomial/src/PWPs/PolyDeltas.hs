@@ -36,9 +36,10 @@ instance (Eq a, Num a) => Eq (PolyDelta a) where
     D x == D y = x == y
     Pd _ == D _ = False
     D _ == Pd _ = False
-instance Functor PolyDelta where
-    fmap f (D x) = D (f x)
-    fmap f (Pd x) = Pd (fmap f x)
+
+mapPD :: (Eq a, Num a) => (a -> a) -> PolyDelta a -> PolyDelta a
+mapPD f (D x) = D (f x)
+mapPD f (Pd x) = Pd . Poly.fromCoefficients . map f $ Poly.toCoefficients x
 
 type MyConstraints a = (Eq a, Num a, Fractional a)
 type EqNum a = (Eq a, Num a)
@@ -60,7 +61,7 @@ timesPD (D x) (D x') = D (x * x')
 instance MyConstraints a => Num (PolyDelta a) where
     (+) = plusPD
     (*) = timesPD
-    negate = fmap negate
+    negate = mapPD negate
     abs = undefined
     signum = undefined
     fromInteger n = Pd $ Poly.constant $ Prelude.fromInteger n

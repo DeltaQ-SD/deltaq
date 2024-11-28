@@ -1,8 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
@@ -58,7 +55,6 @@ import Math.Combinatorics.Exact.Binomial -- needed to automatically derive NFDat
     )
 
 import qualified Data.Function.Class as Fun
-import qualified PWPs.PiecewiseClasses as Classes
 
 {-----------------------------------------------------------------------------
     Basic operations
@@ -69,7 +65,7 @@ newtype Poly a = Poly [a]
     -- INVARIANT: List of coefficients from lowest to highest degree.
     -- INVARIANT: The empty list is not allowed,
     -- the zero polynomial is represented as [0].
-    deriving (Show, Functor, Generic, Generic1)
+    deriving (Show, Generic, Generic1)
 
 instance NFData a => NFData (Poly a)
 instance NFData1 Poly
@@ -541,25 +537,3 @@ root
     -> Poly a
     -> Maybe a
 root e x (l, u) p = findRoot e (l, u) (p - constant x)
-
-instance (Eq a, Num a, Fractional a) => Classes.Evaluable a (Poly a) where
-    evaluate x p = eval p x
-    boost :: (Eq a, Num a, Fractional a) => a -> Poly a -> Poly a
-    boost x y = y + constant x
-    scale = scale
-
-instance (Fractional a, Eq a, Ord a) => Classes.Comparable a (Poly a) where
-    compareObjects (lf, uf, (f, g)) = compareToZero (lf, uf, f - g)
-
-instance (Num a, Eq a, Fractional a) => Classes.Mergeable (Poly a) where
-    mergeObject x y = if x == y then Just y else Nothing
-    zero = zero
-
-instance (Ord a, Num a, Eq a, Fractional a) => Classes.Displayable a (Poly a) where
-    displayObject s (l, u, p) =
-        if l >= u
-            then error "Invalid polynomial interval"
-            else Right (display p (l, u) s)
-
-instance (Ord a, Num a, Eq a, Fractional a) => Classes.ComplexityMeasureable (Poly a) where
-    measureComplexity x = if degree x <= 0 then 1 else degree x
