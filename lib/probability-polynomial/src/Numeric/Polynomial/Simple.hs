@@ -69,7 +69,7 @@ newtype Poly a = Poly [a]
     -- INVARIANT: List of coefficients from lowest to highest degree.
     -- INVARIANT: The empty list is not allowed,
     -- the zero polynomial is represented as [0].
-    deriving (Show, Functor, Foldable, Generic, Generic1)
+    deriving (Show, Functor, Generic, Generic1)
 
 instance NFData a => NFData (Poly a)
 instance NFData1 Poly
@@ -95,7 +95,9 @@ The degree of a constant polynomial is @0@, but
 the degree of the zero polynomial is @-1@ for Euclidean division.
 -}
 degree :: (Eq a, Num a) => Poly a -> Int
-degree x = if trimPoly x == zero then -1 else length (trimPoly x) - 1
+degree x = case trimPoly x of
+    Poly [0] -> -1
+    Poly xs -> length xs - 1
 
 -- | remove top zeroes
 trimPoly :: (Eq a, Num a) => Poly a -> Poly a
