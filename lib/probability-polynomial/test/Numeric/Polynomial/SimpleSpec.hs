@@ -29,6 +29,7 @@ import Numeric.Polynomial.Simple
     , scale
     , scaleX
     , translate
+    , zero
     )
 import Test.Hspec
     ( Spec
@@ -50,6 +51,7 @@ import Test.QuickCheck
     , listOf
     , mapSize
     , property
+    , withMaxSuccess
     )
 
 {-----------------------------------------------------------------------------
@@ -76,6 +78,9 @@ spec = do
         it "eval" $ property $
             \p (x :: Rational) ->
                 eval (scaleX p) x  ===  x * eval p x
+
+        it "zero" $ withMaxSuccess 1 $ property $
+            scaleX zero  ==  (zero :: Poly Rational)
 
     describe "(+)" $ do
         it "eval" $ property $
