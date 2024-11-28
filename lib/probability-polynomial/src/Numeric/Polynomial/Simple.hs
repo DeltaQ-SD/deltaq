@@ -69,7 +69,7 @@ newtype Poly a = Poly [a]
     -- INVARIANT: List of coefficients from lowest to highest degree.
     -- INVARIANT: The empty list is not allowed,
     -- the zero polynomial is represented as [0].
-    deriving (Show, Functor, Generic, Generic1)
+    deriving (Show, Generic, Generic1)
 
 instance NFData a => NFData (Poly a)
 instance NFData1 Poly
