@@ -17,6 +17,7 @@ import Prelude
 
 import Numeric.Polynomial.Simple
     ( Poly
+    , compareToZero
     , constant
     , convolve
     , countRoots
@@ -173,6 +174,40 @@ spec = do
                     xmid = (x1 + x2) / 2
                 in
                     isMonotonicallyIncreasingOn p (x1,xmid)  ===  True
+
+    describe "compareToZero" $ do
+        it "lineFromTo" $ property $
+            \(x1 :: Rational) (Positive dx) y1 (Positive dy) ->
+                let x2 = x1 + dx
+                    y2 = y1 + dy
+                    p = lineFromTo (x1, y1) (x2, y2)
+                    result
+                        | y1 == 0 && y2 == 0 = Just EQ
+                        | y1 >= 0 = Just GT
+                        | y2 <= 0 = Just LT
+                        | otherwise = Nothing
+                in
+                    compareToZero (x1, x2, p)
+                        === result
+
+        it "quadratic polynomial with two roots" $ property $
+            \(x1 :: Rational) (Positive d) ->
+                let xx = scaleX (constant 1)
+                    p  = (xx - constant x1 + 1) * (xx - constant x2 - 1)
+                    x2 = x1 + d
+                in
+                    compareToZero (x1, x2, p)  ===  Just LT
+
+        it "quadratic polynomial + a0" $ property $
+            \(x1 :: Rational) a0 ->
+                let xx = scaleX (constant 1)
+                    p  = (xx - constant x1)^(2 :: Int) + constant a0
+                in
+                    compareToZero (x1 - abs a0 - 1, x1 + abs a0 + 1, p)
+                        === 
+                        if a0 > 0
+                            then Just GT
+                            else Nothing
 
 {-----------------------------------------------------------------------------
     Helper functions
