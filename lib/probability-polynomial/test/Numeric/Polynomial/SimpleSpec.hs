@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 {-|
 Copyright   : Predictable Network Solutions Ltd., 2024
@@ -17,6 +18,7 @@ import Prelude
 
 import Numeric.Polynomial.Simple
     ( Poly
+    , compareToZero
     , constant
     , convolve
     , countRoots
@@ -25,10 +27,13 @@ import Numeric.Polynomial.Simple
     , eval
     , fromCoefficients
     , integrate
+    , isMonotonicallyIncreasingOn
     , lineFromTo
+    , root
     , scale
     , scaleX
     , translate
+    , zero
     )
 import Test.Hspec
     ( Spec
@@ -50,6 +55,7 @@ import Test.QuickCheck
     , listOf
     , mapSize
     , property
+    , withMaxSuccess
     )
 
 {-----------------------------------------------------------------------------
@@ -77,6 +83,9 @@ spec = do
             \p (x :: Rational) ->
                 eval (scaleX p) x  ===  x * eval p x
 
+        it "zero" $ withMaxSuccess 1 $ property $
+            scaleX zero  ==  (zero :: Poly Rational)
+
     describe "(+)" $ do
         it "eval" $ property $
             \p q (x :: Rational) ->
@@ -91,8 +100,7 @@ spec = do
         it "degree" $ property $
             \x1 (x2 :: Rational) y1 y2 ->
                 let p = lineFromTo (x1, y1) (x2, y2)
-                in  x1 /= x2
-                    ==> degree p <= 1
+                in  degree p <= 1
 
         it "eval" $ property $
             \x1 (x2 :: Rational) y1 y2 ->
@@ -158,6 +166,85 @@ spec = do
                     (x `notElem` roots) && (y `notElem` roots)
                     ==> (countRoots (x, y, p)
                         ===  countIntervalMembers (x, y) roots)
+
+    describe "root" $ do
+        it "cubic polynomial" $ property $ mapSize (`div` 5) $
+            \(x1 :: Rational) (Positive dx3) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    x2 = 0.6 * x1 + 0.4 * x3
+                    x3 = x1 + dx3
+                    p = (xx - constant x1) * (xx - constant x2) * (xx - constant x3)
+                    l = x1 + 100 * epsilon
+                    u = x3 - 100 * epsilon
+                    epsilon = (x3-x1)/(1000*1000*50)
+                    Just x2' = root epsilon 0 (l, u) p
+                in
+                    property $ abs (x2' - x2) <= epsilon
+
+        xit "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
+            \(x1 :: Rational) (Positive dx3) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    x2 = (x1 + x3) / 2
+                    x3 = x1 + dx3
+                    p = (xx - constant x1) * (xx - constant x2) * (xx - constant x3)
+                    l = x1 + 100 * epsilon
+                    u = x3 - 100 * epsilon
+                    epsilon = (x3-x1)/(1000*1000*50)
+                    Just x2' = root epsilon 0 (l, u) p
+                in
+                    id
+                    $ counterexample ("interval = " <> show (l,u))
+                    $ counterexample ("countRoots = " <> show (countRoots (l, u, p)))
+                    $ counterexample ("expected root = " <> show x2)
+                    $ counterexample ("eval polynomial at expected root = " <> show (eval p x2))
+                    $ counterexample ("epsilon = " <> show epsilon)
+                    $ counterexample ("found root = " <> show x2')
+                    $ counterexample ("root within range of other root " <> show (abs (x2' - x3) <= 20*epsilon))
+                    $ property $ abs (x2' - x2) <= epsilon
+
+    describe "isMonotonicallyIncreasingOn" $
+        it "quadratic polynomial" $ property $
+            \(x1 :: Rational) (Positive d) ->
+                let xx = scaleX (constant 1)
+                    p  = negate ((xx - constant x1) * (xx - constant x2))
+                    x2 = x1 + d
+                    xmid = (x1 + x2) / 2
+                in
+                    isMonotonicallyIncreasingOn p (x1,xmid)  ===  True
+
+    describe "compareToZero" $ do
+        it "lineFromTo" $ property $
+            \(x1 :: Rational) (Positive dx) y1 (Positive dy) ->
+                let x2 = x1 + dx
+                    y2 = y1 + dy
+                    p = lineFromTo (x1, y1) (x2, y2)
+                    result
+                        | y1 == 0 && y2 == 0 = Just EQ
+                        | y1 >= 0 = Just GT
+                        | y2 <= 0 = Just LT
+                        | otherwise = Nothing
+                in
+                    compareToZero (x1, x2, p)
+                        === result
+
+        it "quadratic polynomial with two roots" $ property $
+            \(x1 :: Rational) (Positive d) ->
+                let xx = scaleX (constant 1)
+                    p  = (xx - constant x1 + 1) * (xx - constant x2 - 1)
+                    x2 = x1 + d
+                in
+                    compareToZero (x1, x2, p)  ===  Just LT
+
+        it "quadratic polynomial + a0" $ property $
+            \(x1 :: Rational) a0 ->
+                let xx = scaleX (constant 1)
+                    p  = (xx - constant x1)^(2 :: Int) + constant a0
+                in
+                    compareToZero (x1 - abs a0 - 1, x1 + abs a0 + 1, p)
+                        === 
+                        if a0 > 0
+                            then Just GT
+                            else Nothing
 
 {-----------------------------------------------------------------------------
     Helper functions
