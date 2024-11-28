@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 {-|
 Copyright   : Predictable Network Solutions Ltd., 2024
@@ -28,6 +29,7 @@ import Numeric.Polynomial.Simple
     , integrate
     , isMonotonicallyIncreasingOn
     , lineFromTo
+    , root
     , scale
     , scaleX
     , translate
@@ -164,6 +166,41 @@ spec = do
                     (x `notElem` roots) && (y `notElem` roots)
                     ==> (countRoots (x, y, p)
                         ===  countIntervalMembers (x, y) roots)
+
+    describe "root" $ do
+        it "cubic polynomial" $ property $ mapSize (`div` 5) $
+            \(x1 :: Rational) (Positive dx3) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    x2 = 0.6 * x1 + 0.4 * x3
+                    x3 = x1 + dx3
+                    p = (xx - constant x1) * (xx - constant x2) * (xx - constant x3)
+                    l = x1 + 100 * epsilon
+                    u = x3 - 100 * epsilon
+                    epsilon = (x3-x1)/(1000*1000*50)
+                    Just x2' = root epsilon 0 (l, u) p
+                in
+                    property $ abs (x2' - x2) <= epsilon
+
+        xit "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
+            \(x1 :: Rational) (Positive dx3) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    x2 = (x1 + x3) / 2
+                    x3 = x1 + dx3
+                    p = (xx - constant x1) * (xx - constant x2) * (xx - constant x3)
+                    l = x1 + 100 * epsilon
+                    u = x3 - 100 * epsilon
+                    epsilon = (x3-x1)/(1000*1000*50)
+                    Just x2' = root epsilon 0 (l, u) p
+                in
+                    id
+                    $ counterexample ("interval = " <> show (l,u))
+                    $ counterexample ("countRoots = " <> show (countRoots (l, u, p)))
+                    $ counterexample ("expected root = " <> show x2)
+                    $ counterexample ("eval polynomial at expected root = " <> show (eval p x2))
+                    $ counterexample ("epsilon = " <> show epsilon)
+                    $ counterexample ("found root = " <> show x2')
+                    $ counterexample ("root within range of other root " <> show (abs (x2' - x3) <= 20*epsilon))
+                    $ property $ abs (x2' - x2) <= epsilon
 
     describe "isMonotonicallyIncreasingOn" $
         it "quadratic polynomial" $ property $
