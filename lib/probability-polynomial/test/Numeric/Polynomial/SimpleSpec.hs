@@ -25,6 +25,7 @@ import Numeric.Polynomial.Simple
     , eval
     , fromCoefficients
     , integrate
+    , isMonotonicallyIncreasingOn
     , lineFromTo
     , scale
     , scaleX
@@ -162,6 +163,16 @@ spec = do
                     (x `notElem` roots) && (y `notElem` roots)
                     ==> (countRoots (x, y, p)
                         ===  countIntervalMembers (x, y) roots)
+
+    describe "isMonotonicallyIncreasingOn" $
+        it "quadratic polynomial" $ property $
+            \(x1 :: Rational) (Positive d) ->
+                let xx = scaleX (constant 1)
+                    p  = negate ((xx - constant x1) * (xx - constant x2))
+                    x2 = x1 + d
+                    xmid = (x1 + x2) / 2
+                in
+                    isMonotonicallyIncreasingOn p (x1,xmid)  ===  True
 
 {-----------------------------------------------------------------------------
     Helper functions
