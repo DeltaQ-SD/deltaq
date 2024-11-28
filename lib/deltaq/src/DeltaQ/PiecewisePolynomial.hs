@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -26,6 +27,9 @@ import DeltaQ.Class
     , Eventually (..)
     , Outcome (..)
     )
+import Control.DeepSeq
+    ( NFData
+    )
 import Numeric.Function.Piecewise
     ( Piecewise
     )
@@ -47,7 +51,7 @@ import qualified Numeric.Polynomial.Simple as Poly
 
 -- | Probability distribution of durations.
 newtype DQ = DQ (Measure Rational)
-    deriving (Eq, Show)
+    deriving (Eq, Show, NFData)
 
 -- | Get the distribution function as piecewise function of polynomials.
 distribution :: DQ -> Piecewise Rational (Poly Rational)

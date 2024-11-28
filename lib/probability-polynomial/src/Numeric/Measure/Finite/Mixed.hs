@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 {-|
 Copyright   : (c) Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
@@ -29,6 +31,9 @@ import Data.Function.Class
 import Data.List
     ( scanl'
     )
+import Control.DeepSeq
+    ( NFData
+    )
 import Numeric.Function.Piecewise
     ( Piecewise
     )
@@ -51,7 +56,7 @@ newtype Measure a = Measure (Piecewise a (Poly a))
     -- INVARIANT: Adjacent pieces contain distinct objects.
     -- INVARIANT: The last piece is a constant polynomial,
     --            so that the measure is finite.
-    deriving (Show)
+    deriving (Show, NFData)
 
 -- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
 --
