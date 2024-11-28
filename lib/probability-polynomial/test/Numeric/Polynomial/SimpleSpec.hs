@@ -96,8 +96,7 @@ spec = do
         it "degree" $ property $
             \x1 (x2 :: Rational) y1 y2 ->
                 let p = lineFromTo (x1, y1) (x2, y2)
-                in  x1 /= x2
-                    ==> degree p <= 1
+                in  degree p <= 1
 
         it "eval" $ property $
             \x1 (x2 :: Rational) y1 y2 ->
