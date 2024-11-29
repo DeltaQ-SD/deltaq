@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -34,6 +36,13 @@ module Numeric.Function.Piecewise
     , zipPointwise
     ) where
 
+import Control.DeepSeq
+    ( NFData
+    )
+import GHC.Generics
+    ( Generic
+    )
+
 import qualified Data.Function.Class as Fun
 
 {-----------------------------------------------------------------------------
@@ -46,7 +55,7 @@ data Piece a o = Piece
     { basepoint :: a
     , object :: o
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic, NFData)
 
 {- | A function defined piecewise on numerical intervals.
  
@@ -80,7 +89,7 @@ e.g. the situation @o1 == o2@ may occur.
 -}
 data Piecewise a o
     = Pieces [Piece a o]
-    deriving (Show)
+    deriving (Show, Generic, NFData)
 
 {-$Piecewise Invariants
 
