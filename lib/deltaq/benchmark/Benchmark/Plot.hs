@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 {-|
-Module      : Main
-Description : Benchmark analysis
 Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : neil.davies@pnsol.com
+Description : Plotting utilities for benchmark results.
 -}
 module Benchmark.Plot where
 
@@ -62,8 +62,21 @@ instance C.FromNamedRecord Measurement where
 {-----------------------------------------------------------------------------
     Plot
 ------------------------------------------------------------------------------}
-plotToHtmlFile :: FilePath -> [Measurement] -> IO ()
-plotToHtmlFile fpath measurements =
+-- | Plot all operations in the current directory.
+plotAllOperations :: FilePath -> [Measurement] -> IO ()
+plotAllOperations dir xs = do
+    plotOp "sequentially" ".>>."
+    plotOp "lastToFinish" "./\\."
+    plotOp "firstToFinish" ".\\/."
+  where
+    plotOp name ticker = do
+        let ys = filter ((ticker == ) . mName) xs
+        plotExprToHtmlFile (dir <> "/expr-" <> name <> ".html") ys
+        plotComplexityToHtmlFile (dir <> "/complexity-" <> name <> ".html") ys
+
+-- | Time against expression size.
+plotExprToHtmlFile :: FilePath -> [Measurement] -> IO ()
+plotExprToHtmlFile fpath measurements =
     G.toHtmlFile fpath . G.toVegaLite $
         [ enc []
         , G.title ("Operation " <> fromString name) []
@@ -87,6 +100,42 @@ plotToHtmlFile fpath measurements =
 
     name = mName $ head measurements
     xys = map (\m -> (fromIntegral $ mExpressionSize m, 1000 * mTime m)) measurements
+
+    values = G.asSpec
+        [ mkData xys
+        , G.mark G.Line []
+        ]
+    points = G.asSpec
+        [ mkData xys
+        , G.mark G.Circle []
+        ]
+
+-- | Time against complexity.
+plotComplexityToHtmlFile :: FilePath -> [Measurement] -> IO ()
+plotComplexityToHtmlFile fpath measurements =
+    G.toHtmlFile fpath . G.toVegaLite $
+        [ enc []
+        , G.title ("Operation " <> fromString name) []
+        , G.layer [ values, points ]
+        , G.height 300
+        , G.width 400
+        ]
+  where
+    enc = G.encoding
+        . G.position G.X
+            [ G.PName "Complexity"
+            , G.PmType G.Quantitative
+            , G.PAxis [ G.AxTickMinStep 1 ]
+            ]
+        . G.position G.Y [ G.PName "Time / ms", G.PmType G.Quantitative ]
+    mkData xfs = G.dataFromColumns []
+        . G.dataColumn "Complexity" (G.Numbers xs)
+        . G.dataColumn "Time / ms" (G.Numbers fs)
+        $ []
+      where (xs, fs) = unzip xfs
+
+    name = mName $ head measurements
+    xys = map (\m -> (fromIntegral $ mValueComplexity m, 1000 * mTime m)) measurements
 
     values = G.asSpec
         [ mkData xys
