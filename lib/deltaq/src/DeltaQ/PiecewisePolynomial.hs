@@ -17,6 +17,9 @@ module DeltaQ.PiecewisePolynomial
     ( DQ
     , distribution
     , fromPositiveMeasure
+
+    -- * Internal
+    , complexity
     ) where
 
 import Data.Maybe
@@ -46,9 +49,8 @@ import qualified Numeric.Measure.Finite.Mixed as Measure
 import qualified Numeric.Polynomial.Simple as Poly
 
 {-----------------------------------------------------------------------------
-    Implementation
+    Type
 ------------------------------------------------------------------------------}
-
 -- | Probability distribution of durations.
 newtype DQ = DQ (Measure Rational)
     deriving (Eq, Show, NFData)
@@ -80,6 +82,21 @@ onDistribution2 err f (DQ mx) (DQ my) =
   where
     impossible = error $ "impossible: not a finite measure in " <> err
 
+-- | Size of the representation of a probability distribution,
+-- i.e. number of pieces of the piecewise function and degrees
+-- of the polynomials.
+--
+-- This quantity is relevant to stating and analyzing
+-- the asymptotic time complexity of operations.
+complexity :: DQ -> Int
+complexity (DQ m) = sum (map complexityOfPiece pieces)
+  where
+    pieces = Piecewise.toAscPieces $ Measure.distribution m
+    complexityOfPiece = (+1) . max 0 . Poly.degree . snd
+
+{-----------------------------------------------------------------------------
+    Operations
+------------------------------------------------------------------------------}
 instance Outcome DQ where
     type Duration DQ = Rational
 

@@ -92,6 +92,8 @@ benchmark basic
     , criterion > 1.6
     , deepseq > 1.4
     , hvega
+    , optparse-applicative
+    , statistics
     , vector
 
   main-is:
