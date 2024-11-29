@@ -53,12 +53,6 @@ library
     Numeric.Measure.Finite.Mixed
     Numeric.Polynomial.Simple
 
-  other-modules:
-    PWPs.IRVs
-    PWPs.Piecewise
-    PWPs.PiecewiseClasses
-    PWPs.PolyDeltas
-
 test-suite test
   import:           warnings
   type:             exitcode-stdio-1.0
