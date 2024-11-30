@@ -37,16 +37,17 @@ import Numeric.Polynomial.Simple
     )
 import Test.Hspec
     ( Spec
+    , before_
     , describe
     , it
     , pendingWith
-    , xit
     )
 import Test.QuickCheck
     ( Arbitrary
     , Gen
     , NonNegative (..)
     , Positive (..)
+    , Property
     , (===)
     , (==>)
     , (.&&.)
@@ -61,6 +62,9 @@ import Test.QuickCheck
 {-----------------------------------------------------------------------------
     Tests
 ------------------------------------------------------------------------------}
+xit' :: String -> String -> Property -> Spec
+xit' reason label = before_ (pendingWith reason) . it label
+
 spec :: Spec
 spec = do
     describe "constant" $ do
@@ -129,17 +133,16 @@ spec = do
                     ===  differentiate p * q + p * differentiate q
 
     describe "translate" $ do
-        it "…" $ do
-            pendingWith
-                $ "Failures for degree > 70, probably Int overflow "
+        let reason =
+                "Failures for degree > 70, probably Int overflow "
                 <> "when computing binomial coefficients."
 
-        xit "eval" $ property $
+        xit' reason "eval" $ property $
             \p y (x :: Rational) ->
                 counterexample ("degree p = " <> show (degree p))
                 $ eval (translate y p) x  ===  eval p (x - y)
 
-        xit "differentiate" $ property $
+        xit' reason "differentiate" $ property $
             \p (y :: Rational) ->
                 counterexample ("degree p = " <> show (degree p))
                 $ differentiate (translate y p)
@@ -181,7 +184,7 @@ spec = do
                 in
                     property $ abs (x2' - x2) <= epsilon
 
-        xit "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
+        xit' "bug" "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
             \(x1 :: Rational) (Positive dx3) ->
                 let xx = scaleX (constant 1) :: Poly Rational
                     x2 = (x1 + x3) / 2

@@ -43,15 +43,16 @@ import Numeric.Polynomial.SimpleSpec
     )
 import Test.Hspec
     ( Spec
+    , before_
     , describe
     , it
     , pendingWith
-    , xit
     )
 import Test.QuickCheck
     ( Arbitrary
     , Gen
     , Positive (..)
+    , Property
     , (===)
     , (==>)
     , arbitrary
@@ -69,6 +70,9 @@ import qualified Numeric.Polynomial.Simple as Poly
 {-----------------------------------------------------------------------------
     Tests
 ------------------------------------------------------------------------------}
+xit' :: String -> String -> Property -> Spec
+xit' reason label = before_ (pendingWith reason) . it label
+
 spec :: Spec
 spec = do
     describe "dirac" $ do
@@ -106,10 +110,8 @@ spec = do
                 total (add mx my)  ===  total mx + total my
 
     describe "translate" $ do
-        it "…" $ do
-            pendingWith "Failures in Poly.translate"
-
-        xit "distribution" $ property $
+        xit' "Failures in Poly.translate"
+            "distribution" $ property $
             \(m :: Measure Rational) y x ->
                 eval (distribution (translate y m)) x
                     ===  eval (distribution m) (x - y)
@@ -163,10 +165,8 @@ spec = do
                 in  isPositive (foldr add zero diracs)
                         === True
 
-        it "…" $ do
-            pendingWith "Corner cases in Poly.isMonotonicallyIncreasingOn"
-
-        xit "nfold convolution of uniform" $ once $
+        xit' "Corner cases in Poly.isMonotonicallyIncreasingOn"
+            "nfold convolution of uniform" $ once $
             let convolutions :: [Measure Rational]
                 convolutions =
                     iterate (convolve (uniform 0 1)) (dirac 0)
