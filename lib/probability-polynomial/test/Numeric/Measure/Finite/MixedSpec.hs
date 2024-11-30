@@ -27,6 +27,7 @@ import Numeric.Measure.Finite.Mixed
     , dirac
     , distribution
     , fromDistribution
+    , isPositive
     , scale
     , support
     , total
@@ -50,11 +51,15 @@ import Test.Hspec
 import Test.QuickCheck
     ( Arbitrary
     , Gen
+    , Positive (..)
     , (===)
     , (==>)
     , arbitrary
+    , conjoin
+    , counterexample
     , cover
     , mapSize
+    , once
     , property
     )
 
@@ -143,7 +148,34 @@ spec = do
         it "distributive, right" $ property $ mapSize (`div` 12) $
             \mx my (mz :: Measure Rational) ->
                 convolve mx (add my mz)
-                    === add (convolve mx my) (convolve mx mz) 
+                    ===  add (convolve mx my) (convolve mx mz) 
+
+    describe "isPositive" $ do
+        it "scale dirac" $ property $
+            \(x :: Rational) w ->
+                isPositive (scale w (dirac x))
+                    ===  (w >= 0)
+
+        it "sum of positive dirac" $ property $
+            \(ws :: [Positive Rational]) ->
+                let mkDirac i (Positive w) = scale w (dirac i)
+                    diracs = zipWith mkDirac [1..] ws
+                in  isPositive (foldr add zero diracs)
+                        === True
+
+        it "…" $ do
+            pendingWith "Corner cases in Poly.isMonotonicallyIncreasingOn"
+
+        xit "nfold convolution of uniform" $ once $
+            let convolutions :: [Measure Rational]
+                convolutions =
+                    iterate (convolve (uniform 0 1)) (dirac 0)
+                prop_isPositive m =
+                    counterexample (show m)
+                    $ isPositive m  ===  True
+            in  conjoin
+                    $ take 20
+                    $ map prop_isPositive convolutions
 
 {-----------------------------------------------------------------------------
     Random generators
