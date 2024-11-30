@@ -110,7 +110,7 @@ spec = do
                     ===  eval (distribution m) (x - y)
 
     describe "convolve" $ do
-        it "dirac" $ property $
+        it "dirac dirac" $ property $
             \(x :: Rational) y ->
                 convolve (dirac x) (dirac y)
                     ===  dirac (x + y)
@@ -118,14 +118,29 @@ spec = do
         it "total" $ property $ mapSize (`div` 10) $
             \mx (my :: Measure Rational) ->
                 total (convolve mx my)
-                    === total mx * total my
+                    ===  total mx * total my
 
-        it "distributes over `add`, left" $ property $ mapSize (`div` 12) $
+        it "dirac translate, left" $ property $ mapSize (`div` 10) $
+            \(mx :: Measure Rational) (y :: Rational) ->
+                convolve mx (dirac y)
+                    ===  translate y mx
+
+        it "dirac translate, right" $ property $ mapSize (`div` 10) $
+            \(x :: Rational) (my :: Measure Rational) ->
+                convolve (dirac x) my
+                    ===  translate x my
+
+        it "symmetric" $ property $ mapSize (`div` 10) $
+            \mx (my :: Measure Rational) ->
+                convolve mx my
+                    ===  convolve my mx
+
+        it "distributive, left" $ property $ mapSize (`div` 12) $
             \mx my (mz :: Measure Rational) ->
                 convolve (add mx my) mz
-                    === add (convolve mx mz) (convolve my mz) 
+                    ===  add (convolve mx mz) (convolve my mz) 
 
-        it "distributes over `add`, right" $ property $ mapSize (`div` 12) $
+        it "distributive, right" $ property $ mapSize (`div` 12) $
             \mx my (mz :: Measure Rational) ->
                 convolve mx (add my mz)
                     === add (convolve mx my) (convolve mx mz) 
