@@ -26,7 +26,7 @@ toXY = toXY' 2048 0.05
 -- | The number of points to plot, the 'overshoot' (as a fraction of the range), the outcome
 toXY' :: (DeltaQ o, Enum (Duration o), Fractional (Duration o))
       => Int -> Double -> o -> [(Duration o, Probability o)]
-toXY' numPoints overshoot o = leftEdge ++ middle ++ rightEdge
+toXY' numPoints overshoot o = dedup $ leftEdge ++ middle ++ rightEdge
   where
     range = upbX - lwbX
     eps = range / fromIntegral numPoints
@@ -43,6 +43,12 @@ toXY' numPoints overshoot o = leftEdge ++ middle ++ rightEdge
         = []
       | otherwise
         = [(x, sw x) |  x <- enumFromThenTo (lwbX + eps) (lwbX + eps + eps) (upbX - eps)]
+    dedup [] = []
+    dedup (x:xs) = x : dedup' x xs
+    dedup' x [] = []
+    dedup' x (x':xs)
+      | x == x'   = dedup' x xs
+      | otherwise = x' : dedup' x' xs
 
 -- | Plot CDF of an outcome - with a title
 plotCDF :: (DeltaQ o, Enum (Duration o), Fractional (Duration o), Real (Duration o), Real (Probability o))
