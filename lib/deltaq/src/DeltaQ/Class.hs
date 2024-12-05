@@ -322,15 +322,17 @@ equality may be up to numerical accuracy.
 
 'deadline'
 
-> deadline never      = Abandoned
-> deadline (wait t)   = Occurs t
-> deadline (x .>>. y) = (+) <$> deadline x <*> deadline y
-> deadline (x ./\. y) = max (deadline x) (deadline y)
-> deadline (x .\/. y) = min (deadline x) (deadline y)
->  -- TODO: This property ^ is actually false!
+> deadline never      =  Abandoned
+> deadline (wait t)   =  Occurs t
+> deadline (x .>>. y) =  (+) <$> deadline x <*> deadline y
+> deadline (x ./\. y) =  max (deadline x) (deadline y)
 >
-> deadline (choice p x y) = max (deadline x) (deadline y)  if p ≠ 0, p ≠ 1
->  -- TODO: This property ^ is actually false!
+> deadline (x .\/. y) =  min (deadline x) (deadline y)
+>   if failure x = 0, failure y = 0
+>
+> deadline (choice p x y) = max (deadline x) (deadline y)
+>   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
+>
 >
 > deadline (uniform r s)  = Occurs s   if r <= s
 

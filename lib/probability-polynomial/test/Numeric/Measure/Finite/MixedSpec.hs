@@ -151,6 +151,11 @@ spec = do
                 convolve mx (add my mz)
                     ===  add (convolve mx my) (convolve mx mz) 
 
+        it "translate, left" $ property $ mapSize (`div` 10) $
+            \mx (my :: Measure Rational) (Positive z) ->
+                translate z (convolve mx my)
+                    ===  convolve (translate z mx) my
+
     describe "isPositive" $ do
         it "scale dirac" $ property $
             \(x :: Rational) w ->

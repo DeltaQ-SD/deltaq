@@ -25,6 +25,7 @@ import Numeric.Measure.Discrete
     , scale
     , toMap
     , total
+    , translate
     , zero
     )
 import Test.Hspec
@@ -34,6 +35,7 @@ import Test.Hspec
     )
 import Test.QuickCheck
     ( Arbitrary
+    , Positive (..)
     , (===)
     , (==>)
     , arbitrary
@@ -70,26 +72,42 @@ spec = do
                 eval (distribution (scale s m)) x
                     === s * eval (distribution m) x
 
+    describe "translate" $ do
+        it "distribution" $ property $
+            \(m :: Discrete Rational) y x ->
+                eval (distribution (translate y m)) x
+                    ===  eval (distribution m) (x - y)
+
     describe "convolve" $ do
         it "dirac" $ property $
             \(x :: Rational) y ->
                 convolve (dirac x) (dirac y)
                     ===  dirac (x + y)
 
-        it "distributes over `add`, left" $ property $
-            \mx my (mz :: Discrete Rational) ->
-                convolve (add mx my) mz
-                    === add (convolve mx mz) (convolve my mz) 
-
-        it "distributes over `add`, right" $ property $
-            \mx my (mz :: Discrete Rational) ->
-                convolve mx (add my mz)
-                    === add (convolve mx my) (convolve mx mz) 
-
         it "total" $ property $
             \mx (my :: Discrete Rational) ->
                 total (convolve mx my)
                     === total mx * total my
+
+        it "symmetric" $ property $
+            \mx (my :: Discrete Rational) ->
+                convolve mx my
+                    ===  convolve my mx
+
+        it "distributive, left" $ property $
+            \mx my (mz :: Discrete Rational) ->
+                convolve (add mx my) mz
+                    === add (convolve mx mz) (convolve my mz) 
+
+        it "distributive, right" $ property $
+            \mx my (mz :: Discrete Rational) ->
+                convolve mx (add my mz)
+                    === add (convolve mx my) (convolve mx mz) 
+
+        it "translate, left" $ property $
+            \mx (my :: Discrete Rational) (Positive z) ->
+                translate z (convolve mx my)
+                    ===  convolve (translate z mx) my
 
 {-----------------------------------------------------------------------------
     Random generators

@@ -327,10 +327,14 @@ convolveContinuous (Continuous ff) (Measure gg)
 
 -- | Additive convolution of two measures.
 --
+-- Properties:
+--
 -- > convolve (dirac x) (dirac y) = dirac (x + y)
--- > convolve (add mx my) mz = add (convolve mx mz) (convolve my mz)
--- > convolve mx (add my mz) = add (convolve mx my) (convolve mx mz)
--- > total (convolve mx my) = total mx * total my
+-- >
+-- > convolve mx my               =  convolve my mx
+-- > convolve (add mx my) mz      =  add (convolve mx mz) (convolve my mz)
+-- > translate z (convolve mx my) =  convolve (translate z mx) my
+-- > total (convolve mx my)       =  total mx * total my
 convolve
     :: (Ord a, Num a, Fractional a)
     => Measure a -> Measure a -> Measure a

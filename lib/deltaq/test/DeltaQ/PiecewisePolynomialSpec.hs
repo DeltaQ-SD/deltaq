@@ -37,7 +37,6 @@ import Test.Hspec
     ( Spec
     , describe
     , it
-    , xit
     )
 import Test.QuickCheck
     ( Arbitrary
@@ -344,20 +343,33 @@ specProperties = do
                 deadline' (x ./\. y)
                     ===  max (deadline' x) (deadline' y)
 
-        xit ".\\/." $ property $
+        it ".\\/." $ property $
             \x y ->
-                deadline' (x .\/. y)
-                    ===  min (deadline' x) (deadline' y)
+                (failure x == 0 && failure y == 0) ==>
+                    deadline' (x .\/. y)
+                        ===  min (deadline' x) (deadline' y)
 
-        xit "choice" $ property $
+        it "choice" $ property $
             \(Probability p) x y ->
-                (0 < p && p < 1) ==>
+                (0 < p && p < 1 && failure x == 0 && failure y == 0) ==>
                     deadline' (choice p x y)
                         === max (deadline' x) (deadline' y)
 
         it "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 deadline' (uniform r s)  ===  Occurs (max r s)
+
+    describe "stress tests" $ do
+        it "orders of magnitude" $ withMaxSuccess 1 $ property $
+            let waitPower2 :: Int -> (Rational, DQ)
+                waitPower2 k = ((1/2)^k, wait (2^k))
+
+                n = 20
+                o = choices $ map waitPower2 [1..n]
+            in
+                deadline o  ===  Occurs (2^n)
+                .&&. failure o  === 0
+                .&&. quantile (1 - 1/4) o  ===  Occurs 4
 
 specImplementation :: Spec
 specImplementation = do
