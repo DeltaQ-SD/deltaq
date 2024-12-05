@@ -11,6 +11,9 @@ module DeltaQ.PiecewisePolynomialSpec
 
 import Prelude
 
+import Data.Maybe
+    ( fromJust
+    )
 import Data.Ratio
     ( (%)
     )
@@ -21,6 +24,8 @@ import DeltaQ.Class
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ
+    , distribution
+    , fromPositiveMeasure
     )
 import Test.Hspec
     ( Spec
@@ -48,6 +53,8 @@ import Test.QuickCheck
     , vectorOf
     )
 
+import qualified Numeric.Measure.Finite.Mixed as Measure
+
 {-----------------------------------------------------------------------------
     Tests
 ------------------------------------------------------------------------------}
@@ -59,6 +66,11 @@ infix 0 .===
 
 spec :: Spec
 spec = do
+    describe "general DeltaQ properties" specProperties
+    describe "DQ specifics" specImplementation
+
+specProperties :: Spec
+specProperties = do
     describe "never" $ do
         it "x .>>. never" $ property $
             \x ->
@@ -338,6 +350,28 @@ spec = do
         it "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 deadline' (uniform r s)  ===  Occurs (max r s)
+
+specImplementation :: Spec
+specImplementation = do
+    describe "fromPositiveMeasure" $ do
+        it "fails on negative measure" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d in
+                fromPositiveMeasure
+                    (Measure.scale (-1) (Measure.uniform r s))
+                    === Nothing
+
+    describe "fromPositiveMeasure . distribution" $ do
+        it "uniform" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d
+                    id' =
+                        fromPositiveMeasure
+                        . fromJust
+                        . Measure.fromDistribution
+                        . distribution
+                in
+                    id' (uniform r s) === Just (uniform r s)
 
 {-----------------------------------------------------------------------------
     Random generators
