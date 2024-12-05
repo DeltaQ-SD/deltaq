@@ -1,6 +1,5 @@
 module PlottingSupport
- ( asMaybe
- , toXY
+ ( toXY
  , toXY'
  , plotCDF
  , plotCDFs
@@ -14,10 +13,6 @@ where
 
 import Graphics.Rendering.Chart.Easy
 import DeltaQ
-
-asMaybe :: Eventually a -> Maybe a
-asMaybe (Occurs x) = Just x
-asMaybe Abandoned  = Nothing
 
 toXY :: (DeltaQ o, Enum (Duration o), Fractional (Duration o))
      => o -> [(Duration o, Probability o)]
@@ -56,7 +51,7 @@ plotCDF :: (DeltaQ o, Enum (Duration o), Fractional (Duration o), Real (Duration
 plotCDF title o = execEC $ do
   layout_title .=  title
   layout_x_axis . laxis_title .= "Time (s)"
-  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (asMaybe $ cv1 <$> deadline o)
+  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (maybeFromEventually $ cv1 <$> deadline o)
   layout_y_axis . laxis_title .= "Probabilty Mass"
   plot $ line "" [[(cv1 a, cv2  b) | (a,b) <- toXY o]]
   where
@@ -75,7 +70,7 @@ plotCDFs title namedOutcomes = execEC $ do
   where
    cv1 = fromRational . toRational
    cv2 = fromRational . toRational
-   maxX =  fmap cv1 $ maximum $ map (asMaybe . deadline . snd) namedOutcomes
+   maxX =  fmap cv1 $ maximum $ map (maybeFromEventually . deadline . snd) namedOutcomes
    plotOne (t, o) = plot $ line t [[(cv1 a, cv2 b) | (a,b) <- toXY o]]
 
 -- | Annotate a CDF with Centiles
@@ -84,7 +79,7 @@ plotCDFWithCentiles :: (DeltaQ o, Enum (Duration o), Fractional (Duration o), Re
 plotCDFWithCentiles title centiles o = execEC $ do
   layout_title .=  title
   layout_x_axis . laxis_title .= "Time (s)"
-  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (asMaybe $ cv1 <$> deadline o)
+  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (maybeFromEventually $ cv1 <$> deadline o)
   layout_y_axis . laxis_title .= "Probabilty Mass"
   plot $ line "" [[(cv1 a, cv2  b) | (a,b) <- toXY o]]
   mapM_ plotCentile centiles
@@ -107,7 +102,7 @@ plotInverseCDF :: (DeltaQ o, Enum (Duration o), Fractional (Duration o), Real (D
 plotInverseCDF title o = execEC $ do
   layout_title .=  title
   layout_x_axis . laxis_title .= "Time (s)"
-  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (asMaybe $ cv1 <$> deadline o)
+  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (maybeFromEventually $ cv1 <$> deadline o)
   layout_y_axis . laxis_title .= "Log Inverse Probabilty Mass"
   plot $ line "" [[(cv1 a, 1 - cv2  b) | (a,b) <- toXY o]]
   where
@@ -125,7 +120,7 @@ plotInverseCDFs title namedOutcomes = execEC $ do
   where
    cv1 = fromRational . toRational
    cv2 = fromRational . toRational
-   maxX =  fmap cv1 $ maximum $ map (asMaybe . deadline . snd) namedOutcomes
+   maxX =  fmap cv1 $ maximum $ map (maybeFromEventually . deadline . snd) namedOutcomes
    plotOne (t, o) = plot $ line t [[(cv1 a, 1 - cv2 b) | (a,b) <- toXY o]]
 
 plotInverseCDFWithCentiles :: (DeltaQ o, Enum (Duration o), Fractional (Duration o), Real (Duration o), Real (Probability o))
@@ -133,7 +128,7 @@ plotInverseCDFWithCentiles :: (DeltaQ o, Enum (Duration o), Fractional (Duration
 plotInverseCDFWithCentiles title centiles o = execEC $ do
   layout_title .=  title
   layout_x_axis . laxis_title .= "Time (s)"
-  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (asMaybe $ cv1 <$> deadline o)
+  layout_x_axis . laxis_generate .= maybe autoAxis (\u' -> scaledAxis def (0, 1.05 * u')) (maybeFromEventually $ cv1 <$> deadline o)
   layout_y_axis . laxis_title .= "Log Inverse Probabilty Mass"
   plot $ line "" [[(cv1 a, 1 - cv2  b) | (a,b) <- toXY o]]
   mapM_ plotCentile centiles
