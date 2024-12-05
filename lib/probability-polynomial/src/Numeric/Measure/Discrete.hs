@@ -122,11 +122,15 @@ translate y (Discrete m) = Discrete $ Map.mapKeys (y +) m
 
 -- | Additive convolution of two measures.
 --
+-- Properties:
+--
 -- > convolve (dirac x) (dirac y) = dirac (x + y)
--- > convolve (add mx my) mz = add (convolve mx mz) (convolve my mz)
--- > convolve mx (add my mz) = add (convolve mx my) (convolve mx mz)
--- > total (convolve mx my) = total mx * total my
 convolve :: (Ord a, Num a) => Discrete a -> Discrete a -> Discrete a
+-- >
+-- > convolve mx my               =  convolve my mx
+-- > convolve (add mx my) mz      =  add (convolve mx mz) (convolve my mz)
+-- > translate z (convolve mx my) =  convolve (translate z mx) my
+-- > total (convolve mx my)       =  total mx * total myconvolve :: (Ord a, Num a) => Discrete a -> Discrete a -> Discrete a
 convolve (Discrete mx) (Discrete my) =
     Discrete $ trim $ Map.fromListWith (+)
         [ (x + y, wx * wy)
