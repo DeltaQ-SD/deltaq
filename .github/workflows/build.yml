@@ -135,7 +135,12 @@ jobs:
         run: >
           mkdir -p gh-pages/hpc
 
+          mkdir -p gh-pages/hpc/deltaq
+
+          mkdir -p gh-pages/hpc/probability-polynomial
+
           cp -R ${{ env.cabal-build-dir }}/build/*/*/deltaq-*/t/test/hpc/vanilla/html gh-pages/hpc/deltaq
+
           cp -R ${{ env.cabal-build-dir }}/build/*/*/probability-polynomial-*/t/test/hpc/vanilla/html gh-pages/hpc/probability-polynomial
 
       - name: Documentation (Deployment)
