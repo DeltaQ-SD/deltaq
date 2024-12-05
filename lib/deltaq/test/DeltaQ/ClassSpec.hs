@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 {-|
 Copyright   : Predictable Network Solutions Ltd., 2024
@@ -12,7 +13,10 @@ module DeltaQ.ClassSpec
 import Prelude
 
 import DeltaQ.Class
-    ( eventuallyFromMaybe
+    ( Eventually (..)
+    , eventually
+    , eventuallyFromMaybe
+    , maybeFromEventually
     )
 import Test.Hspec
     ( Spec
@@ -20,7 +24,8 @@ import Test.Hspec
     , it
     )
 import Test.QuickCheck
-    ( (===)
+    ( Arbitrary (..)
+    , (===)
     , property
     )
 
@@ -54,3 +59,19 @@ spec = do
                     let f = (+)
                     in  (f <$> morphism mx <*> morphism my)
                         === morphism (f <$> mx <*> my)
+
+        it "maybeFromEventually . eventuallyFromMaybe" $ property $
+            \(mx :: Maybe Bool) ->
+                maybeFromEventually (eventuallyFromMaybe mx)
+                    === mx
+
+        it "eventually Abandoned Occurs = id" $ property $
+            \(ex :: Eventually Bool) ->
+                eventually Abandoned Occurs ex 
+                    === ex
+
+{-----------------------------------------------------------------------------
+    Tests
+------------------------------------------------------------------------------}
+instance Arbitrary a => Arbitrary (Eventually a) where
+    arbitrary = eventuallyFromMaybe <$> arbitrary
