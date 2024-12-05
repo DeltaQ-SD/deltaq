@@ -25,6 +25,7 @@ import Numeric.Measure.Discrete
     , scale
     , toMap
     , total
+    , translate
     , zero
     )
 import Test.Hspec
@@ -69,6 +70,12 @@ spec = do
             \(m :: Discrete Rational) x s->
                 eval (distribution (scale s m)) x
                     === s * eval (distribution m) x
+
+    describe "translate" $ do
+        it "distribution" $ property $
+            \(m :: Discrete Rational) y x ->
+                eval (distribution (translate y m)) x
+                    ===  eval (distribution m) (x - y)
 
     describe "convolve" $ do
         it "dirac" $ property $

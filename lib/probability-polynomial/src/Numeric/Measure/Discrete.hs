@@ -14,6 +14,7 @@ module Numeric.Measure.Discrete
     , distribution
     , add
     , scale
+    , translate
     , convolve
     ) where
 
@@ -111,6 +112,13 @@ add (Discrete mx) (Discrete my) =
 scale :: (Ord a, Num a) => a -> Discrete a -> Discrete a
 scale 0 (Discrete _) = Discrete Map.empty
 scale s (Discrete m) = Discrete $ Map.map (s *) m
+
+-- | Translate a measure along the number line.
+--
+-- > eval (distribution (translate y m)) x
+-- >    = eval (distribution m) (x - y)
+translate :: (Ord a, Num a) => a -> Discrete a -> Discrete a
+translate y (Discrete m) = Discrete $ Map.mapKeys (y +) m
 
 -- | Additive convolution of two measures.
 --
