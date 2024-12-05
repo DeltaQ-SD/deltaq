@@ -58,7 +58,7 @@ newtype Measure a = Measure (Piecewise a (Poly a))
     --            so that the measure is finite.
     deriving (Show, NFData)
 
--- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
+-- | @eval (distribution m) x@ is the measure of the interval \( (-∞, x] \).
 --
 -- This is known as the [distribution function
 -- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
@@ -116,7 +116,7 @@ dirac :: (Ord a, Num a) => a -> Measure a
 dirac x = Measure $ Piecewise.fromAscPieces [(x, Poly.constant 1)]
 
 -- | The probability measure of a uniform probability distribution
--- in the interval $[x,y)$
+-- in the interval \( [x,y) \).
 --
 -- > total (uniform x y) = 1
 uniform :: (Ord a, Num a, Fractional a) => a -> a -> Measure a
@@ -135,7 +135,7 @@ total (Measure p) =
         [] -> 0
         ps -> eval (snd (last ps)) 0
 
--- | The 'support' is the smallest closed, contiguous interval $[x,y]$
+-- | The 'support' is the smallest closed, contiguous interval \( [x,y] \)
 -- outside of which the measure is zero.
 --
 -- Returns 'Nothing' if the interval is empty.
