@@ -21,6 +21,7 @@ module DeltaQ.Class
 
     -- ** DeltaQ
     , Eventually (..)
+    , eventually
     , eventuallyFromMaybe
     , maybeFromEventually
 
@@ -125,6 +126,13 @@ instance Applicative Eventually where
     Abandoned <*> (Occurs _) = Abandoned
     (Occurs _) <*> Abandoned = Abandoned
     (Occurs f) <*> (Occurs y) = Occurs (f y)
+
+-- | Helper function to eliminate 'Eventually'.
+--
+-- See also: 'maybe'.
+eventually :: b -> (a -> b) -> Eventually a -> b
+eventually b _ Abandoned = b
+eventually _ f (Occurs x) = f x
 
 -- | Helper function that converts 'Maybe' to 'Eventually'.
 eventuallyFromMaybe :: Maybe a -> Eventually a
