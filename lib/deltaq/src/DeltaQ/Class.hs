@@ -2,13 +2,11 @@
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
-Copyright:
-    Neil Davies, 2024
-    Predictable Network Solutions Ltd., 2024
-License: BSD-3-Clause
-Maintainer: neil.davies@pnsol.com
-Description:
-    Type classes for outcomes and their completion times.
+Copyright   : Neil Davies, 2024
+              Predictable Network Solutions Ltd., 2024
+License     : BSD-3-Clause
+Maintainer  : neil.davies@pnsol.com
+Description : Type classes for outcomes and their completion times.
 
 Type classes
 
@@ -50,7 +48,7 @@ infixr 3 ./\. -- more tight
 --
 -- 'Outcome's can be composed in sequence or in parallel.
 class (Ord (Duration o), Num (Duration o)) => Outcome o where
-    -- | Numerical type representing times in $[0,+∞)$.
+    -- | Numerical type representing times in \( [0,+∞) \).
     --
     -- For example 'Double' or 'Rational'.
     type Duration o
@@ -150,7 +148,7 @@ class   ( Eq (Probability o)
         )
     => DeltaQ o
   where
-    -- | Numerical type representing probabilities in $[0,1]$.
+    -- | Numerical type representing probabilities in \( [0,1] \).
     --
     -- For example 'Double' or 'Rational'.
     type Probability o

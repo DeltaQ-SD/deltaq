@@ -7,7 +7,6 @@
 Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
-Description : Tests for polynomials.
 -}
 module Numeric.Polynomial.SimpleSpec
     ( spec

@@ -1,5 +1,5 @@
 {-|
-Copyright   : (c) Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
 Description : Discrete, finite signed measures on the number line.
@@ -86,7 +86,7 @@ toMap (Discrete m) = m
 total :: Num a => Discrete a -> a
 total (Discrete m) = sum m
 
--- | @eval (distribution m) x@ is the measure of the interval $(-∞, x]$.
+-- | @eval (distribution m) x@ is the measure of the interval \( (-∞, x] \).
 --
 -- This is known as the [distribution function
 -- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).

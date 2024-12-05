@@ -3,12 +3,12 @@
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
-Copyright   : (c) Peter Thompson, 2023
+Copyright   : Peter Thompson, 2023-2024
+              Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
 Stability   : experimental
-
-Polynomials and computations with them.
+Description : Polynomials and computations with them.
 -}
 module Numeric.Polynomial.Simple
     ( -- * Basic operations

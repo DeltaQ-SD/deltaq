@@ -6,7 +6,7 @@
 Module      : DeltaQ
 Description : Class descriptions for the ∆Q systems development approach.
 Copyright   : Neil Davies, 2024
-License     : BSD-3
+License     : BSD-3-Clause
 Maintainer  : neil.davies@pnsol.com
 -}
 module DeltaQ.Model.DeltaQ

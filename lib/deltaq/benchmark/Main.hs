@@ -1,9 +1,8 @@
 {-|
-Module      : Main
-Description : Main benchmark of 'DQ'.
 Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : neil.davies@pnsol.com
+Description : Main benchmark of 'DQ'.
 -}
 module Main (main) where
 
