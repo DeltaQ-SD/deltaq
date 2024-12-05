@@ -5,7 +5,6 @@
 Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
-Description : Tests for discrete finite signed measures.
 -}
 module Numeric.Measure.DiscreteSpec
     ( spec

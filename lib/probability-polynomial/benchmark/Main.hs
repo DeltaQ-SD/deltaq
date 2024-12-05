@@ -1,6 +1,11 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 
+{-|
+Copyright   : Peter Thompson, 2023-2024
+License     : BSD-3-Clause
+Maintainer  : peter.thompson@pnsol.com
+-}
 module Main (main) where
 
 import Criterion.Main

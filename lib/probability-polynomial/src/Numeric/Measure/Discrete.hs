@@ -1,5 +1,5 @@
 {-|
-Copyright   : (c) Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
 Description : Discrete, finite signed measures on the number line.
