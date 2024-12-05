@@ -13,6 +13,7 @@ import Prelude
 
 import DeltaQ.Class
     ( eventuallyFromMaybe
+    , maybeFromEventually
     )
 import Test.Hspec
     ( Spec
@@ -54,3 +55,9 @@ spec = do
                     let f = (+)
                     in  (f <$> morphism mx <*> morphism my)
                         === morphism (f <$> mx <*> my)
+
+        describe "maybeFromEventually" $ do
+            it "maybeFromEventually . eventuallyFromMaybe" $ property $
+                \(mx :: Maybe Bool) ->
+                    maybeFromEventually (eventuallyFromMaybe mx)
+                        === mx
