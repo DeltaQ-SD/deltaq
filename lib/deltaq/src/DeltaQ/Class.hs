@@ -306,6 +306,9 @@ equality may be up to numerical accuracy.
 
 > p <= q  implies  quantile p o <= quantile q o
 >
+> quantile p never    = Abandoned
+> quantile p (wait t) = if p > 0 then Occurs t else Abandoned
+>
 > quantile p (uniform r s)  =  r + p*(s-t)  if r <= s
 
 'earliest'

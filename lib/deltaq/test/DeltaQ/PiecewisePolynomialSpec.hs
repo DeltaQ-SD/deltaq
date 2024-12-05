@@ -252,10 +252,20 @@ spec = do
                 in
                     p' <= q'  ==>  quantile' p' o <= quantile' q' o
 
+        it "never" $ property $
+            \(Probability p) ->
+                quantile' p never  ===  Abandoned
+
+        it "wait" $ property $
+            \(Probability p) (NonNegative t) ->
+                quantile' p (wait t)
+                    ===  if p >= 0 then Occurs t else Abandoned
+
         it "uniform" $ property $
             \(Probability p) (NonNegative r) (Positive d) ->
-                let s = r + d
-                in  quantile' p (uniform r s) === Occurs (r + p*(s-r))
+                let s = r + d in 
+                quantile' p (uniform r s)
+                    === Occurs (r + p*(s-r))
 
     describe "earliest" $ do
         let earliest' :: DQ -> Eventually Rational
