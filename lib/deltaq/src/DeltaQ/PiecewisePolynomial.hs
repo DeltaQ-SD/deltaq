@@ -17,6 +17,7 @@ module DeltaQ.PiecewisePolynomial
     ( DQ
     , distribution
     , fromPositiveMeasure
+    , unsafeFromPositiveMeasure
 
     -- * Internal
     , complexity
@@ -63,10 +64,21 @@ distribution (DQ m) = Measure.distribution m
 --
 -- In order to admit an interpretation as probability, the measure needs
 -- to be positive, if that is not the case, the function returns 'Nothing'.
+--
+-- Note: Due to rare numerical issues,
+-- the check 'Measure.isPositive' can be false negative.
+-- Work around using 'unsafeFromPositiveMeasure'.
 fromPositiveMeasure :: Measure Rational -> Maybe DQ
 fromPositiveMeasure m
-    | Measure.isPositive m = Just (DQ m)
+    | Measure.isPositive m = Just (unsafeFromPositiveMeasure m)
     | otherwise = Nothing
+
+-- | Interpret a finite, positive 'Measure' as a probability distribution.
+--
+-- /The precondition that the measure satisfies 'Measure.isPositive'
+-- is not checked!/
+unsafeFromPositiveMeasure :: Measure Rational -> DQ
+unsafeFromPositiveMeasure = DQ
 
 -- | Helper function for lifting a binary operation on distribution functions.
 onDistribution2
