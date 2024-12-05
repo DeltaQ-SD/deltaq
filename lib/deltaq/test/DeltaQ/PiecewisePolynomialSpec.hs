@@ -11,6 +11,9 @@ module DeltaQ.PiecewisePolynomialSpec
 
 import Prelude
 
+import Data.Maybe
+    ( fromJust
+    )
 import Data.Ratio
     ( (%)
     )
@@ -21,6 +24,9 @@ import DeltaQ.Class
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ
+    , complexity
+    , distribution
+    , fromPositiveMeasure
     )
 import Test.Hspec
     ( Spec
@@ -36,6 +42,7 @@ import Test.QuickCheck
     , Property
     , (===)
     , (==>)
+    , (.&&.)
     , arbitrary
     , choose
     , chooseInteger
@@ -46,7 +53,10 @@ import Test.QuickCheck
     , property
     , scale
     , vectorOf
+    , withMaxSuccess
     )
+
+import qualified Numeric.Measure.Finite.Mixed as Measure
 
 {-----------------------------------------------------------------------------
     Tests
@@ -59,6 +69,11 @@ infix 0 .===
 
 spec :: Spec
 spec = do
+    describe "general DeltaQ properties" specProperties
+    describe "DQ specifics" specImplementation
+
+specProperties :: Spec
+specProperties = do
     describe "never" $ do
         it "x .>>. never" $ property $
             \x ->
@@ -252,10 +267,20 @@ spec = do
                 in
                     p' <= q'  ==>  quantile' p' o <= quantile' q' o
 
+        it "never" $ property $
+            \(Probability p) ->
+                quantile' p never  ===  Abandoned
+
+        it "wait" $ property $
+            \(Probability p) (NonNegative t) ->
+                quantile' p (wait t)
+                    ===  if p >= 0 then Occurs t else Abandoned
+
         it "uniform" $ property $
             \(Probability p) (NonNegative r) (Positive d) ->
-                let s = r + d
-                in  quantile' p (uniform r s) === Occurs (r + p*(s-r))
+                let s = r + d in 
+                quantile' p (uniform r s)
+                    === Occurs (r + p*(s-r))
 
     describe "earliest" $ do
         let earliest' :: DQ -> Eventually Rational
@@ -328,6 +353,36 @@ spec = do
         it "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 deadline' (uniform r s)  ===  Occurs (max r s)
+
+specImplementation :: Spec
+specImplementation = do
+    describe "fromPositiveMeasure" $ do
+        it "fails on negative measure" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d in
+                fromPositiveMeasure
+                    (Measure.scale (-1) (Measure.uniform r s))
+                    === Nothing
+
+    describe "fromPositiveMeasure . distribution" $ do
+        it "uniform" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d
+                    id' =
+                        fromPositiveMeasure
+                        . fromJust
+                        . Measure.fromDistribution
+                        . distribution
+                in
+                    id' (uniform r s) === Just (uniform r s)
+
+    describe "complexity" $ do
+        it "grows exponentially with .>>." $ withMaxSuccess 1 $ property $
+            let power2 (n :: Int) = choice (1/2) (wait 0) (wait (2^n))
+                convolved (m :: Int) = foldr1 (.>>.) $ map power2 [1..m]
+            in
+                complexity (power2 1) <= 4
+                    .&&. complexity (convolved 10) >= 2^(10 :: Int)
 
 {-----------------------------------------------------------------------------
     Random generators

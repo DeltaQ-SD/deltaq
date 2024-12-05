@@ -70,12 +70,14 @@ test-suite test
     , base
     , deltaq
     , hspec ^>= 2.11.0
+    , probability-polynomial
     , QuickCheck
   
   main-is:
     Spec.hs
 
   other-modules:
+    DeltaQ.ClassSpec
     DeltaQ.PiecewisePolynomialSpec
 
 benchmark basic
