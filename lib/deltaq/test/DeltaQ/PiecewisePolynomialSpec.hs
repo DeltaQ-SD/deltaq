@@ -359,6 +359,18 @@ specProperties = do
             \(NonNegative r) (NonNegative s) ->
                 deadline' (uniform r s)  ===  Occurs (max r s)
 
+    describe "stress tests" $ do
+        it "orders of magnitude" $ withMaxSuccess 1 $ property $
+            let waitPower2 :: Int -> (Rational, DQ)
+                waitPower2 k = ((1/2)^k, wait (2^k))
+
+                n = 20
+                o = choices $ map waitPower2 [1..n]
+            in
+                deadline o  ===  Occurs (2^n)
+                .&&. failure o  === 0
+                .&&. quantile (1 - 1/4) o  ===  Occurs 4
+
 specImplementation :: Spec
 specImplementation = do
     describe "fromPositiveMeasure" $ do
