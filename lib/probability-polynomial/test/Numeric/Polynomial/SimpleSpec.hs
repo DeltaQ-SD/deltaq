@@ -16,6 +16,9 @@ module Numeric.Polynomial.SimpleSpec
 
 import Prelude
 
+import Data.List
+    ( nub
+    )
 import Numeric.Polynomial.Simple
     ( Poly
     , compareToZero
@@ -24,6 +27,7 @@ import Numeric.Polynomial.Simple
     , countRoots
     , degree
     , differentiate
+    , display
     , eval
     , fromCoefficients
     , integrate
@@ -37,16 +41,17 @@ import Numeric.Polynomial.Simple
     )
 import Test.Hspec
     ( Spec
+    , before_
     , describe
     , it
     , pendingWith
-    , xit
     )
 import Test.QuickCheck
     ( Arbitrary
     , Gen
     , NonNegative (..)
     , Positive (..)
+    , Property
     , (===)
     , (==>)
     , (.&&.)
@@ -61,6 +66,9 @@ import Test.QuickCheck
 {-----------------------------------------------------------------------------
     Tests
 ------------------------------------------------------------------------------}
+xit' :: String -> String -> Property -> Spec
+xit' reason label = before_ (pendingWith reason) . it label
+
 spec :: Spec
 spec = do
     describe "constant" $ do
@@ -96,6 +104,20 @@ spec = do
             \p q (x :: Rational) ->
                 eval (p * q) x  ===  eval p x * eval q x
 
+    describe "display" $ do
+        it "step == 0" $ property $
+            \(l :: Rational) (Positive d) ->
+                let u = l + d
+                in  display zero (l, u) 0
+                        === zip [l, u] (repeat 0)
+
+        it "zero" $ property $
+            \(l :: Rational) (Positive d) (Positive (n :: Integer)) ->
+                let u = l + d
+                    s = (u - l) / fromIntegral (min 100 n)
+                in  display zero (l, u) s
+                        === zip (nub ([l, l+s .. u] <> [u])) (repeat 0)
+
     describe "lineFromTo" $ do
         it "degree" $ property $
             \x1 (x2 :: Rational) y1 y2 ->
@@ -129,17 +151,16 @@ spec = do
                     ===  differentiate p * q + p * differentiate q
 
     describe "translate" $ do
-        it "…" $ do
-            pendingWith
-                $ "Failures for degree > 70, probably Int overflow "
+        let reason =
+                "Failures for degree > 70, probably Int overflow "
                 <> "when computing binomial coefficients."
 
-        xit "eval" $ property $
+        xit' reason "eval" $ property $
             \p y (x :: Rational) ->
                 counterexample ("degree p = " <> show (degree p))
                 $ eval (translate y p) x  ===  eval p (x - y)
 
-        xit "differentiate" $ property $
+        xit' reason "differentiate" $ property $
             \p (y :: Rational) ->
                 counterexample ("degree p = " <> show (degree p))
                 $ differentiate (translate y p)
@@ -181,7 +202,7 @@ spec = do
                 in
                     property $ abs (x2' - x2) <= epsilon
 
-        xit "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
+        xit' "bug" "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
             \(x1 :: Rational) (Positive dx3) ->
                 let xx = scaleX (constant 1) :: Poly Rational
                     x2 = (x1 + x3) / 2
