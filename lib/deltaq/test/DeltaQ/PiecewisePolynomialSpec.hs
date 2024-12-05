@@ -24,6 +24,7 @@ import DeltaQ.Class
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ
+    , complexity
     , distribution
     , fromPositiveMeasure
     )
@@ -41,6 +42,7 @@ import Test.QuickCheck
     , Property
     , (===)
     , (==>)
+    , (.&&.)
     , arbitrary
     , choose
     , chooseInteger
@@ -51,6 +53,7 @@ import Test.QuickCheck
     , property
     , scale
     , vectorOf
+    , withMaxSuccess
     )
 
 import qualified Numeric.Measure.Finite.Mixed as Measure
@@ -372,6 +375,14 @@ specImplementation = do
                         . distribution
                 in
                     id' (uniform r s) === Just (uniform r s)
+
+    describe "complexity" $ do
+        it "grows exponentially with .>>." $ withMaxSuccess 1 $ property $
+            let power2 (n :: Int) = choice (1/2) (wait 0) (wait (2^n))
+                convolved (m :: Int) = foldr1 (.>>.) $ map power2 [1..m]
+            in
+                complexity (power2 1) <= 4
+                    .&&. complexity (convolved 10) >= 2^(10 :: Int)
 
 {-----------------------------------------------------------------------------
     Random generators
