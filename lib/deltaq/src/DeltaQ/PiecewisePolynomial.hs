@@ -27,8 +27,8 @@ import Data.Maybe
     )
 import DeltaQ.Class
     ( DeltaQ (..)
-    , Eventually (..)
     , Outcome (..)
+    , eventuallyFromMaybe
     )
 import Control.DeepSeq
     ( NFData
@@ -183,10 +183,3 @@ quantileFromMonotone pieces = findInSegments segments
 
 precision :: Rational
 precision = 1 / 10^(10 :: Integer)
-
-{-----------------------------------------------------------------------------
-    Helper functions
-------------------------------------------------------------------------------}
-eventuallyFromMaybe :: Maybe a -> Eventually a
-eventuallyFromMaybe Nothing = Abandoned
-eventuallyFromMaybe (Just x) = Occurs x
