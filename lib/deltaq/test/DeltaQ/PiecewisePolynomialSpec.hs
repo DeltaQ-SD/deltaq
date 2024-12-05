@@ -37,7 +37,6 @@ import Test.Hspec
     ( Spec
     , describe
     , it
-    , xit
     )
 import Test.QuickCheck
     ( Arbitrary
@@ -344,14 +343,15 @@ specProperties = do
                 deadline' (x ./\. y)
                     ===  max (deadline' x) (deadline' y)
 
-        xit ".\\/." $ property $
+        it ".\\/." $ property $
             \x y ->
-                deadline' (x .\/. y)
-                    ===  min (deadline' x) (deadline' y)
+                (failure x == 0 && failure y == 0) ==>
+                    deadline' (x .\/. y)
+                        ===  min (deadline' x) (deadline' y)
 
-        xit "choice" $ property $
+        it "choice" $ property $
             \(Probability p) x y ->
-                (0 < p && p < 1) ==>
+                (0 < p && p < 1 && failure x == 0 && failure y == 0) ==>
                     deadline' (choice p x y)
                         === max (deadline' x) (deadline' y)
 
