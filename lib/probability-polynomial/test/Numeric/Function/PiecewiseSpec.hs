@@ -115,6 +115,32 @@ spec = do
                 eval (zipPointwise (*) p q) x
                 === (eval p x * eval q x)
 
+    describe "instance Num (Piecewise Q Constant)" $ do
+        it "(+)" $ property $
+            \p (q :: Piecewise Rational Constant) x ->
+                eval (p + q) x
+                === (eval p x + eval q x)
+
+        it "(*)" $ property $
+            \p (q :: Piecewise Rational Constant) x ->
+                eval (p * q) x
+                === (eval p x * eval q x)
+
+        it "negate" $ property $
+            \(p :: Piecewise Rational Constant) x ->
+                eval (negate p) x
+                === negate (eval p x)
+
+        it "abs" $ property $
+            \(p :: Piecewise Rational Constant) x ->
+                eval (abs p) x
+                === abs (eval p x)
+
+        it "signum" $ property $
+            \(p :: Piecewise Rational Constant) x ->
+                eval (signum p) x
+                === signum (eval p x)
+
 {-----------------------------------------------------------------------------
     Helper types
     Constant and linear functions
@@ -122,13 +148,15 @@ spec = do
 type Q = Rational
 
 -- | Constant function
-data Constant = Constant Q
+newtype Constant = Constant Q
     deriving (Eq, Show)
 
 instance Num Constant where
     Constant a1 + Constant a2 = Constant (a1 + a2)
     Constant a1 * Constant a2 = Constant (a1 * a2)
     negate (Constant a) = Constant (negate a)
+    abs (Constant a) = Constant (abs a)
+    signum (Constant a) = Constant (signum a)
     fromInteger n = Constant (fromInteger n)
 
 instance Fun.Function Constant where
