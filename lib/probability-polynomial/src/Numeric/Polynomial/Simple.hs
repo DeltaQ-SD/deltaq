@@ -226,12 +226,14 @@ that still satisfies @u' < l@.
 We always display the last point as well.
 -}
 display :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
-display p (l, u) s = (l, eval p l) : goDisplay (l + s)
+display p (l, u) s
+  | s == 0 = map evalPoint [l, u]
+  | otherwise = map evalPoint (l : go (l + s))
   where
-    goDisplay x =
-        if s == 0 || (x + s) >= u
-            then [(u, eval p u)] -- always include the last point
-            else (x, eval p x) : goDisplay (x + s)
+    evalPoint x = (x, eval p x)
+    go x
+      | x >= u = [u] -- always include the last point
+      | otherwise = x : go (x + s)
 
 {-| Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
 assuming that @x1 ≠ x2@.

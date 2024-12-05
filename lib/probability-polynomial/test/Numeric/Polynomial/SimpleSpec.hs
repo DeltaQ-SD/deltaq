@@ -16,6 +16,9 @@ module Numeric.Polynomial.SimpleSpec
 
 import Prelude
 
+import Data.List
+    ( nub
+    )
 import Numeric.Polynomial.Simple
     ( Poly
     , compareToZero
@@ -24,6 +27,7 @@ import Numeric.Polynomial.Simple
     , countRoots
     , degree
     , differentiate
+    , display
     , eval
     , fromCoefficients
     , integrate
@@ -99,6 +103,20 @@ spec = do
         it "eval" $ property $
             \p q (x :: Rational) ->
                 eval (p * q) x  ===  eval p x * eval q x
+
+    describe "display" $ do
+        it "step == 0" $ property $
+            \(l :: Rational) (Positive d) ->
+                let u = l + d
+                in  display zero (l, u) 0
+                        === zip [l, u] (repeat 0)
+
+        it "zero" $ property $
+            \(l :: Rational) (Positive d) (Positive (n :: Integer)) ->
+                let u = l + d
+                    s = (u - l) / fromIntegral (min 100 n)
+                in  display zero (l, u) s
+                        === zip (nub ([l, l+s .. u] <> [u])) (repeat 0)
 
     describe "lineFromTo" $ do
         it "degree" $ property $
