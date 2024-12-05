@@ -121,13 +121,22 @@ jobs:
             && matrix.os == 'ubuntu-latest'
             && matrix.ghc == '9.10'
         run: >
-          mkdir -p gh-pages/hpc
           mkdir -p gh-pages/doc
 
           mv ${{ env.cabal-build-dir }}/build/*/*/*/doc/html/* gh-pages/doc
-          mv ${{ env.cabal-build-dir }}/build/*/*/*/t/test/hpc/* gh-pages/hpc
 
           touch gh-pages/.nojekyll
+
+      - name: Code coverage report (Staging)
+        if: |
+            github.ref == 'refs/heads/main'
+            && matrix.os == 'ubuntu-latest'
+            && matrix.ghc == '9.10'
+        run: >
+          mkdir -p gh-pages/hpc
+
+          cp -R ${{ env.cabal-build-dir }}/build/*/*/deltaq-*/t/test/hpc/vanilla/html gh-pages/hpc/deltaq
+          cp -R ${{ env.cabal-build-dir }}/build/*/*/probability-polynomial-*/t/test/hpc/vanilla/html gh-pages/hpc/probability-polynomial
 
       - name: Documentation (Deployment)
         if: |
