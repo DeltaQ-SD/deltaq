@@ -6,6 +6,3 @@ packages:
 
 tests:
   True
-
-coverage:
-  True
