@@ -251,7 +251,7 @@ toXY'
     -> o -- ^ Outcome to convert
     -> [(Duration o, Probability o)]
 toXY' numPoints overshoot o =
-    dedup $ leftEdge <> middle <> rightEdge
+    deduplicate $ leftEdge <> middle <> rightEdge
   where
     range = upbX - lwbX
     eps = range / fromIntegral numPoints
@@ -273,9 +273,9 @@ toXY' numPoints overshoot o =
             ]
 
 -- | Remove neighboring occurrences of the same element from the list.
-dedup :: Eq a => [a] -> [a]
-dedup [] = []
-dedup (x : xs) = x : dedup' x xs
+deduplicate :: Eq a => [a] -> [a]
+deduplicate [] = []
+deduplicate (x : xs) = x : dedup' x xs
   where
     dedup' _ [] = []
     dedup' y (y' : ys)
