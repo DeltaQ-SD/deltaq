@@ -52,6 +52,7 @@ library
     DeltaQ
     DeltaQ.Class
     DeltaQ.PiecewisePolynomial
+    DeltaQ.Plot
 
   other-modules:
     DeltaQ.Model.DeltaQ
