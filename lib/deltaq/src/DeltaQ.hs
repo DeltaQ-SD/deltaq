@@ -18,6 +18,12 @@ Specifically,
         * @'DQ'@ for a probability distribution with numeric type @Rational@.
         This type represents a mixed discrete / continuous probability distribution
         where the continuous part is represented in terms of piecewise polynomials.
+
+    * plotting utilities in "DeltaQ.Plot"
+
+        * 'plotCDFWithQuantiles' for plotting an instance of 'DeltaQ'
+        with quantiles highlighted.
+
 -}
 module DeltaQ
     ( -- * Example
@@ -25,11 +31,13 @@ module DeltaQ
 
       -- * Modules
       module DeltaQ.Class
+    , module DeltaQ.Plot
     , module DeltaQ.PiecewisePolynomial
     ) where
 
 import DeltaQ.Class
 import DeltaQ.PiecewisePolynomial
+import DeltaQ.Plot
 
 {-$example
 
