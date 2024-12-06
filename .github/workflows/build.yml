@@ -132,12 +132,7 @@ jobs:
             && matrix.os == 'ubuntu-latest'
             && matrix.ghc == '9.10'
         run: |
-          mkdir -p gh-pages/hpc
-          mkdir -p gh-pages/hpc/deltaq
-          mkdir -p gh-pages/hpc/probability-polynomial
-
-          cp -R dist-newstyle/build/*/*/deltaq-*/t/test/hpc/vanilla/html gh-pages/hpc/deltaq
-          cp -R dist-newstyle/build/*/*/probability-polynomial-*/t/test/hpc/vanilla/html gh-pages/hpc/probability-polynomial
+          .github/scripts/cp-hpc-reports.sh gh-pages/hpc
 
       - name: Documentation (Deployment)
         if: |
