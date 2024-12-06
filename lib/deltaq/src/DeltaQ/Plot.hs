@@ -118,19 +118,9 @@ plotCDFWithQuantiles title quantiles o = G.execEC $ do
   where
     cv1 = fromRational . toRational
     cv2 = fromRational . toRational
-    plotQuantile x = case quantile x o of
+    plotQuantile y = case quantile y o of
         Abandoned -> pure ()
-        Occurs y -> G.plot $ G.liftEC $ do
-            G.plot_lines_style . G.line_color .= G.opaque G.black
-            G.plot_lines_style . G.line_dashes .= [5, 5]
-            G.plot_lines_limit_values
-                .= [ [ (G.LMin, G.LValue $ cv2 x)
-                     , (G.LValue $ cv1 y, G.LValue $ cv2 x)
-                     ]
-                   , [(G.LValue $ cv1 y, G.LValue $ cv2 x)
-                     , (G.LValue $ cv1 y, G.LMin)
-                     ]
-                   ]
+        Occurs x -> G.plot $ pure $ focusOnPoint (cv1 x, cv2 y)
 
 -- | Plot the inverse cumulative distribution function (CDF) of a 'DeltaQ',
 -- with title.
@@ -224,19 +214,27 @@ plotInverseCDFWithQuantiles title quantiles o = G.execEC $ do
     cv2 = fromRational . toRational
     plotQuantile y = case quantile y o of
         Abandoned -> pure ()
-        Occurs x -> G.plot $ G.liftEC $ do
-            G.plot_lines_style . G.line_color .= G.opaque G.black
-            G.plot_lines_style . G.line_dashes .= [5, 5]
-            G.plot_lines_limit_values
-                .= [ [ (G.LMin, G.LValue $ cv2 $ 1 - y)
-                     , (G.LValue $ cv1 x, G.LValue $ cv2 $ 1 - y)]
-                   , [ (G.LValue $ cv1 x, G.LValue $ cv2 $ 1 - y)
-                     , (G.LValue $ cv1 x, G.LMin)
-                     ]
-                   ]
+        Occurs x -> G.plot $ pure $ focusOnPoint (cv1 x, cv2 (1 - y))
 
 {-----------------------------------------------------------------------------
     Helper functions
+    Plot
+------------------------------------------------------------------------------}
+-- | Focus on a point by plotting dashed lines that connect it to the axes.
+focusOnPoint
+    :: (G.PlotValue x, G.PlotValue y)
+    => (x,y) -> G.PlotLines x y
+focusOnPoint (x,y) = G.execEC $ do
+    G.plot_lines_style . G.line_color .= G.opaque G.black
+    G.plot_lines_style . G.line_dashes .= [5, 5]
+    G.plot_lines_limit_values .=
+        [ [(G.LMin, G.LValue y), (G.LValue x, G.LValue y)]
+        , [(G.LValue x, G.LValue y), (G.LValue x, G.LMin)]
+        ]
+
+{-----------------------------------------------------------------------------
+    Helper functions
+    Calculations
 ------------------------------------------------------------------------------}
 -- | Create a graph for an 'Outcome', with sensible defaults for plotting.
 toXY
