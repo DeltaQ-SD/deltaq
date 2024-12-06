@@ -23,6 +23,7 @@ import DeltaQ.Class
     ( Outcome (Duration)
     , DeltaQ (..)
     , Eventually (..)
+    , eventually
     , maybeFromEventually
     )
 import Graphics.Rendering.Chart.Easy
@@ -253,23 +254,24 @@ toXY'
 toXY' numPoints overshoot o =
     deduplicate $ leftEdge <> middle <> rightEdge
   where
-    range = upbX - lwbX
+    range = upperX - lowerX
     eps = range / fromIntegral numPoints
-    Occurs lwbX = earliest o
-    Occurs upbX = deadline o
+    lowerX = eventually 0 id $ earliest o
+    upperX = eventually halfLifeCarbon14 id $ deadline o
+    halfLifeCarbon14 = 5730 * 365 * 24 * 60 * 60
     success = 1 - failure o
     sw = successWithin o
     leftEdge =
-        [(0, 0), (lwbX - eps, 0), (lwbX, sw lwbX)]
+        [(0, 0), (lowerX - eps, 0), (lowerX, sw lowerX)]
     rightEdge =
-        [ (upbX, success)
-        , (upbX + (fromRational . toRational $ overshoot) * range, success)
+        [ (upperX, success)
+        , (upperX + (fromRational . toRational $ overshoot) * range, success)
         ]
     middle
         | eps <= 0 = []
         | otherwise =
             [ (x, sw x)
-            | x <- [lwbX + eps, lwbX + 2*eps .. upbX - eps]
+            | x <- [lowerX + eps, lowerX + 2*eps .. upperX - eps]
             ]
 
 -- | Remove neighboring occurrences of the same element from the list.
