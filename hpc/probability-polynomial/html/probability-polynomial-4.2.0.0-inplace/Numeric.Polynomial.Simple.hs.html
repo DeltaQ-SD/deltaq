@@ -500,7 +500,7 @@ span.spaces    { background: white }
 <span class="lineno">  481 </span><span class="spaces">    </span><span class="istickedoff">| countRoots (l, u, p) &gt; 0 = Nothing -- polynomial crosses zero</span>
 <span class="lineno">  482 </span><span class="spaces">    </span><span class="istickedoff">-- since the polynomial has no roots, the comparison is detmined by the boundary values</span>
 <span class="lineno">  483 </span><span class="spaces">    </span><span class="istickedoff">| lower == 0 = Just (compare upper lower)</span>
-<span class="lineno">  484 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">upper == 0</span> = <span class="nottickedoff">Just (compare lower upper)</span></span>
+<span class="lineno">  484 </span><span class="spaces">    </span><span class="istickedoff">| upper == 0 = Just (compare lower upper)</span>
 <span class="lineno">  485 </span><span class="spaces">    </span><span class="istickedoff">| lower &gt; 0 = Just GT -- upper must also be &gt; 0 due to the lack of roots</span>
 <span class="lineno">  486 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Just LT -- upper and lower both &lt; 0 due to the lack of roots</span>
 <span class="lineno">  487 </span><span class="spaces">  </span><span class="istickedoff">where</span>
