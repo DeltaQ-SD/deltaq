@@ -1,0 +1,162 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-|
+<span class="lineno">    2 </span>Copyright   : Predictable Network Solutions Ltd., 2024
+<span class="lineno">    3 </span>License     : BSD-3-Clause
+<span class="lineno">    4 </span>Maintainer  : peter.thompson@pnsol.com
+<span class="lineno">    5 </span>Description : Discrete, finite signed measures on the number line.
+<span class="lineno">    6 </span>-}
+<span class="lineno">    7 </span>module Numeric.Measure.Discrete
+<span class="lineno">    8 </span>    ( Discrete
+<span class="lineno">    9 </span>    , fromMap
+<span class="lineno">   10 </span>    , toMap
+<span class="lineno">   11 </span>    , zero
+<span class="lineno">   12 </span>    , dirac
+<span class="lineno">   13 </span>    , total
+<span class="lineno">   14 </span>    , distribution
+<span class="lineno">   15 </span>    , add
+<span class="lineno">   16 </span>    , scale
+<span class="lineno">   17 </span>    , translate
+<span class="lineno">   18 </span>    , convolve
+<span class="lineno">   19 </span>    ) where
+<span class="lineno">   20 </span>
+<span class="lineno">   21 </span>import Data.List
+<span class="lineno">   22 </span>    ( scanl'
+<span class="lineno">   23 </span>    )
+<span class="lineno">   24 </span>import Data.Map
+<span class="lineno">   25 </span>    ( Map
+<span class="lineno">   26 </span>    )
+<span class="lineno">   27 </span>import Numeric.Function.Piecewise
+<span class="lineno">   28 </span>    ( Piecewise
+<span class="lineno">   29 </span>    )
+<span class="lineno">   30 </span>import Numeric.Polynomial.Simple
+<span class="lineno">   31 </span>    ( Poly
+<span class="lineno">   32 </span>    )
+<span class="lineno">   33 </span>
+<span class="lineno">   34 </span>import qualified Data.Map.Strict as Map
+<span class="lineno">   35 </span>import qualified Numeric.Function.Piecewise as Piecewise
+<span class="lineno">   36 </span>import qualified Numeric.Polynomial.Simple as Poly
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   39 </span>    Type
+<span class="lineno">   40 </span>------------------------------------------------------------------------------}
+<span class="lineno">   41 </span>-- | A discrete, finite
+<span class="lineno">   42 </span>-- [signed measure](https://en.wikipedia.org/wiki/Signed_measure)
+<span class="lineno">   43 </span>-- on the number line.
+<span class="lineno">   44 </span>newtype Discrete a = Discrete (Map a a)
+<span class="lineno">   45 </span>    -- INVARIANT: All values are non-zero.
+<span class="lineno">   46 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">   47 </span>
+<span class="lineno">   48 </span>-- | Internal.
+<span class="lineno">   49 </span>-- Remove all zero values.
+<span class="lineno">   50 </span>trim :: (Ord a, Num a) =&gt; Map a a -&gt; Map a a
+<span class="lineno">   51 </span><span class="decl"><span class="istickedoff">trim m = Map.filter (/= 0) m</span></span>
+<span class="lineno">   52 </span>
+<span class="lineno">   53 </span>-- | Two measures are equal if they yield the same measures on every set.
+<span class="lineno">   54 </span>--
+<span class="lineno">   55 </span>-- &gt; mx == my
+<span class="lineno">   56 </span>-- &gt;   implies
+<span class="lineno">   57 </span>-- &gt;   forall t. eval (distribution mx) t = eval (distribution my) t
+<span class="lineno">   58 </span>instance <span class="decl"><span class="istickedoff">(Ord a, Num a) =&gt; Eq (Discrete a)</span></span> where
+<span class="lineno">   59 </span>    <span class="decl"><span class="istickedoff">Discrete mx == Discrete my = mx == my</span></span>
+<span class="lineno">   60 </span>
+<span class="lineno">   61 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   62 </span>    Operations
+<span class="lineno">   63 </span>------------------------------------------------------------------------------}
+<span class="lineno">   64 </span>-- | The measure that assigns @0@ to every set.
+<span class="lineno">   65 </span>zero :: Num a =&gt; Discrete a
+<span class="lineno">   66 </span><span class="decl"><span class="istickedoff">zero = Discrete Map.empty</span></span>
+<span class="lineno">   67 </span>
+<span class="lineno">   68 </span>-- | A
+<span class="lineno">   69 </span>-- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)
+<span class="lineno">   70 </span>-- at the given point @x@.
+<span class="lineno">   71 </span>--
+<span class="lineno">   72 </span>-- &gt; total (dirac x) = 1
+<span class="lineno">   73 </span>dirac :: (Ord a, Num a) =&gt; a -&gt; Discrete a
+<span class="lineno">   74 </span><span class="decl"><span class="istickedoff">dirac x = Discrete (Map.singleton x 1)</span></span>
+<span class="lineno">   75 </span>
+<span class="lineno">   76 </span>-- | Construct a discrete measure
+<span class="lineno">   77 </span>-- from a collection of points and their measures.
+<span class="lineno">   78 </span>fromMap :: (Ord a, Num a) =&gt; Map a a -&gt; Discrete a
+<span class="lineno">   79 </span><span class="decl"><span class="istickedoff">fromMap = Discrete . trim</span></span>
+<span class="lineno">   80 </span>
+<span class="lineno">   81 </span>-- | Decompose the discrete measure into a collection of points
+<span class="lineno">   82 </span>-- and their measures.
+<span class="lineno">   83 </span>toMap :: Num a =&gt; Discrete a -&gt; Map a a
+<span class="lineno">   84 </span><span class="decl"><span class="istickedoff">toMap (Discrete m) = m</span></span>
+<span class="lineno">   85 </span>
+<span class="lineno">   86 </span>-- | The total of the measure applied to the set of real numbers.
+<span class="lineno">   87 </span>total :: Num a =&gt; Discrete a -&gt; a
+<span class="lineno">   88 </span><span class="decl"><span class="istickedoff">total (Discrete m) = sum m</span></span>
+<span class="lineno">   89 </span>
+<span class="lineno">   90 </span>-- | @eval (distribution m) x@ is the measure of the interval \( (-∞, x] \).
+<span class="lineno">   91 </span>--
+<span class="lineno">   92 </span>-- This is known as the [distribution function
+<span class="lineno">   93 </span>-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
+<span class="lineno">   94 </span>distribution :: (Ord a, Num a) =&gt; Discrete a -&gt; Piecewise a (Poly a)
+<span class="lineno">   95 </span><span class="decl"><span class="istickedoff">distribution (Discrete m) =</span>
+<span class="lineno">   96 </span><span class="spaces">    </span><span class="istickedoff">Piecewise.fromAscPieces</span>
+<span class="lineno">   97 </span><span class="spaces">    </span><span class="istickedoff">$ zipWith (\(x,_) s -&gt; (x,Poly.constant s)) diracs steps</span>
+<span class="lineno">   98 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">   99 </span><span class="spaces">    </span><span class="istickedoff">diracs = Map.toAscList m</span>
+<span class="lineno">  100 </span><span class="spaces">    </span><span class="istickedoff">steps = tail $ scanl' (+) 0 $ map snd diracs</span></span>
+<span class="lineno">  101 </span>
+<span class="lineno">  102 </span>-- | Add two measures.
+<span class="lineno">  103 </span>--
+<span class="lineno">  104 </span>-- &gt; total (add mx my) = total mx + total my
+<span class="lineno">  105 </span>add :: (Ord a, Num a) =&gt; Discrete a -&gt; Discrete a -&gt; Discrete a
+<span class="lineno">  106 </span><span class="decl"><span class="istickedoff">add (Discrete mx) (Discrete my) =</span>
+<span class="lineno">  107 </span><span class="spaces">    </span><span class="istickedoff">Discrete $ trim $ Map.unionWith (+) mx my</span></span>
+<span class="lineno">  108 </span>
+<span class="lineno">  109 </span>-- | Scale a measure by a constant.
+<span class="lineno">  110 </span>--
+<span class="lineno">  111 </span>-- &gt; total (scale a mx) = a * total mx
+<span class="lineno">  112 </span>scale :: (Ord a, Num a) =&gt; a -&gt; Discrete a -&gt; Discrete a
+<span class="lineno">  113 </span><span class="decl"><span class="istickedoff">scale 0 (Discrete _) = Discrete Map.empty</span>
+<span class="lineno">  114 </span><span class="spaces"></span><span class="istickedoff">scale s (Discrete m) = Discrete $ Map.map (s *) m</span></span>
+<span class="lineno">  115 </span>
+<span class="lineno">  116 </span>-- | Translate a measure along the number line.
+<span class="lineno">  117 </span>--
+<span class="lineno">  118 </span>-- &gt; eval (distribution (translate y m)) x
+<span class="lineno">  119 </span>-- &gt;    = eval (distribution m) (x - y)
+<span class="lineno">  120 </span>translate :: (Ord a, Num a) =&gt; a -&gt; Discrete a -&gt; Discrete a
+<span class="lineno">  121 </span><span class="decl"><span class="istickedoff">translate y (Discrete m) = Discrete $ Map.mapKeys (y +) m</span></span>
+<span class="lineno">  122 </span>
+<span class="lineno">  123 </span>-- | Additive convolution of two measures.
+<span class="lineno">  124 </span>--
+<span class="lineno">  125 </span>-- Properties:
+<span class="lineno">  126 </span>--
+<span class="lineno">  127 </span>-- &gt; convolve (dirac x) (dirac y) = dirac (x + y)
+<span class="lineno">  128 </span>convolve :: (Ord a, Num a) =&gt; Discrete a -&gt; Discrete a -&gt; Discrete a
+<span class="lineno">  129 </span>-- &gt;
+<span class="lineno">  130 </span>-- &gt; convolve mx my               =  convolve my mx
+<span class="lineno">  131 </span>-- &gt; convolve (add mx my) mz      =  add (convolve mx mz) (convolve my mz)
+<span class="lineno">  132 </span>-- &gt; translate z (convolve mx my) =  convolve (translate z mx) my
+<span class="lineno">  133 </span>-- &gt; total (convolve mx my)       =  total mx * total myconvolve :: (Ord a, Num a) =&gt; Discrete a -&gt; Discrete a -&gt; Discrete a
+<span class="lineno">  134 </span><span class="decl"><span class="istickedoff">convolve (Discrete mx) (Discrete my) =</span>
+<span class="lineno">  135 </span><span class="spaces">    </span><span class="istickedoff">Discrete $ trim $ Map.fromListWith (+)</span>
+<span class="lineno">  136 </span><span class="spaces">        </span><span class="istickedoff">[ (x + y, wx * wy)</span>
+<span class="lineno">  137 </span><span class="spaces">        </span><span class="istickedoff">| (x,wx) &lt;- Map.toList mx</span>
+<span class="lineno">  138 </span><span class="spaces">        </span><span class="istickedoff">, (y,wy) &lt;- Map.toList my</span>
+<span class="lineno">  139 </span><span class="spaces">        </span><span class="istickedoff">]</span></span>
+
+</pre>
+</body>
+</html>

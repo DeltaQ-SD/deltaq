@@ -1,0 +1,564 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-# LANGUAGE DeriveGeneric #-}
+<span class="lineno">    2 </span>{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+<span class="lineno">    3 </span>{-# LANGUAGE TypeFamilies #-}
+<span class="lineno">    4 </span>
+<span class="lineno">    5 </span>{-|
+<span class="lineno">    6 </span>Copyright   : Peter Thompson, 2023-2024
+<span class="lineno">    7 </span>              Predictable Network Solutions Ltd., 2024
+<span class="lineno">    8 </span>License     : BSD-3-Clause
+<span class="lineno">    9 </span>Maintainer  : peter.thompson@pnsol.com
+<span class="lineno">   10 </span>Stability   : experimental
+<span class="lineno">   11 </span>Description : Polynomials and computations with them.
+<span class="lineno">   12 </span>-}
+<span class="lineno">   13 </span>module Numeric.Polynomial.Simple
+<span class="lineno">   14 </span>    ( -- * Basic operations
+<span class="lineno">   15 </span>      Poly
+<span class="lineno">   16 </span>    , eval
+<span class="lineno">   17 </span>    , degree
+<span class="lineno">   18 </span>    , constant
+<span class="lineno">   19 </span>    , zero
+<span class="lineno">   20 </span>    , monomial
+<span class="lineno">   21 </span>    , fromCoefficients
+<span class="lineno">   22 </span>    , toCoefficients
+<span class="lineno">   23 </span>    , scale
+<span class="lineno">   24 </span>    , scaleX
+<span class="lineno">   25 </span>
+<span class="lineno">   26 </span>      -- * Advanced operations
+<span class="lineno">   27 </span>
+<span class="lineno">   28 </span>      -- ** Convenience
+<span class="lineno">   29 </span>    , display
+<span class="lineno">   30 </span>    , lineFromTo
+<span class="lineno">   31 </span>
+<span class="lineno">   32 </span>      -- ** Algebraic
+<span class="lineno">   33 </span>    , translate
+<span class="lineno">   34 </span>    , integrate
+<span class="lineno">   35 </span>    , differentiate
+<span class="lineno">   36 </span>    , convolve
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>      -- ** Numerical
+<span class="lineno">   39 </span>    , compareToZero
+<span class="lineno">   40 </span>    , countRoots
+<span class="lineno">   41 </span>    , isMonotonicallyIncreasingOn
+<span class="lineno">   42 </span>    , root
+<span class="lineno">   43 </span>    ) where
+<span class="lineno">   44 </span>
+<span class="lineno">   45 </span>import Control.DeepSeq
+<span class="lineno">   46 </span>    ( NFData
+<span class="lineno">   47 </span>    , NFData1
+<span class="lineno">   48 </span>    )
+<span class="lineno">   49 </span>import GHC.Generics
+<span class="lineno">   50 </span>    ( Generic
+<span class="lineno">   51 </span>    , Generic1
+<span class="lineno">   52 </span>    )
+<span class="lineno">   53 </span>import Math.Combinatorics.Exact.Binomial -- needed to automatically derive NFData
+<span class="lineno">   54 </span>    ( choose
+<span class="lineno">   55 </span>    )
+<span class="lineno">   56 </span>
+<span class="lineno">   57 </span>import qualified Data.Function.Class as Fun
+<span class="lineno">   58 </span>
+<span class="lineno">   59 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   60 </span>    Basic operations
+<span class="lineno">   61 </span>------------------------------------------------------------------------------}
+<span class="lineno">   62 </span>
+<span class="lineno">   63 </span>-- | Polynomial with coefficients in @a@.
+<span class="lineno">   64 </span>newtype Poly a = Poly [a]
+<span class="lineno">   65 </span>    -- INVARIANT: List of coefficients from lowest to highest degree.
+<span class="lineno">   66 </span>    -- INVARIANT: The empty list is not allowed,
+<span class="lineno">   67 </span>    -- the zero polynomial is represented as [0].
+<span class="lineno">   68 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Generic</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Generic1</span></span></span></span>)
+<span class="lineno">   69 </span>
+<span class="lineno">   70 </span>instance <span class="decl"><span class="nottickedoff">NFData a =&gt; NFData (Poly a)</span></span>
+<span class="lineno">   71 </span>instance <span class="decl"><span class="nottickedoff">NFData1 Poly</span></span>
+<span class="lineno">   72 </span>
+<span class="lineno">   73 </span>instance <span class="decl"><span class="nottickedoff">(Eq a, Num a) =&gt; Eq (Poly a)</span></span> where
+<span class="lineno">   74 </span>    <span class="decl"><span class="istickedoff">x == y =</span>
+<span class="lineno">   75 </span><span class="spaces">        </span><span class="istickedoff">toCoefficients (trimPoly x) == toCoefficients (trimPoly y)</span></span>
+<span class="lineno">   76 </span>
+<span class="lineno">   77 </span>{-| The constant polynomial.
+<span class="lineno">   78 </span>
+<span class="lineno">   79 </span>&gt; eval (constant a) = const a
+<span class="lineno">   80 </span>-}
+<span class="lineno">   81 </span>constant :: a -&gt; Poly a
+<span class="lineno">   82 </span><span class="decl"><span class="istickedoff">constant x = Poly [x]</span></span>
+<span class="lineno">   83 </span>
+<span class="lineno">   84 </span>-- | The zero polynomial.
+<span class="lineno">   85 </span>zero :: Num a =&gt; Poly a
+<span class="lineno">   86 </span><span class="decl"><span class="istickedoff">zero = constant 0</span></span>
+<span class="lineno">   87 </span>
+<span class="lineno">   88 </span>{-| Degree of a polynomial.
+<span class="lineno">   89 </span>
+<span class="lineno">   90 </span>The degree of a constant polynomial is @0@, but
+<span class="lineno">   91 </span>the degree of the zero polynomial is @-1@ for Euclidean division.
+<span class="lineno">   92 </span>-}
+<span class="lineno">   93 </span>degree :: (Eq a, Num a) =&gt; Poly a -&gt; Int
+<span class="lineno">   94 </span><span class="decl"><span class="istickedoff">degree x = case trimPoly x of</span>
+<span class="lineno">   95 </span><span class="spaces">    </span><span class="istickedoff">Poly [0] -&gt; -1</span>
+<span class="lineno">   96 </span><span class="spaces">    </span><span class="istickedoff">Poly xs -&gt; length xs - 1</span></span>
+<span class="lineno">   97 </span>
+<span class="lineno">   98 </span>-- | remove top zeroes
+<span class="lineno">   99 </span>trimPoly :: (Eq a, Num a) =&gt; Poly a -&gt; Poly a
+<span class="lineno">  100 </span><span class="decl"><span class="istickedoff">trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)</span>
+<span class="lineno">  101 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  102 </span><span class="spaces">    </span><span class="istickedoff">goTrim [] = <span class="nottickedoff">error &quot;Empty polynomial&quot;</span></span>
+<span class="lineno">  103 </span><span class="spaces">    </span><span class="istickedoff">goTrim xss@[_] = xss -- can't use dropWhile as it would remove the last zero</span>
+<span class="lineno">  104 </span><span class="spaces">    </span><span class="istickedoff">goTrim xss@(x : xs) = if x == 0 then goTrim xs else xss</span></span>
+<span class="lineno">  105 </span>
+<span class="lineno">  106 </span>-- | @monomial n a@ is the polynomial @a * x^n@.
+<span class="lineno">  107 </span>monomial :: (Eq a, Num a) =&gt; Int -&gt; a -&gt; Poly a
+<span class="lineno">  108 </span><span class="decl"><span class="istickedoff">monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))</span></span>
+<span class="lineno">  109 </span>
+<span class="lineno">  110 </span>{-| Construct a polynomial @a0 + a1·x + …@ from
+<span class="lineno">  111 </span>its list of coefficients @[a0, a1, …]@.
+<span class="lineno">  112 </span>-}
+<span class="lineno">  113 </span>fromCoefficients :: Num a =&gt; [a] -&gt; Poly a
+<span class="lineno">  114 </span><span class="decl"><span class="istickedoff">fromCoefficients [] = zero</span>
+<span class="lineno">  115 </span><span class="spaces"></span><span class="istickedoff">fromCoefficients as = Poly as</span></span>
+<span class="lineno">  116 </span>
+<span class="lineno">  117 </span>{-| List the coefficients @[a0, a1, …]@
+<span class="lineno">  118 </span>of a polynomial @a0 + a1·x + …@.
+<span class="lineno">  119 </span>-}
+<span class="lineno">  120 </span>toCoefficients :: Poly a -&gt; [a]
+<span class="lineno">  121 </span><span class="decl"><span class="istickedoff">toCoefficients (Poly as) = as</span></span>
+<span class="lineno">  122 </span>
+<span class="lineno">  123 </span>{-| Multiply the polynomial by the unknown @x@.
+<span class="lineno">  124 </span>
+<span class="lineno">  125 </span>&gt; eval (scaleX p) x = x * eval p x
+<span class="lineno">  126 </span>&gt; degree (scaleX p) = 1 + degree p  if  degree p &gt;= 0
+<span class="lineno">  127 </span>-}
+<span class="lineno">  128 </span>scaleX :: (Eq a, Num a) =&gt; Poly a -&gt; Poly a
+<span class="lineno">  129 </span><span class="decl"><span class="istickedoff">scaleX (Poly xs)</span>
+<span class="lineno">  130 </span><span class="spaces">    </span><span class="istickedoff">| xs == [0] = Poly xs -- don't shift up zero</span>
+<span class="lineno">  131 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Poly (0 : xs)</span></span>
+<span class="lineno">  132 </span>
+<span class="lineno">  133 </span>{-| Scale a polynomial by a scalar.
+<span class="lineno">  134 </span>More efficient than multiplying by a constant polynomial.
+<span class="lineno">  135 </span>
+<span class="lineno">  136 </span>&gt; eval (scale a p) x = a * eval p x
+<span class="lineno">  137 </span>-}
+<span class="lineno">  138 </span>scale :: Num a =&gt; a -&gt; Poly a -&gt; Poly a
+<span class="lineno">  139 </span><span class="decl"><span class="istickedoff">scale x (Poly xs) = Poly (map (* x) xs)</span></span>
+<span class="lineno">  140 </span>
+<span class="lineno">  141 </span>-- Does not agree with naming conventions in `Data.Poly`.
+<span class="lineno">  142 </span>
+<span class="lineno">  143 </span>{-|
+<span class="lineno">  144 </span>   Add polynomials by simply adding their coefficients as long as both lists continue.
+<span class="lineno">  145 </span>   When one list runs out we take the tail of the longer list (this prevents us from just using zipWith!).
+<span class="lineno">  146 </span>   Addtion might cancel out the highest order terms, so need to trim just in case.
+<span class="lineno">  147 </span>-}
+<span class="lineno">  148 </span>addPolys :: (Eq a, Num a) =&gt; Poly a -&gt; Poly a -&gt; Poly a
+<span class="lineno">  149 </span><span class="decl"><span class="istickedoff">addPolys (Poly as) (Poly bs) = trimPoly (Poly (go as bs))</span>
+<span class="lineno">  150 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  151 </span><span class="spaces">    </span><span class="istickedoff">go [] ys = ys</span>
+<span class="lineno">  152 </span><span class="spaces">    </span><span class="istickedoff">go xs [] = xs</span>
+<span class="lineno">  153 </span><span class="spaces">    </span><span class="istickedoff">go (x : xs) (y : ys) = (x + y) : go xs ys</span></span>
+<span class="lineno">  154 </span>
+<span class="lineno">  155 </span>{-|
+<span class="lineno">  156 </span>    multiply term-wise and then add (very simple - FFTs might be faster, but not for today)
+<span class="lineno">  157 </span>    (a0 + a1x + a2x^2 + ...) * (b0 + b1x + b2x^2 ...)
+<span class="lineno">  158 </span>    = a0 * (b0 + b1x + b2x^2 +...) + a1x * (b0 + b1x + ...)
+<span class="lineno">  159 </span>    = (a0*b0) + (a0*b1x) + ...
+<span class="lineno">  160 </span>              + (a1*b0x) +
+<span class="lineno">  161 </span>                         + ...
+<span class="lineno">  162 </span>    (may be an optimisation to be done by getting the shortest poly in the right place)
+<span class="lineno">  163 </span>-}
+<span class="lineno">  164 </span>mulPolys :: (Eq a, Num a) =&gt; Poly a -&gt; Poly a -&gt; Poly a
+<span class="lineno">  165 </span><span class="decl"><span class="istickedoff">mulPolys as bs = sum (intermediateSums as bs)</span>
+<span class="lineno">  166 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  167 </span><span class="spaces">    </span><span class="istickedoff">intermediateSums :: (Eq a, Num a) =&gt; Poly a -&gt; Poly a -&gt; [Poly a]</span>
+<span class="lineno">  168 </span><span class="spaces">    </span><span class="istickedoff">intermediateSums _ (Poly []) = <span class="nottickedoff">error &quot;Second polynomial was empty&quot;</span></span>
+<span class="lineno">  169 </span><span class="spaces">    </span><span class="istickedoff">intermediateSums (Poly []) _ = [] -- stop when we exhaust the first list</span>
+<span class="lineno">  170 </span><span class="spaces">    </span><span class="istickedoff">-- as we consume the coeffecients of the first list, we shift up the second list to increase the power under consideration</span>
+<span class="lineno">  171 </span><span class="spaces">    </span><span class="istickedoff">intermediateSums (Poly (x : xs)) ys =</span>
+<span class="lineno">  172 </span><span class="spaces">        </span><span class="istickedoff">scale x ys : intermediateSums (Poly xs) (scaleX ys)</span></span>
+<span class="lineno">  173 </span>
+<span class="lineno">  174 </span>{-| Algebraic operations '(+)', '(*)' and 'negate' on polynomials.
+<span class="lineno">  175 </span>
+<span class="lineno">  176 </span>The functions 'abs' and 'signum' are undefined.
+<span class="lineno">  177 </span>-}
+<span class="lineno">  178 </span>instance <span class="decl"><span class="istickedoff">(Eq a, Num a) =&gt; Num (Poly a)</span></span> where
+<span class="lineno">  179 </span>    <span class="decl"><span class="istickedoff">(+) = addPolys</span></span>
+<span class="lineno">  180 </span>    <span class="decl"><span class="istickedoff">(*) = mulPolys</span></span>
+<span class="lineno">  181 </span>    <span class="decl"><span class="istickedoff">negate (Poly a) = Poly (map negate a)</span></span>
+<span class="lineno">  182 </span>    <span class="decl"><span class="nottickedoff">abs = undefined</span></span>
+<span class="lineno">  183 </span>    <span class="decl"><span class="nottickedoff">signum = undefined</span></span>
+<span class="lineno">  184 </span>    <span class="decl"><span class="istickedoff">fromInteger n = Poly [Prelude.fromInteger n]</span></span>
+<span class="lineno">  185 </span>
+<span class="lineno">  186 </span>{-|
+<span class="lineno">  187 </span>Evaluate a polynomial at a point.
+<span class="lineno">  188 </span>
+<span class="lineno">  189 </span>&gt; eval :: Poly a -&gt; a -&gt; a
+<span class="lineno">  190 </span>-}
+<span class="lineno">  191 </span>instance Num a =&gt; Fun.Function (Poly a) where
+<span class="lineno">  192 </span>    type instance Domain (Poly a) = a
+<span class="lineno">  193 </span>    type instance Codomain (Poly a) = a
+<span class="lineno">  194 </span>    <span class="decl"><span class="istickedoff">eval = eval</span></span>
+<span class="lineno">  195 </span>
+<span class="lineno">  196 </span>{-|
+<span class="lineno">  197 </span>Evaluate a polynomial at a point.
+<span class="lineno">  198 </span>
+<span class="lineno">  199 </span>&gt; eval :: Poly a -&gt; a -&gt; a
+<span class="lineno">  200 </span>
+<span class="lineno">  201 </span>Uses Horner's method to minimise the number of multiplications.
+<span class="lineno">  202 </span>
+<span class="lineno">  203 </span>@
+<span class="lineno">  204 </span>a0 + a1·x + a2·x^2 + ... + a{n-1}·x^{n-1} + an·x^n
+<span class="lineno">  205 </span>  = a0 + x·(a1 + x·(a2 + x·(… + x·(a{n-1} + x·an)) ))
+<span class="lineno">  206 </span>@
+<span class="lineno">  207 </span>-}
+<span class="lineno">  208 </span>eval :: Num a =&gt; Poly a -&gt; a -&gt; a
+<span class="lineno">  209 </span><span class="decl"><span class="istickedoff">eval (Poly as) x = foldr (\ai result -&gt; x * result + ai) 0 as</span></span>
+<span class="lineno">  210 </span>
+<span class="lineno">  211 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  212 </span>    Convenience operations
+<span class="lineno">  213 </span>------------------------------------------------------------------------------}
+<span class="lineno">  214 </span>
+<span class="lineno">  215 </span>{-|
+<span class="lineno">  216 </span>Return a list of pairs @(x, eval p x)@ from the graph of the polynomial.
+<span class="lineno">  217 </span>The values @x@ are from the range @(l, u)@ with uniform spacing @s@.
+<span class="lineno">  218 </span>
+<span class="lineno">  219 </span>Specifically,
+<span class="lineno">  220 </span>
+<span class="lineno">  221 </span>&gt; map fst (display p (l, u) s)
+<span class="lineno">  222 </span>&gt;   = [l, l+s, l + 2·s, … , u'] ++ if u' == l then [] else [l]
+<span class="lineno">  223 </span>
+<span class="lineno">  224 </span>where @u'@ is the largest number of the form @u' = l + s·k@, @k@ natural,
+<span class="lineno">  225 </span>that still satisfies @u' &lt; l@.
+<span class="lineno">  226 </span>We always display the last point as well.
+<span class="lineno">  227 </span>-}
+<span class="lineno">  228 </span>display :: (Ord a, Eq a, Num a) =&gt; Poly a -&gt; (a, a) -&gt; a -&gt; [(a, a)]
+<span class="lineno">  229 </span><span class="decl"><span class="istickedoff">display p (l, u) s</span>
+<span class="lineno">  230 </span><span class="spaces">  </span><span class="istickedoff">| s == 0 = map evalPoint [l, u]</span>
+<span class="lineno">  231 </span><span class="spaces">  </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = map evalPoint (l : go (l + s))</span>
+<span class="lineno">  232 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  233 </span><span class="spaces">    </span><span class="istickedoff">evalPoint x = (x, eval p x)</span>
+<span class="lineno">  234 </span><span class="spaces">    </span><span class="istickedoff">go x</span>
+<span class="lineno">  235 </span><span class="spaces">      </span><span class="istickedoff">| x &gt;= u = [u] -- always include the last point</span>
+<span class="lineno">  236 </span><span class="spaces">      </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = x : go (x + s)</span></span>
+<span class="lineno">  237 </span>
+<span class="lineno">  238 </span>{-| Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
+<span class="lineno">  239 </span>assuming that @x1 ≠ x2@.
+<span class="lineno">  240 </span>
+<span class="lineno">  241 </span>If the points are equal, we return a constant polynomial.
+<span class="lineno">  242 </span>
+<span class="lineno">  243 </span>&gt; let p = lineFromTo (x1, y1) (x2, y2)
+<span class="lineno">  244 </span>&gt;
+<span class="lineno">  245 </span>&gt; degree p &lt;= 1
+<span class="lineno">  246 </span>&gt; eval p x1 = y1
+<span class="lineno">  247 </span>&gt; eval p x2 = y2
+<span class="lineno">  248 </span>-}
+<span class="lineno">  249 </span>lineFromTo :: (Eq a, Fractional a) =&gt; (a, a) -&gt; (a, a) -&gt; Poly a
+<span class="lineno">  250 </span><span class="decl"><span class="istickedoff">lineFromTo (x1, y1) (x2, y2)</span>
+<span class="lineno">  251 </span><span class="spaces">    </span><span class="istickedoff">| x1 == x2 = constant y1</span>
+<span class="lineno">  252 </span><span class="spaces">    </span><span class="istickedoff">| slope == 0 = constant y1</span>
+<span class="lineno">  253 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = fromCoefficients [shift, slope]</span>
+<span class="lineno">  254 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  255 </span><span class="spaces">    </span><span class="istickedoff">-- slope of the linear function</span>
+<span class="lineno">  256 </span><span class="spaces">    </span><span class="istickedoff">slope = (y2 - y1) / (x2 - x1)</span>
+<span class="lineno">  257 </span><span class="spaces">    </span><span class="istickedoff">-- the constant shift is fixed by</span>
+<span class="lineno">  258 </span><span class="spaces">    </span><span class="istickedoff">-- the fact that the line needs to pass through (x1,y1)</span>
+<span class="lineno">  259 </span><span class="spaces">    </span><span class="istickedoff">shift = y1 - x1 * slope</span></span>
+<span class="lineno">  260 </span>
+<span class="lineno">  261 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  262 </span>    Advanced Operations
+<span class="lineno">  263 </span>------------------------------------------------------------------------------}
+<span class="lineno">  264 </span>
+<span class="lineno">  265 </span>{-| Indefinite integral of a polynomial with constant term zero.
+<span class="lineno">  266 </span>
+<span class="lineno">  267 </span>The integral of @x^n@ is @1/(n+1)·x^(n+1)@.
+<span class="lineno">  268 </span>
+<span class="lineno">  269 </span>&gt; eval (integrate p) 0 = 0
+<span class="lineno">  270 </span>&gt; integrate (differentiate p) = p - constant (eval p 0)
+<span class="lineno">  271 </span>-}
+<span class="lineno">  272 </span>integrate :: (Eq a, Fractional a) =&gt; Poly a -&gt; Poly a
+<span class="lineno">  273 </span><span class="decl"><span class="istickedoff">integrate (Poly as) =</span>
+<span class="lineno">  274 </span><span class="spaces">    </span><span class="istickedoff">-- Integrate by puting a zero constant term at the bottom and</span>
+<span class="lineno">  275 </span><span class="spaces">    </span><span class="istickedoff">-- converting a x^n into a/(n+1) x^(n+1).</span>
+<span class="lineno">  276 </span><span class="spaces">    </span><span class="istickedoff">-- 0 -&gt; 0x is the first non-constant term, so we start at 1.</span>
+<span class="lineno">  277 </span><span class="spaces">    </span><span class="istickedoff">-- When integrating a zero polynomial with a zero constant</span>
+<span class="lineno">  278 </span><span class="spaces">    </span><span class="istickedoff">-- we get [0,0] so need to trim</span>
+<span class="lineno">  279 </span><span class="spaces">    </span><span class="istickedoff">trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))</span></span>
+<span class="lineno">  280 </span>
+<span class="lineno">  281 </span>{-| Differentiate a polynomial.
+<span class="lineno">  282 </span>
+<span class="lineno">  283 </span>We have @dx^n/dx = n·x^(n-1)@.
+<span class="lineno">  284 </span>
+<span class="lineno">  285 </span>&gt; differentiate (integrate p) = p
+<span class="lineno">  286 </span>&gt; differentiate (p * q) = (differentiate p) * q + p * (differentiate q)
+<span class="lineno">  287 </span>-}
+<span class="lineno">  288 </span>differentiate :: Num a =&gt; Poly a -&gt; Poly a
+<span class="lineno">  289 </span><span class="decl"><span class="istickedoff">differentiate (Poly []) = <span class="nottickedoff">error &quot;Polynomial was empty&quot;</span></span>
+<span class="lineno">  290 </span><span class="spaces"></span><span class="istickedoff">differentiate (Poly [_]) = zero -- constant differentiates to zero</span>
+<span class="lineno">  291 </span><span class="spaces"></span><span class="istickedoff">differentiate (Poly (_ : as)) =</span>
+<span class="lineno">  292 </span><span class="spaces">    </span><span class="istickedoff">-- discard the constant term, everything else noves down one</span>
+<span class="lineno">  293 </span><span class="spaces">    </span><span class="istickedoff">Poly (zipWith (*) as (iterate (+ 1) 1))</span></span>
+<span class="lineno">  294 </span>
+<span class="lineno">  295 </span>{-| Convolution of two polynomials defined on bounded intervals.
+<span class="lineno">  296 </span>Produces three contiguous pieces as a result.
+<span class="lineno">  297 </span>-}
+<span class="lineno">  298 </span>convolve
+<span class="lineno">  299 </span>    :: (Fractional a, Eq a, Ord a) =&gt; (a, a, Poly a) -&gt; (a, a, Poly a) -&gt; [(a, Poly a)]
+<span class="lineno">  300 </span><span class="decl"><span class="istickedoff">convolve (lf, uf, Poly fs) (lg, ug, Poly gs)</span>
+<span class="lineno">  301 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">(lf &lt; 0) || (lg &lt; 0)</span> = <span class="nottickedoff">error &quot;Interval bounds cannot be negative&quot;</span></span>
+<span class="lineno">  302 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">(lf &gt;= uf) || (lg &gt;= ug)</span> = <span class="nottickedoff">error &quot;Invalid interval&quot;</span> -- upper bounds should be strictly greater than lower bounds</span>
+<span class="lineno">  303 </span><span class="spaces">    </span><span class="istickedoff">| (ug - lg) &gt; (uf - lf) = convolve (lg, ug, Poly gs) (lf, uf, Poly fs) -- if g is wider than f, swap the terms</span>
+<span class="lineno">  304 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> -- we know g is narrower than f</span>
+<span class="lineno">  305 </span><span class="spaces">        </span><span class="istickedoff">=</span>
+<span class="lineno">  306 </span><span class="spaces">        </span><span class="istickedoff">let</span>
+<span class="lineno">  307 </span><span class="spaces">            </span><span class="istickedoff">-- sum a set of terms depending on an iterator k (assumed to go down to 0), where each term is a k-dependent</span>
+<span class="lineno">  308 </span><span class="spaces">            </span><span class="istickedoff">-- polynomial with a k-dependent multiplier</span>
+<span class="lineno">  309 </span><span class="spaces">            </span><span class="istickedoff">sumSeries k mulFactor poly = sum [mulFactor n `scale` poly n | n &lt;- [0 .. k]]</span>
+<span class="lineno">  310 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  311 </span><span class="spaces">            </span><span class="istickedoff">-- the inner summation has a similar structure each time</span>
+<span class="lineno">  312 </span><span class="spaces">            </span><span class="istickedoff">innerSum m n term k = sumSeries (m + k + 1) innerMult (\j -&gt; monomial (m + n + 1 - j) (term j))</span>
+<span class="lineno">  313 </span><span class="spaces">              </span><span class="istickedoff">where</span>
+<span class="lineno">  314 </span><span class="spaces">                </span><span class="istickedoff">innerMult j =</span>
+<span class="lineno">  315 </span><span class="spaces">                    </span><span class="istickedoff">fromIntegral</span>
+<span class="lineno">  316 </span><span class="spaces">                        </span><span class="istickedoff">(if even j then (m + k + 1) `choose` j else negate ((m + k + 1) `choose` j))</span>
+<span class="lineno">  317 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  318 </span><span class="spaces">            </span><span class="istickedoff">convolveMonomials m n innerTerm = sumSeries n (multiplier m n) (innerTerm m n)</span>
+<span class="lineno">  319 </span><span class="spaces">              </span><span class="istickedoff">where</span>
+<span class="lineno">  320 </span><span class="spaces">                </span><span class="istickedoff">multiplier p q k =</span>
+<span class="lineno">  321 </span><span class="spaces">                    </span><span class="istickedoff">fromIntegral (if even k then q `choose` k else negate (q `choose` k))</span>
+<span class="lineno">  322 </span><span class="spaces">                        </span><span class="istickedoff">/ fromIntegral (p + k + 1)</span>
+<span class="lineno">  323 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  324 </span><span class="spaces">            </span><span class="istickedoff">{-</span>
+<span class="lineno">  325 </span><span class="spaces">                </span><span class="istickedoff">For each term, clock through the powers of each polynomial to give convolutions of monomials, which we sum.</span>
+<span class="lineno">  326 </span><span class="spaces">                </span><span class="istickedoff">We extract each coefficient of each polynomial, together with an integer recording their position (i.e. power of x),</span>
+<span class="lineno">  327 </span><span class="spaces">                </span><span class="istickedoff">and multiply the coefficients together with the new polynomial generated by convolving the monomials.</span>
+<span class="lineno">  328 </span><span class="spaces">            </span><span class="istickedoff">-}</span>
+<span class="lineno">  329 </span><span class="spaces">            </span><span class="istickedoff">makeTerm f =</span>
+<span class="lineno">  330 </span><span class="spaces">                </span><span class="istickedoff">sum</span>
+<span class="lineno">  331 </span><span class="spaces">                    </span><span class="istickedoff">[ (a * b) `scale` convolveMonomials m n f</span>
+<span class="lineno">  332 </span><span class="spaces">                    </span><span class="istickedoff">| (m, a) &lt;- zip [0 ..] fs</span>
+<span class="lineno">  333 </span><span class="spaces">                    </span><span class="istickedoff">, (n, b) &lt;- zip [0 ..] gs</span>
+<span class="lineno">  334 </span><span class="spaces">                    </span><span class="istickedoff">]</span>
+<span class="lineno">  335 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  336 </span><span class="spaces">            </span><span class="istickedoff">firstTerm =</span>
+<span class="lineno">  337 </span><span class="spaces">                </span><span class="istickedoff">makeTerm (\m n k -&gt; innerSum m n (lg ^) k - monomial (n - k) (lf ^ (m + k + 1)))</span>
+<span class="lineno">  338 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  339 </span><span class="spaces">            </span><span class="istickedoff">secondTerm = makeTerm (\m n -&gt; innerSum m n (\k -&gt; lg ^ k - ug ^ k))</span>
+<span class="lineno">  340 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  341 </span><span class="spaces">            </span><span class="istickedoff">thirdTerm =</span>
+<span class="lineno">  342 </span><span class="spaces">                </span><span class="istickedoff">makeTerm (\m n k -&gt; monomial (n - k) (uf ^ (m + k + 1)) - innerSum m n (ug ^) k)</span>
+<span class="lineno">  343 </span><span class="spaces">        </span><span class="istickedoff">in</span>
+<span class="lineno">  344 </span><span class="spaces">            </span><span class="istickedoff">{-</span>
+<span class="lineno">  345 </span><span class="spaces">                </span><span class="istickedoff">When convolving distributions, both distributions will start at 0 and so there will always be a pair of intervals</span>
+<span class="lineno">  346 </span><span class="spaces">                </span><span class="istickedoff">with lg = lf = 0, so we don't need to add an initial zero piece.</span>
+<span class="lineno">  347 </span><span class="spaces">                </span><span class="istickedoff">We must have lf + lg &lt; lf + ug due to initial interval validity check. However, it's possible that lf + ug = uf + lg, so</span>
+<span class="lineno">  348 </span><span class="spaces">                </span><span class="istickedoff">we need to test for a redundant middle interval</span>
+<span class="lineno">  349 </span><span class="spaces">            </span><span class="istickedoff">-}</span>
+<span class="lineno">  350 </span><span class="spaces">            </span><span class="istickedoff">if lf + ug == uf + lg</span>
+<span class="lineno">  351 </span><span class="spaces">                </span><span class="istickedoff">then [(lf + lg, firstTerm), (uf + lg, thirdTerm), (uf + ug, zero)]</span>
+<span class="lineno">  352 </span><span class="spaces">                </span><span class="istickedoff">else</span>
+<span class="lineno">  353 </span><span class="spaces">                    </span><span class="istickedoff">[ (lf + lg, firstTerm)</span>
+<span class="lineno">  354 </span><span class="spaces">                    </span><span class="istickedoff">, (lf + ug, secondTerm)</span>
+<span class="lineno">  355 </span><span class="spaces">                    </span><span class="istickedoff">, (uf + lg, thirdTerm)</span>
+<span class="lineno">  356 </span><span class="spaces">                    </span><span class="istickedoff">, (uf + ug, zero)</span>
+<span class="lineno">  357 </span><span class="spaces">                    </span><span class="istickedoff">]</span></span>
+<span class="lineno">  358 </span>
+<span class="lineno">  359 </span>{-| Translate the argument of a polynomial by summing binomial expansions.
+<span class="lineno">  360 </span>
+<span class="lineno">  361 </span>&gt; eval (translate y p) x = eval p (x - y)
+<span class="lineno">  362 </span>-}
+<span class="lineno">  363 </span>translate :: (Fractional a, Eq a, Num a) =&gt; a -&gt; Poly a -&gt; Poly a
+<span class="lineno">  364 </span><span class="decl"><span class="istickedoff">translate s (Poly ps) = sum [b `scale` binomialExpansion n s | (n, b) &lt;- zip [0 ..] ps]</span>
+<span class="lineno">  365 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  366 </span><span class="spaces">    </span><span class="istickedoff">-- the binomial expansion of each power of x is a new polynomial</span>
+<span class="lineno">  367 </span><span class="spaces">    </span><span class="istickedoff">-- whose coefficients are the product of</span>
+<span class="lineno">  368 </span><span class="spaces">    </span><span class="istickedoff">-- a binomial coefficient and the shift value raised to a reducing power</span>
+<span class="lineno">  369 </span><span class="spaces">    </span><span class="istickedoff">binomialTerm :: Num a =&gt; a -&gt; Int -&gt; Int -&gt; a</span>
+<span class="lineno">  370 </span><span class="spaces">    </span><span class="istickedoff">binomialTerm y n k = fromIntegral (n `choose` k) * (-y) ^ (n - k)</span>
+<span class="lineno">  371 </span><span class="spaces">    </span><span class="istickedoff">binomialExpansion :: Num a =&gt; Int -&gt; a -&gt; Poly a</span>
+<span class="lineno">  372 </span><span class="spaces">    </span><span class="istickedoff">binomialExpansion n y = Poly (map (binomialTerm y n) [0 .. n])</span></span>
+<span class="lineno">  373 </span>
+<span class="lineno">  374 </span>{-|
+<span class="lineno">  375 </span>We use Sturm's Theorem to count the number of roots of a polynomial in a given interval.
+<span class="lineno">  376 </span>
+<span class="lineno">  377 </span>(See https://en.wikipedia.org/wiki/Sturm%27s_theorem)
+<span class="lineno">  378 </span>Starting from polynomial p, construct the Sturm sequence p0, p1, . . ., where:
+<span class="lineno">  379 </span>p0 = p
+<span class="lineno">  380 </span>p1 = p′
+<span class="lineno">  381 </span>pi+1 = −rem(pi−1, pi) for i &gt; 1
+<span class="lineno">  382 </span>where p′ is the derivative of p and rem(p, q) is the remainder of the Euclidian division of p by q.
+<span class="lineno">  383 </span>The length of this sequence is at most the degree of p.
+<span class="lineno">  384 </span>We define V(x) to be the number of sign variations in the sequence of numbers p0(x), p1(x), . . ..
+<span class="lineno">  385 </span>Sturm’s theorem states that, if p is a square-free polynomial (one without repeated roots), then
+<span class="lineno">  386 </span>R(l,r](p) = V (l) − V (r). This extends to non-square-free polynomials provided neither l nor r is a
+<span class="lineno">  387 </span>multiple root of p (a circumstance we shall ignore)
+<span class="lineno">  388 </span>
+<span class="lineno">  389 </span>We start from the tuple that emerges from disagregation.
+<span class="lineno">  390 </span>-}
+<span class="lineno">  391 </span>countRoots :: (Fractional a, Eq a, Ord a) =&gt; (a, a, Poly a) -&gt; Int
+<span class="lineno">  392 </span><span class="decl"><span class="istickedoff">countRoots (l, r, p) = case degree p of</span>
+<span class="lineno">  393 </span><span class="spaces">    </span><span class="istickedoff">-- p is the zero polynomial, so it doesn't *cross* zero</span>
+<span class="lineno">  394 </span><span class="spaces">    </span><span class="istickedoff">-1 -&gt; 0</span>
+<span class="lineno">  395 </span><span class="spaces">    </span><span class="istickedoff">-- p is a non-zero constant polynomial - no root</span>
+<span class="lineno">  396 </span><span class="spaces">    </span><span class="istickedoff">0 -&gt; 0</span>
+<span class="lineno">  397 </span><span class="spaces">    </span><span class="istickedoff">-- p is a linear polynomial, which has a root iff it has a different sign at each end of the interval</span>
+<span class="lineno">  398 </span><span class="spaces">    </span><span class="istickedoff">1 -&gt; if eval p l * eval p r &lt; 0 then 1 else 0</span>
+<span class="lineno">  399 </span><span class="spaces">    </span><span class="istickedoff">-- p has degree 2 or more so we can construct the Sturm sequence</span>
+<span class="lineno">  400 </span><span class="spaces">    </span><span class="istickedoff">_ -&gt; signVariations (sturmSequence l p) - signVariations (sturmSequence r p)</span>
+<span class="lineno">  401 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  402 </span><span class="spaces">    </span><span class="istickedoff">signVariations :: (Fractional a, Eq a, Ord a) =&gt; [a] -&gt; Int</span>
+<span class="lineno">  403 </span><span class="spaces">    </span><span class="istickedoff">{-</span>
+<span class="lineno">  404 </span><span class="spaces">    </span><span class="istickedoff">When c0, c1, c2, . . . ck is a finite sequence of real numbers, then a sign variation or sign change in the sequence</span>
+<span class="lineno">  405 </span><span class="spaces">    </span><span class="istickedoff">is a pair of indices i &lt; j such that cicj &lt; 0, and either j = i + 1 or ck = 0 for all k such that i &lt; k &lt; j</span>
+<span class="lineno">  406 </span><span class="spaces">    </span><span class="istickedoff">-}</span>
+<span class="lineno">  407 </span><span class="spaces">    </span><span class="istickedoff">signVariations xs = length (filter (&lt; 0) pairsMultiplied)</span>
+<span class="lineno">  408 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  409 </span><span class="spaces">        </span><span class="istickedoff">-- we implement the clause &quot;ck = 0 for all k such that i &lt; k &lt; j&quot; by removing zero elements</span>
+<span class="lineno">  410 </span><span class="spaces">        </span><span class="istickedoff">zeroesRemoved = filter (/= 0) xs</span>
+<span class="lineno">  411 </span><span class="spaces">        </span><span class="istickedoff">-- TODO: deal with all zero corner case</span>
+<span class="lineno">  412 </span><span class="spaces">        </span><span class="istickedoff">pairsMultiplied = zipWith (*) zeroesRemoved (tail zeroesRemoved)</span>
+<span class="lineno">  413 </span><span class="spaces">    </span><span class="istickedoff">sturmSequence :: (Fractional a, Eq a, Ord a) =&gt; a -&gt; Poly a -&gt; [a]</span>
+<span class="lineno">  414 </span><span class="spaces">    </span><span class="istickedoff">sturmSequence x q = map (flip eval x) (doSeq [differentiate q, q])</span>
+<span class="lineno">  415 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  416 </span><span class="spaces">        </span><span class="istickedoff">doSeq :: (Fractional a, Eq a, Ord a) =&gt; [Poly a] -&gt; [Poly a]</span>
+<span class="lineno">  417 </span><span class="spaces">        </span><span class="istickedoff">{-</span>
+<span class="lineno">  418 </span><span class="spaces">           </span><span class="istickedoff">Note that this is called with a list of length 2 and grows the list, so we don't need to match all cases</span>
+<span class="lineno">  419 </span><span class="spaces">           </span><span class="istickedoff">Note that we build this backwards to avoid use of append, but this doesn't affect the number of</span>
+<span class="lineno">  420 </span><span class="spaces">           </span><span class="istickedoff">sign variations so there's no need to reverse it.</span>
+<span class="lineno">  421 </span><span class="spaces">        </span><span class="istickedoff">-}</span>
+<span class="lineno">  422 </span><span class="spaces">        </span><span class="istickedoff">doSeq x'@(xI : xIminusOne : _) = if polyRemainder == zero then x' else doSeq (negate polyRemainder : x')</span>
+<span class="lineno">  423 </span><span class="spaces">          </span><span class="istickedoff">where</span>
+<span class="lineno">  424 </span><span class="spaces">            </span><span class="istickedoff">polyRemainder = snd (euclidianDivision (xIminusOne, xI))</span>
+<span class="lineno">  425 </span><span class="spaces">        </span><span class="istickedoff">doSeq _ = <span class="nottickedoff">error &quot;List too short&quot;</span></span></span> -- prevent warning about missing cases
+<span class="lineno">  426 </span>
+<span class="lineno">  427 </span>{-|
+<span class="lineno">  428 </span>See https://en.wikipedia.org/wiki/Polynomial_greatest_common_divisor#Euclidean_division
+<span class="lineno">  429 </span>Take a pair of polynomials a, b, and produce the quotient and remainder q and r s.t. a = bq + r
+<span class="lineno">  430 </span>Input: a and b ≠ 0 two polynomials; Output: q, the quotient, and r, the remainder;
+<span class="lineno">  431 </span>Pseudocode:
+<span class="lineno">  432 </span>    Begin
+<span class="lineno">  433 </span>        q := 0
+<span class="lineno">  434 </span>        r := a
+<span class="lineno">  435 </span>        d := deg(b)
+<span class="lineno">  436 </span>        c := lc(b)
+<span class="lineno">  437 </span>        while deg(r) &gt;= d do
+<span class="lineno">  438 </span>            s := lc(r)/c x^(deg(r)-d)
+<span class="lineno">  439 </span>            q := q + s
+<span class="lineno">  440 </span>            r := r − sb
+<span class="lineno">  441 </span>        end do
+<span class="lineno">  442 </span>        return (q, r)
+<span class="lineno">  443 </span>    end
+<span class="lineno">  444 </span>-}
+<span class="lineno">  445 </span>euclidianDivision
+<span class="lineno">  446 </span>    :: (Fractional a, Eq a, Ord a) =&gt; (Poly a, Poly a) -&gt; (Poly a, Poly a)
+<span class="lineno">  447 </span><span class="decl"><span class="istickedoff">euclidianDivision (pa, pb) =</span>
+<span class="lineno">  448 </span><span class="spaces">    </span><span class="istickedoff">if <span class="tickonlyfalse">pb == zero</span></span>
+<span class="lineno">  449 </span><span class="spaces">        </span><span class="istickedoff">then <span class="nottickedoff">error &quot;Division by zero polynomial&quot;</span></span>
+<span class="lineno">  450 </span><span class="spaces">        </span><span class="istickedoff">else goDivide (<span class="nottickedoff">zero</span>, pa)</span>
+<span class="lineno">  451 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  452 </span><span class="spaces">    </span><span class="istickedoff">degB = degree pb</span>
+<span class="lineno">  453 </span><span class="spaces">    </span><span class="istickedoff">leadingCoefficient :: Eq a =&gt; Poly a -&gt; a -- coefficient of the highest power term of the poly</span>
+<span class="lineno">  454 </span><span class="spaces">    </span><span class="istickedoff">leadingCoefficient (Poly x) = last x</span>
+<span class="lineno">  455 </span><span class="spaces">    </span><span class="istickedoff">lcB = leadingCoefficient pb</span>
+<span class="lineno">  456 </span><span class="spaces">    </span><span class="istickedoff">-- goDivide :: (Fractional a, Eq a, Ord a) =&gt; (Poly a, Poly a) -&gt; (Poly a, Poly a)</span>
+<span class="lineno">  457 </span><span class="spaces">    </span><span class="istickedoff">goDivide (q, r) = if degree r &lt; degB then (<span class="nottickedoff">q</span>, r) else goDivide (<span class="nottickedoff">q + s</span>, r - s * pb)</span>
+<span class="lineno">  458 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  459 </span><span class="spaces">        </span><span class="istickedoff">s = monomial (degree r - degB) (leadingCoefficient r / lcB)</span></span>
+<span class="lineno">  460 </span>
+<span class="lineno">  461 </span>-- | Check whether a polynomial is monotonically increasing on
+<span class="lineno">  462 </span>-- a given interval.
+<span class="lineno">  463 </span>isMonotonicallyIncreasingOn
+<span class="lineno">  464 </span>    :: (Fractional a, Eq a, Ord a) =&gt; Poly a -&gt; (a,a) -&gt; Bool
+<span class="lineno">  465 </span><span class="decl"><span class="istickedoff">isMonotonicallyIncreasingOn p (x1,x2) =</span>
+<span class="lineno">  466 </span><span class="spaces">    </span><span class="istickedoff">eval p x1 &lt;= eval p x2</span>
+<span class="lineno">  467 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; countRoots (x1, x2, differentiate p) == 0</span></span>
+<span class="lineno">  468 </span>    -- FIXME: What about double roots?
+<span class="lineno">  469 </span>
+<span class="lineno">  470 </span>{-|
+<span class="lineno">  471 </span>Measure whether or not a polynomial is consistently above or below zero,
+<span class="lineno">  472 </span>or equals zero.
+<span class="lineno">  473 </span>
+<span class="lineno">  474 </span>Need to consider special cases where there is a root at a boundary point.
+<span class="lineno">  475 </span>-}
+<span class="lineno">  476 </span>compareToZero :: (Fractional a, Eq a, Ord a) =&gt; (a, a, Poly a) -&gt; Maybe Ordering
+<span class="lineno">  477 </span><span class="decl"><span class="istickedoff">compareToZero (l, u, p)</span>
+<span class="lineno">  478 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">l &gt;= u</span> = <span class="nottickedoff">error &quot;Invalid interval&quot;</span></span>
+<span class="lineno">  479 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">p == zero</span> = <span class="nottickedoff">Just EQ</span></span>
+<span class="lineno">  480 </span><span class="spaces">    </span><span class="istickedoff">| lower * upper &lt; 0 = Nothing -- quick test to eliminate simple cases</span>
+<span class="lineno">  481 </span><span class="spaces">    </span><span class="istickedoff">| countRoots (l, u, p) &gt; 0 = Nothing -- polynomial crosses zero</span>
+<span class="lineno">  482 </span><span class="spaces">    </span><span class="istickedoff">-- since the polynomial has no roots, the comparison is detmined by the boundary values</span>
+<span class="lineno">  483 </span><span class="spaces">    </span><span class="istickedoff">| lower == 0 = Just (compare upper lower)</span>
+<span class="lineno">  484 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">upper == 0</span> = <span class="nottickedoff">Just (compare lower upper)</span></span>
+<span class="lineno">  485 </span><span class="spaces">    </span><span class="istickedoff">| lower &gt; 0 = Just GT -- upper must also be &gt; 0 due to the lack of roots</span>
+<span class="lineno">  486 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Just LT -- upper and lower both &lt; 0 due to the lack of roots</span>
+<span class="lineno">  487 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  488 </span><span class="spaces">    </span><span class="istickedoff">lower = eval p l</span>
+<span class="lineno">  489 </span><span class="spaces">    </span><span class="istickedoff">upper = eval p u</span></span>
+<span class="lineno">  490 </span>
+<span class="lineno">  491 </span>{-|
+<span class="lineno">  492 </span>Find the root of a polynomial in a given interval,
+<span class="lineno">  493 </span>assuming that there is exactly one root in the given interval.
+<span class="lineno">  494 </span>This precondition has to be checked through other means,
+<span class="lineno">  495 </span>e.g. 'countRoots'.
+<span class="lineno">  496 </span>
+<span class="lineno">  497 </span>We find the root by repeatedly halving the interval in which the root must lie
+<span class="lineno">  498 </span>until its width is less than the specified precision.
+<span class="lineno">  499 </span>Constant and linear polynomials, @degree p &lt;= 1@, are treated as special cases.
+<span class="lineno">  500 </span>-}
+<span class="lineno">  501 </span>findRoot
+<span class="lineno">  502 </span>    :: (Fractional a, Eq a, Num a, Ord a) =&gt; a -&gt; (a, a) -&gt; Poly a -&gt; Maybe a
+<span class="lineno">  503 </span><span class="decl"><span class="istickedoff">findRoot precision (l, u) p</span>
+<span class="lineno">  504 </span><span class="spaces">    </span><span class="istickedoff">-- if the polynomial is zero, the whole interval is a root, so return the basepoint</span>
+<span class="lineno">  505 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">degp &lt; 0</span> = <span class="nottickedoff">Just l</span></span>
+<span class="lineno">  506 </span><span class="spaces">    </span><span class="istickedoff">-- if the poly is a non-zero constant, no root is present</span>
+<span class="lineno">  507 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">degp == 0</span> = <span class="nottickedoff">Nothing</span></span>
+<span class="lineno">  508 </span><span class="spaces">    </span><span class="istickedoff">-- if the polynomial has degree 1, can calculate the root exactly</span>
+<span class="lineno">  509 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">degp == 1</span> = <span class="nottickedoff">Just (-(head ps / last ps))</span> -- p0 + p1x = 0 =&gt; x = -p0/p1</span>
+<span class="lineno">  510 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">precision &lt;= 0</span> = <span class="nottickedoff">error &quot;Invalid precision value&quot;</span></span>
+<span class="lineno">  511 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Just (halveInterval precision l u pl <span class="nottickedoff">pu</span>)</span>
+<span class="lineno">  512 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  513 </span><span class="spaces">    </span><span class="istickedoff">Poly ps = <span class="nottickedoff">p</span></span>
+<span class="lineno">  514 </span><span class="spaces">    </span><span class="istickedoff">degp = degree p</span>
+<span class="lineno">  515 </span><span class="spaces">    </span><span class="istickedoff"><span class="nottickedoff">pu = eval p u</span></span>
+<span class="lineno">  516 </span><span class="spaces">    </span><span class="istickedoff">pl = eval p l</span>
+<span class="lineno">  517 </span><span class="spaces">    </span><span class="istickedoff">halveInterval eps x y px py</span>
+<span class="lineno">  518 </span><span class="spaces">        </span><span class="istickedoff">-- when the interval is small enough, stop:</span>
+<span class="lineno">  519 </span><span class="spaces">        </span><span class="istickedoff">-- the root is in this interval, so take the mid point</span>
+<span class="lineno">  520 </span><span class="spaces">        </span><span class="istickedoff">| width &lt;= eps = mid</span>
+<span class="lineno">  521 </span><span class="spaces">        </span><span class="istickedoff">-- choose the lower half,</span>
+<span class="lineno">  522 </span><span class="spaces">        </span><span class="istickedoff">-- as the polynomial has different signs at the ends</span>
+<span class="lineno">  523 </span><span class="spaces">        </span><span class="istickedoff">| px * pmid &lt; 0 = halveInterval eps x mid px <span class="nottickedoff">pmid</span></span>
+<span class="lineno">  524 </span><span class="spaces">        </span><span class="istickedoff">-- choose the upper half</span>
+<span class="lineno">  525 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = halveInterval eps mid y pmid <span class="nottickedoff">py</span></span>
+<span class="lineno">  526 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  527 </span><span class="spaces">        </span><span class="istickedoff">width = y - x</span>
+<span class="lineno">  528 </span><span class="spaces">        </span><span class="istickedoff">mid = x + width / 2</span>
+<span class="lineno">  529 </span><span class="spaces">        </span><span class="istickedoff">pmid = eval p mid</span></span>
+<span class="lineno">  530 </span>
+<span class="lineno">  531 </span>{-| Otherwise we have a polynomial:
+<span class="lineno">  532 </span>subtract the value we are looking for so that we seek a zero crossing
+<span class="lineno">  533 </span>-}
+<span class="lineno">  534 </span>root
+<span class="lineno">  535 </span>    :: (Ord a, Num a, Eq a, Fractional a)
+<span class="lineno">  536 </span>    =&gt; a
+<span class="lineno">  537 </span>    -&gt; a
+<span class="lineno">  538 </span>    -&gt; (a, a)
+<span class="lineno">  539 </span>    -&gt; Poly a
+<span class="lineno">  540 </span>    -&gt; Maybe a
+<span class="lineno">  541 </span><span class="decl"><span class="istickedoff">root e x (l, u) p = findRoot e (l, u) (p - constant x)</span></span>
+
+</pre>
+</body>
+</html>

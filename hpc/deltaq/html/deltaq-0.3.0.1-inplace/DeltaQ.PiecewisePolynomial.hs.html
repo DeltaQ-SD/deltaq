@@ -1,0 +1,220 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+<span class="lineno">    2 </span>{-# LANGUAGE TypeFamilies #-}
+<span class="lineno">    3 </span>{-# LANGUAGE TypeOperators #-}
+<span class="lineno">    4 </span>
+<span class="lineno">    5 </span>{-|
+<span class="lineno">    6 </span>Copyright   : Predictable Network Solutions Ltd., 2024
+<span class="lineno">    7 </span>License     : BSD-3-Clause
+<span class="lineno">    8 </span>Maintainer  : neil.davies@pnsol.com
+<span class="lineno">    9 </span>Description : Instances via piecewise polynomials.
+<span class="lineno">   10 </span>
+<span class="lineno">   11 </span>@'DQ'@ is a probability distribution of completion time
+<span class="lineno">   12 </span>using the numeric type @Rational@.
+<span class="lineno">   13 </span>This type represents a mixed discrete / continuous probability distribution
+<span class="lineno">   14 </span>where the continuous part is represented in terms of piecewise polynomials.
+<span class="lineno">   15 </span>-}
+<span class="lineno">   16 </span>module DeltaQ.PiecewisePolynomial
+<span class="lineno">   17 </span>    ( DQ
+<span class="lineno">   18 </span>    , distribution
+<span class="lineno">   19 </span>    , fromPositiveMeasure
+<span class="lineno">   20 </span>    , unsafeFromPositiveMeasure
+<span class="lineno">   21 </span>
+<span class="lineno">   22 </span>    -- * Internal
+<span class="lineno">   23 </span>    , complexity
+<span class="lineno">   24 </span>    ) where
+<span class="lineno">   25 </span>
+<span class="lineno">   26 </span>import Data.Maybe
+<span class="lineno">   27 </span>    ( fromMaybe
+<span class="lineno">   28 </span>    )
+<span class="lineno">   29 </span>import DeltaQ.Class
+<span class="lineno">   30 </span>    ( DeltaQ (..)
+<span class="lineno">   31 </span>    , Outcome (..)
+<span class="lineno">   32 </span>    , eventuallyFromMaybe
+<span class="lineno">   33 </span>    )
+<span class="lineno">   34 </span>import Control.DeepSeq
+<span class="lineno">   35 </span>    ( NFData
+<span class="lineno">   36 </span>    )
+<span class="lineno">   37 </span>import Numeric.Function.Piecewise
+<span class="lineno">   38 </span>    ( Piecewise
+<span class="lineno">   39 </span>    )
+<span class="lineno">   40 </span>import Numeric.Measure.Finite.Mixed
+<span class="lineno">   41 </span>    ( Measure
+<span class="lineno">   42 </span>    )
+<span class="lineno">   43 </span>import Numeric.Polynomial.Simple
+<span class="lineno">   44 </span>    ( Poly
+<span class="lineno">   45 </span>    )
+<span class="lineno">   46 </span>
+<span class="lineno">   47 </span>import qualified Data.Function.Class as Function
+<span class="lineno">   48 </span>import qualified Numeric.Function.Piecewise as Piecewise
+<span class="lineno">   49 </span>import qualified Numeric.Measure.Finite.Mixed as Measure
+<span class="lineno">   50 </span>import qualified Numeric.Polynomial.Simple as Poly
+<span class="lineno">   51 </span>
+<span class="lineno">   52 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   53 </span>    Type
+<span class="lineno">   54 </span>------------------------------------------------------------------------------}
+<span class="lineno">   55 </span>-- | Probability distribution of durations.
+<span class="lineno">   56 </span>newtype DQ = DQ (Measure Rational)
+<span class="lineno">   57 </span>    deriving (<span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
+<span class="lineno">   58 </span>
+<span class="lineno">   59 </span>-- | Get the distribution function as piecewise function of polynomials.
+<span class="lineno">   60 </span>distribution :: DQ -&gt; Piecewise Rational (Poly Rational)
+<span class="lineno">   61 </span><span class="decl"><span class="istickedoff">distribution (DQ m) = Measure.distribution m</span></span>
+<span class="lineno">   62 </span>
+<span class="lineno">   63 </span>-- | Interpret a finite, signed 'Measure' as a probability distribution.
+<span class="lineno">   64 </span>--
+<span class="lineno">   65 </span>-- In order to admit an interpretation as probability, the measure needs
+<span class="lineno">   66 </span>-- to be positive, if that is not the case, the function returns 'Nothing'.
+<span class="lineno">   67 </span>--
+<span class="lineno">   68 </span>-- Note: Due to rare numerical issues,
+<span class="lineno">   69 </span>-- the check 'Measure.isPositive' can be false negative.
+<span class="lineno">   70 </span>-- Work around using 'unsafeFromPositiveMeasure'.
+<span class="lineno">   71 </span>fromPositiveMeasure :: Measure Rational -&gt; Maybe DQ
+<span class="lineno">   72 </span><span class="decl"><span class="istickedoff">fromPositiveMeasure m</span>
+<span class="lineno">   73 </span><span class="spaces">    </span><span class="istickedoff">| Measure.isPositive m = Just (unsafeFromPositiveMeasure m)</span>
+<span class="lineno">   74 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span></span>
+<span class="lineno">   75 </span>
+<span class="lineno">   76 </span>-- | Interpret a finite, positive 'Measure' as a probability distribution.
+<span class="lineno">   77 </span>--
+<span class="lineno">   78 </span>-- /The precondition that the measure satisfies 'Measure.isPositive'
+<span class="lineno">   79 </span>-- is not checked!/
+<span class="lineno">   80 </span>unsafeFromPositiveMeasure :: Measure Rational -&gt; DQ
+<span class="lineno">   81 </span><span class="decl"><span class="istickedoff">unsafeFromPositiveMeasure = DQ</span></span>
+<span class="lineno">   82 </span>
+<span class="lineno">   83 </span>-- | Helper function for lifting a binary operation on distribution functions.
+<span class="lineno">   84 </span>onDistribution2
+<span class="lineno">   85 </span>    :: (a ~ Rational)
+<span class="lineno">   86 </span>    =&gt; String
+<span class="lineno">   87 </span>    -&gt; (Piecewise a (Poly a) -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+<span class="lineno">   88 </span>    -&gt; DQ -&gt; DQ -&gt; DQ
+<span class="lineno">   89 </span><span class="decl"><span class="istickedoff">onDistribution2 err f (DQ mx) (DQ my) =</span>
+<span class="lineno">   90 </span><span class="spaces">    </span><span class="istickedoff">DQ</span>
+<span class="lineno">   91 </span><span class="spaces">    </span><span class="istickedoff">$ fromMaybe <span class="nottickedoff">impossible</span></span>
+<span class="lineno">   92 </span><span class="spaces">    </span><span class="istickedoff">$ Measure.fromDistribution</span>
+<span class="lineno">   93 </span><span class="spaces">    </span><span class="istickedoff">$ f (Measure.distribution mx) (Measure.distribution my)</span>
+<span class="lineno">   94 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">   95 </span><span class="spaces">    </span><span class="istickedoff"><span class="nottickedoff">impossible = error $ &quot;impossible: not a finite measure in &quot; &lt;&gt; err</span></span></span>
+<span class="lineno">   96 </span>
+<span class="lineno">   97 </span>-- | Size of the representation of a probability distribution,
+<span class="lineno">   98 </span>-- i.e. number of pieces of the piecewise function and degrees
+<span class="lineno">   99 </span>-- of the polynomials.
+<span class="lineno">  100 </span>--
+<span class="lineno">  101 </span>-- This quantity is relevant to stating and analyzing
+<span class="lineno">  102 </span>-- the asymptotic time complexity of operations.
+<span class="lineno">  103 </span>complexity :: DQ -&gt; Int
+<span class="lineno">  104 </span><span class="decl"><span class="istickedoff">complexity (DQ m) = sum (map complexityOfPiece pieces)</span>
+<span class="lineno">  105 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  106 </span><span class="spaces">    </span><span class="istickedoff">pieces = Piecewise.toAscPieces $ Measure.distribution m</span>
+<span class="lineno">  107 </span><span class="spaces">    </span><span class="istickedoff">complexityOfPiece = (+1) . max 0 . Poly.degree . snd</span></span>
+<span class="lineno">  108 </span>
+<span class="lineno">  109 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  110 </span>    Operations
+<span class="lineno">  111 </span>------------------------------------------------------------------------------}
+<span class="lineno">  112 </span>instance <span class="decl"><span class="istickedoff"><span class="decl"><span class="istickedoff"><span class="decl"><span class="istickedoff">Outcome DQ</span></span></span></span></span></span> where
+<span class="lineno">  113 </span>    type Duration DQ = Rational
+<span class="lineno">  114 </span>
+<span class="lineno">  115 </span>    <span class="decl"><span class="istickedoff">never = DQ Measure.zero</span></span>
+<span class="lineno">  116 </span>
+<span class="lineno">  117 </span>    <span class="decl"><span class="istickedoff">wait t = DQ $ Measure.dirac t</span></span>
+<span class="lineno">  118 </span>
+<span class="lineno">  119 </span>    <span class="decl"><span class="istickedoff">sequentially (DQ mx) (DQ my) = DQ (Measure.convolve mx my)</span></span>
+<span class="lineno">  120 </span>
+<span class="lineno">  121 </span>    <span class="decl"><span class="istickedoff">firstToFinish = onDistribution2 <span class="nottickedoff">&quot;firstToFinish&quot;</span> $ \x y -&gt; x + y - x * y</span></span>
+<span class="lineno">  122 </span>
+<span class="lineno">  123 </span>    <span class="decl"><span class="istickedoff">lastToFinish = onDistribution2 <span class="nottickedoff">&quot;lastToFinish&quot;</span> (*)</span></span>
+<span class="lineno">  124 </span>
+<span class="lineno">  125 </span>instance <span class="decl"><span class="istickedoff">DeltaQ DQ</span></span> where
+<span class="lineno">  126 </span>    type Probability DQ = Rational
+<span class="lineno">  127 </span>
+<span class="lineno">  128 </span>    <span class="decl"><span class="istickedoff">choice p = onDistribution2 <span class="nottickedoff">&quot;choice&quot;</span> $ \x y -&gt;</span>
+<span class="lineno">  129 </span><span class="spaces">        </span><span class="istickedoff">scale p x + scale (1 - p) y</span>
+<span class="lineno">  130 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  131 </span><span class="spaces">        </span><span class="istickedoff">scale = Piecewise.mapPieces . Poly.scale</span></span>
+<span class="lineno">  132 </span>
+<span class="lineno">  133 </span>    <span class="decl"><span class="istickedoff">uniform a = DQ . Measure.uniform a</span></span>
+<span class="lineno">  134 </span>
+<span class="lineno">  135 </span>    <span class="decl"><span class="istickedoff">successWithin (DQ m) = Function.eval (Measure.distribution m)</span></span>
+<span class="lineno">  136 </span>
+<span class="lineno">  137 </span>    <span class="decl"><span class="istickedoff">failure (DQ m) = 1 - Measure.total m</span></span>
+<span class="lineno">  138 </span>
+<span class="lineno">  139 </span>    <span class="decl"><span class="istickedoff">quantile p (DQ m) =</span>
+<span class="lineno">  140 </span><span class="spaces">        </span><span class="istickedoff">eventuallyFromMaybe</span>
+<span class="lineno">  141 </span><span class="spaces">        </span><span class="istickedoff">$ quantileFromMonotone (Measure.distribution m) p</span></span>
+<span class="lineno">  142 </span>
+<span class="lineno">  143 </span>    <span class="decl"><span class="istickedoff">earliest (DQ m) = eventuallyFromMaybe $ fmap fst $ Measure.support m</span></span>
+<span class="lineno">  144 </span>
+<span class="lineno">  145 </span>    <span class="decl"><span class="istickedoff">deadline (DQ m)= eventuallyFromMaybe $ fmap snd $ Measure.support m</span></span>
+<span class="lineno">  146 </span>
+<span class="lineno">  147 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  148 </span>    Operations
+<span class="lineno">  149 </span>    quantile
+<span class="lineno">  150 </span>------------------------------------------------------------------------------}
+<span class="lineno">  151 </span>-- | Helper type for segements of a piecewise functions.
+<span class="lineno">  152 </span>data Segment a b
+<span class="lineno">  153 </span>    = Jump a (b,b)
+<span class="lineno">  154 </span>    | Polynomial (a,a) (b,b) (Poly a)
+<span class="lineno">  155 </span>    | End a b
+<span class="lineno">  156 </span>
+<span class="lineno">  157 </span>-- | Helper function that elaborates a piecewise function
+<span class="lineno">  158 </span>-- into a list of segments.
+<span class="lineno">  159 </span>toSegments :: (a ~ Rational) =&gt; Piecewise a (Poly a) -&gt; [Segment a a]
+<span class="lineno">  160 </span><span class="decl"><span class="istickedoff">toSegments = goJump 0 . Piecewise.toAscPieces</span>
+<span class="lineno">  161 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  162 </span><span class="spaces">    </span><span class="istickedoff">goJump _ [] = []</span>
+<span class="lineno">  163 </span><span class="spaces">    </span><span class="istickedoff">goJump prev ((x1, o) : xos)</span>
+<span class="lineno">  164 </span><span class="spaces">        </span><span class="istickedoff">| y1 - y0 &gt; 0 = Jump x1 (y0, y1) : nexts</span>
+<span class="lineno">  165 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = nexts</span>
+<span class="lineno">  166 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  167 </span><span class="spaces">        </span><span class="istickedoff">y1 = Poly.eval o x1</span>
+<span class="lineno">  168 </span><span class="spaces">        </span><span class="istickedoff">y0 = Poly.eval prev x1</span>
+<span class="lineno">  169 </span><span class="spaces">        </span><span class="istickedoff">nexts = goPoly x1 y1 o xos</span>
+<span class="lineno">  170 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  171 </span><span class="spaces">    </span><span class="istickedoff">goPoly x1 y1 o [] =</span>
+<span class="lineno">  172 </span><span class="spaces">        </span><span class="istickedoff">End <span class="nottickedoff">x1</span> y1 : <span class="nottickedoff">goJump o []</span></span>
+<span class="lineno">  173 </span><span class="spaces">    </span><span class="istickedoff">goPoly x1 y1 o xos@((x2, _) : _) =</span>
+<span class="lineno">  174 </span><span class="spaces">        </span><span class="istickedoff">Polynomial (x1, x2) (y1, Poly.eval o x2) o : goJump o xos</span></span>
+<span class="lineno">  175 </span>        -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
+<span class="lineno">  176 </span>
+<span class="lineno">  177 </span>-- | Compute a quantile from a monotonically increasing function.
+<span class="lineno">  178 </span>quantileFromMonotone :: (a ~ Rational) =&gt; Piecewise a (Poly a) -&gt; a -&gt; Maybe a
+<span class="lineno">  179 </span><span class="decl"><span class="istickedoff">quantileFromMonotone pieces = findInSegments segments</span>
+<span class="lineno">  180 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  181 </span><span class="spaces">    </span><span class="istickedoff">segments = toSegments pieces</span>
+<span class="lineno">  182 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  183 </span><span class="spaces">    </span><span class="istickedoff">findInSegments [] y</span>
+<span class="lineno">  184 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y == 0</span> = <span class="nottickedoff">Just 0</span></span>
+<span class="lineno">  185 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span>
+<span class="lineno">  186 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Jump x1 (y1, y2) : xys) y</span>
+<span class="lineno">  187 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Just x1</span>
+<span class="lineno">  188 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
+<span class="lineno">  189 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Polynomial (x1, x2) (y1, y2) o : xys) y</span>
+<span class="lineno">  190 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Poly.root precision y (x1, x2) o</span>
+<span class="lineno">  191 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
+<span class="lineno">  192 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (End x1 y1 : _) y</span>
+<span class="lineno">  193 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
+<span class="lineno">  194 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span></span>
+<span class="lineno">  195 </span>
+<span class="lineno">  196 </span>precision :: Rational
+<span class="lineno">  197 </span><span class="decl"><span class="istickedoff">precision = 1 / 10^(10 :: Integer)</span></span>
+
+</pre>
+</body>
+</html>

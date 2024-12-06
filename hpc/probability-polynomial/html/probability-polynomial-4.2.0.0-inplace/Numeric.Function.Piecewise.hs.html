@@ -1,0 +1,294 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-# LANGUAGE DeriveAnyClass #-}
+<span class="lineno">    2 </span>{-# LANGUAGE DeriveGeneric #-}
+<span class="lineno">    3 </span>{-# LANGUAGE FlexibleContexts #-}
+<span class="lineno">    4 </span>{-# LANGUAGE TypeFamilies #-}
+<span class="lineno">    5 </span>{-# LANGUAGE TypeOperators #-}
+<span class="lineno">    6 </span>{-# LANGUAGE UndecidableInstances #-}
+<span class="lineno">    7 </span>
+<span class="lineno">    8 </span>{-|
+<span class="lineno">    9 </span>Copyright   : Predictable Network Solutions Ltd., 2024
+<span class="lineno">   10 </span>License     : BSD-3-Clause
+<span class="lineno">   11 </span>Maintainer  : peter.thompson@pnsol.com
+<span class="lineno">   12 </span>Description : Piecewise functions on the number line. 
+<span class="lineno">   13 </span>-}
+<span class="lineno">   14 </span>module Numeric.Function.Piecewise
+<span class="lineno">   15 </span>    ( -- * Type
+<span class="lineno">   16 </span>      Piecewise
+<span class="lineno">   17 </span>
+<span class="lineno">   18 </span>      -- * Basic operations
+<span class="lineno">   19 </span>    , zero
+<span class="lineno">   20 </span>    , fromInterval
+<span class="lineno">   21 </span>    , fromAscPieces
+<span class="lineno">   22 </span>    , toAscPieces
+<span class="lineno">   23 </span>    , intervals
+<span class="lineno">   24 </span>
+<span class="lineno">   25 </span>      -- * Structure
+<span class="lineno">   26 </span>    , mapPieces
+<span class="lineno">   27 </span>    , mergeBy
+<span class="lineno">   28 </span>    , trim
+<span class="lineno">   29 </span>
+<span class="lineno">   30 </span>      -- * Numerical
+<span class="lineno">   31 </span>    , evaluate
+<span class="lineno">   32 </span>    , translateWith
+<span class="lineno">   33 </span>
+<span class="lineno">   34 </span>      -- * Zip
+<span class="lineno">   35 </span>    , zipPointwise
+<span class="lineno">   36 </span>    ) where
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>import Control.DeepSeq
+<span class="lineno">   39 </span>    ( NFData
+<span class="lineno">   40 </span>    )
+<span class="lineno">   41 </span>import GHC.Generics
+<span class="lineno">   42 </span>    ( Generic
+<span class="lineno">   43 </span>    )
+<span class="lineno">   44 </span>
+<span class="lineno">   45 </span>import qualified Data.Function.Class as Fun
+<span class="lineno">   46 </span>
+<span class="lineno">   47 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   48 </span>    Type
+<span class="lineno">   49 </span>------------------------------------------------------------------------------}
+<span class="lineno">   50 </span>-- | Internal representation of a single piece,
+<span class="lineno">   51 </span>-- starting at a basepoint of type @a@
+<span class="lineno">   52 </span>-- and containing an object of type @o@.
+<span class="lineno">   53 </span>data Piece a o = Piece
+<span class="lineno">   54 </span>    { <span class="istickedoff"><span class="decl"><span class="istickedoff">basepoint</span></span></span> :: a
+<span class="lineno">   55 </span>    , <span class="istickedoff"><span class="decl"><span class="istickedoff">object</span></span></span> :: o
+<span class="lineno">   56 </span>    }
+<span class="lineno">   57 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Generic</span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
+<span class="lineno">   58 </span>
+<span class="lineno">   59 </span>{- | A function defined piecewise on numerical intervals.
+<span class="lineno">   60 </span> 
+<span class="lineno">   61 </span>* @a@ = numerical type for the number line, e.g. 'Rational' or 'Double'
+<span class="lineno">   62 </span>* @o@ = type of function on every piece
+<span class="lineno">   63 </span>    e.g. polynomials or other specialized representations of functions
+<span class="lineno">   64 </span>
+<span class="lineno">   65 </span>A value @f :: Piecewise a o@ represents a function
+<span class="lineno">   66 </span>
+<span class="lineno">   67 </span>&gt; eval f x = { 0           if -∞ &lt;  x &lt; x1
+<span class="lineno">   68 </span>&gt;            { eval o1 x   if x1 &lt;= x &lt; x2
+<span class="lineno">   69 </span>&gt;            { eval o2 x   if x2 &lt;= x &lt; x3
+<span class="lineno">   70 </span>&gt;            { …
+<span class="lineno">   71 </span>&gt;            { eval on x   if xn &lt;= x &lt; +∞
+<span class="lineno">   72 </span>
+<span class="lineno">   73 </span>where @x1, …, xn@ are points on the real number line
+<span class="lineno">   74 </span>(in strictly increasing order)
+<span class="lineno">   75 </span>and where @o1, …, on@ are specialized representations functions,
+<span class="lineno">   76 </span>e.g. polynomials.
+<span class="lineno">   77 </span>
+<span class="lineno">   78 </span>In other words, the value @f@ represents a function that
+<span class="lineno">   79 </span>is defined piecewise on half-open intervals.
+<span class="lineno">   80 </span>
+<span class="lineno">   81 </span>The function 'intervals' returns the half-open intervals in the middle:
+<span class="lineno">   82 </span>
+<span class="lineno">   83 </span>&gt; intervals f = [(x1,x2), (x2,x3), …, (xn-1, xn)]
+<span class="lineno">   84 </span>
+<span class="lineno">   85 </span>No attempt is made to merge intervals if the piecewise objects are equal,
+<span class="lineno">   86 </span>e.g. the situation @o1 == o2@ may occur.
+<span class="lineno">   87 </span>
+<span class="lineno">   88 </span>-}
+<span class="lineno">   89 </span>data Piecewise a o
+<span class="lineno">   90 </span>    = Pieces [Piece a o]
+<span class="lineno">   91 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Generic</span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
+<span class="lineno">   92 </span>
+<span class="lineno">   93 </span>{-$Piecewise Invariants
+<span class="lineno">   94 </span>
+<span class="lineno">   95 </span>* The empty list represents the zero function.
+<span class="lineno">   96 </span>* The 'basepoint's are in strictly increasing order.
+<span class="lineno">   97 </span>* The internal representation of the function mentioned in the definition is
+<span class="lineno">   98 </span>
+<span class="lineno">   99 </span>    &gt; f = Pieces [Piece x1 o1, Piece x2 o2, …, Piece xn on]
+<span class="lineno">  100 </span>-}
+<span class="lineno">  101 </span>
+<span class="lineno">  102 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  103 </span>    Operations
+<span class="lineno">  104 </span>------------------------------------------------------------------------------}
+<span class="lineno">  105 </span>-- | The function which is zero everywhere.
+<span class="lineno">  106 </span>zero :: Piecewise a o
+<span class="lineno">  107 </span><span class="decl"><span class="istickedoff">zero = Pieces []</span></span>
+<span class="lineno">  108 </span>
+<span class="lineno">  109 </span>-- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
+<span class="lineno">  110 </span>-- from a single function @o@ by restricting it to the
+<span class="lineno">  111 </span>-- to half-open interval @x1 &lt;= x &lt; x2@.
+<span class="lineno">  112 </span>-- The result is zero outside this interval.
+<span class="lineno">  113 </span>fromInterval :: (Ord a, Num o) =&gt; (a,a) -&gt; o -&gt; Piecewise a o
+<span class="lineno">  114 </span><span class="decl"><span class="istickedoff">fromInterval (x,y) o = Pieces [Piece start o, Piece end 0]</span>
+<span class="lineno">  115 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  116 </span><span class="spaces">    </span><span class="istickedoff">start = min x y</span>
+<span class="lineno">  117 </span><span class="spaces">    </span><span class="istickedoff">end = max x y</span></span>
+<span class="lineno">  118 </span>
+<span class="lineno">  119 </span>-- | Build a piecewise function from an ascending list of contiguous pieces.
+<span class="lineno">  120 </span>--
+<span class="lineno">  121 </span>-- /The precondition (`map fst` of input list is ascending) is not checked./
+<span class="lineno">  122 </span>fromAscPieces :: Ord a =&gt; [(a,o)] -&gt; Piecewise a o
+<span class="lineno">  123 </span><span class="decl"><span class="istickedoff">fromAscPieces = Pieces . map (uncurry Piece)</span></span>
+<span class="lineno">  124 </span>
+<span class="lineno">  125 </span>-- | Convert the piecewise function to a list of contiguous pieces
+<span class="lineno">  126 </span>-- where the starting points of the pieces are in ascending order.
+<span class="lineno">  127 </span>toAscPieces :: Ord a =&gt; Piecewise a o -&gt; [(a,o)]
+<span class="lineno">  128 </span><span class="decl"><span class="istickedoff">toAscPieces (Pieces xos) = [ (x, o) | Piece x o &lt;- xos ]</span></span>
+<span class="lineno">  129 </span>
+<span class="lineno">  130 </span>-- | Intervals on which the piecewise function is defined, in sequence.
+<span class="lineno">  131 </span>-- The last half-open interval, @xn &lt;= x &lt; +∞@, is omitted.
+<span class="lineno">  132 </span>intervals :: Piecewise a o -&gt; [(a,a)]
+<span class="lineno">  133 </span><span class="decl"><span class="istickedoff">intervals (Pieces ys) =</span>
+<span class="lineno">  134 </span><span class="spaces">    </span><span class="istickedoff">zip (map basepoint ys) (drop 1 $ map basepoint ys)</span></span>
+<span class="lineno">  135 </span>
+<span class="lineno">  136 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  137 </span>    Operations
+<span class="lineno">  138 </span>    Structure
+<span class="lineno">  139 </span>------------------------------------------------------------------------------}
+<span class="lineno">  140 </span>-- | Map the objects of pieces.
+<span class="lineno">  141 </span>mapPieces :: (o -&gt; o') -&gt; Piecewise a o -&gt; Piecewise a o'
+<span class="lineno">  142 </span><span class="decl"><span class="istickedoff">mapPieces f (Pieces ps) = Pieces [ Piece x (f o) | Piece x o &lt;- ps ]</span></span>
+<span class="lineno">  143 </span>
+<span class="lineno">  144 </span>-- | Merge all adjacent pieces whose functions are considered
+<span class="lineno">  145 </span>-- equal by the given predicate.
+<span class="lineno">  146 </span>mergeBy :: Num o =&gt; (o -&gt; o -&gt; Bool) -&gt; Piecewise a o -&gt; Piecewise a o
+<span class="lineno">  147 </span><span class="decl"><span class="istickedoff">mergeBy eq (Pieces pieces) = Pieces $ go 0 pieces</span>
+<span class="lineno">  148 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  149 </span><span class="spaces">    </span><span class="istickedoff">go _ [] = []</span>
+<span class="lineno">  150 </span><span class="spaces">    </span><span class="istickedoff">go before (p : ps)</span>
+<span class="lineno">  151 </span><span class="spaces">        </span><span class="istickedoff">| before `eq` object p = go before ps</span>
+<span class="lineno">  152 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = p : go (object p) ps</span></span>
+<span class="lineno">  153 </span>
+<span class="lineno">  154 </span>-- | Merge all adjacent pieces whose functions are equal according to '(==)'.
+<span class="lineno">  155 </span>trim :: (Eq o, Num o) =&gt; Piecewise a o -&gt; Piecewise a o
+<span class="lineno">  156 </span><span class="decl"><span class="istickedoff">trim = mergeBy (==)</span></span>
+<span class="lineno">  157 </span>
+<span class="lineno">  158 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  159 </span>    Operations
+<span class="lineno">  160 </span>    Evaluation
+<span class="lineno">  161 </span>------------------------------------------------------------------------------}
+<span class="lineno">  162 </span>{-|
+<span class="lineno">  163 </span>Evaluate a piecewise function at a point.
+<span class="lineno">  164 </span>
+<span class="lineno">  165 </span>&gt; eval :: (Fun.Function o, Num o, Ord a, Num (Codomain o))
+<span class="lineno">  166 </span>&gt;         =&gt; Piecewise a o -&gt; a -&gt; Codomain o
+<span class="lineno">  167 </span>-}
+<span class="lineno">  168 </span>instance (Fun.Function o, Num o, Ord a, a ~ Fun.Domain o, Num (Fun.Codomain o))
+<span class="lineno">  169 </span>    =&gt; Fun.Function (Piecewise a o)
+<span class="lineno">  170 </span>  where
+<span class="lineno">  171 </span>    type instance Domain (Piecewise a o) = a
+<span class="lineno">  172 </span>    type instance Codomain (Piecewise a o) = Fun.Codomain o
+<span class="lineno">  173 </span>    <span class="decl"><span class="istickedoff">eval = evaluate</span></span>
+<span class="lineno">  174 </span>
+<span class="lineno">  175 </span>-- | Evaluate the piecewise function at a point.
+<span class="lineno">  176 </span>-- See 'Piecewise' for the semantics.
+<span class="lineno">  177 </span>evaluate
+<span class="lineno">  178 </span>    :: (Fun.Function o, Num o, Ord a, Num (Fun.Codomain o), a ~ Fun.Domain o)
+<span class="lineno">  179 </span>    =&gt; Piecewise a o -&gt; a -&gt; Fun.Codomain o
+<span class="lineno">  180 </span><span class="decl"><span class="istickedoff">evaluate (Pieces pieces) x = go 0 pieces</span>
+<span class="lineno">  181 </span><span class="spaces"> </span><span class="istickedoff">where</span>
+<span class="lineno">  182 </span><span class="spaces">    </span><span class="istickedoff">go before [] = Fun.eval before x</span>
+<span class="lineno">  183 </span><span class="spaces">    </span><span class="istickedoff">go before (p:ps)</span>
+<span class="lineno">  184 </span><span class="spaces">        </span><span class="istickedoff">| basepoint p &lt;= x = go (object p) ps</span>
+<span class="lineno">  185 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Fun.eval before x</span></span>
+<span class="lineno">  186 </span>
+<span class="lineno">  187 </span>-- | Translate a piecewise function,
+<span class="lineno">  188 </span>-- given a way to translate each piece.
+<span class="lineno">  189 </span>--
+<span class="lineno">  190 </span>-- &gt;  eval (translate' y o) = eval o (x - y)
+<span class="lineno">  191 </span>-- &gt;    implies
+<span class="lineno">  192 </span>-- &gt;    eval (translateWith translate' y p) = eval p (x - y)
+<span class="lineno">  193 </span>translateWith
+<span class="lineno">  194 </span>    :: (Ord a, Num a, Num o)
+<span class="lineno">  195 </span>    =&gt; (a -&gt; o -&gt; o)
+<span class="lineno">  196 </span>    -&gt; a -&gt; Piecewise a o -&gt; Piecewise a o
+<span class="lineno">  197 </span><span class="decl"><span class="istickedoff">translateWith trans y (Pieces pieces) =</span>
+<span class="lineno">  198 </span><span class="spaces">    </span><span class="istickedoff">Pieces [ Piece (x + y) (trans y o) | Piece x o &lt;- pieces ]</span></span>
+<span class="lineno">  199 </span>
+<span class="lineno">  200 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  201 </span>    Operations
+<span class="lineno">  202 </span>    Zip
+<span class="lineno">  203 </span>------------------------------------------------------------------------------}
+<span class="lineno">  204 </span>-- | Combine two piecewise functions by combining the pieces
+<span class="lineno">  205 </span>-- with a pointwise operation that preserves @0@.
+<span class="lineno">  206 </span>--
+<span class="lineno">  207 </span>-- For example, `(+)` and `(*)` are pointwise operations on functions,
+<span class="lineno">  208 </span>-- but convolution is not a pointwise operation.
+<span class="lineno">  209 </span>--
+<span class="lineno">  210 </span>-- Preconditions on the argument @f@:
+<span class="lineno">  211 </span>--
+<span class="lineno">  212 </span>-- * @f 0 0 = 0@
+<span class="lineno">  213 </span>-- * @f@ is a pointwise operations on functions,
+<span class="lineno">  214 </span>--   e.g. commutes with pointwise evaluation.
+<span class="lineno">  215 </span>--
+<span class="lineno">  216 </span>-- /The preconditions are not checked!/
+<span class="lineno">  217 </span>zipPointwise
+<span class="lineno">  218 </span>    :: (Ord a, Num o)
+<span class="lineno">  219 </span>    =&gt; (o -&gt; o -&gt; o)
+<span class="lineno">  220 </span>        -- ^ @f@
+<span class="lineno">  221 </span>    -&gt; Piecewise a o -&gt; Piecewise a o -&gt; Piecewise a o
+<span class="lineno">  222 </span><span class="decl"><span class="istickedoff">zipPointwise f ps = mapPieces (uncurry f) . zipPieces ps</span></span>
+<span class="lineno">  223 </span>
+<span class="lineno">  224 </span>-- | Internal.
+<span class="lineno">  225 </span>--
+<span class="lineno">  226 </span>-- Combine two 'Piecewise' by pairing pieces on the same intervals.
+<span class="lineno">  227 </span>-- It is usually necessary to split the intervals futher until
+<span class="lineno">  228 </span>-- the intervals align exactly.
+<span class="lineno">  229 </span>zipPieces
+<span class="lineno">  230 </span>    :: (Ord a, Num b, Num c)
+<span class="lineno">  231 </span>    =&gt; Piecewise a b -&gt; Piecewise a c -&gt; Piecewise a (b, c)
+<span class="lineno">  232 </span><span class="decl"><span class="istickedoff">zipPieces (Pieces xs') (Pieces ys') =</span>
+<span class="lineno">  233 </span><span class="spaces">    </span><span class="istickedoff">Pieces $ go 0 xs' 0 ys'</span>
+<span class="lineno">  234 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  235 </span><span class="spaces">    </span><span class="istickedoff">-- We split the intervals and combine the pieces in a single pass.</span>
+<span class="lineno">  236 </span><span class="spaces">    </span><span class="istickedoff">--</span>
+<span class="lineno">  237 </span><span class="spaces">    </span><span class="istickedoff">-- The algorithm is similar to mergesort:</span>
+<span class="lineno">  238 </span><span class="spaces">    </span><span class="istickedoff">-- We walk both lists in parallel and generate a new piece by</span>
+<span class="lineno">  239 </span><span class="spaces">    </span><span class="istickedoff">-- * taking the basepoint of the nearest piece</span>
+<span class="lineno">  240 </span><span class="spaces">    </span><span class="istickedoff">-- * and combining it with the object that was overhanging from</span>
+<span class="lineno">  241 </span><span class="spaces">    </span><span class="istickedoff">--   the previous piece (`xhang`, `yhang`)</span>
+<span class="lineno">  242 </span><span class="spaces">    </span><span class="istickedoff">go _ [] _ [] = []</span>
+<span class="lineno">  243 </span><span class="spaces">    </span><span class="istickedoff">go _ (Piece x ox : xstail) yhang [] =</span>
+<span class="lineno">  244 </span><span class="spaces">        </span><span class="istickedoff">Piece x (ox, yhang) : go <span class="nottickedoff">ox</span> xstail yhang []</span>
+<span class="lineno">  245 </span><span class="spaces">    </span><span class="istickedoff">go xhang [] _ (Piece y oy : ystail) =</span>
+<span class="lineno">  246 </span><span class="spaces">        </span><span class="istickedoff">Piece y (xhang, oy) : go xhang [] <span class="nottickedoff">oy</span> ystail</span>
+<span class="lineno">  247 </span><span class="spaces">    </span><span class="istickedoff">go xhang xs@(Piece x ox : xstail) yhang ys@(Piece y oy : ystail) =</span>
+<span class="lineno">  248 </span><span class="spaces">        </span><span class="istickedoff">case compare x y of</span>
+<span class="lineno">  249 </span><span class="spaces">            </span><span class="istickedoff">LT -&gt; Piece x (ox, yhang) : go ox xstail yhang ys</span>
+<span class="lineno">  250 </span><span class="spaces">            </span><span class="istickedoff">EQ -&gt; Piece x (ox, oy)    : go ox xstail oy ystail</span>
+<span class="lineno">  251 </span><span class="spaces">            </span><span class="istickedoff">GT -&gt; Piece y (xhang, oy) : go xhang xs  oy ystail</span></span>
+<span class="lineno">  252 </span>
+<span class="lineno">  253 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  254 </span>    Operations
+<span class="lineno">  255 </span>    Numeric
+<span class="lineno">  256 </span>------------------------------------------------------------------------------}
+<span class="lineno">  257 </span>{-| Algebraic operations '(+)', '(*)' and 'negate' on piecewise functions.
+<span class="lineno">  258 </span>
+<span class="lineno">  259 </span>The functions 'abs' and 'signum' are defined using 'abs' and 'signum'
+<span class="lineno">  260 </span>for every piece.
+<span class="lineno">  261 </span>
+<span class="lineno">  262 </span>TODO: 'fromInteger' is __undefined__
+<span class="lineno">  263 </span>-}
+<span class="lineno">  264 </span>instance <span class="decl"><span class="nottickedoff">(Ord a, Num o) =&gt; Num (Piecewise a o)</span></span> where
+<span class="lineno">  265 </span>    <span class="decl"><span class="istickedoff">(+) = zipPointwise (+)</span></span>
+<span class="lineno">  266 </span>    <span class="decl"><span class="istickedoff">(*) = zipPointwise (*)</span></span>
+<span class="lineno">  267 </span>    <span class="decl"><span class="istickedoff">negate = mapPieces negate</span></span>
+<span class="lineno">  268 </span>    <span class="decl"><span class="istickedoff">abs = mapPieces abs</span></span>
+<span class="lineno">  269 </span>    <span class="decl"><span class="istickedoff">signum = mapPieces signum</span></span>
+<span class="lineno">  270 </span>    <span class="decl"><span class="istickedoff">fromInteger 0 = zero</span>
+<span class="lineno">  271 </span><span class="spaces">    </span><span class="istickedoff">fromInteger n = <span class="nottickedoff">error &quot;TODO: fromInteger not implemented&quot;</span></span></span>
+
+</pre>
+</body>
+</html>
