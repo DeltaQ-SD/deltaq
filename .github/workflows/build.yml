@@ -19,8 +19,6 @@ jobs:
   build:
     name: ${{ matrix.os }}-ghc-${{ matrix.ghc }}
     runs-on: ${{ matrix.os }}
-    env:
-      cabal-build-dir: b
     strategy:
       matrix:
         os:
@@ -50,66 +48,69 @@ jobs:
 
       - name: Environment
         uses: haskell-actions/setup@v2
-        id: setup-haskell-cabal
+        id: setup
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
 
       - name: Configure
-        run: >
-          cabal configure
-          --builddir=${{ env.cabal-build-dir }}
-          --enable-tests
-          --enable-benchmarks
-          --enable-documentation
-          --test-show-details=direct
-          --write-ghc-environment-files=always
+        run: |
+          cabal configure \
+            --enable-tests \
+            --enable-coverage \
+            --enable-benchmarks \
+            --enable-documentation \
+            --test-show-details=direct \
+            --write-ghc-environment-files=always
+          cabal build all --dry-run
+        # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
-      - name: Freeze
-        run: >
-          cabal freeze
-          --builddir=${{ env.cabal-build-dir }}
-
-      - name: Cache
-        uses: actions/cache@v4
+      # For a description of how the Caching works, see
+      # https://github.com/haskell-actions/setup?tab=readme-ov-file#model-cabal-workflow-with-caching
+      - name: Dependencies (Restore from cache)
+        uses: actions/cache/restore@v4
+        id: cache
         env:
-          hash: ${{ hashFiles('cabal.project.freeze') }}
+          key: ${{ matrix.os }}-ghc-${{ matrix.ghc }}
+          hash: ${{ hashFiles('**/plan.json') }}
         with:
-          key: ${{ matrix.os }}-ghc-${{ matrix.ghc }}-${{ env.hash }}
-          restore-keys: |
-            ${{ matrix.os }}-ghc-${{ matrix.ghc }}-
-          path: |
-            ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
-            ${{ env.cabal-build-dir }}
+          key: ${{ env.key }}-${{ env.hash }}
+          restore-keys: ${{ env.key }}-
+          path: ${{ steps.setup.outputs.cabal-store }}
 
-      - name: Dependencies
-        run: >
-          cabal build all
-          --builddir=${{ env.cabal-build-dir }}
-          --only-dependencies
+      - name: Dependencies (Install)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cabal build all --only-dependencies
+
+      # Cache dependencies already here,
+      # so that we do not have to rebuild them should the subsequent steps fail.
+      - name: Dependencies (Save cache)
+        uses: actions/cache/save@v4
+        # If we had an exact cache hit,
+        # trying to save the cache would error because of key clash.
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+          path: ${{ steps.setup.outputs.cabal-store }}
 
       - name: Build
         run: >
           cabal build all
-          --builddir=${{ env.cabal-build-dir }}
           --enable-tests
           --enable-benchmarks
 
       - name: Test
         run: >
           cabal test all
-          --builddir=${{ env.cabal-build-dir }}
 
       - name: Benchmark
         run: >
           cabal bench all
-          --builddir=${{ env.cabal-build-dir }}
           || true
 
       - name: Documentation (Generation)
         run: >
           cabal haddock all
-          --builddir=${{ env.cabal-build-dir }}
           --enable-documentation
           --haddock-hyperlink-source
           --haddock-html-location
@@ -120,11 +121,9 @@ jobs:
             github.ref == 'refs/heads/main'
             && matrix.os == 'ubuntu-latest'
             && matrix.ghc == '9.10'
-        run: >
+        run: |
           mkdir -p gh-pages/doc
-
-          mv ${{ env.cabal-build-dir }}/build/*/*/*/doc/html/* gh-pages/doc
-
+          mv dist-newstyle/build/*/*/*/doc/html/* gh-pages/doc
           touch gh-pages/.nojekyll
 
       - name: Code coverage report (Staging)
@@ -132,16 +131,13 @@ jobs:
             github.ref == 'refs/heads/main'
             && matrix.os == 'ubuntu-latest'
             && matrix.ghc == '9.10'
-        run: >
+        run: |
           mkdir -p gh-pages/hpc
-
           mkdir -p gh-pages/hpc/deltaq
-
           mkdir -p gh-pages/hpc/probability-polynomial
 
-          cp -R ${{ env.cabal-build-dir }}/build/*/*/deltaq-*/t/test/hpc/vanilla/html gh-pages/hpc/deltaq
-
-          cp -R ${{ env.cabal-build-dir }}/build/*/*/probability-polynomial-*/t/test/hpc/vanilla/html gh-pages/hpc/probability-polynomial
+          cp -R dist-newstyle/build/*/*/deltaq-*/t/test/hpc/vanilla/html gh-pages/hpc/deltaq
+          cp -R dist-newstyle/build/*/*/probability-polynomial-*/t/test/hpc/vanilla/html gh-pages/hpc/probability-polynomial
 
       - name: Documentation (Deployment)
         if: |
