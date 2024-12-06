@@ -34,6 +34,7 @@ import qualified Graphics.Rendering.Chart.Easy as G
 
 {-----------------------------------------------------------------------------
     Plot
+    CDF
 ------------------------------------------------------------------------------}
 -- | Plot the cumulative distribution function (CDF) of a 'DeltaQ',
 -- with title.
@@ -64,19 +65,12 @@ plotCDFs
     -> G.Layout Double Double
 plotCDFs title namedOutcomes = G.execEC $ do
     G.layout_title .= title
-    G.layout_x_axis . G.laxis_title .= "Time (s)"
-    G.layout_x_axis
-        . G.laxis_generate
-        .= maybe G.autoAxis (\u' -> G.scaledAxis G.def (0, 1.05 * u')) maxX
+    add_x_axis (map snd namedOutcomes)
     G.layout_y_axis . G.laxis_title .= "Cumulative Probabilty"
     mapM_ plotOne namedOutcomes
   where
     cv1 = fromRational . toRational
     cv2 = fromRational . toRational
-    maxX =
-        fmap cv1
-        $ maximum
-        $ map (maybeFromEventually . deadline . snd) namedOutcomes
     plotOne (t, o) = G.plot $ G.line t [[(cv1 a, cv2 b) | (a, b) <- toXY o]]
 
 -- | Plot the cumulative distribution function (CDF) of a 'DeltaQ',
@@ -94,13 +88,7 @@ plotCDFWithQuantiles
     -> G.Layout Double Double
 plotCDFWithQuantiles title quantiles o = G.execEC $ do
     G.layout_title .= title
-    G.layout_x_axis . G.laxis_title .= "Time (s)"
-    G.layout_x_axis
-        . G.laxis_generate
-        .= maybe
-            G.autoAxis
-            (\u' -> G.scaledAxis G.def (0, 1.05 * u'))
-            (maybeFromEventually $ cv1 <$> deadline o)
+    add_x_axis [o]
     G.layout_y_axis . G.laxis_title .= "Cumulative Probabilty"
     G.plot $ G.line "" [[(cv1 a, cv2 b) | (a, b) <- toXY o]]
     mapM_ plotQuantile quantiles
@@ -111,6 +99,10 @@ plotCDFWithQuantiles title quantiles o = G.execEC $ do
         Abandoned -> pure ()
         Occurs x -> G.plot $ pure $ focusOnPoint (cv1 x, cv2 y)
 
+{-----------------------------------------------------------------------------
+    Plot
+    Inverse CDF
+------------------------------------------------------------------------------}
 -- | Plot the inverse cumulative distribution function (CDF) of a 'DeltaQ',
 -- with title.
 --
@@ -144,19 +136,12 @@ plotInverseCDFs
     -> G.Layout Double G.LogValue
 plotInverseCDFs title namedOutcomes = G.execEC $ do
     G.layout_title .= title
-    G.layout_x_axis . G.laxis_title .= "Time (s)"
-    G.layout_x_axis
-        . G.laxis_generate
-        .= maybe G.autoAxis (\u' -> G.scaledAxis G.def (0, 1.05 * u')) maxX
+    add_x_axis (map snd namedOutcomes)
     G.layout_y_axis . G.laxis_title .= "Log Inverse Cumulative Probabilty"
     mapM_ plotOne namedOutcomes
   where
     cv1 = fromRational . toRational
     cv2 = fromRational . toRational
-    maxX =
-        fmap cv1
-        $ maximum
-        $ map (maybeFromEventually . deadline . snd) namedOutcomes
     plotOne (t, o) = G.plot $ G.line t [[(cv1 a, 1 - cv2 b) | (a, b) <- toXY o]]
 
 -- | Plot the cumulative distribution function (CDF) of a 'DeltaQ',
@@ -176,13 +161,7 @@ plotInverseCDFWithQuantiles
     -> G.Layout Double G.LogValue
 plotInverseCDFWithQuantiles title quantiles o = G.execEC $ do
     G.layout_title .= title
-    G.layout_x_axis . G.laxis_title .= "Time (s)"
-    G.layout_x_axis
-        . G.laxis_generate
-        .= maybe
-            G.autoAxis
-            (\u' -> G.scaledAxis G.def (0, 1.05 * u'))
-            (maybeFromEventually $ cv1 <$> deadline o)
+    add_x_axis [o]
     G.layout_y_axis . G.laxis_title .= "Log Inverse Cumulative Probabilty"
     G.plot $ G.line "" [[(cv1 a, 1 - cv2 b) | (a, b) <- toXY o]]
     mapM_ plotQuantile quantiles
@@ -197,6 +176,25 @@ plotInverseCDFWithQuantiles title quantiles o = G.execEC $ do
     Helper functions
     Plot
 ------------------------------------------------------------------------------}
+-- | Add a common @x@-axis to the plot.
+add_x_axis 
+    :: (DeltaQ o, Real (Duration o), Fractional (Duration o), G.PlotValue y)
+    => [o]
+    -> G.EC (G.Layout Double y) ()
+add_x_axis outcomes = do
+    G.layout_x_axis . G.laxis_title .= "Time (s)"
+    G.layout_x_axis
+        . G.laxis_generate
+        .= maybe G.autoAxis (\u' -> G.scaledAxis G.def (0, 1.05 * u')) maxX
+  where
+    fromDuration = fromRational . toRational
+    maxX = case outcomes of
+        [] -> Nothing
+        _  -> 
+            fmap fromDuration
+            $ maximum
+            $ map (maybeFromEventually . deadline) outcomes
+
 -- | Focus on a point by plotting dashed lines that connect it to the axes.
 focusOnPoint
     :: (G.PlotValue x, G.PlotValue y)
