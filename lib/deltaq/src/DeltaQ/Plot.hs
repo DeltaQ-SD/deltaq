@@ -47,20 +47,8 @@ plotCDF
     => String -- ^ Title
     -> o -- ^ Outcome to plot
     -> G.Layout Double Double
-plotCDF title o = G.execEC $ do
-    G.layout_title .= title
-    G.layout_x_axis . G.laxis_title .= "Time (s)"
-    G.layout_x_axis
-        . G.laxis_generate
-        .= maybe
-            G.autoAxis
-            (\u' -> G.scaledAxis G.def (0, 1.05 * u'))
-            (maybeFromEventually $ cv1 <$> deadline o)
-    G.layout_y_axis . G.laxis_title .= "Cumulative Probabilty"
-    G.plot $ G.line "" [[(cv1 a, cv2 b) | (a, b) <- toXY o]]
-  where
-    cv1 = fromRational . toRational
-    cv2 = fromRational . toRational
+plotCDF title o =
+    plotCDFs title [("", o)]
 
 -- | Plot multiple CDFs in a single plot,
 -- with title.
