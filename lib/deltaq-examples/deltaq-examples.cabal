@@ -39,6 +39,8 @@ library
     , deltaq
     , Chart
     , Chart-diagrams
+    , diagrams-core
+    , diagrams-svg
 
   exposed-modules:
     DeltaQ.Example.Plot
