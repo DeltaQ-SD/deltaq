@@ -40,6 +40,7 @@ library
     , Chart
     , Chart-diagrams
     , diagrams-core
+    , diagrams-lib
     , diagrams-svg
 
   exposed-modules:

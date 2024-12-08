@@ -8,6 +8,7 @@ module DeltaQ.Example.Plot where
 
 import qualified Diagrams.Core as D
 import qualified Diagrams.Backend.SVG as D
+import qualified Diagrams.TwoD.Size as D
 import qualified Graphics.Rendering.Chart as Chart
 import qualified Graphics.Rendering.Chart.Backend.Diagrams as Chart
 
@@ -30,3 +31,10 @@ toDiagram chart = do
 -- Needs 'IO' in order to load font sizing information.
 newDEnv :: IO (Chart.DEnv Double)
 newDEnv = Chart.defaultEnv Chart.vectorAlignmentFns 400 300
+
+-- | Render a diagram for Haddock, for use with @doctest@.
+haddockRender :: FilePath -> Int -> D.Diagram D.SVG -> IO ()
+haddockRender filename w diagram = do
+    let filepath = "diagrams/" <> filename
+    D.renderSVG filepath (D.mkWidth $ fromIntegral w) diagram
+    putStrLn $ "File written:" <> filepath
