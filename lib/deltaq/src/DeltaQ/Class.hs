@@ -2,13 +2,11 @@
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
-Copyright:
-    Neil Davies, 2024
-    Predictable Network Solutions Ltd., 2024
-License: BSD-3-Clause
-Maintainer: neil.davies@pnsol.com
-Description:
-    Type classes for outcomes and their completion times.
+Copyright   : Neil Davies, 2024
+              Predictable Network Solutions Ltd., 2024
+License     : BSD-3-Clause
+Maintainer  : neil.davies@pnsol.com
+Description : Type classes for outcomes and their completion times.
 
 Type classes
 
@@ -23,6 +21,10 @@ module DeltaQ.Class
 
     -- ** DeltaQ
     , Eventually (..)
+    , eventually
+    , eventuallyFromMaybe
+    , maybeFromEventually
+
     , DeltaQ (..)
 
     -- * Properties
@@ -48,7 +50,7 @@ infixr 3 ./\. -- more tight
 --
 -- 'Outcome's can be composed in sequence or in parallel.
 class (Ord (Duration o), Num (Duration o)) => Outcome o where
-    -- | Numerical type representing times in $[0,+∞)$.
+    -- | Numerical type representing times in \( [0,+∞) \).
     --
     -- For example 'Double' or 'Rational'.
     type Duration o
@@ -125,6 +127,23 @@ instance Applicative Eventually where
     (Occurs _) <*> Abandoned = Abandoned
     (Occurs f) <*> (Occurs y) = Occurs (f y)
 
+-- | Helper function to eliminate 'Eventually'.
+--
+-- See also: 'maybe'.
+eventually :: b -> (a -> b) -> Eventually a -> b
+eventually b _ Abandoned = b
+eventually _ f (Occurs x) = f x
+
+-- | Helper function that converts 'Maybe' to 'Eventually'.
+eventuallyFromMaybe :: Maybe a -> Eventually a
+eventuallyFromMaybe Nothing = Abandoned
+eventuallyFromMaybe (Just x) = Occurs x
+
+-- | Helper function that converts 'Eventually' to 'Maybe'.
+maybeFromEventually :: Eventually a -> Maybe a
+maybeFromEventually Abandoned = Nothing
+maybeFromEventually (Occurs x) = Just x
+
 {-----------------------------------------------------------------------------
     DeltaQ
 ------------------------------------------------------------------------------}
@@ -135,10 +154,15 @@ instance Applicative Eventually where
 --
 -- Specifically, 'DeltaQ' is the probability distribution
 -- of finish times for an outcome.
-class (Num (Probability o), Fractional (Probability o), Outcome o)
+class   ( Eq (Probability o)
+        , Enum (Probability o)
+        , Num (Probability o)
+        , Fractional (Probability o)
+        , Outcome o
+        )
     => DeltaQ o
   where
-    -- | Numerical type representing probabilities in $[0,1]$.
+    -- | Numerical type representing probabilities in \( [0,1] \).
     --
     -- For example 'Double' or 'Rational'.
     type Probability o
@@ -168,8 +192,11 @@ class (Num (Probability o), Fractional (Probability o), Outcome o)
     -- | Probability of /not/ finishing.
     failure :: o -> Probability o
 
-    -- | Probability of finishing within the given time.
-    successBefore :: o -> Duration o -> Probability o
+    -- | Probability of finishing within the given time @t@.
+    --
+    -- \"Within\" is inclusive,
+    -- i.e. this returns the probability that the finishing time is @<= t@.
+    successWithin :: o -> Duration o -> Probability o
 
     -- | Given a probability @p@, return the smallest time @t@
     -- such that the probability of completing within that time
@@ -226,10 +253,14 @@ equality may be up to numerical accuracy.
 '(./\.)'
 
 > (x ./\. y) ./\. z  =  x ./\. (y ./\. z)
+>
+> x ./\. y  =  y ./\. x
 
 '(.\/.)'
 
 > (x .\/. y) .\/. z  =  x .\/. (y .\/. z)
+>
+> x .\/. y  =  y .\/. x
 
 -}
 
@@ -237,11 +268,14 @@ equality may be up to numerical accuracy.
 
 'choice'
 
+> choice 1 x y = x
+> choice 0 x y = y
+>
 > choice p x y .>>. z  =  choice p (x .>>. z) (y .>>. z)
 > choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
 > choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)
 
-'choices;
+'choices'
 
 > choices [] = never
 > choices ((w,o) : wos) = choice p o (choices wos)
@@ -263,29 +297,29 @@ equality may be up to numerical accuracy.
 > failure (choice p x y) = p * failure x + (1-p) * failure y
 > failure (uniform r s)  = 0
 
-'successBefore'
+'successWithin'
 
-TODO: Boundary point - distinguish \"before\" from \"not after".
-Important for delta functions.
-
-> successBefore never    t = 0
-> successBefore (wait s) t = if t <= s then 0 else 1
+> successWithin never    t = 0
+> successWithin (wait s) t = if t < s then 0 else 1
 >
-> successBefore (x ./\. y) t =
->   successBefore t x * successBefore t y
-> successBefore (x .\/. y) t =
->   1 - (1 - successBefore t x) * (1 - successBefore t y)
+> successWithin (x ./\. y) t =
+>   successWithin t x * successWithin t y
+> successWithin (x .\/. y) t =
+>   1 - (1 - successWithin t x) * (1 - successWithin t y)
 >
-> successBefore (choice p x y) t =
->   p * successBefore t x + (1-p) * successBefore t y
-> successBefore (uniform r s) t
->   | t <= r          = 0
->   | r < t && t <= s = (t-r) / (s-r)
->   | s < t           = 1
+> successWithin (choice p x y) t =
+>   p * successWithin t x + (1-p) * successWithin t y
+> successWithin (uniform r s) t
+>   | t < r           = 0
+>   | r <= t && t < s = (t-r) / (s-r)
+>   | s <= t          = 1
 
 'quantile'
 
 > p <= q  implies  quantile p o <= quantile q o
+>
+> quantile p never    = Abandoned
+> quantile p (wait t) = if p > 0 then Occurs t else Abandoned
 >
 > quantile p (uniform r s)  =  r + p*(s-t)  if r <= s
 
@@ -302,13 +336,18 @@ Important for delta functions.
 
 'deadline'
 
-> deadline never      = Abandoned
-> deadline (wait t)   = Occurs t
-> deadline (x .>>. y) = (+) <$> deadline x <*> deadline y
-> deadline (x ./\. y) = max (deadline x) (deadline y)
-> deadline (x .\/. y) = min (deadline x) (deadline y)
+> deadline never      =  Abandoned
+> deadline (wait t)   =  Occurs t
+> deadline (x .>>. y) =  (+) <$> deadline x <*> deadline y
+> deadline (x ./\. y) =  max (deadline x) (deadline y)
 >
-> deadline (choice p x y) = max (deadline x) (deadline y)  if p ≠ 0, p ≠ 1
+> deadline (x .\/. y) =  min (deadline x) (deadline y)
+>   if failure x = 0, failure y = 0
+>
+> deadline (choice p x y) = max (deadline x) (deadline y)
+>   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
+>
+>
 > deadline (uniform r s)  = Occurs s   if r <= s
 
 -}

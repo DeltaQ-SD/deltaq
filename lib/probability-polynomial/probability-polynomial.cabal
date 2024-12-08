@@ -42,19 +42,16 @@ library
 
   build-depends:
     , base
+    , containers
     , deepseq
     , exact-combinatorics > 0.2
 
   exposed-modules:
+    Data.Function.Class
+    Numeric.Function.Piecewise
+    Numeric.Measure.Discrete
+    Numeric.Measure.Finite.Mixed
     Numeric.Polynomial.Simple
-    PWPs.IRVs
-
-  other-modules:
-    PWPs.Calculus
-    PWPs.Piecewise
-    PWPs.PiecewiseClasses
-    PWPs.PolyDeltas
-    PWPs.PolyHeavisides
 
 test-suite test
   import:           warnings
@@ -73,12 +70,19 @@ test-suite test
     
   build-depends:
     , base
+    , containers
     , probability-polynomial
     , hspec ^>= 2.11.0
     , QuickCheck
   
   main-is:
     Spec.hs
+  
+  other-modules:
+    Numeric.Function.PiecewiseSpec
+    Numeric.Measure.DiscreteSpec
+    Numeric.Measure.Finite.MixedSpec
+    Numeric.Polynomial.SimpleSpec
 
 benchmark probability-polynomial-benchmark
   import:           warnings

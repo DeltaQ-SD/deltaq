@@ -44,6 +44,7 @@ library
   default-language: Haskell2010
   build-depends:
     , base
+    , deepseq > 1.4
     , Chart
     , probability-polynomial
 
@@ -51,12 +52,12 @@ library
     DeltaQ
     DeltaQ.Class
     DeltaQ.PiecewisePolynomial
-  
+    DeltaQ.Plot
+
   other-modules:
     DeltaQ.Model.DeltaQ
     DeltaQ.Model.Introspection
     DeltaQ.Model.Utilities
-    DeltaQ.PWPs
 
 test-suite test
   import:           warnings
@@ -70,10 +71,36 @@ test-suite test
     , base
     , deltaq
     , hspec ^>= 2.11.0
+    , probability-polynomial
     , QuickCheck
   
   main-is:
     Spec.hs
 
   other-modules:
+    DeltaQ.ClassSpec
     DeltaQ.PiecewisePolynomialSpec
+
+benchmark basic
+  import:           warnings
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   benchmark
+  default-language: Haskell2010
+
+  build-depends:
+    , base
+    , bytestring
+    , deltaq
+    , cassava
+    , criterion > 1.6
+    , deepseq > 1.4
+    , hvega
+    , optparse-applicative
+    , statistics
+    , vector
+
+  main-is:
+    Main.hs
+
+  other-modules:
+    Benchmark.Plot

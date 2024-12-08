@@ -1,13 +1,14 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TypeFamilies #-}
 
 {-|
-Copyright   : (c) Peter Thompson, 2023
-License     : BSD-2-Clause
+Copyright   : Peter Thompson, 2023-2024
+              Predictable Network Solutions Ltd., 2024
+License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
 Stability   : experimental
-
-Polynomials and computations with them.
+Description : Polynomials and computations with them.
 -}
 module Numeric.Polynomial.Simple
     ( -- * Basic operations
@@ -22,21 +23,23 @@ module Numeric.Polynomial.Simple
     , scale
     , scaleX
 
-    -- * Advanced operations
-    -- ** Convenience
+      -- * Advanced operations
+
+      -- ** Convenience
     , display
     , lineFromTo
 
-    -- ** Algebraic
+      -- ** Algebraic
     , translate
     , integrate
     , differentiate
     , convolve
 
-    -- ** Numerical
+      -- ** Numerical
     , compareToZero
     , countRoots
-    , findRoot
+    , isMonotonicallyIncreasingOn
+    , root
     ) where
 
 import Control.DeepSeq
@@ -46,10 +49,12 @@ import Control.DeepSeq
 import GHC.Generics
     ( Generic
     , Generic1
-    ) -- needed to automatically derive NFData
-import Math.Combinatorics.Exact.Binomial
+    )
+import Math.Combinatorics.Exact.Binomial -- needed to automatically derive NFData
     ( choose
     )
+
+import qualified Data.Function.Class as Fun
 
 {-----------------------------------------------------------------------------
     Basic operations
@@ -60,17 +65,19 @@ newtype Poly a = Poly [a]
     -- INVARIANT: List of coefficients from lowest to highest degree.
     -- INVARIANT: The empty list is not allowed,
     -- the zero polynomial is represented as [0].
-    deriving (Show, Functor, Foldable, Generic, Generic1)
+    deriving (Show, Generic, Generic1)
 
 instance NFData a => NFData (Poly a)
 instance NFData1 Poly
 
-instance Eq a => Eq (Poly a) where
-    Poly x == Poly y = x == y
+instance (Eq a, Num a) => Eq (Poly a) where
+    x == y =
+        toCoefficients (trimPoly x) == toCoefficients (trimPoly y)
 
--- | The constant polynomial.
---
--- > eval (constant a) = const a
+{-| The constant polynomial.
+
+> eval (constant a) = const a
+-}
 constant :: a -> Poly a
 constant x = Poly [x]
 
@@ -78,12 +85,15 @@ constant x = Poly [x]
 zero :: Num a => Poly a
 zero = constant 0
 
--- | Degree of a polynomial.
---
--- The degree of a constant polynomial is @0@, but
--- the degree of the zero polynomial is @-1@ for Euclidean division.
+{-| Degree of a polynomial.
+
+The degree of a constant polynomial is @0@, but
+the degree of the zero polynomial is @-1@ for Euclidean division.
+-}
 degree :: (Eq a, Num a) => Poly a -> Int
-degree x = if trimPoly x == zero then -1 else length (trimPoly x) - 1
+degree x = case trimPoly x of
+    Poly [0] -> -1
+    Poly xs -> length xs - 1
 
 -- | remove top zeroes
 trimPoly :: (Eq a, Num a) => Poly a -> Poly a
@@ -97,33 +107,38 @@ trimPoly (Poly as) = Poly (reverse $ goTrim $ reverse as)
 monomial :: (Eq a, Num a) => Int -> a -> Poly a
 monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
 
--- | Construct a polynomial @a0 + a1·x + …@ from
--- its list of coefficients @[a0, a1, …]@.
+{-| Construct a polynomial @a0 + a1·x + …@ from
+its list of coefficients @[a0, a1, …]@.
+-}
 fromCoefficients :: Num a => [a] -> Poly a
 fromCoefficients [] = zero
 fromCoefficients as = Poly as
 
--- | List the coefficients @[a0, a1, …]@
--- of a polynomial @a0 + a1·x + …@.
+{-| List the coefficients @[a0, a1, …]@
+of a polynomial @a0 + a1·x + …@.
+-}
 toCoefficients :: Poly a -> [a]
 toCoefficients (Poly as) = as
 
--- | Multiply the polynomial by the unknown @x@.
---
--- > eval (scaleX p) x = x * eval p x
--- > degree (scaleX p) = 1 + degree p  if  degree p >= 0
+{-| Multiply the polynomial by the unknown @x@.
+
+> eval (scaleX p) x = x * eval p x
+> degree (scaleX p) = 1 + degree p  if  degree p >= 0
+-}
 scaleX :: (Eq a, Num a) => Poly a -> Poly a
 scaleX (Poly xs)
     | xs == [0] = Poly xs -- don't shift up zero
     | otherwise = Poly (0 : xs)
 
--- | Scale a polynomial by a scalar.
--- More efficient than multiplying by a constant polynomial.
---
--- > eval (scale a p) x = a * eval p x
+{-| Scale a polynomial by a scalar.
+More efficient than multiplying by a constant polynomial.
+
+> eval (scale a p) x = a * eval p x
+-}
 scale :: Num a => a -> Poly a -> Poly a
 scale x (Poly xs) = Poly (map (* x) xs)
-    -- Does not agree with naming conventions in `Data.Poly`.
+
+-- Does not agree with naming conventions in `Data.Poly`.
 
 {-|
    Add polynomials by simply adding their coefficients as long as both lists continue.
@@ -156,9 +171,10 @@ mulPolys as bs = sum (intermediateSums as bs)
     intermediateSums (Poly (x : xs)) ys =
         scale x ys : intermediateSums (Poly xs) (scaleX ys)
 
--- | Algebraic operations '(+)', '(*)' and 'negate' on polynomials.
---
--- The functions 'abs' and 'signum' are undefined.
+{-| Algebraic operations '(+)', '(*)' and 'negate' on polynomials.
+
+The functions 'abs' and 'signum' are undefined.
+-}
 instance (Eq a, Num a) => Num (Poly a) where
     (+) = addPolys
     (*) = mulPolys
@@ -170,13 +186,24 @@ instance (Eq a, Num a) => Num (Poly a) where
 {-|
 Evaluate a polynomial at a point.
 
+> eval :: Poly a -> a -> a
+-}
+instance Num a => Fun.Function (Poly a) where
+    type instance Domain (Poly a) = a
+    type instance Codomain (Poly a) = a
+    eval = eval
+
+{-|
+Evaluate a polynomial at a point.
+
+> eval :: Poly a -> a -> a
+
 Uses Horner's method to minimise the number of multiplications.
 
 @
 a0 + a1·x + a2·x^2 + ... + a{n-1}·x^{n-1} + an·x^n
   = a0 + x·(a1 + x·(a2 + x·(… + x·(a{n-1} + x·an)) ))
 @
-
 -}
 eval :: Num a => Poly a -> a -> a
 eval (Poly as) x = foldr (\ai result -> x * result + ai) 0 as
@@ -184,54 +211,64 @@ eval (Poly as) x = foldr (\ai result -> x * result + ai) 0 as
 {-----------------------------------------------------------------------------
     Convenience operations
 ------------------------------------------------------------------------------}
+
 {-|
 Return a list of pairs @(x, eval p x)@ from the graph of the polynomial.
 The values @x@ are from the range @(l, u)@ with uniform spacing @s@.
 
 Specifically,
 
-> map fst (display p (l, u) s) = [l, l+s, l + 2·s, … , u']
+> map fst (display p (l, u) s)
+>   = [l, l+s, l + 2·s, … , u'] ++ if u' == l then [] else [l]
 
 where @u'@ is the largest number of the form @u' = l + s·k@, @k@ natural,
 that still satisfies @u' < l@.
+We always display the last point as well.
 -}
 display :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
 display p (l, u) s
-    | s == 0 = [(l, eval p l)]
-    | otherwise = goDisplay l
+  | s == 0 = map evalPoint [l, u]
+  | otherwise = map evalPoint (l : go (l + s))
   where
-    goDisplay x = if x >= u then [] else (x, eval p x) : goDisplay (x + s)
-    -- TODO: Off-by-one? What if x == u?
+    evalPoint x = (x, eval p x)
+    go x
+      | x >= u = [u] -- always include the last point
+      | otherwise = x : go (x + s)
 
--- | Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
--- assuming that @x1 ≠ x2@.
---
--- > let p = lineFromTo (x1, y1) (x2, y2)
--- > 
--- > degree p <= 1
--- > eval p x1 = y1
--- > eval p x2 = y2
-lineFromTo :: (Eq a, Fractional a) => (a,a) -> (a,a) -> Poly a
+{-| Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
+assuming that @x1 ≠ x2@.
+
+If the points are equal, we return a constant polynomial.
+
+> let p = lineFromTo (x1, y1) (x2, y2)
+>
+> degree p <= 1
+> eval p x1 = y1
+> eval p x2 = y2
+-}
+lineFromTo :: (Eq a, Fractional a) => (a, a) -> (a, a) -> Poly a
 lineFromTo (x1, y1) (x2, y2)
+    | x1 == x2 = constant y1
     | slope == 0 = constant y1
     | otherwise = fromCoefficients [shift, slope]
   where
-        -- slope of the linear function
+    -- slope of the linear function
     slope = (y2 - y1) / (x2 - x1)
-        -- the constant shift is fixed by
-        -- the fact that the line needs to pass through (x1,y1)
+    -- the constant shift is fixed by
+    -- the fact that the line needs to pass through (x1,y1)
     shift = y1 - x1 * slope
 
 {-----------------------------------------------------------------------------
     Advanced Operations
 ------------------------------------------------------------------------------}
 
--- | Indefinite integral of a polynomial with constant term zero.
---
--- The integral of @x^n@ is @1/(n+1)·x^(n+1)@.
---
--- > eval (integrate p) 0 = 0
--- > integrate (differentiate p) = p - constant (eval p 0)
+{-| Indefinite integral of a polynomial with constant term zero.
+
+The integral of @x^n@ is @1/(n+1)·x^(n+1)@.
+
+> eval (integrate p) 0 = 0
+> integrate (differentiate p) = p - constant (eval p 0)
+-}
 integrate :: (Eq a, Fractional a) => Poly a -> Poly a
 integrate (Poly as) =
     -- Integrate by puting a zero constant term at the bottom and
@@ -241,12 +278,13 @@ integrate (Poly as) =
     -- we get [0,0] so need to trim
     trimPoly (Poly (0 : zipWith (/) as (iterate (+ 1) 1)))
 
--- | Differentiate a polynomial.
---
--- We have @dx^n/dx = n·x^(n-1)@.
---
--- > differentiate (integrate p) = p
--- > differentiate (p * q) = (differentiate p) * q + p * (differentiate q)
+{-| Differentiate a polynomial.
+
+We have @dx^n/dx = n·x^(n-1)@.
+
+> differentiate (integrate p) = p
+> differentiate (p * q) = (differentiate p) * q + p * (differentiate q)
+-}
 differentiate :: Num a => Poly a -> Poly a
 differentiate (Poly []) = error "Polynomial was empty"
 differentiate (Poly [_]) = zero -- constant differentiates to zero
@@ -254,8 +292,9 @@ differentiate (Poly (_ : as)) =
     -- discard the constant term, everything else noves down one
     Poly (zipWith (*) as (iterate (+ 1) 1))
 
--- | Convolution of two polynomials defined on bounded intervals.
--- Produces three contiguous pieces as a result.
+{-| Convolution of two polynomials defined on bounded intervals.
+Produces three contiguous pieces as a result.
+-}
 convolve
     :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> (a, a, Poly a) -> [(a, Poly a)]
 convolve (lf, uf, Poly fs) (lg, ug, Poly gs)
@@ -294,11 +333,13 @@ convolve (lf, uf, Poly fs) (lg, ug, Poly gs)
                     , (n, b) <- zip [0 ..] gs
                     ]
 
-            firstTerm = makeTerm (\m n k -> innerSum m n (lg ^) k - monomial (n - k) (lf ^ (m + k + 1)))
+            firstTerm =
+                makeTerm (\m n k -> innerSum m n (lg ^) k - monomial (n - k) (lf ^ (m + k + 1)))
 
             secondTerm = makeTerm (\m n -> innerSum m n (\k -> lg ^ k - ug ^ k))
 
-            thirdTerm = makeTerm (\m n k -> monomial (n - k) (uf ^ (m + k + 1)) - innerSum m n (ug ^) k)
+            thirdTerm =
+                makeTerm (\m n k -> monomial (n - k) (uf ^ (m + k + 1)) - innerSum m n (ug ^) k)
         in
             {-
                 When convolving distributions, both distributions will start at 0 and so there will always be a pair of intervals
@@ -315,10 +356,10 @@ convolve (lf, uf, Poly fs) (lg, ug, Poly gs)
                     , (uf + ug, zero)
                     ]
 
--- | Translate the argument of a polynomial by summing binomial expansions.
---
--- > eval (translate y p) x = eval p (x - y)
---
+{-| Translate the argument of a polynomial by summing binomial expansions.
+
+> eval (translate y p) x = eval p (x - y)
+-}
 translate :: (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
 translate s (Poly ps) = sum [b `scale` binomialExpansion n s | (n, b) <- zip [0 ..] ps]
   where
@@ -417,11 +458,21 @@ euclidianDivision (pa, pb) =
       where
         s = monomial (degree r - degB) (leadingCoefficient r / lcB)
 
--- |
--- Measure whether or not a polynomial is consistently above or below zero,
--- or equals zero.
---
--- Need to consider special cases where there is a root at a boundary point.
+-- | Check whether a polynomial is monotonically increasing on
+-- a given interval.
+isMonotonicallyIncreasingOn
+    :: (Fractional a, Eq a, Ord a) => Poly a -> (a,a) -> Bool
+isMonotonicallyIncreasingOn p (x1,x2) =
+    eval p x1 <= eval p x2
+    && countRoots (x1, x2, differentiate p) == 0
+    -- FIXME: What about double roots?
+
+{-|
+Measure whether or not a polynomial is consistently above or below zero,
+or equals zero.
+
+Need to consider special cases where there is a root at a boundary point.
+-}
 compareToZero :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Maybe Ordering
 compareToZero (l, u, p)
     | l >= u = error "Invalid interval"
@@ -443,18 +494,20 @@ assuming that there is exactly one root in the given interval.
 This precondition has to be checked through other means,
 e.g. 'countRoots'.
 
-We find the root by repeatedly halving the interval in which the root must lie.
+We find the root by repeatedly halving the interval in which the root must lie
+until its width is less than the specified precision.
 Constant and linear polynomials, @degree p <= 1@, are treated as special cases.
 -}
 findRoot
     :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
 findRoot precision (l, u) p
-    | precision <= 0 = error "Invalid precision value"
-        -- the polynomial is zero, so the whole interval is a root, so return the basepoint
+    -- if the polynomial is zero, the whole interval is a root, so return the basepoint
     | degp < 0 = Just l
-         -- the poly is a non-zero constant so no root is present
+    -- if the poly is a non-zero constant, no root is present
     | degp == 0 = Nothing
+    -- if the polynomial has degree 1, can calculate the root exactly
     | degp == 1 = Just (-(head ps / last ps)) -- p0 + p1x = 0 => x = -p0/p1
+    | precision <= 0 = error "Invalid precision value"
     | otherwise = Just (halveInterval precision l u pl pu)
   where
     Poly ps = p
@@ -462,15 +515,27 @@ findRoot precision (l, u) p
     pu = eval p u
     pl = eval p l
     halveInterval eps x y px py
-            -- when the interval is small enough, stop:
-            -- the root is in this interval, so take the mid point
+        -- when the interval is small enough, stop:
+        -- the root is in this interval, so take the mid point
         | width <= eps = mid
-            -- choose the lower half,
-            -- as the polynomial has different signs at the ends
+        -- choose the lower half,
+        -- as the polynomial has different signs at the ends
         | px * pmid < 0 = halveInterval eps x mid px pmid
-            -- choose the upper half
+        -- choose the upper half
         | otherwise = halveInterval eps mid y pmid py
       where
         width = y - x
         mid = x + width / 2
         pmid = eval p mid
+
+{-| Otherwise we have a polynomial:
+subtract the value we are looking for so that we seek a zero crossing
+-}
+root
+    :: (Ord a, Num a, Eq a, Fractional a)
+    => a
+    -> a
+    -> (a, a)
+    -> Poly a
+    -> Maybe a
+root e x (l, u) p = findRoot e (l, u) (p - constant x)

@@ -5,12 +5,20 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
+{-|
+Copyright   : Predictable Network Solutions Ltd., 2024
+License     : BSD-3-Clause
+Maintainer  : neil.davies@pnsol.com
+-}
 module DeltaQ.PiecewisePolynomialSpec
     ( spec
     ) where
 
 import Prelude
 
+import Data.Maybe
+    ( fromJust
+    )
 import Data.Ratio
     ( (%)
     )
@@ -20,13 +28,15 @@ import DeltaQ.Class
     , Outcome (..)
     )
 import DeltaQ.PiecewisePolynomial
-    ( Durations
+    ( DQ
+    , complexity
+    , distribution
+    , fromPositiveMeasure
     )
 import Test.Hspec
     ( Spec
     , describe
     , it
-    , xit
     )
 import Test.QuickCheck
     ( Arbitrary
@@ -36,6 +46,7 @@ import Test.QuickCheck
     , Property
     , (===)
     , (==>)
+    , (.&&.)
     , arbitrary
     , choose
     , chooseInteger
@@ -46,7 +57,10 @@ import Test.QuickCheck
     , property
     , scale
     , vectorOf
+    , withMaxSuccess
     )
+
+import qualified Numeric.Measure.Finite.Mixed as Measure
 
 {-----------------------------------------------------------------------------
     Tests
@@ -54,40 +68,51 @@ import Test.QuickCheck
 infix 0 .===
 
 -- | '(===)' with constrained types.
-(.===) :: Durations Rational -> Durations Rational -> Property
+(.===) :: DQ -> DQ -> Property
 (.===) = (===)
 
 spec :: Spec
 spec = do
+    describe "general DeltaQ properties" specProperties
+    describe "DQ specifics" specImplementation
+
+specProperties :: Spec
+specProperties = do
     describe "never" $ do
         it "x .>>. never" $ property $
             \x ->
                 (x .>>. never) .=== never
-        xit "x ./\\. never" $ property $
+
+        it "x ./\\. never" $ property $
             \x ->
                 (x ./\. never) .=== never
-        xit "x .\\/. never" $ property $
+
+        it "x .\\/. never" $ property $
             \x ->
-                (x ./\. never) .=== x
+                (x .\/. never) .=== x
 
         it "never .>>. x" $ property $
             \x ->
                 (never .>>. x) .=== never
-        xit "never ./\\. x" $ property $
+
+        it "never ./\\. x" $ property $
             \x ->
                 (never ./\. x) .=== never
-        xit "never .\\/. x" $ property $
+
+        it "never .\\/. x" $ property $
             \x ->
-                (never ./\. x) .=== x
+                (never .\/. x) .=== x
 
     describe "wait" $ do
         it ".>>." $ property $
             \(NonNegative t) (NonNegative s) ->
                 (wait t .>>. wait s) .=== wait (t+s)
-        xit "./\\." $ property $
+
+        it "./\\." $ property $
             \(NonNegative t) (NonNegative s) ->
                 (wait t ./\. wait s) .=== wait (max t s)
-        xit ".\\/." $ property $
+
+        it ".\\/." $ property $
             \(NonNegative t) (NonNegative s) ->
                 (wait t .\/. wait s) .=== wait (min t s)
 
@@ -97,184 +122,284 @@ spec = do
                 (x .>>. y) .>>. z .=== x .>>. (y .>>. z)
 
     describe "./\\." $ do
-        xit "associativity" $ property $
+        it "associativity" $ property $
             \x y z ->
                 (x ./\. y) ./\. z .=== x ./\. (y ./\. z)
 
+        it "commutativity" $ property $
+            \x y ->
+                x ./\. y  .===  y ./\. x
+
     describe ".\\/." $ do
-        xit "associativity" $ property $
+        it "associativity" $ property $
             \x y z ->
                 (x .\/. y) .\/. z .=== x .\/. (y .\/. z)
 
+        it "commutativity" $ property $
+            \x y ->
+                x .\/. y  .===  y .\/. x
+
     describe "choice" $ do
+        it "choice 1" $ property $
+            \x y ->
+                choice 1 x y  .===  x
+
+        it "choice 0" $ property $
+            \x y ->
+                choice 0 x y  .===  y
+
         it ".>>." $ property $ mapSize (`div` 3) $
             \(Probability p) x y z ->
                 choice p x y .>>. z  .===  choice p (x .>>. z) (y .>>. z)
-        xit "./\\." $ property $
+
+        it "./\\." $ property $
             \(Probability p) x y z ->
                 choice p x y ./\. z  .===  choice p (x ./\. z) (y ./\. z)
-        xit ".\\/." $ property $
+
+        it ".\\/." $ property $
             \(Probability p) x y z ->
                 choice p x y .\/. z  .===  choice p (x .\/. z) (y .\/. z)
 
     describe "choices" $ do
         it "choices []" $ property $
             (choices []  .===   never)
-        xit "choices ((w,o):wos)" $ property $
-            \(Positive (w :: Rational)) (o :: Durations Rational) ws' os ->
-                let unPositive (Positive x) = x
-                    ws = map unPositive ws'
-                    wos = zip ws os
+
+        it "choices ((w,o):wos)" $ property $ mapSize (`div` 2) $
+            \ (Positive (w :: Rational))
+              (o :: DQ)
+              (wos' :: [(Positive Rational, DQ)]) ->
+                let wos = map (\(Positive w', o') -> (w',o')) wos'
+                    ws = map fst wos
                     p = w / (w + sum ws)
                 in
                     choices ((w,o):wos)
                         .=== choice p o (choices wos)
 
     describe "uniform" $ do
-        xit "wait .>>. uniform" $ property $
-            \(NonNegative r) (NonNegative s) (NonNegative t) ->
+        it "wait .>>. uniform" $ property $
+            \(NonNegative r) (Positive d) (NonNegative t) ->
+                let s = r + d in
                 (wait t .>>. uniform r s) .=== uniform (t+r) (t+s)
-        xit "uniform .>>. wait" $ property $
-            \(NonNegative r) (NonNegative s) (NonNegative t) ->
+
+        it "uniform .>>. wait" $ property $
+            \(NonNegative r) (Positive d) (NonNegative t) ->
+                let s = r + d in
                 (uniform r s .>>. wait t) .=== uniform (r+t) (s+t)
 
     describe "failure" $ do
-        let failure' :: Durations Rational -> Rational
+        let failure' :: DQ -> Rational
             failure' = failure
 
         it "never" $ property $
             failure' never  ===  1
-        xit "wait" $ property $
+
+        it "wait" $ property $
             \(NonNegative t) ->
-                failure' (wait t)  ===  1
-        xit ".>>." $ property $
+                failure' (wait t)  ===  0
+
+        it ".>>." $ property $
             \x y ->
                 failure' (x .>>. y)
                     ===  1 - (1 - failure' x) * (1 - failure' y)
-        xit "./\\." $ property $
+
+        it "./\\." $ property $
             \x y ->
                 failure' (x ./\. y)
                     ===  1 - (1 - failure' x) * (1 - failure' y)
-        xit ".\\/." $ property $
+
+        it ".\\/." $ property $
             \x y ->
                 failure' (x .\/. y)
                     ===  failure' x * failure' y
-        xit "choice" $ property $
+
+        it "choice" $ property $
             \(Probability p) x y ->
                 failure' (choice p x y)
                     ===  p * failure' x + (1-p) * failure' y
-        xit "uniform" $ property $
-            \(NonNegative r) (NonNegative s) ->
+
+        it "uniform" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d in
                 failure' (uniform r s)  ===  0
 
-    describe "successBefore" $ do
-        let successBefore' :: Durations Rational -> Rational -> Rational
-            successBefore' = successBefore
+    describe "successWithin" $ do
+        let successWithin' :: DQ -> Rational -> Rational
+            successWithin' = successWithin
 
-        xit "never" $ property $
+        it "never" $ property $
             \(NonNegative t) ->
-                successBefore' never t  ===  0
-        xit "wait" $ property $
+                successWithin' never t  ===  0
+
+        it "wait" $ property $
             \(NonNegative t) (NonNegative s) ->
-                successBefore' (wait s) t  ===  if t <= s then 0 else 1
-        xit "./\\." $ property $
+                successWithin' (wait s) t  ===  if t < s then 0 else 1
+
+        it "./\\." $ property $
             \(NonNegative t) x y ->
-                successBefore' (x ./\. y) t
-                    === successBefore' x t * successBefore' y t
-        xit ".\\/." $ property $
+                successWithin' (x ./\. y) t
+                    === successWithin' x t * successWithin' y t
+
+        it ".\\/." $ property $
             \(NonNegative t) x y ->
-                successBefore' (x .\/. y) t
-                    === 1 - (1 - successBefore' x t) * (1 - successBefore' y t)
-        xit "choice" $ property $
+                successWithin' (x .\/. y) t
+                    === 1 - (1 - successWithin' x t) * (1 - successWithin' y t)
+
+        it "choice" $ property $
             \(NonNegative t) (Probability p) x y ->
-                successBefore' (choice p x y) t
-                    ===  p * successBefore' x t + (1-p) * successBefore' y t
+                successWithin' (choice p x y) t
+                    ===  p * successWithin' x t + (1-p) * successWithin' y t
+
         it "uniform" $ property $ 
-            let successBefore2 r s t
-                    | t <= r          = 0
-                    | r < t && t <= s = (t-r) / (s-r)
-                    | s < t           = 1
+            let successWithin2 r s t
+                    | t < r           = 0
+                    | r <= t && t < s = (t-r) / (s-r)
+                    | s <= t          = 1
                     | otherwise       = error "impossible"
             in \(NonNegative t) (NonNegative r) (Positive d) ->
                 let s = r + d
-                in  successBefore' (uniform r s) t
-                        === successBefore2 r s t
+                in  successWithin' (uniform r s) t
+                        === successWithin2 r s t
 
     describe "quantile" $ do
-        let quantile' :: Rational -> Durations Rational -> Eventually Rational
+        let quantile' :: Rational -> DQ -> Eventually Rational
             quantile' = quantile
 
-        xit "monotonic" $ property $
+        it "monotonic" $ property $
             \o (Probability p) (Probability q) ->
                 let p' = min p q
                     q' = max p q
                 in
                     p' <= q'  ==>  quantile' p' o <= quantile' q' o
 
+        it "never" $ property $
+            \(Probability p) ->
+                quantile' p never  ===  Abandoned
+
+        it "wait" $ property $
+            \(Probability p) (NonNegative t) ->
+                quantile' p (wait t)
+                    ===  if p >= 0 then Occurs t else Abandoned
+
         it "uniform" $ property $
             \(Probability p) (NonNegative r) (Positive d) ->
-                let s = r + d
-                in  quantile' p (uniform r s) === Occurs (r + p*(s-r))
+                let s = r + d in 
+                quantile' p (uniform r s)
+                    === Occurs (r + p*(s-r))
 
     describe "earliest" $ do
-        let earliest' :: Durations Rational -> Eventually Rational
+        let earliest' :: DQ -> Eventually Rational
             earliest' = earliest
 
-        xit "never" $ property $
+        it "never" $ property $
             earliest' never  ===  Abandoned
+
         it "wait" $ property $
             \(NonNegative t) ->
                 earliest' (wait t)  ===  Occurs t
-        xit ".>>." $ property $
+
+        it ".>>." $ property $
             \x y ->
                 earliest' (x .>>. y)
                     ===  ((+) <$> earliest' x <*> earliest' y)
-        xit "./\\." $ property $
+
+        it "./\\." $ property $
             \x y ->
                 earliest' (x ./\. y)
                     ===  max (earliest' x) (earliest' y)
-        xit ".\\/." $ property $
+
+        it ".\\/." $ property $
             \x y ->
-                earliest' (x ./\. y)
+                earliest' (x .\/. y)
                     ===  min (earliest' x) (earliest' y)
-        xit "choice" $ property $
+
+        it "choice" $ property $
             \(Probability p) x y ->
                 (0 < p && p < 1) ==>
                     (earliest' (choice p x y)
                         === min (earliest' x) (earliest' y))
-        xit "uniform" $ property $
+
+        it "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 earliest' (uniform r s)  ===  Occurs (min r s)
 
     describe "deadline" $ do
-        let deadline' :: Durations Rational -> Eventually Rational
+        let deadline' :: DQ -> Eventually Rational
             deadline' = deadline
 
-        xit "never" $ property $
+        it "never" $ property $
             deadline' never  ===  Abandoned
+
         it "wait" $ property $
             \(NonNegative t) ->
                 deadline' (wait t)  ===  Occurs t
-        xit ".>>." $ property $
+
+        it ".>>." $ property $
             \x y ->
                 deadline' (x .>>. y)
                     ===  ((+) <$> deadline' x <*> deadline' y)
-        xit "./\\." $ property $
+
+        it "./\\." $ property $
             \x y ->
                 deadline' (x ./\. y)
                     ===  max (deadline' x) (deadline' y)
-        xit ".\\/." $ property $
+
+        it ".\\/." $ property $
             \x y ->
-                deadline' (x ./\. y)
-                    ===  min (deadline' x) (deadline' y)
-        xit "choice" $ property $
+                (failure x == 0 && failure y == 0) ==>
+                    deadline' (x .\/. y)
+                        ===  min (deadline' x) (deadline' y)
+
+        it "choice" $ property $
             \(Probability p) x y ->
-                (0 < p && p < 1) ==>
-                    (deadline' (choice p x y)
-                        === max (deadline' x) (deadline' y))
-        xit "uniform" $ property $
+                (0 < p && p < 1 && failure x == 0 && failure y == 0) ==>
+                    deadline' (choice p x y)
+                        === max (deadline' x) (deadline' y)
+
+        it "uniform" $ property $
             \(NonNegative r) (NonNegative s) ->
                 deadline' (uniform r s)  ===  Occurs (max r s)
+
+    describe "stress tests" $ do
+        it "orders of magnitude" $ withMaxSuccess 1 $ property $
+            let waitPower2 :: Int -> (Rational, DQ)
+                waitPower2 k = ((1/2)^k, wait (2^k))
+
+                n = 20
+                o = choices $ map waitPower2 [1..n]
+            in
+                deadline o  ===  Occurs (2^n)
+                .&&. failure o  === 0
+                .&&. quantile (1 - 1/4) o  ===  Occurs 4
+
+specImplementation :: Spec
+specImplementation = do
+    describe "fromPositiveMeasure" $ do
+        it "fails on negative measure" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d in
+                fromPositiveMeasure
+                    (Measure.scale (-1) (Measure.uniform r s))
+                    === Nothing
+
+    describe "fromPositiveMeasure . distribution" $ do
+        it "uniform" $ property $
+            \(NonNegative r) (Positive d) ->
+                let s = r + d
+                    id' =
+                        fromPositiveMeasure
+                        . fromJust
+                        . Measure.fromDistribution
+                        . distribution
+                in
+                    id' (uniform r s) === Just (uniform r s)
+
+    describe "complexity" $ do
+        it "grows exponentially with .>>." $ withMaxSuccess 1 $ property $
+            let power2 (n :: Int) = choice (1/2) (wait 0) (wait (2^n))
+                convolved (m :: Int) = foldr1 (.>>.) $ map power2 [1..m]
+            in
+                complexity (power2 1) <= 4
+                    .&&. complexity (convolved 10) >= 2^(10 :: Int)
 
 {-----------------------------------------------------------------------------
     Random generators
@@ -285,7 +410,7 @@ data Prob = Probability Rational
 instance Arbitrary Prob where
     arbitrary = Probability <$> genProbability
 
-instance Arbitrary (Durations Rational) where
+instance Arbitrary DQ where
     arbitrary = scale (`div` 10) genDeltaQ
 
 -- | Generate a random 'DeltaQ' by generating a random expression.
