@@ -1,16 +1,59 @@
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+
 {-|
 Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : neil.davies@pnsol.com
 Description : Example plots
 -}
-module DeltaQ.Example.Plot where
+module DeltaQ.Example.Plot
+    ( -- * Plots
+    -- $setup
+
+    -- $plots
+    ) where
 
 import qualified Diagrams.Core as D
 import qualified Diagrams.Backend.SVG as D
 import qualified Diagrams.TwoD.Size as D
 import qualified Graphics.Rendering.Chart as Chart
 import qualified Graphics.Rendering.Chart.Backend.Diagrams as Chart
+
+{- $setup
+We need to import the following modules:
+
+>>> import Prelude
+>>> import DeltaQ
+-}
+
+{- $plots
+
+Consider the following definitions:
+
+>>> :{
+e0, e1, e2 :: DQ
+e0 = choice 0.0001 never $ uniform 0.5 1.5 .>>. uniform 0.5 3.5
+e1 = choice 0.05 never $ e0 .>>. wait 0.5
+e2 = e0 ./\. e1
+:}
+
+We plot them like this:
+
+>>> plot_e0 <- toDiagram $ plotCDF "e0" e0
+
+<<diagrams/e0.svg>>
+
+>>> plot_e1 <- toDiagram $ plotCDF "e0" e0
+
+<<diagrams/e1.svg>>
+
+=== __(source code for generating images)__
+>>> haddockRender "e0.svg" 500 plot_e0
+File written:diagrams/e0.svg
+
+>>> haddockRender "e1.svg" 500 plot_e1
+File written:diagrams/e1.svg
+-}
 
 {-----------------------------------------------------------------------------
     Helper functions
