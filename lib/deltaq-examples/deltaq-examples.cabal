@@ -30,6 +30,9 @@ extra-doc-files:
 common warnings
   ghc-options: -Wall
 
+common executable
+  ghc-options: -threaded -rtsopts
+
 library
   import:           warnings
   hs-source-dirs:   src
@@ -45,3 +48,13 @@ library
 
   exposed-modules:
     DeltaQ.Example.Plot
+
+test-suite doctest
+  import:           warnings
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   test/doctest
+  default-language: Haskell2010
+  build-depends:
+    , base
+    , doctest
+  main-is: Main.hs
