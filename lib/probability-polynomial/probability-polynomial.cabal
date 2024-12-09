@@ -5,7 +5,7 @@ name:            probability-polynomial
 -- PVP summary:    +-+------- breaking API changes
 --                 | | +----- non-breaking API additions
 --                 | | | +--- code changes with no API change
-version:         4.2.0.0
+version:         1.0.0.0
 synopsis:        Probability distributions via piecewise polynomials
 
 -- description:
@@ -17,12 +17,10 @@ maintainer:      peter.thompson@pnsol.com
 
 -- copyright:
 build-type:      Simple
-extra-doc-files:
+
+extra-source-files:
   CHANGELOG.md
   README.md
-
--- Extra source files to be distributed with the package, such as examples, or a tutorial module.
--- extra-source-files:
 
 common warnings
   ghc-options: -Wall
@@ -31,20 +29,12 @@ library
   import:           warnings
   hs-source-dirs:   src
   default-language: Haskell2010
-  other-extensions:
-    AllowAmbiguousTypes
-    FlexibleInstances
-    GeneralizedNewtypeDeriving
-    MonoLocalBinds
-    MultiParamTypeClasses
-    ScopedTypeVariables
-    TypeSynonymInstances
 
   build-depends:
-    , base
-    , containers
-    , deepseq
-    , exact-combinatorics > 0.2
+    , base >= 4.14.3.0 && < 4.21
+    , containers >= 0.6 && < 0.8
+    , deepseq >= 1.4.4.0 && < 1.6
+    , exact-combinatorics > 0.2 && < 0.3
 
   exposed-modules:
     Data.Function.Class
@@ -58,13 +48,6 @@ test-suite test
   type:             exitcode-stdio-1.0
   hs-source-dirs:   test
   default-language: Haskell2010
-  other-extensions:
-    AllowAmbiguousTypes
-    FlexibleInstances
-    GeneralizedNewtypeDeriving
-    MultiParamTypeClasses
-    ScopedTypeVariables
-    TypeSynonymInstances
 
   build-tool-depends: hspec-discover:hspec-discover
     
@@ -72,8 +55,8 @@ test-suite test
     , base
     , containers
     , probability-polynomial
-    , hspec ^>= 2.11.0
-    , QuickCheck
+    , hspec >= 2.11.0 && < 2.12
+    , QuickCheck >= 2.14 && < 2.16
   
   main-is:
     Spec.hs
@@ -94,5 +77,5 @@ benchmark probability-polynomial-benchmark
   build-depends:
     , base
     , probability-polynomial
-    , criterion > 1.6
-    , deepseq > 1.4
+    , criterion >= 1.6 && < 1.7
+    , deepseq
