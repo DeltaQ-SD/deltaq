@@ -414,7 +414,7 @@ span.spaces    { background: white }
 <span class="lineno">  395 </span><span class="spaces">    </span><span class="istickedoff">-- p is a non-zero constant polynomial - no root</span>
 <span class="lineno">  396 </span><span class="spaces">    </span><span class="istickedoff">0 -&gt; 0</span>
 <span class="lineno">  397 </span><span class="spaces">    </span><span class="istickedoff">-- p is a linear polynomial, which has a root iff it has a different sign at each end of the interval</span>
-<span class="lineno">  398 </span><span class="spaces">    </span><span class="istickedoff">1 -&gt; if eval p l * eval p r &lt; 0 then 1 else 0</span>
+<span class="lineno">  398 </span><span class="spaces">    </span><span class="istickedoff">1 -&gt; if <span class="tickonlyfalse">eval p l * eval p r &lt; 0</span> then <span class="nottickedoff">1</span> else 0</span>
 <span class="lineno">  399 </span><span class="spaces">    </span><span class="istickedoff">-- p has degree 2 or more so we can construct the Sturm sequence</span>
 <span class="lineno">  400 </span><span class="spaces">    </span><span class="istickedoff">_ -&gt; signVariations (sturmSequence l p) - signVariations (sturmSequence r p)</span>
 <span class="lineno">  401 </span><span class="spaces">  </span><span class="istickedoff">where</span>
@@ -500,7 +500,7 @@ span.spaces    { background: white }
 <span class="lineno">  481 </span><span class="spaces">    </span><span class="istickedoff">| countRoots (l, u, p) &gt; 0 = Nothing -- polynomial crosses zero</span>
 <span class="lineno">  482 </span><span class="spaces">    </span><span class="istickedoff">-- since the polynomial has no roots, the comparison is detmined by the boundary values</span>
 <span class="lineno">  483 </span><span class="spaces">    </span><span class="istickedoff">| lower == 0 = Just (compare upper lower)</span>
-<span class="lineno">  484 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">upper == 0</span> = <span class="nottickedoff">Just (compare lower upper)</span></span>
+<span class="lineno">  484 </span><span class="spaces">    </span><span class="istickedoff">| upper == 0 = Just (compare lower upper)</span>
 <span class="lineno">  485 </span><span class="spaces">    </span><span class="istickedoff">| lower &gt; 0 = Just GT -- upper must also be &gt; 0 due to the lack of roots</span>
 <span class="lineno">  486 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Just LT -- upper and lower both &lt; 0 due to the lack of roots</span>
 <span class="lineno">  487 </span><span class="spaces">  </span><span class="istickedoff">where</span>
