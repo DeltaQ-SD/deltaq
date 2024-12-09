@@ -5,7 +5,7 @@ name:            probability-polynomial
 -- PVP summary:    +-+------- breaking API changes
 --                 | | +----- non-breaking API additions
 --                 | | | +--- code changes with no API change
-version:         4.2.0.0
+version:         1.0.0.0
 synopsis:        Probability distributions via piecewise polynomials
 
 -- description:
