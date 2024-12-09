@@ -41,10 +41,10 @@ library
     TypeSynonymInstances
 
   build-depends:
-    , base
-    , containers
-    , deepseq
-    , exact-combinatorics > 0.2
+    , base >= 4.14.3.0 && < 4.21
+    , containers >= 0.6 && < 0.8
+    , deepseq >= 1.4.4.0 && < 1.6
+    , exact-combinatorics > 0.2 && < 0.3
 
   exposed-modules:
     Data.Function.Class
@@ -72,8 +72,8 @@ test-suite test
     , base
     , containers
     , probability-polynomial
-    , hspec ^>= 2.11.0
-    , QuickCheck
+    , hspec >= 2.11.0 && < 2.12
+    , QuickCheck >= 2.14 && < 2.16
   
   main-is:
     Spec.hs
@@ -94,5 +94,5 @@ benchmark probability-polynomial-benchmark
   build-depends:
     , base
     , probability-polynomial
-    , criterion > 1.6
-    , deepseq > 1.4
+    , criterion >= 1.6 && < 1.7
+    , deepseq
