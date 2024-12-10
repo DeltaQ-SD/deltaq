@@ -264,6 +264,10 @@ specProperties = do
         let quantile' :: Rational -> DQ -> Eventually Rational
             quantile' = quantile
 
+        it "0" $ property $
+            \o ->
+                quantile' 0 o  ===  Occurs 0
+
         it "monotonic" $ property $
             \o (Probability p) (Probability q) ->
                 let p' = min p q
@@ -273,16 +277,18 @@ specProperties = do
 
         it "never" $ property $
             \(Probability p) ->
-                quantile' p never  ===  Abandoned
+                p > 0 ==>
+                quantile' p never ===  Abandoned
 
         it "wait" $ property $
             \(Probability p) (NonNegative t) ->
-                quantile' p (wait t)
-                    ===  if p >= 0 then Occurs t else Abandoned
+                p > 0 ==>
+                quantile' p (wait t) ===  Occurs t
 
         it "uniform" $ property $
             \(Probability p) (NonNegative r) (Positive d) ->
                 let s = r + d in 
+                p > 0 ==>
                 quantile' p (uniform r s)
                     === Occurs (r + p*(s-r))
 
