@@ -337,39 +337,40 @@ span.spaces    { background: white }
 <span class="lineno">  318 </span>
 <span class="lineno">  319 </span>&gt; p &lt;= q  implies  quantile p o &lt;= quantile q o
 <span class="lineno">  320 </span>&gt;
-<span class="lineno">  321 </span>&gt; quantile p never    = Abandoned
-<span class="lineno">  322 </span>&gt; quantile p (wait t) = if p &gt; 0 then Occurs t else Abandoned
-<span class="lineno">  323 </span>&gt;
-<span class="lineno">  324 </span>&gt; quantile p (uniform r s)  =  r + p*(s-t)  if r &lt;= s
-<span class="lineno">  325 </span>
-<span class="lineno">  326 </span>'earliest'
-<span class="lineno">  327 </span>
-<span class="lineno">  328 </span>&gt; earliest never      = Abandoned
-<span class="lineno">  329 </span>&gt; earliest (wait t)   = Occurs t
-<span class="lineno">  330 </span>&gt; earliest (x .&gt;&gt;. y) = (+) &lt;$&gt; earliest x &lt;*&gt; earliest y
-<span class="lineno">  331 </span>&gt; earliest (x ./\. y) = max (earliest x) (earliest y)
-<span class="lineno">  332 </span>&gt; earliest (x .\/. y) = min (earliest x) (earliest y)
-<span class="lineno">  333 </span>&gt;
-<span class="lineno">  334 </span>&gt; earliest (choice p x y) = min (earliest x) (earliest y)  if p ≠ 0, p ≠ 1
-<span class="lineno">  335 </span>&gt; earliest (uniform r s)  = Occurs r   if r &lt;= s
-<span class="lineno">  336 </span>
-<span class="lineno">  337 </span>'deadline'
-<span class="lineno">  338 </span>
-<span class="lineno">  339 </span>&gt; deadline never      =  Abandoned
-<span class="lineno">  340 </span>&gt; deadline (wait t)   =  Occurs t
-<span class="lineno">  341 </span>&gt; deadline (x .&gt;&gt;. y) =  (+) &lt;$&gt; deadline x &lt;*&gt; deadline y
-<span class="lineno">  342 </span>&gt; deadline (x ./\. y) =  max (deadline x) (deadline y)
-<span class="lineno">  343 </span>&gt;
-<span class="lineno">  344 </span>&gt; deadline (x .\/. y) =  min (deadline x) (deadline y)
-<span class="lineno">  345 </span>&gt;   if failure x = 0, failure y = 0
-<span class="lineno">  346 </span>&gt;
-<span class="lineno">  347 </span>&gt; deadline (choice p x y) = max (deadline x) (deadline y)
-<span class="lineno">  348 </span>&gt;   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
-<span class="lineno">  349 </span>&gt;
+<span class="lineno">  321 </span>&gt; quantile 0 x        = Occurs 0
+<span class="lineno">  322 </span>&gt; quantile p never    = Abandoned       if p &gt; 0
+<span class="lineno">  323 </span>&gt; quantile p (wait t) = Occurs t        if p &gt; 0
+<span class="lineno">  324 </span>&gt;
+<span class="lineno">  325 </span>&gt; quantile p (uniform r s)  =  r + p*(s-t)  if p &gt; 0, r &lt;= s
+<span class="lineno">  326 </span>
+<span class="lineno">  327 </span>'earliest'
+<span class="lineno">  328 </span>
+<span class="lineno">  329 </span>&gt; earliest never      = Abandoned
+<span class="lineno">  330 </span>&gt; earliest (wait t)   = Occurs t
+<span class="lineno">  331 </span>&gt; earliest (x .&gt;&gt;. y) = (+) &lt;$&gt; earliest x &lt;*&gt; earliest y
+<span class="lineno">  332 </span>&gt; earliest (x ./\. y) = max (earliest x) (earliest y)
+<span class="lineno">  333 </span>&gt; earliest (x .\/. y) = min (earliest x) (earliest y)
+<span class="lineno">  334 </span>&gt;
+<span class="lineno">  335 </span>&gt; earliest (choice p x y) = min (earliest x) (earliest y)  if p ≠ 0, p ≠ 1
+<span class="lineno">  336 </span>&gt; earliest (uniform r s)  = Occurs r   if r &lt;= s
+<span class="lineno">  337 </span>
+<span class="lineno">  338 </span>'deadline'
+<span class="lineno">  339 </span>
+<span class="lineno">  340 </span>&gt; deadline never      =  Abandoned
+<span class="lineno">  341 </span>&gt; deadline (wait t)   =  Occurs t
+<span class="lineno">  342 </span>&gt; deadline (x .&gt;&gt;. y) =  (+) &lt;$&gt; deadline x &lt;*&gt; deadline y
+<span class="lineno">  343 </span>&gt; deadline (x ./\. y) =  max (deadline x) (deadline y)
+<span class="lineno">  344 </span>&gt;
+<span class="lineno">  345 </span>&gt; deadline (x .\/. y) =  min (deadline x) (deadline y)
+<span class="lineno">  346 </span>&gt;   if failure x = 0, failure y = 0
+<span class="lineno">  347 </span>&gt;
+<span class="lineno">  348 </span>&gt; deadline (choice p x y) = max (deadline x) (deadline y)
+<span class="lineno">  349 </span>&gt;   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
 <span class="lineno">  350 </span>&gt;
-<span class="lineno">  351 </span>&gt; deadline (uniform r s)  = Occurs s   if r &lt;= s
-<span class="lineno">  352 </span>
-<span class="lineno">  353 </span>-}
+<span class="lineno">  351 </span>&gt;
+<span class="lineno">  352 </span>&gt; deadline (uniform r s)  = Occurs s   if r &lt;= s
+<span class="lineno">  353 </span>
+<span class="lineno">  354 </span>-}
 
 </pre>
 </body>

@@ -199,21 +199,22 @@ span.spaces    { background: white }
 <span class="lineno">  180 </span><span class="spaces">  </span><span class="istickedoff">where</span>
 <span class="lineno">  181 </span><span class="spaces">    </span><span class="istickedoff">segments = toSegments pieces</span>
 <span class="lineno">  182 </span><span class="spaces"></span><span class="istickedoff"></span>
-<span class="lineno">  183 </span><span class="spaces">    </span><span class="istickedoff">findInSegments [] y</span>
-<span class="lineno">  184 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y == 0</span> = <span class="nottickedoff">Just 0</span></span>
-<span class="lineno">  185 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span>
-<span class="lineno">  186 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Jump x1 (y1, y2) : xys) y</span>
-<span class="lineno">  187 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Just x1</span>
-<span class="lineno">  188 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
-<span class="lineno">  189 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Polynomial (x1, x2) (y1, y2) o : xys) y</span>
-<span class="lineno">  190 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Poly.root precision y (x1, x2) o</span>
-<span class="lineno">  191 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
-<span class="lineno">  192 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (End x1 y1 : _) y</span>
-<span class="lineno">  193 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
-<span class="lineno">  194 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span></span>
-<span class="lineno">  195 </span>
-<span class="lineno">  196 </span>precision :: Rational
-<span class="lineno">  197 </span><span class="decl"><span class="istickedoff">precision = 1 / 10^(10 :: Integer)</span></span>
+<span class="lineno">  183 </span><span class="spaces">    </span><span class="istickedoff">findInSegments _ 0</span>
+<span class="lineno">  184 </span><span class="spaces">        </span><span class="istickedoff">= Just 0</span>
+<span class="lineno">  185 </span><span class="spaces">    </span><span class="istickedoff">findInSegments [] _</span>
+<span class="lineno">  186 </span><span class="spaces">        </span><span class="istickedoff">= Nothing</span>
+<span class="lineno">  187 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Jump x1 (y1, y2) : xys) y</span>
+<span class="lineno">  188 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Just x1</span>
+<span class="lineno">  189 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
+<span class="lineno">  190 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Polynomial (x1, x2) (y1, y2) o : xys) y</span>
+<span class="lineno">  191 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Poly.root precision y (x1, x2) o</span>
+<span class="lineno">  192 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
+<span class="lineno">  193 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (End x1 y1 : _) y</span>
+<span class="lineno">  194 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
+<span class="lineno">  195 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span></span>
+<span class="lineno">  196 </span>
+<span class="lineno">  197 </span>precision :: Rational
+<span class="lineno">  198 </span><span class="decl"><span class="istickedoff">precision = 1 / 10^(10 :: Integer)</span></span>
 
 </pre>
 </body>

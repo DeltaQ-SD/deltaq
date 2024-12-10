@@ -58,10 +58,11 @@ successWithin (uniform r s) t
   | r &lt;= t &amp;&amp; t &lt; s = (t-r) / (s-r)
   | s &lt;= t          = 1</pre><p><code><a href="DeltaQ-Class.html#v:quantile" title="DeltaQ.Class">quantile</a></code></p><pre>p &lt;= q  implies  quantile p o &lt;= quantile q o
 
-quantile p never    = Abandoned
-quantile p (wait t) = if p &gt; 0 then Occurs t else Abandoned
+quantile 0 x        = Occurs 0
+quantile p never    = Abandoned       if p &gt; 0
+quantile p (wait t) = Occurs t        if p &gt; 0
 
-quantile p (uniform r s)  =  r + p*(s-t)  if r &lt;= s</pre><p><code><a href="DeltaQ-Class.html#v:earliest" title="DeltaQ.Class">earliest</a></code></p><pre>earliest never      = Abandoned
+quantile p (uniform r s)  =  r + p*(s-t)  if p &gt; 0, r &lt;= s</pre><p><code><a href="DeltaQ-Class.html#v:earliest" title="DeltaQ.Class">earliest</a></code></p><pre>earliest never      = Abandoned
 earliest (wait t)   = Occurs t
 earliest (x .&gt;&gt;. y) = (+) &lt;$&gt; earliest x &lt;*&gt; earliest y
 earliest (x ./\. y) = max (earliest x) (earliest y)
