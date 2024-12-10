@@ -180,9 +180,10 @@ quantileFromMonotone pieces = findInSegments segments
   where
     segments = toSegments pieces
 
-    findInSegments [] y
-        | y == 0 = Just 0
-        | otherwise = Nothing
+    findInSegments _ 0
+        = Just 0
+    findInSegments [] _
+        = Nothing
     findInSegments (Jump x1 (y1, y2) : xys) y
         | y1 < y && y <= y2 = Just x1
         | otherwise = findInSegments xys y
