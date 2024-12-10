@@ -201,7 +201,7 @@ spec = do
                 in
                     property $ abs (x2' - x2) <= epsilon
 
-        xit' "bug" "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
+        it "cubic polynomial, midpoint" $ property $ mapSize (`div` 5) $
             \(x1 :: Rational) (Positive dx3) ->
                 let xx = scaleX (constant 1) :: Poly Rational
                     x2 = (x1 + x3) / 2
