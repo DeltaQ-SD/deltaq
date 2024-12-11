@@ -52,11 +52,6 @@ library
     DeltaQ.PiecewisePolynomial
     DeltaQ.Plot
 
-  other-modules:
-    DeltaQ.Model.DeltaQ
-    DeltaQ.Model.Introspection
-    DeltaQ.Model.Utilities
-
 test-suite test
   import:           warnings
   type:             exitcode-stdio-1.0
