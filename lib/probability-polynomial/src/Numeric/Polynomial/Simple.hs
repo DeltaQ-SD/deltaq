@@ -585,24 +585,26 @@ findRoot precision (l, u) p
     -- if the polynomial has degree 1, can calculate the root exactly
     | degp == 1 = Just (-(head ps / last ps)) -- p0 + p1x = 0 => x = -p0/p1
     | precision <= 0 = error "Invalid precision value"
-    | otherwise = Just (halveInterval precision l u pl pu)
+    | otherwise = halveInterval precision l u pl pu
   where
     Poly ps = p
     degp = degree p
     pu = eval p u
     pl = eval p l
     halveInterval eps x y px py
-        -- if we already have a root, chosse it
-        | px == 0 = x
-        | py == 0 = y
+        -- if we already have a root, choose it
+        | px == 0 = Just x
+        | py == 0 = Just y
+        | pmid == 0 = Just mid
         -- when the interval is small enough, stop:
         -- the root is in this interval, so take the mid point
-        | width <= eps = mid
-        -- choose the lower half,
-        -- as the polynomial has different signs at the ends
+        | width <= eps = Just mid
+        -- choose the lower half, if the polynomial has different signs at the ends
         | px * pmid < 0 = halveInterval eps x mid px pmid
-        -- choose the upper half
-        | otherwise = halveInterval eps mid y pmid py
+        -- choose the upper half, if the polynomial has different signs at the ends
+        | py * pmid < 0 = halveInterval eps mid y pmid py
+        -- otherwise we have a repeated root, which is also a root of the derivative
+        | otherwise = findRoot precision (x, y) (differentiate p)
       where
         width = y - x
         mid = x + width / 2
