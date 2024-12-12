@@ -109,8 +109,7 @@ spec = do
                 total (add mx my)  ===  total mx + total my
 
     describe "translate" $ do
-        xit' "Failures in Poly.translate"
-            "distribution" $ property $
+        it "distribution" $ property $
             \(m :: Measure Rational) y x ->
                 eval (distribution (translate y m)) x
                     ===  eval (distribution m) (x - y)

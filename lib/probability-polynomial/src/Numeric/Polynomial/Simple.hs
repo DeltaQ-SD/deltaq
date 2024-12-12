@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
@@ -360,16 +361,20 @@ convolve (lf, uf, Poly fs) (lg, ug, Poly gs)
 
 > eval (translate y p) x = eval p (x - y)
 -}
-translate :: (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
-translate s (Poly ps) = sum [b `scale` binomialExpansion n s | (n, b) <- zip [0 ..] ps]
+translate :: forall a. (Fractional a, Eq a, Num a) => a -> Poly a -> Poly a
+translate y (Poly ps) =
+    sum
+      [ b `scale` binomialExpansion n
+      | (n, b) <- zip [0 ..] ps
+      ]
   where
-    -- the binomial expansion of each power of x is a new polynomial
-    -- whose coefficients are the product of
-    -- a binomial coefficient and the shift value raised to a reducing power
-    binomialTerm :: Num a => a -> Int -> Int -> a
-    binomialTerm y n k = fromIntegral (n `choose` k) * (-y) ^ (n - k)
-    binomialExpansion :: Num a => Int -> a -> Poly a
-    binomialExpansion n y = Poly (map (binomialTerm y n) [0 .. n])
+    -- binomialTerm n k = coefficient of x^k in the expensation of (x - y)^n
+    binomialTerm :: Integer -> Integer -> a
+    binomialTerm n k = fromInteger (n `choose` k) * (-y) ^ (n - k)
+
+    -- binomialExpansion n = (x - y)^n  expanded as a polyonial in x
+    binomialExpansion :: Integer -> Poly a
+    binomialExpansion n = Poly (map (binomialTerm n) [0 .. n])
 
 {-|
 We use Sturm's Theorem to count the number of roots of a polynomial in a given interval.
