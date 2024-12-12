@@ -76,7 +76,7 @@ span.spaces    { background: white }
 <span class="lineno">   57 </span>    deriving (<span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
 <span class="lineno">   58 </span>
 <span class="lineno">   59 </span>-- | Get the distribution function as piecewise function of polynomials.
-<span class="lineno">   60 </span>distribution :: DQ -&gt; Piecewise Rational (Poly Rational)
+<span class="lineno">   60 </span>distribution :: DQ -&gt; Piecewise (Poly Rational)
 <span class="lineno">   61 </span><span class="decl"><span class="istickedoff">distribution (DQ m) = Measure.distribution m</span></span>
 <span class="lineno">   62 </span>
 <span class="lineno">   63 </span>-- | Interpret a finite, signed 'Measure' as a probability distribution.
@@ -103,7 +103,7 @@ span.spaces    { background: white }
 <span class="lineno">   84 </span>onDistribution2
 <span class="lineno">   85 </span>    :: (a ~ Rational)
 <span class="lineno">   86 </span>    =&gt; String
-<span class="lineno">   87 </span>    -&gt; (Piecewise a (Poly a) -&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a))
+<span class="lineno">   87 </span>    -&gt; (Piecewise (Poly a) -&gt; Piecewise (Poly a) -&gt; Piecewise (Poly a))
 <span class="lineno">   88 </span>    -&gt; DQ -&gt; DQ -&gt; DQ
 <span class="lineno">   89 </span><span class="decl"><span class="istickedoff">onDistribution2 err f (DQ mx) (DQ my) =</span>
 <span class="lineno">   90 </span><span class="spaces">    </span><span class="istickedoff">DQ</span>
@@ -175,7 +175,7 @@ span.spaces    { background: white }
 <span class="lineno">  156 </span>
 <span class="lineno">  157 </span>-- | Helper function that elaborates a piecewise function
 <span class="lineno">  158 </span>-- into a list of segments.
-<span class="lineno">  159 </span>toSegments :: (a ~ Rational) =&gt; Piecewise a (Poly a) -&gt; [Segment a a]
+<span class="lineno">  159 </span>toSegments :: (a ~ Rational) =&gt; Piecewise (Poly a) -&gt; [Segment a a]
 <span class="lineno">  160 </span><span class="decl"><span class="istickedoff">toSegments = goJump 0 . Piecewise.toAscPieces</span>
 <span class="lineno">  161 </span><span class="spaces">  </span><span class="istickedoff">where</span>
 <span class="lineno">  162 </span><span class="spaces">    </span><span class="istickedoff">goJump _ [] = []</span>
@@ -194,7 +194,7 @@ span.spaces    { background: white }
 <span class="lineno">  175 </span>        -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
 <span class="lineno">  176 </span>
 <span class="lineno">  177 </span>-- | Compute a quantile from a monotonically increasing function.
-<span class="lineno">  178 </span>quantileFromMonotone :: (a ~ Rational) =&gt; Piecewise a (Poly a) -&gt; a -&gt; Maybe a
+<span class="lineno">  178 </span>quantileFromMonotone :: (a ~ Rational) =&gt; Piecewise (Poly a) -&gt; a -&gt; Maybe a
 <span class="lineno">  179 </span><span class="decl"><span class="istickedoff">quantileFromMonotone pieces = findInSegments segments</span>
 <span class="lineno">  180 </span><span class="spaces">  </span><span class="istickedoff">where</span>
 <span class="lineno">  181 </span><span class="spaces">    </span><span class="istickedoff">segments = toSegments pieces</span>

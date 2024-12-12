@@ -110,7 +110,7 @@ span.spaces    { background: white }
 <span class="lineno">   91 </span>--
 <span class="lineno">   92 </span>-- This is known as the [distribution function
 <span class="lineno">   93 </span>-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
-<span class="lineno">   94 </span>distribution :: (Ord a, Num a) =&gt; Discrete a -&gt; Piecewise a (Poly a)
+<span class="lineno">   94 </span>distribution :: (Ord a, Num a) =&gt; Discrete a -&gt; Piecewise (Poly a)
 <span class="lineno">   95 </span><span class="decl"><span class="istickedoff">distribution (Discrete m) =</span>
 <span class="lineno">   96 </span><span class="spaces">    </span><span class="istickedoff">Piecewise.fromAscPieces</span>
 <span class="lineno">   97 </span><span class="spaces">    </span><span class="istickedoff">$ zipWith (\(x,_) s -&gt; (x,Poly.constant s)) diracs steps</span>

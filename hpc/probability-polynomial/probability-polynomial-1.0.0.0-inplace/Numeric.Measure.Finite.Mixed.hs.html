@@ -71,7 +71,7 @@ span.spaces    { background: white }
 <span class="lineno">   52 </span>-- | A finite
 <span class="lineno">   53 </span>-- [signed measure](https://en.wikipedia.org/wiki/Signed_measure)
 <span class="lineno">   54 </span>-- on the number line.
-<span class="lineno">   55 </span>newtype Measure a = Measure (Piecewise a (Poly a))
+<span class="lineno">   55 </span>newtype Measure a = Measure (Piecewise (Poly a))
 <span class="lineno">   56 </span>    -- INVARIANT: Adjacent pieces contain distinct objects.
 <span class="lineno">   57 </span>    -- INVARIANT: The last piece is a constant polynomial,
 <span class="lineno">   58 </span>    --            so that the measure is finite.
@@ -81,7 +81,7 @@ span.spaces    { background: white }
 <span class="lineno">   62 </span>--
 <span class="lineno">   63 </span>-- This is known as the [distribution function
 <span class="lineno">   64 </span>-- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
-<span class="lineno">   65 </span>distribution :: (Ord a, Num a) =&gt; Measure a -&gt; Piecewise a (Poly a)
+<span class="lineno">   65 </span>distribution :: (Ord a, Num a) =&gt; Measure a -&gt; Piecewise (Poly a)
 <span class="lineno">   66 </span><span class="decl"><span class="istickedoff">distribution (Measure p) = p</span></span>
 <span class="lineno">   67 </span>
 <span class="lineno">   68 </span>-- | Construct a signed measure from its
@@ -92,13 +92,13 @@ span.spaces    { background: white }
 <span class="lineno">   73 </span>-- that is if the last piece of the piecewise function is not constant.
 <span class="lineno">   74 </span>fromDistribution
 <span class="lineno">   75 </span>    :: (Ord a, Num a)
-<span class="lineno">   76 </span>    =&gt; Piecewise a (Poly a) -&gt; Maybe (Measure a)
+<span class="lineno">   76 </span>    =&gt; Piecewise (Poly a) -&gt; Maybe (Measure a)
 <span class="lineno">   77 </span><span class="decl"><span class="istickedoff">fromDistribution pieces</span>
 <span class="lineno">   78 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">isEventuallyConstant pieces</span> = Just $ Measure $ trim pieces</span>
 <span class="lineno">   79 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
 <span class="lineno">   80 </span>
 <span class="lineno">   81 </span>-- | Test whether a piecewise polynomial is consant as x -&gt; ∞.
-<span class="lineno">   82 </span>isEventuallyConstant :: (Ord a, Num a) =&gt; Piecewise a (Poly a) -&gt; Bool
+<span class="lineno">   82 </span>isEventuallyConstant :: (Ord a, Num a) =&gt; Piecewise (Poly a) -&gt; Bool
 <span class="lineno">   83 </span><span class="decl"><span class="istickedoff">isEventuallyConstant pieces</span>
 <span class="lineno">   84 </span><span class="spaces">    </span><span class="istickedoff">| null xpolys = True</span>
 <span class="lineno">   85 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = (&lt;= 0) . Poly.degree . snd $ last xpolys</span>
@@ -107,7 +107,7 @@ span.spaces    { background: white }
 <span class="lineno">   88 </span>
 <span class="lineno">   89 </span>-- | Internal.
 <span class="lineno">   90 </span>-- Join all intervals whose polynomials are equal.
-<span class="lineno">   91 </span>trim :: (Ord a, Num a) =&gt; Piecewise a (Poly a) -&gt; Piecewise a (Poly a)
+<span class="lineno">   91 </span>trim :: (Ord a, Num a) =&gt; Piecewise (Poly a) -&gt; Piecewise (Poly a)
 <span class="lineno">   92 </span><span class="decl"><span class="istickedoff">trim = Piecewise.trim</span></span>
 <span class="lineno">   93 </span>
 <span class="lineno">   94 </span>-- | Two measures are equal if they yield the same measures on every set.
@@ -218,12 +218,12 @@ span.spaces    { background: white }
 <span class="lineno">  199 </span>-- | Measure that is absolutely continuous
 <span class="lineno">  200 </span>-- with respect to the Lebesgue measure,
 <span class="lineno">  201 </span>-- Represented via its distribution function.
-<span class="lineno">  202 </span>newtype Continuous a = Continuous { <span class="istickedoff"><span class="decl"><span class="istickedoff">unContinuous</span></span></span> :: Piecewise a (Poly a) }
+<span class="lineno">  202 </span>newtype Continuous a = Continuous { <span class="istickedoff"><span class="decl"><span class="istickedoff">unContinuous</span></span></span> :: Piecewise (Poly a) }
 <span class="lineno">  203 </span>    -- INVARIANT: The last piece is @Poly.constant p@ for some @p :: a@.
 <span class="lineno">  204 </span>
 <span class="lineno">  205 </span>-- | Density function (Radon–Nikodym derivative) of an absolutely
 <span class="lineno">  206 </span>-- continuous measure.
-<span class="lineno">  207 </span>newtype Density a = Density (Piecewise a (Poly a))
+<span class="lineno">  207 </span>newtype Density a = Density (Piecewise (Poly a))
 <span class="lineno">  208 </span>    -- INVARIANT: The last piece is @Poly.constant 0@.
 <span class="lineno">  209 </span>
 <span class="lineno">  210 </span>-- | Density function of an absolutely continuous measure.
