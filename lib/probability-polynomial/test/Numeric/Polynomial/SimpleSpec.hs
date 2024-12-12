@@ -150,16 +150,12 @@ spec = do
                     ===  differentiate p * q + p * differentiate q
 
     describe "translate" $ do
-        let reason =
-                "Failures for degree > 70, probably Int overflow "
-                <> "when computing binomial coefficients."
-
-        xit' reason "eval" $ property $
+        it "eval" $ property $
             \p y (x :: Rational) ->
                 counterexample ("degree p = " <> show (degree p))
                 $ eval (translate y p) x  ===  eval p (x - y)
 
-        xit' reason "differentiate" $ property $
+        it "differentiate" $ property $
             \p (y :: Rational) ->
                 counterexample ("degree p = " <> show (degree p))
                 $ differentiate (translate y p)
