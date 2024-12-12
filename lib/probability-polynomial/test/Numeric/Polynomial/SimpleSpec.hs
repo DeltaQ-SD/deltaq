@@ -212,6 +212,19 @@ spec = do
                     epsilon = (x3-x1)/(1000*1000*50)
                     Just x2' = root epsilon 0 (l, u) p
                 in
+                    abs (x2' - x2) <= epsilon
+
+        it "quartic polynomial, double root" $ property $ mapSize (`div` 5) $
+            \(x1 :: Rational) (Positive dx3) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    x2 = (x1 + x3) / 2
+                    x3 = x1 + dx3
+                    p = xx * (xx - constant x1) * (xx - constant x2) * (xx - constant x3)
+                    l = x1 + 1002 * epsilon
+                    u = x3 - 1000 * epsilon
+                    epsilon = (x3-x1)/(1000*1000*50)
+                    Just x2' = root epsilon 0 (l, u) p
+                in
                     id
                     $ counterexample ("interval = " <> show (l,u))
                     $ counterexample ("countRoots = " <> show (countRoots (l, u, p)))
