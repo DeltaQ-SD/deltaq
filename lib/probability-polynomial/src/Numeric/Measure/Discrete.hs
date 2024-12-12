@@ -91,7 +91,7 @@ total (Discrete m) = sum m
 --
 -- This is known as the [distribution function
 -- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
-distribution :: (Ord a, Num a) => Discrete a -> Piecewise a (Poly a)
+distribution :: (Ord a, Num a) => Discrete a -> Piecewise (Poly a)
 distribution (Discrete m) =
     Piecewise.fromAscPieces
     $ zipWith (\(x,_) s -> (x,Poly.constant s)) diracs steps

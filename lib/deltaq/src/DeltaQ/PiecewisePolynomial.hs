@@ -57,7 +57,7 @@ newtype DQ = DQ (Measure Rational)
     deriving (Eq, Show, NFData)
 
 -- | Get the distribution function as piecewise function of polynomials.
-distribution :: DQ -> Piecewise Rational (Poly Rational)
+distribution :: DQ -> Piecewise (Poly Rational)
 distribution (DQ m) = Measure.distribution m
 
 -- | Interpret a finite, signed 'Measure' as a probability distribution.
@@ -84,7 +84,7 @@ unsafeFromPositiveMeasure = DQ
 onDistribution2
     :: (a ~ Rational)
     => String
-    -> (Piecewise a (Poly a) -> Piecewise a (Poly a) -> Piecewise a (Poly a))
+    -> (Piecewise (Poly a) -> Piecewise (Poly a) -> Piecewise (Poly a))
     -> DQ -> DQ -> DQ
 onDistribution2 err f (DQ mx) (DQ my) =
     DQ
@@ -156,7 +156,7 @@ data Segment a b
 
 -- | Helper function that elaborates a piecewise function
 -- into a list of segments.
-toSegments :: (a ~ Rational) => Piecewise a (Poly a) -> [Segment a a]
+toSegments :: (a ~ Rational) => Piecewise (Poly a) -> [Segment a a]
 toSegments = goJump 0 . Piecewise.toAscPieces
   where
     goJump _ [] = []
@@ -175,7 +175,7 @@ toSegments = goJump 0 . Piecewise.toAscPieces
         -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
 
 -- | Compute a quantile from a monotonically increasing function.
-quantileFromMonotone :: (a ~ Rational) => Piecewise a (Poly a) -> a -> Maybe a
+quantileFromMonotone :: (a ~ Rational) => Piecewise (Poly a) -> a -> Maybe a
 quantileFromMonotone pieces = findInSegments segments
   where
     segments = toSegments pieces

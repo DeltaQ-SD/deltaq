@@ -52,7 +52,7 @@ import qualified Numeric.Polynomial.Simple as Poly
 -- | A finite
 -- [signed measure](https://en.wikipedia.org/wiki/Signed_measure)
 -- on the number line.
-newtype Measure a = Measure (Piecewise a (Poly a))
+newtype Measure a = Measure (Piecewise (Poly a))
     -- INVARIANT: Adjacent pieces contain distinct objects.
     -- INVARIANT: The last piece is a constant polynomial,
     --            so that the measure is finite.
@@ -62,7 +62,7 @@ newtype Measure a = Measure (Piecewise a (Poly a))
 --
 -- This is known as the [distribution function
 -- ](https://en.wikipedia.org/wiki/Distribution_function_%28measure_theory%29).
-distribution :: (Ord a, Num a) => Measure a -> Piecewise a (Poly a)
+distribution :: (Ord a, Num a) => Measure a -> Piecewise (Poly a)
 distribution (Measure p) = p
 
 -- | Construct a signed measure from its
@@ -73,13 +73,13 @@ distribution (Measure p) = p
 -- that is if the last piece of the piecewise function is not constant.
 fromDistribution
     :: (Ord a, Num a)
-    => Piecewise a (Poly a) -> Maybe (Measure a)
+    => Piecewise (Poly a) -> Maybe (Measure a)
 fromDistribution pieces
     | isEventuallyConstant pieces = Just $ Measure $ trim pieces
     | otherwise = Nothing
 
 -- | Test whether a piecewise polynomial is consant as x -> ∞.
-isEventuallyConstant :: (Ord a, Num a) => Piecewise a (Poly a) -> Bool
+isEventuallyConstant :: (Ord a, Num a) => Piecewise (Poly a) -> Bool
 isEventuallyConstant pieces
     | null xpolys = True
     | otherwise = (<= 0) . Poly.degree . snd $ last xpolys
@@ -88,7 +88,7 @@ isEventuallyConstant pieces
 
 -- | Internal.
 -- Join all intervals whose polynomials are equal.
-trim :: (Ord a, Num a) => Piecewise a (Poly a) -> Piecewise a (Poly a)
+trim :: (Ord a, Num a) => Piecewise (Poly a) -> Piecewise (Poly a)
 trim = Piecewise.trim
 
 -- | Two measures are equal if they yield the same measures on every set.
@@ -199,12 +199,12 @@ translate y (Measure m) =
 -- | Measure that is absolutely continuous
 -- with respect to the Lebesgue measure,
 -- Represented via its distribution function.
-newtype Continuous a = Continuous { unContinuous :: Piecewise a (Poly a) }
+newtype Continuous a = Continuous { unContinuous :: Piecewise (Poly a) }
     -- INVARIANT: The last piece is @Poly.constant p@ for some @p :: a@.
 
 -- | Density function (Radon–Nikodym derivative) of an absolutely
 -- continuous measure.
-newtype Density a = Density (Piecewise a (Poly a))
+newtype Density a = Density (Piecewise (Poly a))
     -- INVARIANT: The last piece is @Poly.constant 0@.
 
 -- | Density function of an absolutely continuous measure.
