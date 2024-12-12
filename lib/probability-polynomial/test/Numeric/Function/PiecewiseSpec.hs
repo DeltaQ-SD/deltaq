@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 {-# OPTIONS_GHC -Wno-missing-methods #-}
 
@@ -68,7 +69,7 @@ spec = do
 
     describe "fromInterval" $ do
         it "intervals" $ property $
-            \(x :: Rational) (Positive d) (o :: Rational) ->
+            \(x :: Rational) (Positive d) (o :: Constant) ->
                 let y = x + d
                 in  intervals (fromInterval (x,y) o) === [(x,y)]
 
@@ -82,20 +83,20 @@ spec = do
 
     describe "mergeBy" $ do
         it "(p + negate p) trims to 0" $ property $
-            \(p :: Piecewise Rational Linear) ->
+            \(p :: Piecewise Linear) ->
                 let z = trim (p + negate p)
                 in  null (toAscPieces z) === True
                     .&&. eval z 0 === 0
 
     describe "translateWith" $ do
         it "eval . translate" $ property $
-            \(p :: Piecewise Rational Linear) x y ->
+            \(p :: Piecewise Linear) x y ->
                 eval (translateWith translateLinear y p) x
                     === eval p (x - y)
 
     describe "zipPointwise" $ do
         it "intersects intervals" $ property $
-            \p (q :: Piecewise Rational Integer) ->
+            \p (q :: Piecewise Constant) ->
                 allIntervals (zipPointwise (+) p q)
                 === [ i
                     | ip <- allIntervals p
@@ -105,38 +106,38 @@ spec = do
                     ]
 
         it "eval, +" $ property $
-            \p (q :: Piecewise Rational Linear) x ->
+            \p (q :: Piecewise Linear) x ->
                 eval (zipPointwise (+) p q) x
                 === (eval p x + eval q x)
 
         it "eval, *" $ property $
-            \p (q :: Piecewise Rational Constant) x ->
+            \p (q :: Piecewise Constant) x ->
                 eval (zipPointwise (*) p q) x
                 === (eval p x * eval q x)
 
     describe "instance Num (Piecewise Q Constant)" $ do
         it "(+)" $ property $
-            \p (q :: Piecewise Rational Constant) x ->
+            \p (q :: Piecewise Constant) x ->
                 eval (p + q) x
                 === (eval p x + eval q x)
 
         it "(*)" $ property $
-            \p (q :: Piecewise Rational Constant) x ->
+            \p (q :: Piecewise Constant) x ->
                 eval (p * q) x
                 === (eval p x * eval q x)
 
         it "negate" $ property $
-            \(p :: Piecewise Rational Constant) x ->
+            \(p :: Piecewise Constant) x ->
                 eval (negate p) x
                 === negate (eval p x)
 
         it "abs" $ property $
-            \(p :: Piecewise Rational Constant) x ->
+            \(p :: Piecewise Constant) x ->
                 eval (abs p) x
                 === abs (eval p x)
 
         it "signum" $ property $
-            \(p :: Piecewise Rational Constant) x ->
+            \(p :: Piecewise Constant) x ->
                 eval (signum p) x
                 === signum (eval p x)
 
@@ -228,7 +229,7 @@ mkFromTo :: Q -> Q -> Interval
 mkFromTo x y = if x < y then FromTo x y else Empty
 
 -- | Return all intervals, 
-allIntervals :: Piecewise Q o -> [Interval]
+allIntervals :: Fun.Domain o ~ Q => Piecewise o -> [Interval]
 allIntervals pieces
     | null xs = [All]
     | otherwise = [Before xmin] <> map (uncurry FromTo) is <> [After xmax]
@@ -277,11 +278,14 @@ genDisjointSorted =
 instance Arbitrary (DisjointSorted Rational) where
     arbitrary = genDisjointSorted
 
-genPiecewise :: Gen o -> Gen (Piecewise Rational o)
+genPiecewise :: Fun.Domain o ~ Rational => Gen o -> Gen (Piecewise o)
 genPiecewise gen = do
     DisjointSorted xs <- genDisjointSorted
     os <- mapM (const gen) xs
     pure $ fromAscPieces $ zip xs os
 
-instance Arbitrary o => Arbitrary (Piecewise Rational o) where
+instance
+    (Fun.Domain o ~ Rational, Arbitrary o)
+    => Arbitrary (Piecewise o)
+  where
     arbitrary = genPiecewise arbitrary

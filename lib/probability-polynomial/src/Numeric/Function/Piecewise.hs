@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -58,11 +59,11 @@ data Piece a o = Piece
 
 {- | A function defined piecewise on numerical intervals.
  
-* @a@ = numerical type for the number line, e.g. 'Rational' or 'Double'
 * @o@ = type of function on every piece
     e.g. polynomials or other specialized representations of functions
+* @'Fun.Domain' o@ = numerical type for the number line, e.g. 'Rational' or 'Double'
 
-A value @f :: Piecewise a o@ represents a function
+A value @f :: Piecewise o@ represents a function
 
 > eval f x = { 0           if -∞ <  x < x1
 >            { eval o1 x   if x1 <= x < x2
@@ -86,9 +87,12 @@ No attempt is made to merge intervals if the piecewise objects are equal,
 e.g. the situation @o1 == o2@ may occur.
 
 -}
-data Piecewise a o
-    = Pieces [Piece a o]
-    deriving (Show, Generic, NFData)
+data Piecewise o
+    = Pieces [Piece (Fun.Domain o) o]
+    deriving (Generic)
+
+deriving instance (Show (Fun.Domain o), Show o) => Show (Piecewise o)
+deriving instance (NFData (Fun.Domain o), NFData o) => NFData (Piecewise o)
 
 {-$Piecewise Invariants
 
@@ -103,14 +107,16 @@ data Piecewise a o
     Operations
 ------------------------------------------------------------------------------}
 -- | The function which is zero everywhere.
-zero :: Piecewise a o
+zero :: Piecewise o
 zero = Pieces []
 
 -- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
 -- from a single function @o@ by restricting it to the
 -- to half-open interval @x1 <= x < x2@.
 -- The result is zero outside this interval.
-fromInterval :: (Ord a, Num o) => (a,a) -> o -> Piecewise a o
+fromInterval
+    :: (Ord (Fun.Domain o), Num o)
+    => (Fun.Domain o, Fun.Domain o) -> o -> Piecewise o
 fromInterval (x,y) o = Pieces [Piece start o, Piece end 0]
   where
     start = min x y
@@ -119,17 +125,17 @@ fromInterval (x,y) o = Pieces [Piece start o, Piece end 0]
 -- | Build a piecewise function from an ascending list of contiguous pieces.
 --
 -- /The precondition (`map fst` of input list is ascending) is not checked./
-fromAscPieces :: Ord a => [(a,o)] -> Piecewise a o
+fromAscPieces :: Ord (Fun.Domain o) => [(Fun.Domain o, o)] -> Piecewise o
 fromAscPieces = Pieces . map (uncurry Piece)
 
 -- | Convert the piecewise function to a list of contiguous pieces
 -- where the starting points of the pieces are in ascending order.
-toAscPieces :: Ord a => Piecewise a o -> [(a,o)]
+toAscPieces :: Ord (Fun.Domain o) => Piecewise o -> [(Fun.Domain o, o)]
 toAscPieces (Pieces xos) = [ (x, o) | Piece x o <- xos ]
 
 -- | Intervals on which the piecewise function is defined, in sequence.
 -- The last half-open interval, @xn <= x < +∞@, is omitted.
-intervals :: Piecewise a o -> [(a,a)]
+intervals :: Piecewise o -> [(Fun.Domain o, Fun.Domain o)]
 intervals (Pieces ys) =
     zip (map basepoint ys) (drop 1 $ map basepoint ys)
 
@@ -138,12 +144,14 @@ intervals (Pieces ys) =
     Structure
 ------------------------------------------------------------------------------}
 -- | Map the objects of pieces.
-mapPieces :: (o -> o') -> Piecewise a o -> Piecewise a o'
+mapPieces
+    :: Fun.Domain o ~ Fun.Domain o'
+    => (o -> o') -> Piecewise o -> Piecewise o'
 mapPieces f (Pieces ps) = Pieces [ Piece x (f o) | Piece x o <- ps ]
 
 -- | Merge all adjacent pieces whose functions are considered
 -- equal by the given predicate.
-mergeBy :: Num o => (o -> o -> Bool) -> Piecewise a o -> Piecewise a o
+mergeBy :: Num o => (o -> o -> Bool) -> Piecewise o -> Piecewise o
 mergeBy eq (Pieces pieces) = Pieces $ go 0 pieces
   where
     go _ [] = []
@@ -152,7 +160,7 @@ mergeBy eq (Pieces pieces) = Pieces $ go 0 pieces
         | otherwise = p : go (object p) ps
 
 -- | Merge all adjacent pieces whose functions are equal according to '(==)'.
-trim :: (Eq o, Num o) => Piecewise a o -> Piecewise a o
+trim :: (Eq o, Num o) => Piecewise o -> Piecewise o
 trim = mergeBy (==)
 
 {-----------------------------------------------------------------------------
@@ -162,21 +170,21 @@ trim = mergeBy (==)
 {-|
 Evaluate a piecewise function at a point.
 
-> eval :: (Fun.Function o, Num o, Ord a, Num (Codomain o))
->         => Piecewise a o -> a -> Codomain o
+* @'Fun.Domain' ('Piecewise' o) = 'Fun.Domain' o@
+* @'Fun.Codomain' ('Piecewise' o) = 'Fun.Codomain' o@
 -}
-instance (Fun.Function o, Num o, Ord a, a ~ Fun.Domain o, Num (Fun.Codomain o))
-    => Fun.Function (Piecewise a o)
+instance (Fun.Function o, Num o, Ord (Fun.Domain o), Num (Fun.Codomain o))
+    => Fun.Function (Piecewise o)
   where
-    type instance Domain (Piecewise a o) = a
-    type instance Codomain (Piecewise a o) = Fun.Codomain o
+    type instance Domain (Piecewise o) = Fun.Domain o
+    type instance Codomain (Piecewise o) = Fun.Codomain o
     eval = evaluate
 
 -- | Evaluate the piecewise function at a point.
 -- See 'Piecewise' for the semantics.
 evaluate
-    :: (Fun.Function o, Num o, Ord a, Num (Fun.Codomain o), a ~ Fun.Domain o)
-    => Piecewise a o -> a -> Fun.Codomain o
+    :: (Fun.Function o, Num o, Ord (Fun.Domain o), Num (Fun.Codomain o))
+    => Piecewise o -> Fun.Domain o -> Fun.Codomain o
 evaluate (Pieces pieces) x = go 0 pieces
  where
     go before [] = Fun.eval before x
@@ -191,9 +199,9 @@ evaluate (Pieces pieces) x = go 0 pieces
 -- >    implies
 -- >    eval (translateWith translate' y p) = eval p (x - y)
 translateWith
-    :: (Ord a, Num a, Num o)
-    => (a -> o -> o)
-    -> a -> Piecewise a o -> Piecewise a o
+    :: (Ord (Fun.Domain o), Num (Fun.Domain o), Num o)
+    => (Fun.Domain o -> o -> o)
+    -> Fun.Domain o -> Piecewise o -> Piecewise o
 translateWith trans y (Pieces pieces) =
     Pieces [ Piece (x + y) (trans y o) | Piece x o <- pieces ]
 
@@ -215,21 +223,11 @@ translateWith trans y (Pieces pieces) =
 --
 -- /The preconditions are not checked!/
 zipPointwise
-    :: (Ord a, Num o)
+    :: (Ord (Fun.Domain o), Num o)
     => (o -> o -> o)
         -- ^ @f@
-    -> Piecewise a o -> Piecewise a o -> Piecewise a o
-zipPointwise f ps = mapPieces (uncurry f) . zipPieces ps
-
--- | Internal.
---
--- Combine two 'Piecewise' by pairing pieces on the same intervals.
--- It is usually necessary to split the intervals futher until
--- the intervals align exactly.
-zipPieces
-    :: (Ord a, Num b, Num c)
-    => Piecewise a b -> Piecewise a c -> Piecewise a (b, c)
-zipPieces (Pieces xs') (Pieces ys') =
+    -> Piecewise o -> Piecewise o -> Piecewise o
+zipPointwise f (Pieces xs') (Pieces ys') =
     Pieces $ go 0 xs' 0 ys'
   where
     -- We split the intervals and combine the pieces in a single pass.
@@ -241,14 +239,14 @@ zipPieces (Pieces xs') (Pieces ys') =
     --   the previous piece (`xhang`, `yhang`)
     go _ [] _ [] = []
     go _ (Piece x ox : xstail) yhang [] =
-        Piece x (ox, yhang) : go ox xstail yhang []
+        Piece x (f ox yhang) : go ox xstail yhang []
     go xhang [] _ (Piece y oy : ystail) =
-        Piece y (xhang, oy) : go xhang [] oy ystail
+        Piece y (f xhang oy) : go xhang [] oy ystail
     go xhang xs@(Piece x ox : xstail) yhang ys@(Piece y oy : ystail) =
         case compare x y of
-            LT -> Piece x (ox, yhang) : go ox xstail yhang ys
-            EQ -> Piece x (ox, oy)    : go ox xstail oy ystail
-            GT -> Piece y (xhang, oy) : go xhang xs  oy ystail
+            LT -> Piece x (f ox    yhang) : go ox xstail yhang ys
+            EQ -> Piece x (f ox    oy   ) : go ox xstail oy ystail
+            GT -> Piece y (f xhang oy   ) : go xhang xs  oy ystail
 
 {-----------------------------------------------------------------------------
     Operations
@@ -261,7 +259,7 @@ for every piece.
 
 TODO: 'fromInteger' is __undefined__
 -}
-instance (Ord a, Num o) => Num (Piecewise a o) where
+instance (Ord (Fun.Domain o), Num o) => Num (Piecewise o) where
     (+) = zipPointwise (+)
     (*) = zipPointwise (*)
     negate = mapPieces negate
