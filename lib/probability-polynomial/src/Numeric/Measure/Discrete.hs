@@ -5,13 +5,19 @@ Maintainer  : peter.thompson@pnsol.com
 Description : Discrete, finite signed measures on the number line.
 -}
 module Numeric.Measure.Discrete
-    ( Discrete
+    ( -- * Type
+      Discrete
     , fromMap
     , toMap
     , zero
     , dirac
-    , total
     , distribution
+
+    -- * Observations
+    , total
+    , integrate
+
+    -- * Operations, numerical
     , add
     , scale
     , translate
@@ -86,6 +92,11 @@ toMap (Discrete m) = m
 -- | The total of the measure applied to the set of real numbers.
 total :: Num a => Discrete a -> a
 total (Discrete m) = sum m
+
+-- | Integrate a function @f@ with respect to the given measure @m@,
+-- \( \int f(x) dm(x) \).
+integrate :: (Ord a, Num a) => (a -> a) -> Discrete a -> a
+integrate f (Discrete m) = sum $ Map.mapWithKey (\x w -> f x * w) m
 
 -- | @eval (distribution m) x@ is the measure of the interval \( (-∞, x] \).
 --

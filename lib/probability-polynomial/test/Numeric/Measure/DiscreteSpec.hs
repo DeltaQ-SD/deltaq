@@ -22,6 +22,7 @@ import Numeric.Measure.Discrete
     , dirac
     , distribution
     , fromMap
+    , integrate
     , scale
     , toMap
     , total
@@ -71,6 +72,30 @@ spec = do
             \(m :: Discrete Rational) x s->
                 eval (distribution (scale s m)) x
                     === s * eval (distribution m) x
+
+    describe "integrate" $ do
+        it "total" $ property $
+            \(m :: Discrete Rational) ->
+                integrate (const 1) m
+                    === total m
+
+        it "linearity, function (+)" $ property $
+            \(mx :: Discrete Rational) ->
+                let f = id
+                in  integrate (\x -> f x + f x) mx
+                        === integrate f mx + integrate f mx 
+
+        it "linearity, measure add" $ property $
+            \(mx :: Discrete Rational) my ->
+                let f = id
+                in  integrate f (add mx my)
+                        === integrate f mx + integrate f my 
+
+        it "linearity, measure scale" $ property $
+            \(mx :: Discrete Rational) a ->
+                let f = id
+                in  integrate f (scale a mx)
+                        === a * integrate f mx
 
     describe "translate" $ do
         it "distribution" $ property $
