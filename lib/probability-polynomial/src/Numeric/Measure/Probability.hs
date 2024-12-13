@@ -11,14 +11,17 @@ module Numeric.Measure.Probability
       Prob
     , dirac
     , uniform
-    , support
     , distribution
     , fromDistribution
     , measure
     , fromMeasure
     , unsafeFromMeasure
 
-      -- * Numerical operations
+      -- * Observations
+    , support
+    , expectation
+
+      -- * Operations, numerical
     , choice
     , translate
     , convolve
@@ -109,7 +112,7 @@ instance (Ord a, Num a) => Eq (Prob a) where
     Prob mx == Prob my = mx == my
 
 {-----------------------------------------------------------------------------
-    Operations
+    Construction
 ------------------------------------------------------------------------------}
 -- | A
 -- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)
@@ -123,12 +126,22 @@ dirac = Prob . M.dirac
 uniform :: (Ord a, Num a, Fractional a) => a -> a -> Prob a
 uniform x y = Prob $ M.uniform x y
 
+{-----------------------------------------------------------------------------
+    Construction
+------------------------------------------------------------------------------}
 -- | The 'support' is the smallest closed, contiguous interval \( [x,y] \)
 -- outside of which the probability is zero.
 --
 -- Returns 'Nothing' if the interval is empty.
 support :: (Ord a, Num a) => Prob a -> Maybe (a, a)
 support (Prob m) = M.support m
+
+-- | Compute the
+-- [expected value](https://en.wikipedia.org/wiki/Expected_value)
+-- of a polynomial @f@ with respect to the given probability distribution,
+-- \( E[f(X)] \).
+expectation :: (Ord a, Num a, Fractional a) => Poly a -> Prob a -> a
+expectation f (Prob m) = M.integrate f m
 
 {-----------------------------------------------------------------------------
     Operations

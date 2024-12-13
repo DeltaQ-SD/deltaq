@@ -25,6 +25,7 @@ import Numeric.Measure.Probability
     , convolve
     , dirac
     , distribution
+    , expectation
     , fromDistribution
     , fromMeasure
     , unsafeFromMeasure
@@ -105,6 +106,12 @@ spec = do
             \(m :: Prob Rational) ->
                 Just m  ===
                     (fromDistribution . distribution) m
+
+    describe "expectation" $ do
+        it "unit" $ property $
+            \(m :: Prob Rational) ->
+                expectation (Poly.constant 1) m
+                    === 1
 
     describe "choice" $ do
         it "distribution" $ property $
