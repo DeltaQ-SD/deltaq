@@ -26,6 +26,7 @@ import Numeric.Measure.Finite.Mixed
     , dirac
     , distribution
     , fromDistribution
+    , integrate
     , isPositive
     , scale
     , support
@@ -179,6 +180,29 @@ spec = do
             in  conjoin
                     $ take 20
                     $ map prop_isPositive convolutions
+
+    describe "integrate" $ do
+        it "total" $ mapSize (`div` 10) $ property $
+            \(m :: Measure Rational) ->
+                integrate (Poly.constant 1) m
+                    === total m
+
+        it "linearity, function (+)" $ mapSize (`div` 10) $ property $
+            \f g (mx :: Measure Rational) ->
+                integrate (f + g) mx
+                    === integrate f mx + integrate g mx 
+
+        it "linearity, measure add" $ mapSize (`div` 10) $ property $
+            \(mx :: Measure Rational) my ->
+                let f = Poly.fromCoefficients [0,1]
+                in  integrate f (add mx my)
+                        === integrate f mx + integrate f my 
+
+        it "linearity, measure scale" $ mapSize (`div` 10) $ property $
+            \(mx :: Measure Rational) a ->
+                let f = Poly.fromCoefficients [0,1]
+                in  integrate f (scale a mx)
+                        === a * integrate f mx
 
 {-----------------------------------------------------------------------------
     Random generators

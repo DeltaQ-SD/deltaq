@@ -11,6 +11,7 @@ Maintainer  : peter.thompson@pnsol.com
 module Numeric.Polynomial.SimpleSpec
     ( spec
     , genPoly
+    , genPositivePoly
     ) where
 
 import Prelude
@@ -56,11 +57,14 @@ import Test.QuickCheck
     , (.&&.)
     , arbitrary
     , counterexample
+    , forAll
     , listOf
     , mapSize
     , property
     , withMaxSuccess
     )
+
+import qualified Test.QuickCheck as QC
 
 {-----------------------------------------------------------------------------
     Tests
@@ -262,6 +266,12 @@ spec = do
                             then Just GT
                             else Nothing
 
+    describe "genPositivePoly" $
+        it "eval" $ property $
+            \(x :: Rational) ->
+            forAll genPositivePoly $ \p ->
+                eval p x >= 0
+
 {-----------------------------------------------------------------------------
     Helper functions
 ------------------------------------------------------------------------------}
@@ -291,6 +301,18 @@ countIntervalMembers (xl, xr) =
 ------------------------------------------------------------------------------}
 genPoly :: Gen (Poly Rational)
 genPoly = fromCoefficients <$> listOf arbitrary
+
+-- | Generate a positive polynomial, i.e. @eval p x >= 0@ for all @x@.
+genPositivePoly :: Gen (Poly Rational)
+genPositivePoly =
+    QC.scale (`div` 3) $ product <$> listOf genQuadratic
+  where
+    xx = fromCoefficients [0, 1]
+
+    genQuadratic = do
+        x0 <- constant <$> arbitrary
+        NonNegative b <- arbitrary
+        pure $ (xx - x0) * (xx - x0) + constant b
 
 instance Arbitrary (Poly Rational) where
     arbitrary = genPoly

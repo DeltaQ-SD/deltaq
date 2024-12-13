@@ -19,12 +19,16 @@ import Data.Function.Class
 import Data.Ratio
     ( (%)
     )
+import Numeric.Polynomial.SimpleSpec
+    ( genPositivePoly
+    )
 import Numeric.Measure.Probability
     ( Prob
     , choice
     , convolve
     , dirac
     , distribution
+    , expectation
     , fromDistribution
     , fromMeasure
     , unsafeFromMeasure
@@ -61,6 +65,7 @@ import Test.QuickCheck
     )
 
 import qualified Numeric.Measure.Finite.Mixed as M
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-----------------------------------------------------------------------------
     Tests
@@ -106,6 +111,17 @@ spec = do
                 Just m  ===
                     (fromDistribution . distribution) m
 
+    describe "expectation" $ do
+        it "unit" $ property $
+            \(m :: Prob Rational) ->
+                expectation (Poly.constant 1) m
+                    === 1
+
+        it "positivity" $ mapSize (`div` 2) $ property $
+            \(m :: Prob Rational) (PositivePoly p) ->
+                expectation p m
+                    >=  0
+
     describe "choice" $ do
         it "distribution" $ property $
             \(Probability p) (mx :: Prob Rational) my z ->
@@ -148,7 +164,13 @@ spec = do
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
-data Probability = Probability Rational
+newtype PositivePoly = PositivePoly (Poly.Poly Rational)
+    deriving (Eq, Show)
+
+instance Arbitrary PositivePoly where
+    arbitrary = PositivePoly <$> genPositivePoly
+
+newtype Probability = Probability Rational
     deriving (Eq, Show)
 
 instance Arbitrary Probability where
