@@ -15,7 +15,7 @@ module Numeric.Probability.Moments
     Test
 ------------------------------------------------------------------------------}
 
--- | The first four common monents of a probability distribution.
+-- | The first four commonly used moments of a probability distribution.
 data Moments a = Moments
     { mean :: a
     -- ^ [Mean or Expected Value](https://en.wikipedia.org/wiki/Expected_value)

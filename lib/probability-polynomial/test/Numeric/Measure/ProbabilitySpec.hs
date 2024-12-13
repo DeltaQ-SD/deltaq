@@ -33,9 +33,13 @@ import Numeric.Measure.Probability
     , fromMeasure
     , unsafeFromMeasure
     , measure
+    , moments
     , support
     , translate
     , uniform
+    )
+import Numeric.Probability.Moments
+    ( Moments (..)
     )
 import Test.Hspec
     ( Spec
@@ -121,6 +125,37 @@ spec = do
             \(m :: Prob Rational) (PositivePoly p) ->
                 expectation p m
                     >=  0
+
+    describe "moments" $ do
+        it "mean is additive" $ mapSize (`div` 10) $ property $
+            \(mx :: Prob Rational) my ->
+                let mean' = mean . moments
+                in  mean' (convolve mx my)
+                        ===  mean' mx + mean' my
+
+        it "variance is additive" $ mapSize (`div` 10) $ property $
+            \(mx :: Prob Rational) my ->
+                let variance' = variance . moments
+                in  variance' (convolve mx my)
+                        ===  variance' mx + variance' my
+
+        it "skewness absorbs translate" $ property $
+            \(m :: Prob Rational) y ->
+                let skewness' = skewness . moments
+                in  skewness' (translate y m)
+                        === skewness' m
+
+        it "kurtosis absorbs translate" $ property $
+            \(m :: Prob Rational) y ->
+                let kurtosis' = kurtosis . moments
+                in  kurtosis' (translate y m)
+                        === kurtosis' m
+
+        it "kurtosis bounded below" $ property $
+            \(m :: Prob Rational) ->
+                let ms = moments m
+                in  kurtosis ms
+                        >=  (skewness ms)^(2 :: Int) + 1
 
     describe "choice" $ do
         it "distribution" $ property $
