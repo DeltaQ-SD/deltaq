@@ -12,13 +12,16 @@ module Numeric.Measure.Finite.Mixed
     , zero
     , dirac
     , uniform
-    , total
-    , support
-    , isPositive
     , distribution
     , fromDistribution
 
-      -- * Numerical operations
+      -- * Observations
+    , total
+    , support
+    , isPositive
+    , integrate
+
+      -- * Operations, numerical
     , add
     , scale
     , translate
@@ -236,6 +239,41 @@ decompose (Measure m) =
         go _ [] = []
         go prev ((x,o) : xos) =
             (x, Poly.eval o x - Poly.eval prev x) : go o xos
+
+{-----------------------------------------------------------------------------
+    Observations
+    Integration
+------------------------------------------------------------------------------}
+-- | Integrate a polynomial @f@ with respect to the given measure @m@,
+-- \( \int f(x) dm(x) \).
+integrate :: (Ord a, Num a, Fractional a) => Poly a -> Measure a -> a
+integrate f m =
+    integrateContinuous f continuous
+    + D.integrate (eval f) discrete
+  where
+    (continuous, discrete) = decompose m
+
+-- | Integrate a polynomial over an absolutely continuous measure.
+integrateContinuous
+    :: (Ord a, Num a, Fractional a)
+    => Poly a -> Continuous a -> a
+integrateContinuous f gg
+    | null gpieces = 0
+    | otherwise = sum $ map integrateOverInterval $ integrands
+  where
+    Density g = toDensity gg
+    gpieces = Piecewise.toAscPieces g
+
+    -- Pieces on the bounded intervals
+    boundedPieces xos =
+        zipWith (\(x1,o) (x2,_) -> ((x1, x2), o)) xos (drop 1 xos)
+
+    integrands = [ (x12, f * o) | (x12, o) <- boundedPieces gpieces ]
+
+    integrateOverInterval ((x1, x2), p) =
+        eval pp x2 - eval pp x1
+      where
+        pp = Poly.integrate p
 
 {-----------------------------------------------------------------------------
     Operations
