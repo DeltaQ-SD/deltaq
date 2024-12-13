@@ -7,7 +7,7 @@ Copyright   : Predictable Network Solutions Ltd., 2024
 License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
 -}
-module Numeric.Probability.MixedSpec
+module Numeric.Measure.ProbabilitySpec
     ( spec
     ) where
 
@@ -19,7 +19,7 @@ import Data.Function.Class
 import Data.Ratio
     ( (%)
     )
-import Numeric.Probability.Mixed
+import Numeric.Measure.Probability
     ( Prob
     , choice
     , convolve
