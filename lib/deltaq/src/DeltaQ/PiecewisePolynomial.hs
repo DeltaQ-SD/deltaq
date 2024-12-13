@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -14,10 +15,15 @@ This type represents a mixed discrete / continuous probability distribution
 where the continuous part is represented in terms of piecewise polynomials.
 -}
 module DeltaQ.PiecewisePolynomial
-    ( DQ
+    ( -- * Type
+      DQ
     , distribution
     , fromPositiveMeasure
     , unsafeFromPositiveMeasure
+
+    -- * Operations
+    , Moments (..)
+    , moments
 
     -- * Internal
     , complexity
@@ -43,10 +49,14 @@ import Numeric.Measure.Finite.Mixed
 import Numeric.Polynomial.Simple
     ( Poly
     )
+import Numeric.Probability.Moments
+    ( Moments (..)
+    )
 
 import qualified Data.Function.Class as Function
 import qualified Numeric.Function.Piecewise as Piecewise
 import qualified Numeric.Measure.Finite.Mixed as Measure
+import qualified Numeric.Measure.Probability as Prob
 import qualified Numeric.Polynomial.Simple as Poly
 
 {-----------------------------------------------------------------------------
@@ -196,3 +206,20 @@ quantileFromMonotone pieces = findInSegments segments
 
 precision :: Rational
 precision = 1 / 10^(10 :: Integer)
+
+{-----------------------------------------------------------------------------
+    Operations
+    Moments
+------------------------------------------------------------------------------}
+-- | Compute the success probability of a 'DQ',
+-- and the first commonly used 'Moments' of the
+-- probability distribution conditioned on success.
+moments :: DQ -> (Rational, Moments Rational)
+moments (DQ m)
+    | success == 0 =
+        (0, Moments{mean = 0, variance = 0, skewness = 0, kurtosis = 1})
+    | otherwise =
+        (success, Prob.moments conditional)
+  where
+    success = Measure.total m
+    conditional = Prob.unsafeFromMeasure $ Measure.scale (1/success) m

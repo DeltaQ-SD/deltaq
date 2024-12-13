@@ -20,6 +20,7 @@ module Numeric.Measure.Probability
       -- * Observations
     , support
     , expectation
+    , moments
 
       -- * Operations, numerical
     , choice
@@ -39,8 +40,13 @@ import Numeric.Measure.Finite.Mixed
 import Numeric.Polynomial.Simple
     ( Poly
     )
+import Numeric.Probability.Moments
+    ( Moments (..)
+    , fromExpectedPowers
+    )
 
 import qualified Numeric.Measure.Finite.Mixed as M
+import qualified Numeric.Polynomial.Simple as Poly
 
 {-----------------------------------------------------------------------------
     Type
@@ -142,6 +148,14 @@ support (Prob m) = M.support m
 -- \( E[f(X)] \).
 expectation :: (Ord a, Num a, Fractional a) => Poly a -> Prob a -> a
 expectation f (Prob m) = M.integrate f m
+
+-- | Compute the first four
+-- commonly used moments of a probability distribution.
+moments :: (Ord a, Num a, Fractional a) => Prob a -> Moments a
+moments m =
+    fromExpectedPowers (ex 1, ex 2, ex 3, ex 4)
+  where
+    ex n = expectation (Poly.monomial n 1) m
 
 {-----------------------------------------------------------------------------
     Operations

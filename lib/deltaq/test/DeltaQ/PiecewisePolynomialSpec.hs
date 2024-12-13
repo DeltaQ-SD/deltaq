@@ -32,6 +32,10 @@ import DeltaQ.PiecewisePolynomial
     , complexity
     , distribution
     , fromPositiveMeasure
+    , moments
+    )
+import Numeric.Probability.Moments
+    ( Moments (..)
     )
 import Test.Hspec
     ( Spec
@@ -398,6 +402,15 @@ specImplementation = do
                         . distribution
                 in
                     id' (uniform r s) === Just (uniform r s)
+
+    describe "moments" $ do
+        it "never" $ withMaxSuccess 1 $ property $
+            fst (moments never)  ===  0
+
+        it "wait" $ property $
+            \(NonNegative t) ->
+                let ms = Moments{mean = t, variance = 0, skewness = 0, kurtosis = 1}
+                in  moments (wait t)  ===  (1, ms)
 
     describe "complexity" $ do
         it "grows exponentially with .>>." $ withMaxSuccess 1 $ property $
