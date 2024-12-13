@@ -266,4 +266,4 @@ instance (Ord (Fun.Domain o), Num o) => Num (Piecewise o) where
     abs = mapPieces abs
     signum = mapPieces signum
     fromInteger 0 = zero
-    fromInteger n = error "TODO: fromInteger not implemented"
+    fromInteger _ = error "TODO: fromInteger not implemented"
