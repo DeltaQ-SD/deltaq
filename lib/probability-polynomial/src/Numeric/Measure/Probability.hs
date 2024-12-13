@@ -6,7 +6,7 @@ License     : BSD-3-Clause
 Maintainer  : peter.thompson@pnsol.com
 Description : Probability measures on the number line.
 -}
-module Numeric.Probability.Mixed
+module Numeric.Measure.Probability
     ( -- * Type
       Prob
     , dirac

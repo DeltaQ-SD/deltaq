@@ -41,8 +41,8 @@ library
     Numeric.Function.Piecewise
     Numeric.Measure.Discrete
     Numeric.Measure.Finite.Mixed
+    Numeric.Measure.Probability
     Numeric.Polynomial.Simple
-    Numeric.Probability.Mixed
     Numeric.Probability.Moments
 
 test-suite test
@@ -67,8 +67,8 @@ test-suite test
     Numeric.Function.PiecewiseSpec
     Numeric.Measure.DiscreteSpec
     Numeric.Measure.Finite.MixedSpec
+    Numeric.Measure.ProbabilitySpec
     Numeric.Polynomial.SimpleSpec
-    Numeric.Probability.MixedSpec
 
 benchmark probability-polynomial-benchmark
   import:           warnings
