@@ -42,6 +42,7 @@ library
     Numeric.Measure.Discrete
     Numeric.Measure.Finite.Mixed
     Numeric.Polynomial.Simple
+    Numeric.Probability.Mixed
 
 test-suite test
   import:           warnings
