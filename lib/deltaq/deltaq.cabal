@@ -10,12 +10,14 @@ synopsis:        ∆Q Systems Development
 description:
   ∆Q System Development is a paradigm for developing distributed systems
   that meet performance requirements.
+
   In this paradigm,
   the system designer starts by defining high-level outcomes,
   explores different refinements into combinations of lower-level outcomes,
   and evaluates their performance characteristics.
 
-  This package provides data types and functions for
+  The `deltaq` package (pronounced "Delta Q") provides
+  data types and functions for
 
   * outcomes and their combinations
   * evaluating the performance characteristics of outcomes,
