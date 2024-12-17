@@ -4,7 +4,7 @@
 
 ∆Q System Development works by defining desired system outcomes, exploring different designs that decompose these outcomes into lower-level outcomes, and estimating their performance characteristics.
 
-∆Q System Development represents performance as a probability distribution of the expected time to complete an outcome. This repository includes a Haskell package `probability-polynomial` to concretely represent and manipulate such distributions, and a package `deltaq` built on top of this for writing outcome expressions and evaluating their performance characteristics.
+∆Q System Development represents performance as a probability distribution of the expected time to complete an outcome. This repository includes a Haskell package `probability-polynomial` to concretely represent and manipulate such distributions, and a package `deltaq` (pronounced "Delta Q") built on top of this for writing outcome expressions and evaluating their performance characteristics.
 
 For more information on the ∆Q System Development paradigm, also consult
 
