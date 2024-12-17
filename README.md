@@ -49,6 +49,5 @@ cabal test deltaq
 
 # Roadmap
 
-* Add more property tests
-* Simplify internals
+* Approximation for probability distributions of large size
 * Create more examples
