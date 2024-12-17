@@ -198,7 +198,7 @@ span.spaces    { background: white }
 <span class="lineno">  179 </span><span class="spaces">        </span><span class="istickedoff">nexts = goPoly x1 y1 o xos</span>
 <span class="lineno">  180 </span><span class="spaces"></span><span class="istickedoff"></span>
 <span class="lineno">  181 </span><span class="spaces">    </span><span class="istickedoff">goPoly x1 y1 o [] =</span>
-<span class="lineno">  182 </span><span class="spaces">        </span><span class="istickedoff">End <span class="nottickedoff">x1</span> y1 : <span class="nottickedoff">goJump o []</span></span>
+<span class="lineno">  182 </span><span class="spaces">        </span><span class="istickedoff"><span class="nottickedoff">End x1 y1 : goJump o []</span></span>
 <span class="lineno">  183 </span><span class="spaces">    </span><span class="istickedoff">goPoly x1 y1 o xos@((x2, _) : _) =</span>
 <span class="lineno">  184 </span><span class="spaces">        </span><span class="istickedoff">Polynomial (x1, x2) (y1, Poly.eval o x2) o : goJump o xos</span></span>
 <span class="lineno">  185 </span>        -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
@@ -220,8 +220,8 @@ span.spaces    { background: white }
 <span class="lineno">  201 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Poly.root precision y (x1, x2) o</span>
 <span class="lineno">  202 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
 <span class="lineno">  203 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (End x1 y1 : _) y</span>
-<span class="lineno">  204 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
-<span class="lineno">  205 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span></span>
+<span class="lineno">  204 </span><span class="spaces">        </span><span class="istickedoff">| <span class="nottickedoff">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
+<span class="lineno">  205 </span><span class="spaces">        </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
 <span class="lineno">  206 </span>
 <span class="lineno">  207 </span>precision :: Rational
 <span class="lineno">  208 </span><span class="decl"><span class="istickedoff">precision = 1 / 10^(10 :: Integer)</span></span>
