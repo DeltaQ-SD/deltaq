@@ -19,6 +19,8 @@ Specifically,
         This type represents a mixed discrete / continuous probability distribution
         where the continuous part is represented in terms of piecewise polynomials.
 
+    * common methods for analysis and construction in "DeltaQ.Methods"
+
     * plotting utilities in "DeltaQ.Plot"
 
         * 'plotCDFWithQuantiles' for plotting an instance of 'DeltaQ'
@@ -31,11 +33,13 @@ module DeltaQ
 
       -- * Modules
       module DeltaQ.Class
+    , module DeltaQ.Methods
     , module DeltaQ.Plot
     , module DeltaQ.PiecewisePolynomial
     ) where
 
 import DeltaQ.Class
+import DeltaQ.Methods
 import DeltaQ.PiecewisePolynomial
 import DeltaQ.Plot
 

@@ -154,7 +154,7 @@ maybeFromEventually (Occurs x) = Just x
 --
 -- Specifically, 'DeltaQ' is the probability distribution
 -- of finish times for an outcome.
-class   ( Eq (Probability o)
+class   ( Ord (Probability o)
         , Enum (Probability o)
         , Num (Probability o)
         , Fractional (Probability o)
