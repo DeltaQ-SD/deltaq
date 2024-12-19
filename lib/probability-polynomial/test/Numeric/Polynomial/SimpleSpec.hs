@@ -187,16 +187,22 @@ spec = do
                         === integratePieces (convolve p1 q1)
 
     describe "countRoots" $ do
-        it "disjoint roots and interval" $ property $ mapSize (`div` 5) $
-            \(DisjointSorted roots) x (Positive d) ->
-                let xx = scaleX (constant 1) :: Poly Rational
-                    -- Vieta's formula
-                    p = product $ map (\r -> xx - constant r) roots
-                    y = x + d
-                in
-                    (x `notElem` roots) && (y `notElem` roots)
-                    ==> (countRoots (x, y, p)
-                        ===  countIntervalMembers (x, y) roots)
+        it "counts distinct roots in open interval" $ property $
+            \(PolyWithRealRoots p roots) (x1 :: Rational) (Positive d) ->
+                let x2 = x1 + d in
+                    countRoots (x1, x2, p)
+                        ===  countRoots' (x1, x2) roots
+
+        it "handles roots at boundary" $ mapSize (`div` 2) $ property $
+            \(PolyWithRealRoots p _) (x1 :: Rational) (Positive d) ->
+                let x2 = x1 + d
+                    xx = monomial 1 1
+                    rootCount = countRoots (x1, x2, p)
+                in      countRoots (x1, x2, p * (xx - constant x1))
+                            ===  rootCount
+                    .&&.
+                        countRoots (x1, x2, p * (xx - constant x2))
+                            ===  rootCount
 
     describe "root" $ do
         it "cubic polynomial" $ property $ mapSize (`div` 5) $
@@ -330,11 +336,6 @@ countRoots' :: Ord a => (a, a) -> Roots a -> Int
 countRoots' (xl, xr) (Roots xs) =
     length . filter (\x -> xl < x && x < xr) $ map fst xs
 
--- | Count the number of list elements that fall in a given interval.
-countIntervalMembers :: Ord a => (a, a) -> [a] -> Int 
-countIntervalMembers (xl, xr) =
-    length . filter (\x -> xl < x && x <= xr)
-
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
@@ -393,8 +394,8 @@ data PolyWithRealRoots a = PolyWithRealRoots (Poly a) (Roots a)
 
 genPolyWithRealRoots :: Gen (PolyWithRealRoots Rational)
 genPolyWithRealRoots = do
-    roots <- QC.scale (`div` 6) $ arbitrary
-    q <- QC.scale (`div` 10) $ genPositivePoly
+    roots <- QC.scale (`div` 7) $ arbitrary
+    q <- QC.scale (`div` 11) $ genPositivePoly
     pure $ PolyWithRealRoots (fromRoots roots * q) roots
 
 instance Arbitrary (PolyWithRealRoots Rational) where
