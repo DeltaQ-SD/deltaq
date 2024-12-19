@@ -94,9 +94,9 @@ span.spaces    { background: white }
 <span class="lineno">   75 </span>-- These preconditions are checked and the function returns 'Nothing'
 <span class="lineno">   76 </span>-- if they fail. 
 <span class="lineno">   77 </span>fromMeasure :: (Ord a, Num a, Fractional a) =&gt; Measure a -&gt; Maybe (Prob a)
-<span class="lineno">   78 </span><span class="decl"><span class="nottickedoff">fromMeasure m</span>
-<span class="lineno">   79 </span><span class="spaces">    </span><span class="nottickedoff">| M.isPositive m &amp;&amp; M.total m == 1 = Just $ Prob m</span>
-<span class="lineno">   80 </span><span class="spaces">    </span><span class="nottickedoff">| otherwise = Nothing</span></span>
+<span class="lineno">   78 </span><span class="decl"><span class="istickedoff">fromMeasure m</span>
+<span class="lineno">   79 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">M.isPositive m &amp;&amp; M.total m == 1</span> = Just $ Prob m</span>
+<span class="lineno">   80 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
 <span class="lineno">   81 </span>
 <span class="lineno">   82 </span>-- | View a 'M.Measure' as a probability distribution.
 <span class="lineno">   83 </span>--
@@ -123,9 +123,9 @@ span.spaces    { background: white }
 <span class="lineno">  104 </span>fromDistribution
 <span class="lineno">  105 </span>    :: (Ord a, Num a, Fractional a)
 <span class="lineno">  106 </span>    =&gt; Piecewise (Poly a) -&gt; Maybe (Prob a)
-<span class="lineno">  107 </span><span class="decl"><span class="nottickedoff">fromDistribution pieces</span>
-<span class="lineno">  108 </span><span class="spaces">    </span><span class="nottickedoff">| Just m &lt;- M.fromDistribution pieces = fromMeasure m</span>
-<span class="lineno">  109 </span><span class="spaces">    </span><span class="nottickedoff">| otherwise = Nothing</span></span>
+<span class="lineno">  107 </span><span class="decl"><span class="istickedoff">fromDistribution pieces</span>
+<span class="lineno">  108 </span><span class="spaces">    </span><span class="istickedoff">| Just m &lt;- M.fromDistribution pieces = fromMeasure m</span>
+<span class="lineno">  109 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
 <span class="lineno">  110 </span>
 <span class="lineno">  111 </span>-- | Two probability measures are equal if they have the same cumulative
 <span class="lineno">  112 </span>-- distribution functions.
