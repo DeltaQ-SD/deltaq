@@ -111,9 +111,9 @@ monomial n x = if x == 0 then zero else Poly (reverse (x : replicate n 0))
 {-| Construct a polynomial @a0 + a1·x + …@ from
 its list of coefficients @[a0, a1, …]@.
 -}
-fromCoefficients :: Num a => [a] -> Poly a
+fromCoefficients :: (Eq a, Num a) => [a] -> Poly a
 fromCoefficients [] = zero
-fromCoefficients as = Poly as
+fromCoefficients as = trimPoly $ Poly as
 
 {-| List the coefficients @[a0, a1, …]@
 of a polynomial @a0 + a1·x + …@.
