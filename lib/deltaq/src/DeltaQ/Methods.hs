@@ -80,7 +80,7 @@ meetsRequirement o (t,p)
     dp = p' - p
     dt = t - eventually err id t'
 
-    t' = quantile p o
+    t' = quantile o p
     p' = o `successWithin` t
 
     err = error "distanceToReference: inconsistency"

@@ -266,35 +266,35 @@ specProperties = do
                         === successWithin2 r s t
 
     describe "quantile" $ do
-        let quantile' :: Rational -> DQ -> Eventually Rational
+        let quantile' :: DQ -> Rational -> Eventually Rational
             quantile' = quantile
 
         it "0" $ property $
             \o ->
-                quantile' 0 o  ===  Occurs 0
+                quantile' o 0  ===  Occurs 0
 
         it "monotonic" $ property $
             \o (Probability p) (Probability q) ->
                 let p' = min p q
                     q' = max p q
                 in
-                    p' <= q'  ==>  quantile' p' o <= quantile' q' o
+                    p' <= q'  ==>  quantile' o p' <= quantile' o q'
 
         it "never" $ property $
             \(Probability p) ->
                 p > 0 ==>
-                quantile' p never ===  Abandoned
+                quantile' never p  ===  Abandoned
 
         it "wait" $ property $
             \(Probability p) (NonNegative t) ->
                 p > 0 ==>
-                quantile' p (wait t) ===  Occurs t
+                quantile' (wait t) p  ===  Occurs t
 
         it "uniform" $ property $
             \(Probability p) (NonNegative r) (Positive d) ->
                 let s = r + d in 
                 p > 0 ==>
-                quantile' p (uniform r s)
+                quantile' (uniform r s) p
                     === Occurs (r + p*(s-r))
 
     describe "earliest" $ do
@@ -380,7 +380,7 @@ specProperties = do
             in
                 deadline o  ===  Occurs (2^n)
                 .&&. failure o  === 0
-                .&&. quantile (1 - 1/4) o  ===  Occurs 4
+                .&&. quantile o (1 - 1/4)  ===  Occurs 4
 
 specImplementation :: Spec
 specImplementation = do

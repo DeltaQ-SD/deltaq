@@ -204,7 +204,7 @@ class   ( Ord (Probability o)
     --
     -- Return 'Abandoned' if the given probability
     -- exceeds the probability of finishing.
-    quantile :: Probability o -> o -> Eventually (Duration o)
+    quantile :: o -> Probability o -> Eventually (Duration o)
 
     -- | The earliest finish time with non-zero probability.
     --
@@ -316,13 +316,13 @@ equality may be up to numerical accuracy.
 
 'quantile'
 
-> p <= q  implies  quantile p o <= quantile q o
+> p <= q  implies  quantile o p <= quantile o q
 >
-> quantile 0 x        = Occurs 0
-> quantile p never    = Abandoned       if p > 0
-> quantile p (wait t) = Occurs t        if p > 0
+> quantile x        0 = Occurs 0
+> quantile never    p = Abandoned       if p > 0
+> quantile (wait t) p = Occurs t        if p > 0
 >
-> quantile p (uniform r s)  =  r + p*(s-t)  if p > 0, r <= s
+> quantile (uniform r s) p  =  r + p*(s-t)  if p > 0, r <= s
 
 'earliest'
 
