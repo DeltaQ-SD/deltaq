@@ -415,23 +415,15 @@ euclidianDivision pa pb
     Advanced operations
     Numerical
 ------------------------------------------------------------------------------}
-
 {-|
-We use Sturm's Theorem to count the number of roots of a polynomial in a given interval.
+@'countRoots' (x1, x2, p)@ returns the number of /distinct/ real roots
+of the polynomial on the half-open interval \( (x_1, x_2] \).
 
-(See https://en.wikipedia.org/wiki/Sturm%27s_theorem)
-Starting from polynomial p, construct the Sturm sequence p0, p1, . . ., where:
-p0 = p
-p1 = p′
-pi+1 = −rem(pi−1, pi) for i > 1
-where p′ is the derivative of p and rem(p, q) is the remainder of the Euclidian division of p by q.
-The length of this sequence is at most the degree of p.
-We define V(x) to be the number of sign variations in the sequence of numbers p0(x), p1(x), . . ..
-Sturm’s theorem states that, if p is a square-free polynomial (one without repeated roots), then
-R(l,r](p) = V (l) − V (r). This extends to non-square-free polynomials provided neither l nor r is a
-multiple root of p (a circumstance we shall ignore)
+(Roots with higher multiplicity are each counted as a single distinct root.)
 
-We start from the tuple that emerges from disagregation.
+This function uses [Sturm's theorem
+](https://en.wikipedia.org/wiki/Sturm%27s_theorem),
+with special provisions for roots on the boundary of the interval.
 -}
 countRoots :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Int
 countRoots (l, r, p) = case degree p of
@@ -439,35 +431,80 @@ countRoots (l, r, p) = case degree p of
     -1 -> 0
     -- p is a non-zero constant polynomial - no root
     0 -> 0
-    -- p is a linear polynomial, which has a root iff it has a different sign at each end of the interval
-    1 -> if eval p l * eval p r < 0 then 1 else 0
+    -- p is a linear polynomial,
+    1 | eval p l * eval p r < 0 -> 1 -- different signs at the end of the interval
+      | otherwise -> 0
     -- p has degree 2 or more so we can construct the Sturm sequence
-    _ -> signVariations (sturmSequence l p) - signVariations (sturmSequence r p)
+    _ -> countRootsSturm (l, r, p)
+
+{-|
+@'countRootsSturm' (x1, x2, p)@ returns the number of /distinct/ real roots
+of the polynomial @p@ on the half-open interval \( (x_1, x_2] \),
+under the following assumptions:
+
+* @'degree' p >= 2@
+* neither \( x_1 \) nor \( x_2 \) are multiple roots of \( p(x) \).
+
+This function is an implementation of [Sturm's theorem
+](https://en.wikipedia.org/wiki/Sturm%27s_theorem).
+-}
+countRootsSturm :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Int
+countRootsSturm (l, r, p) =
+    -- p has degree 2 or more so we can construct the Sturm sequence
+    signVariations psl - signVariations psr
   where
-    signVariations :: (Fractional a, Eq a, Ord a) => [a] -> Int
-    {-
-    When c0, c1, c2, . . . ck is a finite sequence of real numbers, then a sign variation or sign change in the sequence
-    is a pair of indices i < j such that cicj < 0, and either j = i + 1 or ck = 0 for all k such that i < k < j
-    -}
-    signVariations xs = length (filter (< 0) pairsMultiplied)
+    ps = reversedSturmSequence p
+    psl = map (flip eval l) ps
+    psr = map (flip eval r) ps
+
+{-| Number of sign variations in a list of real numbers.
+
+Given a list @c0, c1, c2, . . . ck@,
+then a sign variation (or sign change) in the sequence
+is a pair of indices @i < j@ such that @ci*cj < 0@,
+and either @j = i + 1@ or @ck = 0@ for all @@ such that @i < k < j@.
+-}
+signVariations :: (Fractional a, Ord a) => [a] -> Int
+signVariations xs =
+    length (filter (< 0) pairsMultiplied)
+  where
+    -- we simply remove zero elements to implement the clause
+    -- "ck = 0 for all k such that i < k < j"
+    zeroesRemoved = filter (/= 0) xs
+    pairsMultiplied = zipWith (*) zeroesRemoved (drop 1 zeroesRemoved)
+
+{-|
+Construct the [Sturm sequence
+](https://en.wikipedia.org/wiki/Sturm%27s_theorem)
+of a given polynomial @p@. The Sturm sequence is given by the polynomials
+
+> p0 = p
+> p1 = differentiate p
+> p{i+1} = - rem(p{i-1}, pi)
+
+where @rem@ denotes the remainder under 'euclidianDivision'.
+We truncate the list when one of the @pi = 0@.
+
+For ease of implementation, we
+
+* construct the 'reverse' of the Sturm sequence.
+  This does not affect the number of sign variations that the usage site
+  will be interested in.
+
+* assume that the @degree p >= 1@.
+-}
+reversedSturmSequence :: (Fractional a, Ord a) => Poly a -> [Poly a]
+reversedSturmSequence p =
+    go [differentiate p, p]
+  where
+    -- Note that this is called with a list of length 2 and grows the list,
+    -- so we don't need to match all cases.
+    go ps@(pI : pIminusOne : _)
+        | remainder == zero = ps
+        | otherwise = go (negate remainder : ps)
       where
-        -- we implement the clause "ck = 0 for all k such that i < k < j" by removing zero elements
-        zeroesRemoved = filter (/= 0) xs
-        -- TODO: deal with all zero corner case
-        pairsMultiplied = zipWith (*) zeroesRemoved (tail zeroesRemoved)
-    sturmSequence :: (Fractional a, Eq a, Ord a) => a -> Poly a -> [a]
-    sturmSequence x q = map (flip eval x) (doSeq [differentiate q, q])
-      where
-        doSeq :: (Fractional a, Eq a, Ord a) => [Poly a] -> [Poly a]
-        {-
-           Note that this is called with a list of length 2 and grows the list, so we don't need to match all cases
-           Note that we build this backwards to avoid use of append, but this doesn't affect the number of
-           sign variations so there's no need to reverse it.
-        -}
-        doSeq x'@(xI : xIminusOne : _) = if polyRemainder == zero then x' else doSeq (negate polyRemainder : x')
-          where
-            polyRemainder = snd $ euclidianDivision xIminusOne xI
-        doSeq _ = error "List too short" -- prevent warning about missing cases
+        remainder = snd $ euclidianDivision pIminusOne pI
+    go _ = error "reversedSturmSequence: impossible"
 
 -- | Check whether a polynomial is monotonically increasing on
 -- a given interval.
