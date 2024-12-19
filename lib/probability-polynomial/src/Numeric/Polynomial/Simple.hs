@@ -417,7 +417,7 @@ euclidianDivision pa pb
 ------------------------------------------------------------------------------}
 {-|
 @'countRoots' (x1, x2, p)@ returns the number of /distinct/ real roots
-of the polynomial on the half-open interval \( (x_1, x_2] \).
+of the polynomial on the open interval \( (x_1, x_2) \).
 
 (Roots with higher multiplicity are each counted as a single distinct root.)
 
@@ -425,17 +425,50 @@ This function uses [Sturm's theorem
 ](https://en.wikipedia.org/wiki/Sturm%27s_theorem),
 with special provisions for roots on the boundary of the interval.
 -}
-countRoots :: (Fractional a, Eq a, Ord a) => (a, a, Poly a) -> Int
-countRoots (l, r, p) = case degree p of
-    -- p is the zero polynomial, so it doesn't *cross* zero
-    -1 -> 0
-    -- p is a non-zero constant polynomial - no root
-    0 -> 0
-    -- p is a linear polynomial,
-    1 | eval p l * eval p r < 0 -> 1 -- different signs at the end of the interval
-      | otherwise -> 0
-    -- p has degree 2 or more so we can construct the Sturm sequence
-    _ -> countRootsSturm (l, r, p)
+countRoots :: (Fractional a, Ord a) => (a, a, Poly a) -> Int
+countRoots (l, r, p) =
+    countRoots' $ (p `factorOutRoot` l) `factorOutRoot` r
+  where
+    -- we can now assume that the polynomial has no roots at the boundary
+    countRoots' q = case degree q of
+        -- q is the zero polynomial, so it doesn't *cross* zero
+        -1 -> 0
+        -- q is a non-zero constant polynomial - no root
+        0 -> 0
+        -- q is a linear polynomial,
+        1 -> if eval q l * eval q r < 0 then 1 else 0
+        -- q has degree 2 or more so we can construct the Sturm sequence
+        _ -> countRootsSturm (l, r, q)
+
+-- | Given a polynomial \( p(x) \) and a value \( a \),
+-- this functions factors out the polynomial \( (x-a)^m \),
+-- where \( m \) is the highest power where this polynomial
+-- divides \( p(x) \) without remainder.
+--
+-- * If the value \( a \) is a root of the polynomial,
+--   then \( m \) is the multiplicity of the root.
+-- * If the value \( a \) is not a root, then
+--   \( m = 0 \) and the function returns \( p (x) \).
+--
+-- In other words, this function returns a polynomial \( q (x) \)
+-- such that
+--
+-- \( p(x) = q(x)·(x - a)^m \)
+--
+-- where \( q(a) ≠ 0 \).
+-- If the polynomial \( p(x) \) is identically 'zero',
+-- we return 'zero' as well.
+factorOutRoot :: (Fractional a, Ord a) => Poly a -> a -> Poly a
+factorOutRoot p0 x0
+    | p0 == zero = zero
+    | otherwise = go p0
+  where
+    go p
+        | eval p x0 == 0 = factorOutRoot pDividedByXMinusX0 x0
+        | otherwise = p
+      where
+        xMinusX0 = monomial 1 1 - constant x0
+        (pDividedByXMinusX0, _) = p `euclidianDivision` xMinusX0
 
 {-|
 @'countRootsSturm' (x1, x2, p)@ returns the number of /distinct/ real roots
@@ -513,7 +546,6 @@ isMonotonicallyIncreasingOn
 isMonotonicallyIncreasingOn p (x1,x2) =
     eval p x1 <= eval p x2
     && countRoots (x1, x2, differentiate p) == 0
-    -- FIXME: What about double roots?
 
 {-|
 Measure whether or not a polynomial is consistently above or below zero,
