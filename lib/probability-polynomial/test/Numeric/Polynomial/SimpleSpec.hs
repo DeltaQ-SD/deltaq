@@ -281,7 +281,7 @@ spec = do
         it "eval" $ property $
             \(x :: Rational) ->
             forAll genPositivePoly $ \p ->
-                eval p x >= 0
+                eval p x > 0
 
     describe "genPolyWithRealRoots" $
         it "eval" $ property $
@@ -346,15 +346,15 @@ instance Arbitrary (Poly Rational) where
     arbitrary = genPoly
 
 -- | Generate a quadratic polynomial that is positive,
--- i.e. has no real roots.
+-- i.e. has no real roots and is always larger than zero.
 genQuadraticPositivePoly :: Gen (Poly Rational)
 genQuadraticPositivePoly = do
     let xx = fromCoefficients [0, 1]
     x0 <- constant <$> arbitrary
-    NonNegative b <- arbitrary
+    Positive b <- arbitrary
     pure $ (xx - x0) * (xx - x0) + constant b
 
--- | Generate a positive polynomial, i.e. @eval p x >= 0@ for all @x@.
+-- | Generate a positive polynomial, i.e. @eval p x > 0@ for all @x@.
 genPositivePoly :: Gen (Poly Rational)
 genPositivePoly =
     QC.scale (`div` 3) $ product <$> listOf genQuadraticPositivePoly
@@ -393,7 +393,7 @@ data PolyWithRealRoots a = PolyWithRealRoots (Poly a) (Roots a)
 
 genPolyWithRealRoots :: Gen (PolyWithRealRoots Rational)
 genPolyWithRealRoots = do
-    roots <- QC.scale (`div` 3) $ arbitrary
+    roots <- QC.scale (`div` 6) $ arbitrary
     q <- QC.scale (`div` 10) $ genPositivePoly
     pure $ PolyWithRealRoots (fromRoots roots * q) roots
 
