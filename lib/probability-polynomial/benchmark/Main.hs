@@ -20,7 +20,7 @@ import Numeric.Polynomial.Simple
 
 import qualified Numeric.Polynomial.Simple as Poly
 
-longPoly :: (Integral b, Floating a) => b -> Poly a
+longPoly :: (Integral b, Floating a, Eq a) => b -> Poly a
 longPoly m = Poly.fromCoefficients $ replicate (2 ^ m) pi
 
 mulLongPolys :: Int -> Poly Double

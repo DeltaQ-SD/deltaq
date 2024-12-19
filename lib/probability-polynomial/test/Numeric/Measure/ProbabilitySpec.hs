@@ -43,17 +43,14 @@ import Numeric.Probability.Moments
     )
 import Test.Hspec
     ( Spec
-    , before_
     , describe
     , it
-    , pendingWith
     )
 import Test.QuickCheck
     ( Arbitrary
     , Gen
     , NonNegative (..)
     , Positive (..)
-    , Property
     , (===)
     , (==>)
     , arbitrary
@@ -74,9 +71,6 @@ import qualified Numeric.Polynomial.Simple as Poly
 {-----------------------------------------------------------------------------
     Tests
 ------------------------------------------------------------------------------}
-xit' :: String -> String -> Property -> Spec
-xit' reason label = before_ (pendingWith reason) . it label
-
 spec :: Spec
 spec = do
     describe "uniform" $ do
@@ -99,8 +93,7 @@ spec = do
             \(m :: Prob Rational) ->
                 m  ===  (unsafeFromMeasure . measure) m
 
-        xit' "Corner cases in Poly.isMonotonicallyIncreasingOn"
-            "fromMeasure . measure" $ property $
+        it "fromMeasure . measure" $ property $
             \(m :: Prob Rational) ->
                 Just m  ===  (fromMeasure . measure) m
 
@@ -109,8 +102,7 @@ spec = do
                 Just m  ===
                     (fmap unsafeFromMeasure . M.fromDistribution . distribution) m
 
-        xit' "Corner cases in Poly.isMonotonicallyIncreasingOn"
-            "fromDistribution . distribution" $ property $
+        it "fromDistribution . distribution" $ property $
             \(m :: Prob Rational) ->
                 Just m  ===
                     (fromDistribution . distribution) m

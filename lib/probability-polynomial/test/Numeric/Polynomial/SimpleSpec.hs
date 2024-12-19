@@ -19,6 +19,9 @@ import Prelude
 import Data.List
     ( nub
     )
+import Data.Traversable
+    ( for
+    )
 import Numeric.Polynomial.Simple
     ( Poly
     , compareToZero
@@ -28,11 +31,13 @@ import Numeric.Polynomial.Simple
     , degree
     , differentiate
     , display
+    , euclidianDivision
     , eval
     , fromCoefficients
     , integrate
     , isMonotonicallyIncreasingOn
     , lineFromTo
+    , monomial
     , root
     , scale
     , scaleX
@@ -58,6 +63,7 @@ import Test.QuickCheck
     , arbitrary
     , counterexample
     , forAll
+    , frequency
     , listOf
     , mapSize
     , property
@@ -156,14 +162,19 @@ spec = do
     describe "translate" $ do
         it "eval" $ property $
             \p y (x :: Rational) ->
-                counterexample ("degree p = " <> show (degree p))
-                $ eval (translate y p) x  ===  eval p (x - y)
+                eval (translate y p) x  ===  eval p (x - y)
 
         it "differentiate" $ property $
             \p (y :: Rational) ->
-                counterexample ("degree p = " <> show (degree p))
-                $ differentiate (translate y p)
+                differentiate (translate y p)
                     ===  translate y (differentiate p)
+
+    describe "euclidianDivision" $ do
+        it "a = q * b + r, and  degree r < degree b" $ property $
+            \a (b :: Poly Rational) ->
+                let (q, r) = euclidianDivision a b in
+                b /= zero ==>
+                    (a  === q*b + r  .&&.  degree r < degree b)
 
     describe "convolve" $ do
         it "product of integrals" $ property $ mapSize (`div` 6) $
@@ -176,16 +187,22 @@ spec = do
                         === integratePieces (convolve p1 q1)
 
     describe "countRoots" $ do
-        it "disjoint roots and interval" $ property $ mapSize (`div` 5) $
-            \(DisjointSorted roots) x (Positive d) ->
-                let xx = scaleX (constant 1) :: Poly Rational
-                    -- Vieta's formula
-                    p = product $ map (\r -> xx - constant r) roots
-                    y = x + d
-                in
-                    (x `notElem` roots) && (y `notElem` roots)
-                    ==> (countRoots (x, y, p)
-                        ===  countIntervalMembers (x, y) roots)
+        it "counts distinct roots in open interval" $ property $
+            \(PolyWithRealRoots p roots) (x1 :: Rational) (Positive d) ->
+                let x2 = x1 + d in
+                    countRoots (x1, x2, p)
+                        ===  countRoots' (x1, x2) roots
+
+        it "handles roots at boundary" $ mapSize (`div` 2) $ property $
+            \(PolyWithRealRoots p _) (x1 :: Rational) (Positive d) ->
+                let x2 = x1 + d
+                    xx = monomial 1 1
+                    rootCount = countRoots (x1, x2, p)
+                in      countRoots (x1, x2, p * (xx - constant x1))
+                            ===  rootCount
+                    .&&.
+                        countRoots (x1, x2, p * (xx - constant x2))
+                            ===  rootCount
 
     describe "root" $ do
         it "cubic polynomial" $ property $ mapSize (`div` 5) $
@@ -270,7 +287,12 @@ spec = do
         it "eval" $ property $
             \(x :: Rational) ->
             forAll genPositivePoly $ \p ->
-                eval p x >= 0
+                eval p x > 0
+
+    describe "genPolyWithRealRoots" $
+        it "eval" $ property $
+            \(PolyWithRealRoots (p :: Poly Rational) (Roots roots)) ->
+                all (\x -> eval p x == 0) $ map fst roots
 
 {-----------------------------------------------------------------------------
     Helper functions
@@ -291,37 +313,90 @@ integratePieces = sum . map integrateInterval . intervals
         | ((x, p), y) <- zip pieces $ drop 1 $ map fst pieces
         ]
 
--- | Count the number of list elements that fall in a given interval.
-countIntervalMembers :: Ord a => (a, a) -> [a] -> Int 
-countIntervalMembers (xl, xr) =
-    length . filter (\x -> xl < x && x <= xr)
+-- | Multiplicity of a root.
+type Multiplicity = Int
+
+-- | A list of roots with multiplicity.
+newtype Roots a = Roots [(a, Multiplicity)]
+    deriving (Eq, Show)
+
+-- | Use [Vieta's theorem
+-- ](https://en.wikipedia.org/wiki/Vieta%27s_formulas)
+-- to convert a list of roots with mulitiplicities into
+-- a polynomial with exactly those roots.
+fromRoots :: (Ord a, Num a) => Roots a -> Poly a
+fromRoots (Roots xms) =
+    product $ map (\(r,m) -> (xx - constant r) ^ m) xms
+  where
+    xx = monomial 1 1
+
+-- | Count the distinct number of real roots
+-- that lie in the given, open interval.
+countRoots' :: Ord a => (a, a) -> Roots a -> Int
+countRoots' (xl, xr) (Roots xs) =
+    length . filter (\x -> xl < x && x < xr) $ map fst xs
 
 {-----------------------------------------------------------------------------
     Random generators
 ------------------------------------------------------------------------------}
+-- | Generate an arbitrary polynomial.
 genPoly :: Gen (Poly Rational)
 genPoly = fromCoefficients <$> listOf arbitrary
 
--- | Generate a positive polynomial, i.e. @eval p x >= 0@ for all @x@.
-genPositivePoly :: Gen (Poly Rational)
-genPositivePoly =
-    QC.scale (`div` 3) $ product <$> listOf genQuadratic
-  where
-    xx = fromCoefficients [0, 1]
-
-    genQuadratic = do
-        x0 <- constant <$> arbitrary
-        NonNegative b <- arbitrary
-        pure $ (xx - x0) * (xx - x0) + constant b
-
 instance Arbitrary (Poly Rational) where
     arbitrary = genPoly
+
+-- | Generate a quadratic polynomial that is positive,
+-- i.e. has no real roots and is always larger than zero.
+genQuadraticPositivePoly :: Gen (Poly Rational)
+genQuadraticPositivePoly = do
+    let xx = fromCoefficients [0, 1]
+    x0 <- constant <$> arbitrary
+    Positive b <- arbitrary
+    pure $ (xx - x0) * (xx - x0) + constant b
+
+-- | Generate a positive polynomial, i.e. @eval p x > 0@ for all @x@.
+genPositivePoly :: Gen (Poly Rational)
+genPositivePoly =
+    QC.scale (`div` 3) $ product <$> listOf genQuadraticPositivePoly
 
 -- | A list of disjoint and sorted elements.
 newtype DisjointSorted a = DisjointSorted [a]
     deriving (Eq, Show)
 
+genDisjointSorted :: Gen (DisjointSorted Rational)
+genDisjointSorted = 
+    DisjointSorted . drop 1 . scanl (\s (Positive d) -> s + d) 0
+        <$> listOf arbitrary
+
 instance Arbitrary (DisjointSorted Rational) where
-    arbitrary =
-        DisjointSorted . drop 1 . scanl (\s (Positive d) -> s + d) 0
-            <$> listOf arbitrary
+    arbitrary = genDisjointSorted
+
+genMultiplicity :: Gen Multiplicity
+genMultiplicity =
+    frequency [(20, pure 1), (2, pure 2), (2, pure 3), (1, pure 7)]
+
+genRoots :: Gen (Roots Rational)
+genRoots = do
+    DisjointSorted xs <- arbitrary
+    xms <- for xs $ \x -> do
+        multiplicity <- genMultiplicity
+        pure $ (x, multiplicity)
+    pure $ Roots xms
+
+instance Arbitrary (Roots Rational) where
+    arbitrary = genRoots
+
+-- | A polynomial with known real roots.
+-- The polynomial may have additional complex roots.
+data PolyWithRealRoots a = PolyWithRealRoots (Poly a) (Roots a)
+    deriving (Eq, Show)
+
+genPolyWithRealRoots :: Gen (PolyWithRealRoots Rational)
+genPolyWithRealRoots = do
+    roots <- QC.scale (`div` 7) $ arbitrary
+    q <- QC.scale (`div` 11) $ genPositivePoly
+    pure $ PolyWithRealRoots (fromRoots roots * q) roots
+
+instance Arbitrary (PolyWithRealRoots Rational) where
+    arbitrary = genPolyWithRealRoots

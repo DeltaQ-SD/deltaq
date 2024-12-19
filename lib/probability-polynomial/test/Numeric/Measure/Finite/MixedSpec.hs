@@ -43,16 +43,13 @@ import Numeric.Polynomial.SimpleSpec
     )
 import Test.Hspec
     ( Spec
-    , before_
     , describe
     , it
-    , pendingWith
     )
 import Test.QuickCheck
     ( Arbitrary
     , Gen
     , Positive (..)
-    , Property
     , (===)
     , (==>)
     , arbitrary
@@ -70,9 +67,6 @@ import qualified Numeric.Polynomial.Simple as Poly
 {-----------------------------------------------------------------------------
     Tests
 ------------------------------------------------------------------------------}
-xit' :: String -> String -> Property -> Spec
-xit' reason label = before_ (pendingWith reason) . it label
-
 spec :: Spec
 spec = do
     describe "dirac" $ do
@@ -169,8 +163,7 @@ spec = do
                 in  isPositive (foldr add zero diracs)
                         === True
 
-        xit' "Corner cases in Poly.isMonotonicallyIncreasingOn"
-            "nfold convolution of uniform" $ once $
+        it "nfold convolution of uniform" $ once $
             let convolutions :: [Measure Rational]
                 convolutions =
                     iterate (convolve (uniform 0 1)) (dirac 0)
