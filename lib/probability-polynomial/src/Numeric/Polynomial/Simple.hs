@@ -34,6 +34,7 @@ module Numeric.Polynomial.Simple
     , translate
     , integrate
     , differentiate
+    , euclidianDivision
     , convolve
 
       -- ** Numerical
@@ -210,7 +211,8 @@ eval :: Num a => Poly a -> a -> a
 eval (Poly as) x = foldr (\ai result -> x * result + ai) 0 as
 
 {-----------------------------------------------------------------------------
-    Convenience operations
+    Advanced operations
+    Convenience
 ------------------------------------------------------------------------------}
 
 {-|
@@ -260,7 +262,8 @@ lineFromTo (x1, y1) (x2, y2)
     shift = y1 - x1 * slope
 
 {-----------------------------------------------------------------------------
-    Advanced Operations
+    Advanced operations
+    Algebraic
 ------------------------------------------------------------------------------}
 
 {-| Indefinite integral of a polynomial with constant term zero.
@@ -377,6 +380,43 @@ translate y (Poly ps) =
     binomialExpansion n = Poly (map (binomialTerm n) [0 .. n])
 
 {-|
+[Euclidian division of polynomials
+](https://en.wikipedia.org/wiki/Polynomial_greatest_common_divisor#Euclidean_division)
+takes two polynomials @a@ and @b ≠ 0@,
+and returns two polynomials, the quotient @q@ and the remainder @r@,
+such that
+
+> a = q * b + r
+> degree r < degree b
+-}
+euclidianDivision
+    :: forall a. (Fractional a, Eq a, Ord a)
+    => Poly a -> Poly a -> (Poly a, Poly a)
+euclidianDivision pa pb
+    | pb == zero = error "Division by zero polynomial"
+    | otherwise = goDivide (zero, pa)
+  where
+    degB = degree pb
+
+    -- Coefficient of the highest power term
+    leadingCoefficient :: Poly a -> a
+    leadingCoefficient (Poly x) = last x
+
+    lcB = leadingCoefficient pb
+
+    goDivide :: (Poly a, Poly a) -> (Poly a, Poly a)
+    goDivide (q, r)
+        | degree r < degB = (q, r)
+        | otherwise = goDivide (q + s, r - s * pb)
+      where
+        s = monomial (degree r - degB) (leadingCoefficient r / lcB)
+
+{-----------------------------------------------------------------------------
+    Advanced operations
+    Numerical
+------------------------------------------------------------------------------}
+
+{-|
 We use Sturm's Theorem to count the number of roots of a polynomial in a given interval.
 
 (See https://en.wikipedia.org/wiki/Sturm%27s_theorem)
@@ -426,42 +466,8 @@ countRoots (l, r, p) = case degree p of
         -}
         doSeq x'@(xI : xIminusOne : _) = if polyRemainder == zero then x' else doSeq (negate polyRemainder : x')
           where
-            polyRemainder = snd (euclidianDivision (xIminusOne, xI))
+            polyRemainder = snd $ euclidianDivision xIminusOne xI
         doSeq _ = error "List too short" -- prevent warning about missing cases
-
-{-|
-See https://en.wikipedia.org/wiki/Polynomial_greatest_common_divisor#Euclidean_division
-Take a pair of polynomials a, b, and produce the quotient and remainder q and r s.t. a = bq + r
-Input: a and b ≠ 0 two polynomials; Output: q, the quotient, and r, the remainder;
-Pseudocode:
-    Begin
-        q := 0
-        r := a
-        d := deg(b)
-        c := lc(b)
-        while deg(r) >= d do
-            s := lc(r)/c x^(deg(r)-d)
-            q := q + s
-            r := r − sb
-        end do
-        return (q, r)
-    end
--}
-euclidianDivision
-    :: (Fractional a, Eq a, Ord a) => (Poly a, Poly a) -> (Poly a, Poly a)
-euclidianDivision (pa, pb) =
-    if pb == zero
-        then error "Division by zero polynomial"
-        else goDivide (zero, pa)
-  where
-    degB = degree pb
-    leadingCoefficient :: Eq a => Poly a -> a -- coefficient of the highest power term of the poly
-    leadingCoefficient (Poly x) = last x
-    lcB = leadingCoefficient pb
-    -- goDivide :: (Fractional a, Eq a, Ord a) => (Poly a, Poly a) -> (Poly a, Poly a)
-    goDivide (q, r) = if degree r < degB then (q, r) else goDivide (q + s, r - s * pb)
-      where
-        s = monomial (degree r - degB) (leadingCoefficient r / lcB)
 
 -- | Check whether a polynomial is monotonically increasing on
 -- a given interval.

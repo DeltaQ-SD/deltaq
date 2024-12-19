@@ -28,6 +28,7 @@ import Numeric.Polynomial.Simple
     , degree
     , differentiate
     , display
+    , euclidianDivision
     , eval
     , fromCoefficients
     , integrate
@@ -156,14 +157,19 @@ spec = do
     describe "translate" $ do
         it "eval" $ property $
             \p y (x :: Rational) ->
-                counterexample ("degree p = " <> show (degree p))
-                $ eval (translate y p) x  ===  eval p (x - y)
+                eval (translate y p) x  ===  eval p (x - y)
 
         it "differentiate" $ property $
             \p (y :: Rational) ->
-                counterexample ("degree p = " <> show (degree p))
-                $ differentiate (translate y p)
+                differentiate (translate y p)
                     ===  translate y (differentiate p)
+
+    describe "euclidianDivision" $ do
+        it "a = q * b + r, and  degree r < degree b" $ property $
+            \a (b :: Poly Rational) ->
+                let (q, r) = euclidianDivision a b in
+                b /= zero ==>
+                    (a  === q*b + r  .&&.  degree r < degree b)
 
     describe "convolve" $ do
         it "product of integrals" $ property $ mapSize (`div` 6) $
