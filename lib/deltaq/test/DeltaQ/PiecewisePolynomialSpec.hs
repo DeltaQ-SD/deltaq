@@ -32,6 +32,7 @@ import DeltaQ.PiecewisePolynomial
     , complexity
     , distribution
     , fromPositiveMeasure
+    , meetsQTA
     , moments
     )
 import Numeric.Probability.Moments
@@ -403,6 +404,34 @@ specImplementation = do
                 in
                     id' (uniform r s) === Just (uniform r s)
 
+    describe "meetsQTA" $ do
+        it "never" $ property $
+            \x ->
+                x `meetsQTA` never  ===  True
+
+        it "uniform" $ property $
+            \(NonNegative r) (Positive d) (Positive d2) ->
+                let s = r + d
+                    s2 = s + d2
+                in
+                    uniform s r `meetsQTA` uniform r s2  ===  True
+
+        it "wait .>>." $ property $
+            \x (NonNegative t) ->
+                x `meetsQTA` (wait t .>>. x)  ===  True
+
+        it "choice never" $ property $
+            \x (Probability p) ->
+                x `meetsQTA` choice p never x  ===  True
+
+        it "./\\." $ property $
+            \x y ->
+                x `meetsQTA` (x ./\. y)
+
+        it ".\\/." $ property $
+            \x y ->
+                (x .\/. y) `meetsQTA` x
+
     describe "moments" $ do
         it "never" $ withMaxSuccess 1 $ property $
             fst (moments never)  ===  0
@@ -430,7 +459,7 @@ instance Arbitrary Prob where
     arbitrary = Probability <$> genProbability
 
 instance Arbitrary DQ where
-    arbitrary = scale (`div` 10) genDeltaQ
+    arbitrary = scale (`div` 11) genDeltaQ
 
 -- | Generate a random 'DeltaQ' by generating a random expression.
 genDeltaQ

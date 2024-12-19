@@ -22,6 +22,7 @@ module DeltaQ.PiecewisePolynomial
     , unsafeFromPositiveMeasure
 
     -- * Operations
+    , meetsQTA
     , Moments (..)
     , moments
 
@@ -163,6 +164,7 @@ data Segment a b
     = Jump a (b,b)
     | Polynomial (a,a) (b,b) (Poly a)
     | End a b
+    deriving (Eq, Show)
 
 -- | Helper function that elaborates a piecewise function
 -- into a list of segments.
@@ -206,6 +208,31 @@ quantileFromMonotone pieces = findInSegments segments
 
 precision :: Rational
 precision = 1 / 10^(10 :: Integer)
+
+{-----------------------------------------------------------------------------
+    Operations
+    QTA
+------------------------------------------------------------------------------}
+-- | Test whether the given probability distribution of completion times
+-- is equal to or better than a given
+-- __quantitative timeliness agreement__ (QTA).
+--
+-- > p `meetsQTA` qta = True
+--
+-- if and only
+--
+-- > ∀ t. successWithin o t >= successWithin qta t
+meetsQTA :: DQ -> DQ -> Bool
+meetsQTA m1 m2 =
+    all isNonNegative $ toSegments $ distribution m1 - distribution m2
+  where
+    isNonNegative (Jump _ (y1, y2)) =
+        y1 >= 0 && y2 >= 0
+    isNonNegative (Polynomial (x1, x2) _ poly) =
+        let compareToZero = Poly.compareToZero (x1, x2, poly)
+        in  compareToZero == Just GT || compareToZero == Just EQ
+    isNonNegative (End _ y) =
+        y >= 0
 
 {-----------------------------------------------------------------------------
     Operations
