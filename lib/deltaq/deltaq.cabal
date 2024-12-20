@@ -46,6 +46,7 @@ library
     , base >= 4.14.3.0 && < 4.21
     , deepseq >= 1.4.4.0 && < 1.6
     , Chart >= 1.8 && < 2.0
+    , lattices >= 2.2 && < 2.3
     , probability-polynomial >= 1.0 && < 1.1
 
   exposed-modules:

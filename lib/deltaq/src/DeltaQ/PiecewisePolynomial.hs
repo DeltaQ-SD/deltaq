@@ -30,6 +30,9 @@ module DeltaQ.PiecewisePolynomial
     , complexity
     ) where
 
+import Algebra.PartialOrd
+    ( PartialOrd (..)
+    )
 import Data.Maybe
     ( fromMaybe
     )
@@ -74,11 +77,9 @@ distribution (DQ m) = Measure.distribution m
 -- | Interpret a finite, signed 'Measure' as a probability distribution.
 --
 -- In order to admit an interpretation as probability, the measure needs
--- to be positive, if that is not the case, the function returns 'Nothing'.
---
--- Note: Due to rare numerical issues,
--- the check 'Measure.isPositive' can be false negative.
--- Work around using 'unsafeFromPositiveMeasure'.
+-- to be positive.
+-- This condition is checked, and if it does not hold,
+-- the function returns 'Nothing'.
 fromPositiveMeasure :: Measure Rational -> Maybe DQ
 fromPositiveMeasure m
     | Measure.isPositive m = Just (unsafeFromPositiveMeasure m)
@@ -86,8 +87,7 @@ fromPositiveMeasure m
 
 -- | Interpret a finite, positive 'Measure' as a probability distribution.
 --
--- /The precondition that the measure satisfies 'Measure.isPositive'
--- is not checked!/
+-- /The precondition that the measure is positive is not checked!/
 unsafeFromPositiveMeasure :: Measure Rational -> DQ
 unsafeFromPositiveMeasure = DQ
 
@@ -155,9 +155,23 @@ instance DeltaQ DQ where
 
     deadline (DQ m)= eventuallyFromMaybe $ fmap snd $ Measure.support m
 
+-- | Partial order of cumulative distribution functions.
+--
+-- @'leq' x y@ holds if and only if for all completion times @t@,
+-- the probability to succeed within the time @t@
+-- is always larger (or equal) for @x@ compared to @y@.
+-- In other words, @x@ has a higher probability of completing faster.
+--
+-- > x `leq` y  <=>  ∀ t. successWithin x t >= successWithin y t
+instance PartialOrd DQ where
+    m1 `leq` m2 =
+        all isNonNegativeOnSegment
+        $ toSegments
+        $ distribution m1 - distribution m2
+
 {-----------------------------------------------------------------------------
     Operations
-    quantile
+    Helper functions
 ------------------------------------------------------------------------------}
 -- | Helper type for segements of a piecewise functions.
 data Segment a b
@@ -186,6 +200,10 @@ toSegments = goJump 0 . Piecewise.toAscPieces
         Polynomial (x1, x2) (y1, Poly.eval o x2) o : goJump o xos
         -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
 
+{-----------------------------------------------------------------------------
+    Operations
+    quantile
+------------------------------------------------------------------------------}
 -- | Compute a quantile from a monotonically increasing function.
 quantileFromMonotone :: (a ~ Rational) => Piecewise (Poly a) -> a -> Maybe a
 quantileFromMonotone pieces = findInSegments segments
@@ -211,28 +229,27 @@ precision = 1 / 10^(10 :: Integer)
 
 {-----------------------------------------------------------------------------
     Operations
-    QTA
+    meetsQTA
 ------------------------------------------------------------------------------}
 -- | Test whether the given probability distribution of completion times
 -- is equal to or better than a given
 -- __quantitative timeliness agreement__ (QTA).
 --
--- > p `meetsQTA` qta = True
+-- Synonym for `leq` of the partial order,
 --
--- if and only
---
--- > ∀ t. successWithin o t >= successWithin qta t
+-- > p `meetsQTA` qta  =  p `leq` qta
 meetsQTA :: DQ -> DQ -> Bool
-meetsQTA m1 m2 =
-    all isNonNegative $ toSegments $ distribution m1 - distribution m2
+meetsQTA = leq
+
+isNonNegativeOnSegment :: (a ~ Rational) => Segment a a -> Bool
+isNonNegativeOnSegment (Jump _ (y1, y2)) =
+    y1 >= 0 && y2 >= 0
+isNonNegativeOnSegment (Polynomial (x1, x2) _ poly) =
+    compareToZero == Just GT || compareToZero == Just EQ
   where
-    isNonNegative (Jump _ (y1, y2)) =
-        y1 >= 0 && y2 >= 0
-    isNonNegative (Polynomial (x1, x2) _ poly) =
-        let compareToZero = Poly.compareToZero (x1, x2, poly)
-        in  compareToZero == Just GT || compareToZero == Just EQ
-    isNonNegative (End _ y) =
-        y >= 0
+    compareToZero = Poly.compareToZero (x1, x2, poly)
+isNonNegativeOnSegment (End _ y) =
+    y >= 0
 
 {-----------------------------------------------------------------------------
     Operations
