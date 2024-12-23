@@ -67,7 +67,7 @@ which requires combining every possible delay of the first
 outcome with every possible delay of the second. For instance, consider
 statistical mixtures of discrete Dirac measures at the powers of two,
 
-```
+```hs
 import Numeric.Measure.Discrete
 import qualified Data.Map as Map
 
@@ -77,14 +77,14 @@ mix m = scale 0.5 $ add (dirac 0) (dirac (2^(m :: Int)))
 
 Then, the n-fold convolution
 
-```
+```hs
 convolved :: Int -> Discrete Rational
 convolved n = foldr1 convolve $ map mix [1..n]
 ```
 
 will have internal representation size `2^n`. For example
 
-```
+```hs
 >>> Map.size $ toMap $ convolved 10
 1024
 ```
@@ -120,7 +120,7 @@ appropriate for all cases.
 
 For example, the library can provide a function
 
-```
+```hs
 approximate :: DeltaQ o => Precision -> o -> o
 ```
 
@@ -129,7 +129,7 @@ internal size that is within precision `eps` of the original distribution `o` in
 some suitably defined metric. The direction of the error can be imposed by a
 condition such as
 
-```
+```hs
 ∀ t eps o. successWithin t (approximate eps o) <= successWithin t o
 ```
 
