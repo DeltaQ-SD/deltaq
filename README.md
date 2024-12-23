@@ -47,6 +47,10 @@ To run the tests for the `deltaq` package, use
 cabal test deltaq
 ```
 
+# Thanks
+
+Development of this package has been generously supported by [IOG](https://iog.io).
+
 # Roadmap
 
 * Approximation for probability distributions of large size
