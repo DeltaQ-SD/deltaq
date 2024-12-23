@@ -6,7 +6,7 @@ name:            deltaq
 --                 | | +----- non-breaking API additions
 --                 | | | +--- code changes with no API change
 version:         1.0.0.0
-synopsis:        ∆Q Systems Development
+synopsis:        Framework for ∆Q System Development
 description:
   ∆Q System Development is a paradigm for developing distributed systems
   that meet performance requirements.
@@ -23,28 +23,35 @@ description:
   * evaluating the performance characteristics of outcomes,
     specifically the probability distribution of their completion times
 
+category:        DeltaQ, Distributed Systems, Probability
+homepage:        https://github.com/DeltaQ-SD/deltaq
 license:         BSD-3-Clause
 license-file:    LICENSE
 copyright:       Predictable Network Solutions Ltd., 2003-2024
 author:          Neil Davies, Heinrich Apfelmus
 maintainer:      neil.davies@pnsol.ccom
 
--- copyright:
-build-type:      Simple
-
-extra-source-files:
+extra-doc-files:
   CHANGELOG.md
   README.md
 
+tested-with:
+  , GHC == 9.10.1
+
 common warnings
   ghc-options: -Wall
+
+source-repository head
+  type:     git
+  location: git://github.com/DeltaQ-SD/deltaq.git
+  subdir:   lib/deltaq
 
 library
   import:           warnings
   hs-source-dirs:   src
   default-language: Haskell2010
   build-depends:
-    , base >= 4.14.3.0 && < 4.21
+    , base >= 4.14.3.0 && < 5
     , deepseq >= 1.4.4.0 && < 1.6
     , Chart >= 1.8 && < 2.0
     , lattices >= 2.2 && < 2.3
