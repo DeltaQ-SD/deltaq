@@ -14,7 +14,29 @@ will give a probability distribution whose internal representation size is
 exponentially slow as the number of outcomes increases. As such compositions
 represent typical use cases, this slowdown is a **problem** for **usability**.
 
-For instance…
+For instance, given the following definitions:
+
+```hs
+mix :: Int -> DQ
+mix m = choice 0.5 (wait 0) (wait (2^(m :: Int)))
+
+
+convolved :: Int -> DQ
+convolved n = foldr1 (.>>.) $ map mix [1..n]
+```
+
+We get the following results for `complexity . convolved`:
+
+| n  | time | complexity | complexity / sec | 
+|:---:|:---:|:---:|:----:|
+| 19 | 0.908s                    | 524288  | 577193.3  |
+| 20 | 1.79s                     | 1048576 | 585958.8  |
+| 21 | 3.56s                     | 2097152 | 588980.8  |
+| 22 | 7.17s                     | 4194304 | 585338.8  |
+| 23 | 14.3s                     | 8388608 | 586128.25 |
+| 24 | 28.2s                     | 16777216 | 594332.6 |
+| 25 | 56.79s                    | 33554432 | 590929   |
+
 
 Unfortunately, the problem is inherent in the **semantics** of **sequential composition**,
 which requires combining every possible delay of the first
