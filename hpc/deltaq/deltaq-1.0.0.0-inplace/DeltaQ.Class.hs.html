@@ -223,7 +223,7 @@ span.spaces    { background: white }
 <span class="lineno">  204 </span>    --
 <span class="lineno">  205 </span>    -- Return 'Abandoned' if the given probability
 <span class="lineno">  206 </span>    -- exceeds the probability of finishing.
-<span class="lineno">  207 </span>    quantile :: Probability o -&gt; o -&gt; Eventually (Duration o)
+<span class="lineno">  207 </span>    quantile :: o -&gt; Probability o -&gt; Eventually (Duration o)
 <span class="lineno">  208 </span>
 <span class="lineno">  209 </span>    -- | The earliest finish time with non-zero probability.
 <span class="lineno">  210 </span>    --
@@ -335,13 +335,13 @@ span.spaces    { background: white }
 <span class="lineno">  316 </span>
 <span class="lineno">  317 </span>'quantile'
 <span class="lineno">  318 </span>
-<span class="lineno">  319 </span>&gt; p &lt;= q  implies  quantile p o &lt;= quantile q o
+<span class="lineno">  319 </span>&gt; p &lt;= q  implies  quantile o p &lt;= quantile o q
 <span class="lineno">  320 </span>&gt;
-<span class="lineno">  321 </span>&gt; quantile 0 x        = Occurs 0
-<span class="lineno">  322 </span>&gt; quantile p never    = Abandoned       if p &gt; 0
-<span class="lineno">  323 </span>&gt; quantile p (wait t) = Occurs t        if p &gt; 0
+<span class="lineno">  321 </span>&gt; quantile x        0 = Occurs 0
+<span class="lineno">  322 </span>&gt; quantile never    p = Abandoned       if p &gt; 0
+<span class="lineno">  323 </span>&gt; quantile (wait t) p = Occurs t        if p &gt; 0
 <span class="lineno">  324 </span>&gt;
-<span class="lineno">  325 </span>&gt; quantile p (uniform r s)  =  r + p*(s-t)  if p &gt; 0, r &lt;= s
+<span class="lineno">  325 </span>&gt; quantile (uniform r s) p  =  r + p*(s-t)  if p &gt; 0, r &lt;= s
 <span class="lineno">  326 </span>
 <span class="lineno">  327 </span>'earliest'
 <span class="lineno">  328 </span>

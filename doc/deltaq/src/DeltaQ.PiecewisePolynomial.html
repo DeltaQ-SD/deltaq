@@ -443,10 +443,10 @@ forall a. (Ord a, Num a) =&gt; Measure a -&gt; a
 </span><span class="hs-identifier hs-var">Measure.total</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679112162"><span class="hs-identifier hs-var">m</span></a></span><span>
 </span><span id="line-149"></span><span>
-</span><span id="line-150"></span><span>    </span><span id="local-6989586621679112167"><span class="annot"><span class="annottext">quantile :: Probability DQ -&gt; DQ -&gt; Eventually (Duration DQ)
-</span><a href="#local-6989586621679112167"><span class="hs-identifier hs-var hs-var hs-var">quantile</span></a></span></span><span> </span><span id="local-6989586621679112169"><span class="annot"><span class="annottext">Probability DQ
-</span><a href="#local-6989586621679112169"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679112170"><span class="annot"><span class="annottext">Measure Rational
-</span><a href="#local-6989586621679112170"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-150"></span><span>    </span><span id="local-6989586621679112167"><span class="annot"><span class="annottext">quantile :: DQ -&gt; Probability DQ -&gt; Eventually (Duration DQ)
+</span><a href="#local-6989586621679112167"><span class="hs-identifier hs-var hs-var hs-var">quantile</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679112169"><span class="annot"><span class="annottext">Measure Rational
+</span><a href="#local-6989586621679112169"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span id="local-6989586621679112170"><span class="annot"><span class="annottext">Probability DQ
+</span><a href="#local-6989586621679112170"><span class="hs-identifier hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-151"></span><span>        </span><span class="annot"><span class="annottext">Maybe (Duration DQ) -&gt; Eventually (Duration DQ)
 forall a. Maybe a -&gt; Eventually a
 </span><a href="DeltaQ.Class.html#eventuallyFromMaybe"><span class="hs-identifier hs-var">eventuallyFromMaybe</span></a></span><span>
@@ -458,9 +458,9 @@ forall a. (a ~ Rational) =&gt; Piecewise (Poly a) -&gt; a -&gt; Maybe a
 </span><a href="DeltaQ.PiecewisePolynomial.html#quantileFromMonotone"><span class="hs-identifier hs-var">quantileFromMonotone</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Measure Rational -&gt; Piecewise (Poly Rational)
 forall a. (Ord a, Num a) =&gt; Measure a -&gt; Piecewise (Poly a)
 </span><span class="hs-identifier hs-var">Measure.distribution</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
-</span><a href="#local-6989586621679112170"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><a href="#local-6989586621679112169"><span class="hs-identifier hs-var">m</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Rational
 Probability DQ
-</span><a href="#local-6989586621679112169"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><a href="#local-6989586621679112170"><span class="hs-identifier hs-var">p</span></a></span><span>
 </span><span id="line-153"></span><span>
 </span><span id="line-154"></span><span>    </span><span id="local-6989586621679112176"><span class="annot"><span class="annottext">earliest :: DQ -&gt; Eventually (Duration DQ)
 </span><a href="#local-6989586621679112176"><span class="hs-identifier hs-var hs-var hs-var">earliest</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679112178"><span class="annot"><span class="annottext">Measure Rational

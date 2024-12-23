@@ -325,11 +325,11 @@ forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
 </span><span id="line-98"></span><span>    </span><span id="local-6989586621679112669"><span class="annot"><span class="annottext">plotQuantile :: Probability o -&gt; EC (Layout Double Double) ()
 </span><a href="#local-6989586621679112669"><span class="hs-identifier hs-var hs-var">plotQuantile</span></a></span></span><span> </span><span id="local-6989586621679112682"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679112682"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; o -&gt; Eventually (Duration o)
-forall o. DeltaQ o =&gt; Probability o -&gt; o -&gt; Eventually (Duration o)
-</span><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-var">quantile</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679112682"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679112664"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679112682"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">o -&gt; Probability o -&gt; Eventually (Duration o)
+forall o. DeltaQ o =&gt; o -&gt; Probability o -&gt; Eventually (Duration o)
+</span><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-var">quantile</span></a></span><span> </span><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679112664"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679112682"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-99"></span><span>        </span><span class="annot"><span class="annottext">Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#Abandoned"><span class="hs-identifier hs-var">Abandoned</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; EC (Layout Double Double) ()
 forall a. a -&gt; StateT (Layout Double Double) (State CState) a
@@ -668,11 +668,11 @@ forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
 </span><span id="line-171"></span><span>    </span><span id="local-6989586621679112812"><span class="annot"><span class="annottext">plotQuantile :: Probability o -&gt; EC (Layout Double LogValue) ()
 </span><a href="#local-6989586621679112812"><span class="hs-identifier hs-var hs-var">plotQuantile</span></a></span></span><span> </span><span id="local-6989586621679112825"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679112825"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; o -&gt; Eventually (Duration o)
-forall o. DeltaQ o =&gt; Probability o -&gt; o -&gt; Eventually (Duration o)
-</span><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-var">quantile</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679112825"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679112807"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679112825"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">o -&gt; Probability o -&gt; Eventually (Duration o)
+forall o. DeltaQ o =&gt; o -&gt; Probability o -&gt; Eventually (Duration o)
+</span><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-var">quantile</span></a></span><span> </span><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679112807"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679112825"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-172"></span><span>        </span><span class="annot"><span class="annottext">Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#Abandoned"><span class="hs-identifier hs-var">Abandoned</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; EC (Layout Double LogValue) ()
 forall a. a -&gt; StateT (Layout Double LogValue) (State CState) a

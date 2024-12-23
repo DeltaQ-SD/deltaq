@@ -353,7 +353,7 @@ forall a b. (a, b) -&gt; a
 </span><span id="line-204"></span><span>    </span><span class="hs-comment">--</span><span>
 </span><span id="line-205"></span><span>    </span><span class="hs-comment">-- Return 'Abandoned' if the given probability</span><span>
 </span><span id="line-206"></span><span>    </span><span class="hs-comment">-- exceeds the probability of finishing.</span><span>
-</span><span id="line-207"></span><span>    </span><span id="quantile"><span class="annot"><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-type">quantile</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111488"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679111488"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Eventually"><span class="hs-identifier hs-type">Eventually</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111488"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-207"></span><span>    </span><span id="quantile"><span class="annot"><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-type">quantile</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679111488"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111488"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Eventually"><span class="hs-identifier hs-type">Eventually</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679111488"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-208"></span><span>
 </span><span id="line-209"></span><span>    </span><span class="hs-comment">-- | The earliest finish time with non-zero probability.</span><span>
 </span><span id="line-210"></span><span>    </span><span class="hs-comment">--</span><span>
@@ -465,13 +465,13 @@ equality may be up to numerical accuracy.
 
 'quantile'
 
-&gt; p &lt;= q  implies  quantile p o &lt;= quantile q o
+&gt; p &lt;= q  implies  quantile o p &lt;= quantile o q
 &gt;
-&gt; quantile 0 x        = Occurs 0
-&gt; quantile p never    = Abandoned       if p &gt; 0
-&gt; quantile p (wait t) = Occurs t        if p &gt; 0
+&gt; quantile x        0 = Occurs 0
+&gt; quantile never    p = Abandoned       if p &gt; 0
+&gt; quantile (wait t) p = Occurs t        if p &gt; 0
 &gt;
-&gt; quantile p (uniform r s)  =  r + p*(s-t)  if p &gt; 0, r &lt;= s
+&gt; quantile (uniform r s) p  =  r + p*(s-t)  if p &gt; 0, r &lt;= s
 
 'earliest'
 
