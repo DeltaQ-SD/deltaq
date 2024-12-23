@@ -2,10 +2,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
-Copyright   : Neil Davies, 2024
-              Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2003-2024
 License     : BSD-3-Clause
-Maintainer  : neil.davies@pnsol.com
 Description : Type classes for outcomes and their completion times.
 
 Type classes

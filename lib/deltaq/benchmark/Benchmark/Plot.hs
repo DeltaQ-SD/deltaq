@@ -2,9 +2,8 @@
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 {-|
-Copyright   : Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2003-2024
 License     : BSD-3-Clause
-Maintainer  : neil.davies@pnsol.com
 Description : Plotting utilities for benchmark results.
 -}
 module Benchmark.Plot where

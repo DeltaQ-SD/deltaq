@@ -6,9 +6,8 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 {-|
-Copyright   : Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : neil.davies@pnsol.com
 -}
 module DeltaQ.PiecewisePolynomialSpec
     ( spec
