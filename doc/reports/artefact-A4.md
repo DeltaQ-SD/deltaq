@@ -2,8 +2,8 @@
 
 # Problem Statement
 
-The section [Performance measurements](https://github.com/DeltaQ-SD/dq-revamp/blob/41e75562843dcad0eae2d10fc678f7efb7c11a17/doc/reports/artefact-A2.md#performance-measurements)
-of the [Report on test results, coverage analysis and performance](https://github.com/DeltaQ-SD/dq-revamp/blob/41e75562843dcad0eae2d10fc678f7efb7c11a17/doc/reports/artefact-A2.md)
+The section [Performance measurements](https://github.com/DeltaQ-SD/deltaq/blob/41e75562843dcad0eae2d10fc678f7efb7c11a17/doc/reports/artefact-A2.md#performance-measurements)
+of the [Report on test results, coverage analysis and performance](https://github.com/DeltaQ-SD/deltaq/blob/41e75562843dcad0eae2d10fc678f7efb7c11a17/doc/reports/artefact-A2.md)
 highlights that repeated application of sequential composition, `.>>.`, creates
 probability distributions with large internal representation size. (The internal
 representation size is measured by the function `complexity`.)
