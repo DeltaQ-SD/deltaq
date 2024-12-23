@@ -37,11 +37,30 @@ We get the following results for `complexity . convolved`:
 | 24 | 28.2s                     | 16777216 | 594332.6 |
 | 25 | 56.79s                    | 33554432 | 590929   |
 
+```hs
+mix1 :: Int -> DQ
+mix1 m = choice 0.5 (wait 0) (uniform 0 (2^(m:: Int)))
+
+convolved1 :: Int -> DQ
+convolved1 n = foldr1 (.>>.) $ map mix1 [1..n]
+```
+
+We get the following results for `complexity . convolved`:
+
+| n  | time | complexity | complexity / sec |
+|:---:|:---:|:---:|:----:|
+|1|0.00012s|3|24814.5|
+|3|0.000217s|25|115272.7|
+|5|0.001422s|161|113178.1|
+|7|0.013792s|897|65020.2|
+|10|0.43766s|10241|23399.3|
+|12|4.1044s|49153|11975.7|
+|15|655.94s|491521|749.3|
 
 
-`complexity` is a measure of space complexity. The difference the two examples
+`complexity` is a measure of space complexity. The difference between the two examples
 above can be put down to the increasing computational complexity associated with
-processing increasing higher-order polynomials.
+processing increasingly higher-order polynomials.
 
 Unfortunately, the problem is inherent in the **semantics** of **sequential composition**,
 which requires combining every possible delay of the first
