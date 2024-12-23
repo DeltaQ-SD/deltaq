@@ -6,9 +6,8 @@
 {-# OPTIONS_GHC -Wno-missing-methods #-}
 
 {-|
-Copyright   : Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : peter.thompson@pnsol.com
 -}
 module Numeric.Function.PiecewiseSpec
     ( spec

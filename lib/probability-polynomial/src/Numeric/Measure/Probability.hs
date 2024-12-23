@@ -1,9 +1,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 {-|
-Copyright   : Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : peter.thompson@pnsol.com
 Description : Probability measures on the number line.
 -}
 module Numeric.Measure.Probability

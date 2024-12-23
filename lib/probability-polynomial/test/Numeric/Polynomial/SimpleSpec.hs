@@ -4,9 +4,8 @@
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 {-|
-Copyright   : Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : peter.thompson@pnsol.com
 -}
 module Numeric.Polynomial.SimpleSpec
     ( spec

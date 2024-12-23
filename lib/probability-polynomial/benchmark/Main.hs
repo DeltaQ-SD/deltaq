@@ -2,9 +2,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 {-|
-Copyright   : Peter Thompson, 2023-2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : peter.thompson@pnsol.com
 -}
 module Main (main) where
 

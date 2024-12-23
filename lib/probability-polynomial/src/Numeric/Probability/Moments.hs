@@ -1,9 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 {-|
-Copyright   : Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : peter.thompson@pnsol.com
 Description : Moments of probability distributions.
 -}
 module Numeric.Probability.Moments

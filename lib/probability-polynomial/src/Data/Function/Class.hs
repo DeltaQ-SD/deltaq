@@ -1,9 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
-Copyright   : Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : peter.thompson@pnsol.com
 Description : Type class for functions, e.g. polynomials.
 -}
 module Data.Function.Class
