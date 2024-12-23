@@ -147,7 +147,7 @@ instance DeltaQ DQ where
 
     failure (DQ m) = 1 - Measure.total m
 
-    quantile p (DQ m) =
+    quantile (DQ m) p =
         eventuallyFromMaybe
         $ quantileFromMonotone (Measure.distribution m) p
 

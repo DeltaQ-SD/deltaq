@@ -95,7 +95,7 @@ plotCDFWithQuantiles title quantiles o = G.execEC $ do
   where
     cv1 = fromRational . toRational
     cv2 = fromRational . toRational
-    plotQuantile y = case quantile y o of
+    plotQuantile y = case quantile o y of
         Abandoned -> pure ()
         Occurs x -> G.plot $ pure $ focusOnPoint (cv1 x, cv2 y)
 
@@ -168,7 +168,7 @@ plotInverseCDFWithQuantiles title quantiles o = G.execEC $ do
   where
     cv1 = fromRational . toRational
     cv2 = fromRational . toRational
-    plotQuantile y = case quantile y o of
+    plotQuantile y = case quantile o y of
         Abandoned -> pure ()
         Occurs x -> G.plot $ pure $ focusOnPoint (cv1 x, cv2 (1 - y))
 
