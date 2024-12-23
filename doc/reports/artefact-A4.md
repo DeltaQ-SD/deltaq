@@ -27,7 +27,7 @@ convolved n = foldr1 (.>>.) $ map mix [1..n]
 
 We get the following results for `complexity . convolved`:
 
-| n  | time | complexity | complexity / sec | 
+| n  | time | complexity | complexity / sec |
 |:---:|:---:|:---:|:----:|
 | 19 | 0.908s                    | 524288  | 577193.3  |
 | 20 | 1.79s                     | 1048576 | 585958.8  |
@@ -37,6 +37,11 @@ We get the following results for `complexity . convolved`:
 | 24 | 28.2s                     | 16777216 | 594332.6 |
 | 25 | 56.79s                    | 33554432 | 590929   |
 
+
+
+`complexity` is a measure of space complexity. The difference the two examples
+above can be put down to the increasing computational complexity associated with
+processing increasing higher-order polynomials.
 
 Unfortunately, the problem is inherent in the **semantics** of **sequential composition**,
 which requires combining every possible delay of the first
