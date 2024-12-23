@@ -25,7 +25,8 @@ description:
 
 license:         BSD-3-Clause
 license-file:    LICENSE
-author:          Neil Davies
+copyright:       Predictable Network Solutions Ltd., 2003-2024
+author:          Neil Davies, Heinrich Apfelmus
 maintainer:      neil.davies@pnsol.ccom
 
 -- copyright:

@@ -4,11 +4,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 {-|
-Copyright   : Peter Thompson, 2023-2024
-              Predictable Network Solutions Ltd., 2024
+Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Maintainer  : peter.thompson@pnsol.com
-Stability   : experimental
 Description : Polynomials and computations with them.
 -}
 module Numeric.Polynomial.Simple
