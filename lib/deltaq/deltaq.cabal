@@ -37,6 +37,8 @@ extra-doc-files:
 
 tested-with:
   , GHC == 9.10.1
+  , GHC == 9.6.6
+  , GHC == 8.10.7
 
 common warnings
   ghc-options: -Wall
