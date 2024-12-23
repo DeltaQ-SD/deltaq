@@ -23,86 +23,85 @@ span.spaces    { background: white }
 <span class="lineno">    4 </span>{-# LANGUAGE UndecidableInstances #-}
 <span class="lineno">    5 </span>
 <span class="lineno">    6 </span>{-|
-<span class="lineno">    7 </span>Copyright   : Predictable Network Solutions Ltd., 2024
+<span class="lineno">    7 </span>Copyright   : Predictable Network Solutions Ltd., 2003-2024
 <span class="lineno">    8 </span>License     : BSD-3-Clause
-<span class="lineno">    9 </span>Maintainer  : neil.davies@pnsol.com
-<span class="lineno">   10 </span>Description : Methods for analysis and construction.
-<span class="lineno">   11 </span>
-<span class="lineno">   12 </span>This module collects common methods
-<span class="lineno">   13 </span>for constructing 'DeltaQ' and analyzing them.
-<span class="lineno">   14 </span>-}
-<span class="lineno">   15 </span>module DeltaQ.Methods
-<span class="lineno">   16 </span>    ( -- * Slack / Hazard
-<span class="lineno">   17 </span>      meetsRequirement
-<span class="lineno">   18 </span>    , SlackOrHazard (..)
-<span class="lineno">   19 </span>    , isSlack
-<span class="lineno">   20 </span>    , isHazard
-<span class="lineno">   21 </span>    ) where
-<span class="lineno">   22 </span>
-<span class="lineno">   23 </span>import DeltaQ.Class
-<span class="lineno">   24 </span>    ( DeltaQ (..)
-<span class="lineno">   25 </span>    , Eventually (..)
-<span class="lineno">   26 </span>    , Outcome (..)
-<span class="lineno">   27 </span>    , eventually
-<span class="lineno">   28 </span>    )
-<span class="lineno">   29 </span>
-<span class="lineno">   30 </span>{-----------------------------------------------------------------------------
-<span class="lineno">   31 </span>    Methods
-<span class="lineno">   32 </span>    Slack / Hazard
-<span class="lineno">   33 </span>------------------------------------------------------------------------------}
-<span class="lineno">   34 </span>-- | The \&quot;slack or hazard\&quot; represents the distance between
-<span class="lineno">   35 </span>-- a reference point in (time, probability) space
-<span class="lineno">   36 </span>-- and a given 'DeltaQ'.
-<span class="lineno">   37 </span>--
-<span class="lineno">   38 </span>-- * 'Slack' represents the case where the 'DeltaQ' __meets__
-<span class="lineno">   39 </span>--   the performance requirements set by the reference point.
-<span class="lineno">   40 </span>-- * 'Hazard' represents the case where the 'DeltaQ' __fails__ to meet
-<span class="lineno">   41 </span>--   the performance requirements set by the reference point.
-<span class="lineno">   42 </span>--
-<span class="lineno">   43 </span>-- Both cases include information of how far the reference point is
-<span class="lineno">   44 </span>-- away.
-<span class="lineno">   45 </span>data SlackOrHazard o
-<span class="lineno">   46 </span>    = Slack (Duration o) (Probability o)
-<span class="lineno">   47 </span>    -- ^ We have some slack.
-<span class="lineno">   48 </span>    -- Specifically, we have 'Duration' at the same probability as the reference,
-<span class="lineno">   49 </span>    -- and 'Probability' at the same duration as the reference.
-<span class="lineno">   50 </span>    | Hazard (Eventually (Duration o)) (Probability o)
-<span class="lineno">   51 </span>    -- ^ We fail to meet the reference point.
-<span class="lineno">   52 </span>    -- Specifically,
-<span class="lineno">   53 </span>    -- we overshoot by 'Duration' at the same probability as the reference,
-<span class="lineno">   54 </span>    -- and by 'Probability' at the same duration as the reference.
-<span class="lineno">   55 </span>
-<span class="lineno">   56 </span><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">deriving instance (Eq (Duration o), Eq (Probability o))</span>
-<span class="lineno">   57 </span><span class="spaces">    </span><span class="nottickedoff">=&gt; Eq (SlackOrHazard o)</span></span></span></span>
-<span class="lineno">   58 </span>
-<span class="lineno">   59 </span><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">deriving instance (Show (Duration o), Show (Probability o))</span>
-<span class="lineno">   60 </span><span class="spaces">    </span><span class="nottickedoff">=&gt; Show (SlackOrHazard o)</span></span></span></span></span></span>
-<span class="lineno">   61 </span>
-<span class="lineno">   62 </span>-- | Test whether the given 'SlackOrHazard' is 'Slack'.
-<span class="lineno">   63 </span>isSlack :: SlackOrHazard o -&gt; Bool
-<span class="lineno">   64 </span><span class="decl"><span class="nottickedoff">isSlack (Slack _ _) = True</span>
-<span class="lineno">   65 </span><span class="spaces"></span><span class="nottickedoff">isSlack _ = False</span></span>
-<span class="lineno">   66 </span>
-<span class="lineno">   67 </span>-- | Test whether the given 'SlackOrHazard' is 'Hazard'.
-<span class="lineno">   68 </span>isHazard :: SlackOrHazard o -&gt; Bool
-<span class="lineno">   69 </span><span class="decl"><span class="nottickedoff">isHazard (Hazard _ _) = True</span>
-<span class="lineno">   70 </span><span class="spaces"></span><span class="nottickedoff">isHazard _ = False</span></span>
-<span class="lineno">   71 </span>
-<span class="lineno">   72 </span>-- | Compute \&quot;slack or hazard\&quot; with respect to a given reference point.
-<span class="lineno">   73 </span>meetsRequirement
-<span class="lineno">   74 </span>    :: DeltaQ o =&gt; o -&gt; (Duration o, Probability o) -&gt; SlackOrHazard o
-<span class="lineno">   75 </span><span class="decl"><span class="istickedoff">meetsRequirement o (t,p)</span>
-<span class="lineno">   76 </span><span class="spaces">    </span><span class="istickedoff">| dp &gt;= 0 = Slack dt dp</span>
-<span class="lineno">   77 </span><span class="spaces">    </span><span class="istickedoff">| Abandoned &lt;- t' = Hazard Abandoned (negate dp)</span>
-<span class="lineno">   78 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Hazard (Occurs $ negate dt) (negate dp)</span>
-<span class="lineno">   79 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">   80 </span><span class="spaces">    </span><span class="istickedoff">dp = p' - p</span>
-<span class="lineno">   81 </span><span class="spaces">    </span><span class="istickedoff">dt = t - eventually <span class="nottickedoff">err</span> id t'</span>
-<span class="lineno">   82 </span><span class="spaces"></span><span class="istickedoff"></span>
-<span class="lineno">   83 </span><span class="spaces">    </span><span class="istickedoff">t' = quantile o p</span>
-<span class="lineno">   84 </span><span class="spaces">    </span><span class="istickedoff">p' = o `successWithin` t</span>
-<span class="lineno">   85 </span><span class="spaces"></span><span class="istickedoff"></span>
-<span class="lineno">   86 </span><span class="spaces">    </span><span class="istickedoff"><span class="nottickedoff">err = error &quot;distanceToReference: inconsistency&quot;</span></span></span>
+<span class="lineno">    9 </span>Description : Methods for analysis and construction.
+<span class="lineno">   10 </span>
+<span class="lineno">   11 </span>This module collects common methods
+<span class="lineno">   12 </span>for constructing 'DeltaQ' and analyzing them.
+<span class="lineno">   13 </span>-}
+<span class="lineno">   14 </span>module DeltaQ.Methods
+<span class="lineno">   15 </span>    ( -- * Slack / Hazard
+<span class="lineno">   16 </span>      meetsRequirement
+<span class="lineno">   17 </span>    , SlackOrHazard (..)
+<span class="lineno">   18 </span>    , isSlack
+<span class="lineno">   19 </span>    , isHazard
+<span class="lineno">   20 </span>    ) where
+<span class="lineno">   21 </span>
+<span class="lineno">   22 </span>import DeltaQ.Class
+<span class="lineno">   23 </span>    ( DeltaQ (..)
+<span class="lineno">   24 </span>    , Eventually (..)
+<span class="lineno">   25 </span>    , Outcome (..)
+<span class="lineno">   26 </span>    , eventually
+<span class="lineno">   27 </span>    )
+<span class="lineno">   28 </span>
+<span class="lineno">   29 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   30 </span>    Methods
+<span class="lineno">   31 </span>    Slack / Hazard
+<span class="lineno">   32 </span>------------------------------------------------------------------------------}
+<span class="lineno">   33 </span>-- | The \&quot;slack or hazard\&quot; represents the distance between
+<span class="lineno">   34 </span>-- a reference point in (time, probability) space
+<span class="lineno">   35 </span>-- and a given 'DeltaQ'.
+<span class="lineno">   36 </span>--
+<span class="lineno">   37 </span>-- * 'Slack' represents the case where the 'DeltaQ' __meets__
+<span class="lineno">   38 </span>--   the performance requirements set by the reference point.
+<span class="lineno">   39 </span>-- * 'Hazard' represents the case where the 'DeltaQ' __fails__ to meet
+<span class="lineno">   40 </span>--   the performance requirements set by the reference point.
+<span class="lineno">   41 </span>--
+<span class="lineno">   42 </span>-- Both cases include information of how far the reference point is
+<span class="lineno">   43 </span>-- away.
+<span class="lineno">   44 </span>data SlackOrHazard o
+<span class="lineno">   45 </span>    = Slack (Duration o) (Probability o)
+<span class="lineno">   46 </span>    -- ^ We have some slack.
+<span class="lineno">   47 </span>    -- Specifically, we have 'Duration' at the same probability as the reference,
+<span class="lineno">   48 </span>    -- and 'Probability' at the same duration as the reference.
+<span class="lineno">   49 </span>    | Hazard (Eventually (Duration o)) (Probability o)
+<span class="lineno">   50 </span>    -- ^ We fail to meet the reference point.
+<span class="lineno">   51 </span>    -- Specifically,
+<span class="lineno">   52 </span>    -- we overshoot by 'Duration' at the same probability as the reference,
+<span class="lineno">   53 </span>    -- and by 'Probability' at the same duration as the reference.
+<span class="lineno">   54 </span>
+<span class="lineno">   55 </span><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">deriving instance (Eq (Duration o), Eq (Probability o))</span>
+<span class="lineno">   56 </span><span class="spaces">    </span><span class="nottickedoff">=&gt; Eq (SlackOrHazard o)</span></span></span></span>
+<span class="lineno">   57 </span>
+<span class="lineno">   58 </span><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">deriving instance (Show (Duration o), Show (Probability o))</span>
+<span class="lineno">   59 </span><span class="spaces">    </span><span class="nottickedoff">=&gt; Show (SlackOrHazard o)</span></span></span></span></span></span>
+<span class="lineno">   60 </span>
+<span class="lineno">   61 </span>-- | Test whether the given 'SlackOrHazard' is 'Slack'.
+<span class="lineno">   62 </span>isSlack :: SlackOrHazard o -&gt; Bool
+<span class="lineno">   63 </span><span class="decl"><span class="nottickedoff">isSlack (Slack _ _) = True</span>
+<span class="lineno">   64 </span><span class="spaces"></span><span class="nottickedoff">isSlack _ = False</span></span>
+<span class="lineno">   65 </span>
+<span class="lineno">   66 </span>-- | Test whether the given 'SlackOrHazard' is 'Hazard'.
+<span class="lineno">   67 </span>isHazard :: SlackOrHazard o -&gt; Bool
+<span class="lineno">   68 </span><span class="decl"><span class="nottickedoff">isHazard (Hazard _ _) = True</span>
+<span class="lineno">   69 </span><span class="spaces"></span><span class="nottickedoff">isHazard _ = False</span></span>
+<span class="lineno">   70 </span>
+<span class="lineno">   71 </span>-- | Compute \&quot;slack or hazard\&quot; with respect to a given reference point.
+<span class="lineno">   72 </span>meetsRequirement
+<span class="lineno">   73 </span>    :: DeltaQ o =&gt; o -&gt; (Duration o, Probability o) -&gt; SlackOrHazard o
+<span class="lineno">   74 </span><span class="decl"><span class="istickedoff">meetsRequirement o (t,p)</span>
+<span class="lineno">   75 </span><span class="spaces">    </span><span class="istickedoff">| dp &gt;= 0 = Slack dt dp</span>
+<span class="lineno">   76 </span><span class="spaces">    </span><span class="istickedoff">| Abandoned &lt;- t' = Hazard Abandoned (negate dp)</span>
+<span class="lineno">   77 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Hazard (Occurs $ negate dt) (negate dp)</span>
+<span class="lineno">   78 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">   79 </span><span class="spaces">    </span><span class="istickedoff">dp = p' - p</span>
+<span class="lineno">   80 </span><span class="spaces">    </span><span class="istickedoff">dt = t - eventually <span class="nottickedoff">err</span> id t'</span>
+<span class="lineno">   81 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">   82 </span><span class="spaces">    </span><span class="istickedoff">t' = quantile o p</span>
+<span class="lineno">   83 </span><span class="spaces">    </span><span class="istickedoff">p' = o `successWithin` t</span>
+<span class="lineno">   84 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">   85 </span><span class="spaces">    </span><span class="istickedoff"><span class="nottickedoff">err = error &quot;distanceToReference: inconsistency&quot;</span></span></span>
 
 </pre>
 </body>

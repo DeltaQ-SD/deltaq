@@ -20,196 +20,195 @@ span.spaces    { background: white }
 <span class="lineno">    1 </span>{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 <span class="lineno">    2 </span>
 <span class="lineno">    3 </span>{-|
-<span class="lineno">    4 </span>Copyright   : Predictable Network Solutions Ltd., 2024
+<span class="lineno">    4 </span>Copyright   : Predictable Network Solutions Ltd., 2020-2024
 <span class="lineno">    5 </span>License     : BSD-3-Clause
-<span class="lineno">    6 </span>Maintainer  : peter.thompson@pnsol.com
-<span class="lineno">    7 </span>Description : Probability measures on the number line.
-<span class="lineno">    8 </span>-}
-<span class="lineno">    9 </span>module Numeric.Measure.Probability
-<span class="lineno">   10 </span>    ( -- * Type
-<span class="lineno">   11 </span>      Prob
-<span class="lineno">   12 </span>    , dirac
-<span class="lineno">   13 </span>    , uniform
-<span class="lineno">   14 </span>    , distribution
-<span class="lineno">   15 </span>    , fromDistribution
-<span class="lineno">   16 </span>    , measure
-<span class="lineno">   17 </span>    , fromMeasure
-<span class="lineno">   18 </span>    , unsafeFromMeasure
-<span class="lineno">   19 </span>
-<span class="lineno">   20 </span>      -- * Observations
-<span class="lineno">   21 </span>    , support
-<span class="lineno">   22 </span>    , expectation
-<span class="lineno">   23 </span>    , moments
-<span class="lineno">   24 </span>
-<span class="lineno">   25 </span>      -- * Operations, numerical
-<span class="lineno">   26 </span>    , choice
-<span class="lineno">   27 </span>    , translate
-<span class="lineno">   28 </span>    , convolve
-<span class="lineno">   29 </span>    ) where
-<span class="lineno">   30 </span>
-<span class="lineno">   31 </span>import Control.DeepSeq
-<span class="lineno">   32 </span>    ( NFData
-<span class="lineno">   33 </span>    )
-<span class="lineno">   34 </span>import Numeric.Function.Piecewise
-<span class="lineno">   35 </span>    ( Piecewise
-<span class="lineno">   36 </span>    )
-<span class="lineno">   37 </span>import Numeric.Measure.Finite.Mixed
-<span class="lineno">   38 </span>    ( Measure
-<span class="lineno">   39 </span>    )
-<span class="lineno">   40 </span>import Numeric.Polynomial.Simple
-<span class="lineno">   41 </span>    ( Poly
-<span class="lineno">   42 </span>    )
-<span class="lineno">   43 </span>import Numeric.Probability.Moments
-<span class="lineno">   44 </span>    ( Moments (..)
-<span class="lineno">   45 </span>    , fromExpectedPowers
-<span class="lineno">   46 </span>    )
-<span class="lineno">   47 </span>
-<span class="lineno">   48 </span>import qualified Numeric.Measure.Finite.Mixed as M
-<span class="lineno">   49 </span>import qualified Numeric.Polynomial.Simple as Poly
-<span class="lineno">   50 </span>
-<span class="lineno">   51 </span>{-----------------------------------------------------------------------------
-<span class="lineno">   52 </span>    Type
-<span class="lineno">   53 </span>------------------------------------------------------------------------------}
-<span class="lineno">   54 </span>-- | A
-<span class="lineno">   55 </span>-- [probability measure](https://en.wikipedia.org/wiki/Probability_measure)
-<span class="lineno">   56 </span>-- on the number line.
-<span class="lineno">   57 </span>--
-<span class="lineno">   58 </span>-- A probability measure is a 'M.Measure' whose 'M.total' is @1@.
-<span class="lineno">   59 </span>newtype Prob a = Prob (Measure a)
-<span class="lineno">   60 </span>    -- INVARIANT: 'M.isPositive' equals 'True'.
-<span class="lineno">   61 </span>    -- INVARIANT: 'M.total' equals 1
-<span class="lineno">   62 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
-<span class="lineno">   63 </span>
-<span class="lineno">   64 </span>-- | View the probability measure as a 'M.Measure'.
-<span class="lineno">   65 </span>measure :: (Ord a, Num a) =&gt; Prob a -&gt; Measure a
-<span class="lineno">   66 </span><span class="decl"><span class="istickedoff">measure (Prob m) = m</span></span>
-<span class="lineno">   67 </span>
-<span class="lineno">   68 </span>-- | View a 'M.Measure' as a probability distribution.
-<span class="lineno">   69 </span>--
-<span class="lineno">   70 </span>-- The measure @m@ must be positive, with total weight @1@, that is
-<span class="lineno">   71 </span>--
-<span class="lineno">   72 </span>-- &gt; isPositive m == True
-<span class="lineno">   73 </span>-- &gt; total m == 1
-<span class="lineno">   74 </span>--
-<span class="lineno">   75 </span>-- These preconditions are checked and the function returns 'Nothing'
-<span class="lineno">   76 </span>-- if they fail. 
-<span class="lineno">   77 </span>fromMeasure :: (Ord a, Num a, Fractional a) =&gt; Measure a -&gt; Maybe (Prob a)
-<span class="lineno">   78 </span><span class="decl"><span class="istickedoff">fromMeasure m</span>
-<span class="lineno">   79 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">M.isPositive m &amp;&amp; M.total m == 1</span> = Just $ Prob m</span>
-<span class="lineno">   80 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
-<span class="lineno">   81 </span>
-<span class="lineno">   82 </span>-- | View a 'M.Measure' as a probability distribution.
-<span class="lineno">   83 </span>--
-<span class="lineno">   84 </span>-- Variant of 'fromMeasure' where /the precondition are not checked!/
-<span class="lineno">   85 </span>unsafeFromMeasure :: Measure a -&gt; Prob a
-<span class="lineno">   86 </span><span class="decl"><span class="istickedoff">unsafeFromMeasure = Prob</span></span>
-<span class="lineno">   87 </span>
-<span class="lineno">   88 </span>-- | @eval (distribution m) x@ is the probability of picking a number @&lt;= x@.
-<span class="lineno">   89 </span>--
-<span class="lineno">   90 </span>-- This is known as the
-<span class="lineno">   91 </span>-- [cumulative distribution function
-<span class="lineno">   92 </span>-- ](https://en.wikipedia.org/wiki/Cumulative_distribution_function).
-<span class="lineno">   93 </span>distribution :: (Ord a, Num a) =&gt; Prob a -&gt; Piecewise (Poly a)
-<span class="lineno">   94 </span><span class="decl"><span class="istickedoff">distribution (Prob m) = M.distribution m</span></span>
-<span class="lineno">   95 </span>
-<span class="lineno">   96 </span>-- | Construct a probability distribution from its
-<span class="lineno">   97 </span>-- [cumulative distribution function
-<span class="lineno">   98 </span>-- ](https://en.wikipedia.org/wiki/Cumulative_distribution_function).
-<span class="lineno">   99 </span>--
-<span class="lineno">  100 </span>-- Return 'Nothing' if
-<span class="lineno">  101 </span>-- * the cumulative distribution function is not monotonicall increasing
-<span class="lineno">  102 </span>-- * the last piece of the piecewise function is not a constant
-<span class="lineno">  103 </span>--   equal to @1@.
-<span class="lineno">  104 </span>fromDistribution
-<span class="lineno">  105 </span>    :: (Ord a, Num a, Fractional a)
-<span class="lineno">  106 </span>    =&gt; Piecewise (Poly a) -&gt; Maybe (Prob a)
-<span class="lineno">  107 </span><span class="decl"><span class="istickedoff">fromDistribution pieces</span>
-<span class="lineno">  108 </span><span class="spaces">    </span><span class="istickedoff">| Just m &lt;- M.fromDistribution pieces = fromMeasure m</span>
-<span class="lineno">  109 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
-<span class="lineno">  110 </span>
-<span class="lineno">  111 </span>-- | Two probability measures are equal if they have the same cumulative
-<span class="lineno">  112 </span>-- distribution functions.
-<span class="lineno">  113 </span>--
-<span class="lineno">  114 </span>-- &gt; px == py
-<span class="lineno">  115 </span>-- &gt;   implies
-<span class="lineno">  116 </span>-- &gt;   forall t. eval (distribution px) t = eval (distribution py) t
-<span class="lineno">  117 </span>instance <span class="decl"><span class="istickedoff">(Ord a, Num a) =&gt; Eq (Prob a)</span></span> where
-<span class="lineno">  118 </span>    <span class="decl"><span class="istickedoff">Prob mx == Prob my = mx == my</span></span>
-<span class="lineno">  119 </span>
-<span class="lineno">  120 </span>{-----------------------------------------------------------------------------
-<span class="lineno">  121 </span>    Construction
-<span class="lineno">  122 </span>------------------------------------------------------------------------------}
-<span class="lineno">  123 </span>-- | A
-<span class="lineno">  124 </span>-- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)
-<span class="lineno">  125 </span>-- at the given point @x@.
-<span class="lineno">  126 </span>--
-<span class="lineno">  127 </span>-- @dirac x@ is the probability distribution where @x@ occurs with certainty.
-<span class="lineno">  128 </span>dirac :: (Ord a, Num a) =&gt; a -&gt; Prob a
-<span class="lineno">  129 </span><span class="decl"><span class="istickedoff">dirac = Prob . M.dirac</span></span>
-<span class="lineno">  130 </span>
-<span class="lineno">  131 </span>-- | The uniform probability distribution on the interval \( [x,y) \).
-<span class="lineno">  132 </span>uniform :: (Ord a, Num a, Fractional a) =&gt; a -&gt; a -&gt; Prob a
-<span class="lineno">  133 </span><span class="decl"><span class="istickedoff">uniform x y = Prob $ M.uniform x y</span></span>
-<span class="lineno">  134 </span>
-<span class="lineno">  135 </span>{-----------------------------------------------------------------------------
-<span class="lineno">  136 </span>    Construction
-<span class="lineno">  137 </span>------------------------------------------------------------------------------}
-<span class="lineno">  138 </span>-- | The 'support' is the smallest closed, contiguous interval \( [x,y] \)
-<span class="lineno">  139 </span>-- outside of which the probability is zero.
-<span class="lineno">  140 </span>--
-<span class="lineno">  141 </span>-- Returns 'Nothing' if the interval is empty.
-<span class="lineno">  142 </span>support :: (Ord a, Num a) =&gt; Prob a -&gt; Maybe (a, a)
-<span class="lineno">  143 </span><span class="decl"><span class="istickedoff">support (Prob m) = M.support m</span></span>
-<span class="lineno">  144 </span>
-<span class="lineno">  145 </span>-- | Compute the
-<span class="lineno">  146 </span>-- [expected value](https://en.wikipedia.org/wiki/Expected_value)
-<span class="lineno">  147 </span>-- of a polynomial @f@ with respect to the given probability distribution,
-<span class="lineno">  148 </span>-- \( E[f(X)] \).
-<span class="lineno">  149 </span>expectation :: (Ord a, Num a, Fractional a) =&gt; Poly a -&gt; Prob a -&gt; a
-<span class="lineno">  150 </span><span class="decl"><span class="istickedoff">expectation f (Prob m) = M.integrate f m</span></span>
-<span class="lineno">  151 </span>
-<span class="lineno">  152 </span>-- | Compute the first four
-<span class="lineno">  153 </span>-- commonly used moments of a probability distribution.
-<span class="lineno">  154 </span>moments :: (Ord a, Num a, Fractional a) =&gt; Prob a -&gt; Moments a
-<span class="lineno">  155 </span><span class="decl"><span class="istickedoff">moments m =</span>
-<span class="lineno">  156 </span><span class="spaces">    </span><span class="istickedoff">fromExpectedPowers (ex 1, ex 2, ex 3, ex 4)</span>
-<span class="lineno">  157 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">  158 </span><span class="spaces">    </span><span class="istickedoff">ex n = expectation (Poly.monomial n 1) m</span></span>
-<span class="lineno">  159 </span>
-<span class="lineno">  160 </span>{-----------------------------------------------------------------------------
-<span class="lineno">  161 </span>    Operations
-<span class="lineno">  162 </span>------------------------------------------------------------------------------}
-<span class="lineno">  163 </span>-- | Left-biased random choice.
-<span class="lineno">  164 </span>--
-<span class="lineno">  165 </span>-- @choice p@ is a probability distribution where
-<span class="lineno">  166 </span>-- events from the left argument are chosen with probablity @p@
-<span class="lineno">  167 </span>-- and events from the right argument are chosen with probability @(1-p)@.
-<span class="lineno">  168 </span>--
-<span class="lineno">  169 </span>-- &gt; eval (distribution (choice p mx my)) z
-<span class="lineno">  170 </span>-- &gt;    = p * eval (distribution mx) z + (1-p) * eval (distribution my) z
-<span class="lineno">  171 </span>choice :: (Ord a, Num a, Fractional a) =&gt; a -&gt; Prob a -&gt; Prob a -&gt; Prob a
-<span class="lineno">  172 </span><span class="decl"><span class="istickedoff">choice p (Prob mx) (Prob my) = Prob $</span>
-<span class="lineno">  173 </span><span class="spaces">    </span><span class="istickedoff">M.add (M.scale p mx) (M.scale (1 - p) my)</span></span>
-<span class="lineno">  174 </span>
-<span class="lineno">  175 </span>-- | Translate a probability distribution along the number line.
-<span class="lineno">  176 </span>--
-<span class="lineno">  177 </span>-- &gt; eval (distribution (translate y m)) x
-<span class="lineno">  178 </span>-- &gt;    = eval (distribution m) (x - y)
-<span class="lineno">  179 </span>translate :: (Ord a, Num a, Fractional a) =&gt; a -&gt; Prob a -&gt; Prob a
-<span class="lineno">  180 </span><span class="decl"><span class="istickedoff">translate y (Prob m) = Prob $ M.translate y m</span></span>
-<span class="lineno">  181 </span>
-<span class="lineno">  182 </span>-- | Additive convolution of two probability measures.
-<span class="lineno">  183 </span>--
-<span class="lineno">  184 </span>-- Properties:
-<span class="lineno">  185 </span>--
-<span class="lineno">  186 </span>-- &gt; convolve (dirac x) (dirac y) = dirac (x + y)
-<span class="lineno">  187 </span>-- &gt;
-<span class="lineno">  188 </span>-- &gt; convolve mx my               =  convolve my mx
-<span class="lineno">  189 </span>-- &gt; translate z (convolve mx my) =  convolve (translate z mx) my
-<span class="lineno">  190 </span>convolve
-<span class="lineno">  191 </span>    :: (Ord a, Num a, Fractional a)
-<span class="lineno">  192 </span>    =&gt; Prob a -&gt; Prob a -&gt; Prob a
-<span class="lineno">  193 </span><span class="decl"><span class="istickedoff">convolve (Prob mx) (Prob my) = Prob $ M.convolve mx my</span></span>
+<span class="lineno">    6 </span>Description : Probability measures on the number line.
+<span class="lineno">    7 </span>-}
+<span class="lineno">    8 </span>module Numeric.Measure.Probability
+<span class="lineno">    9 </span>    ( -- * Type
+<span class="lineno">   10 </span>      Prob
+<span class="lineno">   11 </span>    , dirac
+<span class="lineno">   12 </span>    , uniform
+<span class="lineno">   13 </span>    , distribution
+<span class="lineno">   14 </span>    , fromDistribution
+<span class="lineno">   15 </span>    , measure
+<span class="lineno">   16 </span>    , fromMeasure
+<span class="lineno">   17 </span>    , unsafeFromMeasure
+<span class="lineno">   18 </span>
+<span class="lineno">   19 </span>      -- * Observations
+<span class="lineno">   20 </span>    , support
+<span class="lineno">   21 </span>    , expectation
+<span class="lineno">   22 </span>    , moments
+<span class="lineno">   23 </span>
+<span class="lineno">   24 </span>      -- * Operations, numerical
+<span class="lineno">   25 </span>    , choice
+<span class="lineno">   26 </span>    , translate
+<span class="lineno">   27 </span>    , convolve
+<span class="lineno">   28 </span>    ) where
+<span class="lineno">   29 </span>
+<span class="lineno">   30 </span>import Control.DeepSeq
+<span class="lineno">   31 </span>    ( NFData
+<span class="lineno">   32 </span>    )
+<span class="lineno">   33 </span>import Numeric.Function.Piecewise
+<span class="lineno">   34 </span>    ( Piecewise
+<span class="lineno">   35 </span>    )
+<span class="lineno">   36 </span>import Numeric.Measure.Finite.Mixed
+<span class="lineno">   37 </span>    ( Measure
+<span class="lineno">   38 </span>    )
+<span class="lineno">   39 </span>import Numeric.Polynomial.Simple
+<span class="lineno">   40 </span>    ( Poly
+<span class="lineno">   41 </span>    )
+<span class="lineno">   42 </span>import Numeric.Probability.Moments
+<span class="lineno">   43 </span>    ( Moments (..)
+<span class="lineno">   44 </span>    , fromExpectedPowers
+<span class="lineno">   45 </span>    )
+<span class="lineno">   46 </span>
+<span class="lineno">   47 </span>import qualified Numeric.Measure.Finite.Mixed as M
+<span class="lineno">   48 </span>import qualified Numeric.Polynomial.Simple as Poly
+<span class="lineno">   49 </span>
+<span class="lineno">   50 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   51 </span>    Type
+<span class="lineno">   52 </span>------------------------------------------------------------------------------}
+<span class="lineno">   53 </span>-- | A
+<span class="lineno">   54 </span>-- [probability measure](https://en.wikipedia.org/wiki/Probability_measure)
+<span class="lineno">   55 </span>-- on the number line.
+<span class="lineno">   56 </span>--
+<span class="lineno">   57 </span>-- A probability measure is a 'M.Measure' whose 'M.total' is @1@.
+<span class="lineno">   58 </span>newtype Prob a = Prob (Measure a)
+<span class="lineno">   59 </span>    -- INVARIANT: 'M.isPositive' equals 'True'.
+<span class="lineno">   60 </span>    -- INVARIANT: 'M.total' equals 1
+<span class="lineno">   61 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
+<span class="lineno">   62 </span>
+<span class="lineno">   63 </span>-- | View the probability measure as a 'M.Measure'.
+<span class="lineno">   64 </span>measure :: (Ord a, Num a) =&gt; Prob a -&gt; Measure a
+<span class="lineno">   65 </span><span class="decl"><span class="istickedoff">measure (Prob m) = m</span></span>
+<span class="lineno">   66 </span>
+<span class="lineno">   67 </span>-- | View a 'M.Measure' as a probability distribution.
+<span class="lineno">   68 </span>--
+<span class="lineno">   69 </span>-- The measure @m@ must be positive, with total weight @1@, that is
+<span class="lineno">   70 </span>--
+<span class="lineno">   71 </span>-- &gt; isPositive m == True
+<span class="lineno">   72 </span>-- &gt; total m == 1
+<span class="lineno">   73 </span>--
+<span class="lineno">   74 </span>-- These preconditions are checked and the function returns 'Nothing'
+<span class="lineno">   75 </span>-- if they fail. 
+<span class="lineno">   76 </span>fromMeasure :: (Ord a, Num a, Fractional a) =&gt; Measure a -&gt; Maybe (Prob a)
+<span class="lineno">   77 </span><span class="decl"><span class="istickedoff">fromMeasure m</span>
+<span class="lineno">   78 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">M.isPositive m &amp;&amp; M.total m == 1</span> = Just $ Prob m</span>
+<span class="lineno">   79 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
+<span class="lineno">   80 </span>
+<span class="lineno">   81 </span>-- | View a 'M.Measure' as a probability distribution.
+<span class="lineno">   82 </span>--
+<span class="lineno">   83 </span>-- Variant of 'fromMeasure' where /the precondition are not checked!/
+<span class="lineno">   84 </span>unsafeFromMeasure :: Measure a -&gt; Prob a
+<span class="lineno">   85 </span><span class="decl"><span class="istickedoff">unsafeFromMeasure = Prob</span></span>
+<span class="lineno">   86 </span>
+<span class="lineno">   87 </span>-- | @eval (distribution m) x@ is the probability of picking a number @&lt;= x@.
+<span class="lineno">   88 </span>--
+<span class="lineno">   89 </span>-- This is known as the
+<span class="lineno">   90 </span>-- [cumulative distribution function
+<span class="lineno">   91 </span>-- ](https://en.wikipedia.org/wiki/Cumulative_distribution_function).
+<span class="lineno">   92 </span>distribution :: (Ord a, Num a) =&gt; Prob a -&gt; Piecewise (Poly a)
+<span class="lineno">   93 </span><span class="decl"><span class="istickedoff">distribution (Prob m) = M.distribution m</span></span>
+<span class="lineno">   94 </span>
+<span class="lineno">   95 </span>-- | Construct a probability distribution from its
+<span class="lineno">   96 </span>-- [cumulative distribution function
+<span class="lineno">   97 </span>-- ](https://en.wikipedia.org/wiki/Cumulative_distribution_function).
+<span class="lineno">   98 </span>--
+<span class="lineno">   99 </span>-- Return 'Nothing' if
+<span class="lineno">  100 </span>-- * the cumulative distribution function is not monotonicall increasing
+<span class="lineno">  101 </span>-- * the last piece of the piecewise function is not a constant
+<span class="lineno">  102 </span>--   equal to @1@.
+<span class="lineno">  103 </span>fromDistribution
+<span class="lineno">  104 </span>    :: (Ord a, Num a, Fractional a)
+<span class="lineno">  105 </span>    =&gt; Piecewise (Poly a) -&gt; Maybe (Prob a)
+<span class="lineno">  106 </span><span class="decl"><span class="istickedoff">fromDistribution pieces</span>
+<span class="lineno">  107 </span><span class="spaces">    </span><span class="istickedoff">| Just m &lt;- M.fromDistribution pieces = fromMeasure m</span>
+<span class="lineno">  108 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
+<span class="lineno">  109 </span>
+<span class="lineno">  110 </span>-- | Two probability measures are equal if they have the same cumulative
+<span class="lineno">  111 </span>-- distribution functions.
+<span class="lineno">  112 </span>--
+<span class="lineno">  113 </span>-- &gt; px == py
+<span class="lineno">  114 </span>-- &gt;   implies
+<span class="lineno">  115 </span>-- &gt;   forall t. eval (distribution px) t = eval (distribution py) t
+<span class="lineno">  116 </span>instance <span class="decl"><span class="istickedoff">(Ord a, Num a) =&gt; Eq (Prob a)</span></span> where
+<span class="lineno">  117 </span>    <span class="decl"><span class="istickedoff">Prob mx == Prob my = mx == my</span></span>
+<span class="lineno">  118 </span>
+<span class="lineno">  119 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  120 </span>    Construction
+<span class="lineno">  121 </span>------------------------------------------------------------------------------}
+<span class="lineno">  122 </span>-- | A
+<span class="lineno">  123 </span>-- [Dirac measure](https://en.wikipedia.org/wiki/Dirac_measure)
+<span class="lineno">  124 </span>-- at the given point @x@.
+<span class="lineno">  125 </span>--
+<span class="lineno">  126 </span>-- @dirac x@ is the probability distribution where @x@ occurs with certainty.
+<span class="lineno">  127 </span>dirac :: (Ord a, Num a) =&gt; a -&gt; Prob a
+<span class="lineno">  128 </span><span class="decl"><span class="istickedoff">dirac = Prob . M.dirac</span></span>
+<span class="lineno">  129 </span>
+<span class="lineno">  130 </span>-- | The uniform probability distribution on the interval \( [x,y) \).
+<span class="lineno">  131 </span>uniform :: (Ord a, Num a, Fractional a) =&gt; a -&gt; a -&gt; Prob a
+<span class="lineno">  132 </span><span class="decl"><span class="istickedoff">uniform x y = Prob $ M.uniform x y</span></span>
+<span class="lineno">  133 </span>
+<span class="lineno">  134 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  135 </span>    Construction
+<span class="lineno">  136 </span>------------------------------------------------------------------------------}
+<span class="lineno">  137 </span>-- | The 'support' is the smallest closed, contiguous interval \( [x,y] \)
+<span class="lineno">  138 </span>-- outside of which the probability is zero.
+<span class="lineno">  139 </span>--
+<span class="lineno">  140 </span>-- Returns 'Nothing' if the interval is empty.
+<span class="lineno">  141 </span>support :: (Ord a, Num a) =&gt; Prob a -&gt; Maybe (a, a)
+<span class="lineno">  142 </span><span class="decl"><span class="istickedoff">support (Prob m) = M.support m</span></span>
+<span class="lineno">  143 </span>
+<span class="lineno">  144 </span>-- | Compute the
+<span class="lineno">  145 </span>-- [expected value](https://en.wikipedia.org/wiki/Expected_value)
+<span class="lineno">  146 </span>-- of a polynomial @f@ with respect to the given probability distribution,
+<span class="lineno">  147 </span>-- \( E[f(X)] \).
+<span class="lineno">  148 </span>expectation :: (Ord a, Num a, Fractional a) =&gt; Poly a -&gt; Prob a -&gt; a
+<span class="lineno">  149 </span><span class="decl"><span class="istickedoff">expectation f (Prob m) = M.integrate f m</span></span>
+<span class="lineno">  150 </span>
+<span class="lineno">  151 </span>-- | Compute the first four
+<span class="lineno">  152 </span>-- commonly used moments of a probability distribution.
+<span class="lineno">  153 </span>moments :: (Ord a, Num a, Fractional a) =&gt; Prob a -&gt; Moments a
+<span class="lineno">  154 </span><span class="decl"><span class="istickedoff">moments m =</span>
+<span class="lineno">  155 </span><span class="spaces">    </span><span class="istickedoff">fromExpectedPowers (ex 1, ex 2, ex 3, ex 4)</span>
+<span class="lineno">  156 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  157 </span><span class="spaces">    </span><span class="istickedoff">ex n = expectation (Poly.monomial n 1) m</span></span>
+<span class="lineno">  158 </span>
+<span class="lineno">  159 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  160 </span>    Operations
+<span class="lineno">  161 </span>------------------------------------------------------------------------------}
+<span class="lineno">  162 </span>-- | Left-biased random choice.
+<span class="lineno">  163 </span>--
+<span class="lineno">  164 </span>-- @choice p@ is a probability distribution where
+<span class="lineno">  165 </span>-- events from the left argument are chosen with probablity @p@
+<span class="lineno">  166 </span>-- and events from the right argument are chosen with probability @(1-p)@.
+<span class="lineno">  167 </span>--
+<span class="lineno">  168 </span>-- &gt; eval (distribution (choice p mx my)) z
+<span class="lineno">  169 </span>-- &gt;    = p * eval (distribution mx) z + (1-p) * eval (distribution my) z
+<span class="lineno">  170 </span>choice :: (Ord a, Num a, Fractional a) =&gt; a -&gt; Prob a -&gt; Prob a -&gt; Prob a
+<span class="lineno">  171 </span><span class="decl"><span class="istickedoff">choice p (Prob mx) (Prob my) = Prob $</span>
+<span class="lineno">  172 </span><span class="spaces">    </span><span class="istickedoff">M.add (M.scale p mx) (M.scale (1 - p) my)</span></span>
+<span class="lineno">  173 </span>
+<span class="lineno">  174 </span>-- | Translate a probability distribution along the number line.
+<span class="lineno">  175 </span>--
+<span class="lineno">  176 </span>-- &gt; eval (distribution (translate y m)) x
+<span class="lineno">  177 </span>-- &gt;    = eval (distribution m) (x - y)
+<span class="lineno">  178 </span>translate :: (Ord a, Num a, Fractional a) =&gt; a -&gt; Prob a -&gt; Prob a
+<span class="lineno">  179 </span><span class="decl"><span class="istickedoff">translate y (Prob m) = Prob $ M.translate y m</span></span>
+<span class="lineno">  180 </span>
+<span class="lineno">  181 </span>-- | Additive convolution of two probability measures.
+<span class="lineno">  182 </span>--
+<span class="lineno">  183 </span>-- Properties:
+<span class="lineno">  184 </span>--
+<span class="lineno">  185 </span>-- &gt; convolve (dirac x) (dirac y) = dirac (x + y)
+<span class="lineno">  186 </span>-- &gt;
+<span class="lineno">  187 </span>-- &gt; convolve mx my               =  convolve my mx
+<span class="lineno">  188 </span>-- &gt; translate z (convolve mx my) =  convolve (translate z mx) my
+<span class="lineno">  189 </span>convolve
+<span class="lineno">  190 </span>    :: (Ord a, Num a, Fractional a)
+<span class="lineno">  191 </span>    =&gt; Prob a -&gt; Prob a -&gt; Prob a
+<span class="lineno">  192 </span><span class="decl"><span class="istickedoff">convolve (Prob mx) (Prob my) = Prob $ M.convolve mx my</span></span>
 
 </pre>
 </body>

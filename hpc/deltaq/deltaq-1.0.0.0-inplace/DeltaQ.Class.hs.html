@@ -21,356 +21,354 @@ span.spaces    { background: white }
 <span class="lineno">    2 </span>{-# LANGUAGE TypeFamilies #-}
 <span class="lineno">    3 </span>
 <span class="lineno">    4 </span>{-|
-<span class="lineno">    5 </span>Copyright   : Neil Davies, 2024
-<span class="lineno">    6 </span>              Predictable Network Solutions Ltd., 2024
-<span class="lineno">    7 </span>License     : BSD-3-Clause
-<span class="lineno">    8 </span>Maintainer  : neil.davies@pnsol.com
-<span class="lineno">    9 </span>Description : Type classes for outcomes and their completion times.
+<span class="lineno">    5 </span>Copyright   : Predictable Network Solutions Ltd., 2003-2024
+<span class="lineno">    6 </span>License     : BSD-3-Clause
+<span class="lineno">    7 </span>Description : Type classes for outcomes and their completion times.
+<span class="lineno">    8 </span>
+<span class="lineno">    9 </span>Type classes
 <span class="lineno">   10 </span>
-<span class="lineno">   11 </span>Type classes
-<span class="lineno">   12 </span>
-<span class="lineno">   13 </span>* 'Outcome' — outcomes their combinations.
-<span class="lineno">   14 </span>* 'DeltaQ' — probability distributions of completion times.
-<span class="lineno">   15 </span>
-<span class="lineno">   16 </span>-}
-<span class="lineno">   17 </span>module DeltaQ.Class
-<span class="lineno">   18 </span>    ( -- * Type classes
-<span class="lineno">   19 </span>      -- ** Outcome
-<span class="lineno">   20 </span>      Outcome (..)
-<span class="lineno">   21 </span>
-<span class="lineno">   22 </span>    -- ** DeltaQ
-<span class="lineno">   23 </span>    , Eventually (..)
-<span class="lineno">   24 </span>    , eventually
-<span class="lineno">   25 </span>    , eventuallyFromMaybe
-<span class="lineno">   26 </span>    , maybeFromEventually
+<span class="lineno">   11 </span>* 'Outcome' — outcomes their combinations.
+<span class="lineno">   12 </span>* 'DeltaQ' — probability distributions of completion times.
+<span class="lineno">   13 </span>
+<span class="lineno">   14 </span>-}
+<span class="lineno">   15 </span>module DeltaQ.Class
+<span class="lineno">   16 </span>    ( -- * Type classes
+<span class="lineno">   17 </span>      -- ** Outcome
+<span class="lineno">   18 </span>      Outcome (..)
+<span class="lineno">   19 </span>
+<span class="lineno">   20 </span>    -- ** DeltaQ
+<span class="lineno">   21 </span>    , Eventually (..)
+<span class="lineno">   22 </span>    , eventually
+<span class="lineno">   23 </span>    , eventuallyFromMaybe
+<span class="lineno">   24 </span>    , maybeFromEventually
+<span class="lineno">   25 </span>
+<span class="lineno">   26 </span>    , DeltaQ (..)
 <span class="lineno">   27 </span>
-<span class="lineno">   28 </span>    , DeltaQ (..)
-<span class="lineno">   29 </span>
-<span class="lineno">   30 </span>    -- * Properties
-<span class="lineno">   31 </span>    -- $properties
-<span class="lineno">   32 </span>
-<span class="lineno">   33 </span>    -- ** Outcome
-<span class="lineno">   34 </span>    -- $properties-outcome
-<span class="lineno">   35 </span>
-<span class="lineno">   36 </span>    -- ** DeltaQ
-<span class="lineno">   37 </span>    -- $properties-deltaq
-<span class="lineno">   38 </span>    ) where
-<span class="lineno">   39 </span>
-<span class="lineno">   40 </span>{-----------------------------------------------------------------------------
-<span class="lineno">   41 </span>    Outcome
-<span class="lineno">   42 </span>------------------------------------------------------------------------------}
-<span class="lineno">   43 </span>
-<span class="lineno">   44 </span>infixl 1 .&gt;&gt;. -- less tight
-<span class="lineno">   45 </span>infixr 2 .\/.
-<span class="lineno">   46 </span>infixr 3 ./\. -- more tight
-<span class="lineno">   47 </span>
-<span class="lineno">   48 </span>-- | An 'Outcome' is the result of an activity that takes time,
-<span class="lineno">   49 </span>-- such as a distributed computation, communication, bus ride, … .
-<span class="lineno">   50 </span>--
-<span class="lineno">   51 </span>-- 'Outcome's can be composed in sequence or in parallel.
-<span class="lineno">   52 </span>class (Ord (Duration o), Num (Duration o)) =&gt; Outcome o where
-<span class="lineno">   53 </span>    -- | Numerical type representing times in \( [0,+∞) \).
-<span class="lineno">   54 </span>    --
-<span class="lineno">   55 </span>    -- For example 'Double' or 'Rational'.
-<span class="lineno">   56 </span>    type Duration o
-<span class="lineno">   57 </span>
-<span class="lineno">   58 </span>    -- | The outcome that never finishes.
-<span class="lineno">   59 </span>    never :: o
-<span class="lineno">   60 </span>
-<span class="lineno">   61 </span>    -- | The outcome that succeeds after waiting for a fixed amount of time.
-<span class="lineno">   62 </span>    wait :: Duration o -&gt; o
-<span class="lineno">   63 </span>
-<span class="lineno">   64 </span>    -- | Sequential composition:
-<span class="lineno">   65 </span>    --
-<span class="lineno">   66 </span>    -- First run the outcome on the left,
-<span class="lineno">   67 </span>    -- then run the outcome on the right.
-<span class="lineno">   68 </span>    sequentially :: o -&gt; o -&gt; o
-<span class="lineno">   69 </span>
-<span class="lineno">   70 </span>    -- | Infix operator synonym for 'sequentially'.
-<span class="lineno">   71 </span>    (.&gt;&gt;.) :: o -&gt; o -&gt; o
-<span class="lineno">   72 </span>    <span class="decl"><span class="istickedoff">(.&gt;&gt;.) = sequentially</span></span>
-<span class="lineno">   73 </span>
-<span class="lineno">   74 </span>    -- | Parallel composition, first to finish:
-<span class="lineno">   75 </span>    --
-<span class="lineno">   76 </span>    -- Run two outcomes in parallel,
-<span class="lineno">   77 </span>    -- finish as soon as any one of them finishes.
-<span class="lineno">   78 </span>    firstToFinish :: o -&gt; o -&gt; o
-<span class="lineno">   79 </span>
-<span class="lineno">   80 </span>    -- | Infix operator synonym for 'firstToFinish'.
-<span class="lineno">   81 </span>    (.\/.) :: o -&gt; o -&gt; o
-<span class="lineno">   82 </span>    <span class="decl"><span class="istickedoff">(.\/.) = firstToFinish</span></span>
-<span class="lineno">   83 </span>
-<span class="lineno">   84 </span>    -- | Parallel composiiton, last to finish:
-<span class="lineno">   85 </span>    --
-<span class="lineno">   86 </span>    -- Run two outcomes in parallel,
-<span class="lineno">   87 </span>    -- finish after all of them have finished.
-<span class="lineno">   88 </span>    lastToFinish :: o -&gt; o -&gt; o
-<span class="lineno">   89 </span>
-<span class="lineno">   90 </span>    -- | Infix operator synonym for 'lastToFinish'.
-<span class="lineno">   91 </span>    (./\.) :: o -&gt; o -&gt; o
-<span class="lineno">   92 </span>    <span class="decl"><span class="istickedoff">(./\.) = lastToFinish</span></span>
-<span class="lineno">   93 </span>
-<span class="lineno">   94 </span>{-----------------------------------------------------------------------------
-<span class="lineno">   95 </span>    Eventually
-<span class="lineno">   96 </span>------------------------------------------------------------------------------}
-<span class="lineno">   97 </span>-- | 'Eventually' represents a value that either eventually occurs
-<span class="lineno">   98 </span>-- or is eventually abandoned.
-<span class="lineno">   99 </span>--
-<span class="lineno">  100 </span>-- Similar to the 'Maybe' type, but with a different 'Ord' instance:
-<span class="lineno">  101 </span>-- @Occurs x &lt; Abandoned@ for all @x@.
-<span class="lineno">  102 </span>--
-<span class="lineno">  103 </span>data Eventually a
-<span class="lineno">  104 </span>    = Occurs a
-<span class="lineno">  105 </span>    | Abandoned
-<span class="lineno">  106 </span>    deriving (<span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
-<span class="lineno">  107 </span>
-<span class="lineno">  108 </span>-- | For all @x@, we have @Occurs x &lt; Abandoned@.
-<span class="lineno">  109 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="istickedoff"><span class="decl"><span class="istickedoff">Ord a =&gt; Ord (Eventually a)</span></span></span></span></span></span></span></span></span></span></span></span> where
-<span class="lineno">  110 </span>    <span class="decl"><span class="istickedoff">compare Abandoned Abandoned = EQ</span>
-<span class="lineno">  111 </span><span class="spaces">    </span><span class="istickedoff">compare Abandoned (Occurs _) = GT</span>
-<span class="lineno">  112 </span><span class="spaces">    </span><span class="istickedoff">compare (Occurs _) Abandoned = LT</span>
-<span class="lineno">  113 </span><span class="spaces">    </span><span class="istickedoff">compare (Occurs x) (Occurs y) = compare x y</span></span>
-<span class="lineno">  114 </span>
-<span class="lineno">  115 </span>instance <span class="decl"><span class="nottickedoff">Functor Eventually</span></span> where
-<span class="lineno">  116 </span>    <span class="decl"><span class="istickedoff">fmap _ Abandoned = Abandoned</span>
-<span class="lineno">  117 </span><span class="spaces">    </span><span class="istickedoff">fmap f (Occurs x) = Occurs (f x)</span></span>
-<span class="lineno">  118 </span>
-<span class="lineno">  119 </span>-- |
-<span class="lineno">  120 </span>-- &gt; Abandoned &lt;*&gt; _ = Abandoned
-<span class="lineno">  121 </span>-- &gt; _ &lt;*&gt; Abandoned = Abandoned
-<span class="lineno">  122 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Applicative Eventually</span></span></span></span></span></span> where
-<span class="lineno">  123 </span>    <span class="decl"><span class="istickedoff">pure = Occurs</span></span>
-<span class="lineno">  124 </span>
-<span class="lineno">  125 </span>    <span class="decl"><span class="istickedoff">Abandoned &lt;*&gt; Abandoned = Abandoned</span>
-<span class="lineno">  126 </span><span class="spaces">    </span><span class="istickedoff">Abandoned &lt;*&gt; (Occurs _) = Abandoned</span>
-<span class="lineno">  127 </span><span class="spaces">    </span><span class="istickedoff">(Occurs _) &lt;*&gt; Abandoned = Abandoned</span>
-<span class="lineno">  128 </span><span class="spaces">    </span><span class="istickedoff">(Occurs f) &lt;*&gt; (Occurs y) = Occurs (f y)</span></span>
-<span class="lineno">  129 </span>
-<span class="lineno">  130 </span>-- | Helper function to eliminate 'Eventually'.
-<span class="lineno">  131 </span>--
-<span class="lineno">  132 </span>-- See also: 'maybe'.
-<span class="lineno">  133 </span>eventually :: b -&gt; (a -&gt; b) -&gt; Eventually a -&gt; b
-<span class="lineno">  134 </span><span class="decl"><span class="istickedoff">eventually b _ Abandoned = b</span>
-<span class="lineno">  135 </span><span class="spaces"></span><span class="istickedoff">eventually _ f (Occurs x) = f x</span></span>
-<span class="lineno">  136 </span>
-<span class="lineno">  137 </span>-- | Helper function that converts 'Maybe' to 'Eventually'.
-<span class="lineno">  138 </span>eventuallyFromMaybe :: Maybe a -&gt; Eventually a
-<span class="lineno">  139 </span><span class="decl"><span class="istickedoff">eventuallyFromMaybe Nothing = Abandoned</span>
-<span class="lineno">  140 </span><span class="spaces"></span><span class="istickedoff">eventuallyFromMaybe (Just x) = Occurs x</span></span>
-<span class="lineno">  141 </span>
-<span class="lineno">  142 </span>-- | Helper function that converts 'Eventually' to 'Maybe'.
-<span class="lineno">  143 </span>maybeFromEventually :: Eventually a -&gt; Maybe a
-<span class="lineno">  144 </span><span class="decl"><span class="istickedoff">maybeFromEventually Abandoned = Nothing</span>
-<span class="lineno">  145 </span><span class="spaces"></span><span class="istickedoff">maybeFromEventually (Occurs x) = Just x</span></span>
-<span class="lineno">  146 </span>
-<span class="lineno">  147 </span>{-----------------------------------------------------------------------------
-<span class="lineno">  148 </span>    DeltaQ
-<span class="lineno">  149 </span>------------------------------------------------------------------------------}
-<span class="lineno">  150 </span>
-<span class="lineno">  151 </span>-- | 'DeltaQ' — quality attenuation.
+<span class="lineno">   28 </span>    -- * Properties
+<span class="lineno">   29 </span>    -- $properties
+<span class="lineno">   30 </span>
+<span class="lineno">   31 </span>    -- ** Outcome
+<span class="lineno">   32 </span>    -- $properties-outcome
+<span class="lineno">   33 </span>
+<span class="lineno">   34 </span>    -- ** DeltaQ
+<span class="lineno">   35 </span>    -- $properties-deltaq
+<span class="lineno">   36 </span>    ) where
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   39 </span>    Outcome
+<span class="lineno">   40 </span>------------------------------------------------------------------------------}
+<span class="lineno">   41 </span>
+<span class="lineno">   42 </span>infixl 1 .&gt;&gt;. -- less tight
+<span class="lineno">   43 </span>infixr 2 .\/.
+<span class="lineno">   44 </span>infixr 3 ./\. -- more tight
+<span class="lineno">   45 </span>
+<span class="lineno">   46 </span>-- | An 'Outcome' is the result of an activity that takes time,
+<span class="lineno">   47 </span>-- such as a distributed computation, communication, bus ride, … .
+<span class="lineno">   48 </span>--
+<span class="lineno">   49 </span>-- 'Outcome's can be composed in sequence or in parallel.
+<span class="lineno">   50 </span>class (Ord (Duration o), Num (Duration o)) =&gt; Outcome o where
+<span class="lineno">   51 </span>    -- | Numerical type representing times in \( [0,+∞) \).
+<span class="lineno">   52 </span>    --
+<span class="lineno">   53 </span>    -- For example 'Double' or 'Rational'.
+<span class="lineno">   54 </span>    type Duration o
+<span class="lineno">   55 </span>
+<span class="lineno">   56 </span>    -- | The outcome that never finishes.
+<span class="lineno">   57 </span>    never :: o
+<span class="lineno">   58 </span>
+<span class="lineno">   59 </span>    -- | The outcome that succeeds after waiting for a fixed amount of time.
+<span class="lineno">   60 </span>    wait :: Duration o -&gt; o
+<span class="lineno">   61 </span>
+<span class="lineno">   62 </span>    -- | Sequential composition:
+<span class="lineno">   63 </span>    --
+<span class="lineno">   64 </span>    -- First run the outcome on the left,
+<span class="lineno">   65 </span>    -- then run the outcome on the right.
+<span class="lineno">   66 </span>    sequentially :: o -&gt; o -&gt; o
+<span class="lineno">   67 </span>
+<span class="lineno">   68 </span>    -- | Infix operator synonym for 'sequentially'.
+<span class="lineno">   69 </span>    (.&gt;&gt;.) :: o -&gt; o -&gt; o
+<span class="lineno">   70 </span>    <span class="decl"><span class="istickedoff">(.&gt;&gt;.) = sequentially</span></span>
+<span class="lineno">   71 </span>
+<span class="lineno">   72 </span>    -- | Parallel composition, first to finish:
+<span class="lineno">   73 </span>    --
+<span class="lineno">   74 </span>    -- Run two outcomes in parallel,
+<span class="lineno">   75 </span>    -- finish as soon as any one of them finishes.
+<span class="lineno">   76 </span>    firstToFinish :: o -&gt; o -&gt; o
+<span class="lineno">   77 </span>
+<span class="lineno">   78 </span>    -- | Infix operator synonym for 'firstToFinish'.
+<span class="lineno">   79 </span>    (.\/.) :: o -&gt; o -&gt; o
+<span class="lineno">   80 </span>    <span class="decl"><span class="istickedoff">(.\/.) = firstToFinish</span></span>
+<span class="lineno">   81 </span>
+<span class="lineno">   82 </span>    -- | Parallel composiiton, last to finish:
+<span class="lineno">   83 </span>    --
+<span class="lineno">   84 </span>    -- Run two outcomes in parallel,
+<span class="lineno">   85 </span>    -- finish after all of them have finished.
+<span class="lineno">   86 </span>    lastToFinish :: o -&gt; o -&gt; o
+<span class="lineno">   87 </span>
+<span class="lineno">   88 </span>    -- | Infix operator synonym for 'lastToFinish'.
+<span class="lineno">   89 </span>    (./\.) :: o -&gt; o -&gt; o
+<span class="lineno">   90 </span>    <span class="decl"><span class="istickedoff">(./\.) = lastToFinish</span></span>
+<span class="lineno">   91 </span>
+<span class="lineno">   92 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   93 </span>    Eventually
+<span class="lineno">   94 </span>------------------------------------------------------------------------------}
+<span class="lineno">   95 </span>-- | 'Eventually' represents a value that either eventually occurs
+<span class="lineno">   96 </span>-- or is eventually abandoned.
+<span class="lineno">   97 </span>--
+<span class="lineno">   98 </span>-- Similar to the 'Maybe' type, but with a different 'Ord' instance:
+<span class="lineno">   99 </span>-- @Occurs x &lt; Abandoned@ for all @x@.
+<span class="lineno">  100 </span>--
+<span class="lineno">  101 </span>data Eventually a
+<span class="lineno">  102 </span>    = Occurs a
+<span class="lineno">  103 </span>    | Abandoned
+<span class="lineno">  104 </span>    deriving (<span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">  105 </span>
+<span class="lineno">  106 </span>-- | For all @x@, we have @Occurs x &lt; Abandoned@.
+<span class="lineno">  107 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="istickedoff"><span class="decl"><span class="istickedoff">Ord a =&gt; Ord (Eventually a)</span></span></span></span></span></span></span></span></span></span></span></span> where
+<span class="lineno">  108 </span>    <span class="decl"><span class="istickedoff">compare Abandoned Abandoned = EQ</span>
+<span class="lineno">  109 </span><span class="spaces">    </span><span class="istickedoff">compare Abandoned (Occurs _) = GT</span>
+<span class="lineno">  110 </span><span class="spaces">    </span><span class="istickedoff">compare (Occurs _) Abandoned = LT</span>
+<span class="lineno">  111 </span><span class="spaces">    </span><span class="istickedoff">compare (Occurs x) (Occurs y) = compare x y</span></span>
+<span class="lineno">  112 </span>
+<span class="lineno">  113 </span>instance <span class="decl"><span class="nottickedoff">Functor Eventually</span></span> where
+<span class="lineno">  114 </span>    <span class="decl"><span class="istickedoff">fmap _ Abandoned = Abandoned</span>
+<span class="lineno">  115 </span><span class="spaces">    </span><span class="istickedoff">fmap f (Occurs x) = Occurs (f x)</span></span>
+<span class="lineno">  116 </span>
+<span class="lineno">  117 </span>-- |
+<span class="lineno">  118 </span>-- &gt; Abandoned &lt;*&gt; _ = Abandoned
+<span class="lineno">  119 </span>-- &gt; _ &lt;*&gt; Abandoned = Abandoned
+<span class="lineno">  120 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Applicative Eventually</span></span></span></span></span></span> where
+<span class="lineno">  121 </span>    <span class="decl"><span class="istickedoff">pure = Occurs</span></span>
+<span class="lineno">  122 </span>
+<span class="lineno">  123 </span>    <span class="decl"><span class="istickedoff">Abandoned &lt;*&gt; Abandoned = Abandoned</span>
+<span class="lineno">  124 </span><span class="spaces">    </span><span class="istickedoff">Abandoned &lt;*&gt; (Occurs _) = Abandoned</span>
+<span class="lineno">  125 </span><span class="spaces">    </span><span class="istickedoff">(Occurs _) &lt;*&gt; Abandoned = Abandoned</span>
+<span class="lineno">  126 </span><span class="spaces">    </span><span class="istickedoff">(Occurs f) &lt;*&gt; (Occurs y) = Occurs (f y)</span></span>
+<span class="lineno">  127 </span>
+<span class="lineno">  128 </span>-- | Helper function to eliminate 'Eventually'.
+<span class="lineno">  129 </span>--
+<span class="lineno">  130 </span>-- See also: 'maybe'.
+<span class="lineno">  131 </span>eventually :: b -&gt; (a -&gt; b) -&gt; Eventually a -&gt; b
+<span class="lineno">  132 </span><span class="decl"><span class="istickedoff">eventually b _ Abandoned = b</span>
+<span class="lineno">  133 </span><span class="spaces"></span><span class="istickedoff">eventually _ f (Occurs x) = f x</span></span>
+<span class="lineno">  134 </span>
+<span class="lineno">  135 </span>-- | Helper function that converts 'Maybe' to 'Eventually'.
+<span class="lineno">  136 </span>eventuallyFromMaybe :: Maybe a -&gt; Eventually a
+<span class="lineno">  137 </span><span class="decl"><span class="istickedoff">eventuallyFromMaybe Nothing = Abandoned</span>
+<span class="lineno">  138 </span><span class="spaces"></span><span class="istickedoff">eventuallyFromMaybe (Just x) = Occurs x</span></span>
+<span class="lineno">  139 </span>
+<span class="lineno">  140 </span>-- | Helper function that converts 'Eventually' to 'Maybe'.
+<span class="lineno">  141 </span>maybeFromEventually :: Eventually a -&gt; Maybe a
+<span class="lineno">  142 </span><span class="decl"><span class="istickedoff">maybeFromEventually Abandoned = Nothing</span>
+<span class="lineno">  143 </span><span class="spaces"></span><span class="istickedoff">maybeFromEventually (Occurs x) = Just x</span></span>
+<span class="lineno">  144 </span>
+<span class="lineno">  145 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  146 </span>    DeltaQ
+<span class="lineno">  147 </span>------------------------------------------------------------------------------}
+<span class="lineno">  148 </span>
+<span class="lineno">  149 </span>-- | 'DeltaQ' — quality attenuation.
+<span class="lineno">  150 </span>--
+<span class="lineno">  151 </span>-- 'DeltaQ' is a probability distribution of time.
 <span class="lineno">  152 </span>--
-<span class="lineno">  153 </span>-- 'DeltaQ' is a probability distribution of time.
-<span class="lineno">  154 </span>--
-<span class="lineno">  155 </span>-- Specifically, 'DeltaQ' is the probability distribution
-<span class="lineno">  156 </span>-- of finish times for an outcome.
-<span class="lineno">  157 </span>class   ( Ord (Probability o)
-<span class="lineno">  158 </span>        , Enum (Probability o)
-<span class="lineno">  159 </span>        , Num (Probability o)
-<span class="lineno">  160 </span>        , Fractional (Probability o)
-<span class="lineno">  161 </span>        , Outcome o
-<span class="lineno">  162 </span>        )
-<span class="lineno">  163 </span>    =&gt; DeltaQ o
-<span class="lineno">  164 </span>  where
-<span class="lineno">  165 </span>    -- | Numerical type representing probabilities in \( [0,1] \).
-<span class="lineno">  166 </span>    --
-<span class="lineno">  167 </span>    -- For example 'Double' or 'Rational'.
-<span class="lineno">  168 </span>    type Probability o
-<span class="lineno">  169 </span>
-<span class="lineno">  170 </span>    -- | Left-biased random choice.
-<span class="lineno">  171 </span>    --
-<span class="lineno">  172 </span>    -- @choice p@ chooses the left argument with probablity @p@
-<span class="lineno">  173 </span>    -- and the right argument with probability @(1-p)@.
-<span class="lineno">  174 </span>    choice :: Probability o -&gt; o -&gt; o -&gt; o
-<span class="lineno">  175 </span>
-<span class="lineno">  176 </span>    -- | Random choice between multiple alternatives
-<span class="lineno">  177 </span>    --
-<span class="lineno">  178 </span>    -- @choices [(w_1, o_1), (w_2, o_2), …]@ chooses randomly between multiple
-<span class="lineno">  179 </span>    -- outcomes. The probability @p_i@ for choosing the outcome @o_i@ is
-<span class="lineno">  180 </span>    -- determined by the weights as @p_i = w_i / (w_1 + w_2 + …)@.
-<span class="lineno">  181 </span>    choices :: [(Probability o, o)] -&gt; o
-<span class="lineno">  182 </span>    <span class="decl"><span class="istickedoff">choices [] = never</span>
-<span class="lineno">  183 </span><span class="spaces">    </span><span class="istickedoff">choices wos =</span>
-<span class="lineno">  184 </span><span class="spaces">        </span><span class="istickedoff">foldr (uncurry choice) never</span>
-<span class="lineno">  185 </span><span class="spaces">        </span><span class="istickedoff">$ zipWith (\wtot (w, o) -&gt; (w / wtot, o)) ws wos</span>
-<span class="lineno">  186 </span><span class="spaces">      </span><span class="istickedoff">where</span>
-<span class="lineno">  187 </span><span class="spaces">        </span><span class="istickedoff">ws = scanr1 (+) (map fst wos)</span></span>
-<span class="lineno">  188 </span>
-<span class="lineno">  189 </span>    -- | Uniform probability distribution on a time interval.
-<span class="lineno">  190 </span>    uniform :: Duration o -&gt; Duration o -&gt; o
-<span class="lineno">  191 </span>
-<span class="lineno">  192 </span>    -- | Probability of /not/ finishing.
-<span class="lineno">  193 </span>    failure :: o -&gt; Probability o
-<span class="lineno">  194 </span>
-<span class="lineno">  195 </span>    -- | Probability of finishing within the given time @t@.
-<span class="lineno">  196 </span>    --
-<span class="lineno">  197 </span>    -- \&quot;Within\&quot; is inclusive,
-<span class="lineno">  198 </span>    -- i.e. this returns the probability that the finishing time is @&lt;= t@.
-<span class="lineno">  199 </span>    successWithin :: o -&gt; Duration o -&gt; Probability o
-<span class="lineno">  200 </span>
-<span class="lineno">  201 </span>    -- | Given a probability @p@, return the smallest time @t@
-<span class="lineno">  202 </span>    -- such that the probability of completing within that time
-<span class="lineno">  203 </span>    -- is at least @p@.
-<span class="lineno">  204 </span>    --
-<span class="lineno">  205 </span>    -- Return 'Abandoned' if the given probability
-<span class="lineno">  206 </span>    -- exceeds the probability of finishing.
-<span class="lineno">  207 </span>    quantile :: o -&gt; Probability o -&gt; Eventually (Duration o)
-<span class="lineno">  208 </span>
-<span class="lineno">  209 </span>    -- | The earliest finish time with non-zero probability.
-<span class="lineno">  210 </span>    --
-<span class="lineno">  211 </span>    -- Return 'Abandoned' if the outcome is 'never'.
-<span class="lineno">  212 </span>    earliest :: o -&gt; Eventually (Duration o)
-<span class="lineno">  213 </span>
-<span class="lineno">  214 </span>    -- | The last finish time which still has non-zero probability to occur.
-<span class="lineno">  215 </span>    --
-<span class="lineno">  216 </span>    -- Return 'Abandoned' if arbitrarily late times are possible.
-<span class="lineno">  217 </span>    deadline :: o -&gt; Eventually (Duration o)
-<span class="lineno">  218 </span>
-<span class="lineno">  219 </span>{-----------------------------------------------------------------------------
-<span class="lineno">  220 </span>    Properties
-<span class="lineno">  221 </span>------------------------------------------------------------------------------}
-<span class="lineno">  222 </span>{-$properties
-<span class="lineno">  223 </span>All instances of the above type classes are expected to satisfy
-<span class="lineno">  224 </span>the following properties.
-<span class="lineno">  225 </span>
-<span class="lineno">  226 </span>For instances that use approximate arithmetic
-<span class="lineno">  227 </span>such as floating point arithmetic or fixed precision arithmetic,
-<span class="lineno">  228 </span>equality may be up to numerical accuracy.
-<span class="lineno">  229 </span>-}
+<span class="lineno">  153 </span>-- Specifically, 'DeltaQ' is the probability distribution
+<span class="lineno">  154 </span>-- of finish times for an outcome.
+<span class="lineno">  155 </span>class   ( Ord (Probability o)
+<span class="lineno">  156 </span>        , Enum (Probability o)
+<span class="lineno">  157 </span>        , Num (Probability o)
+<span class="lineno">  158 </span>        , Fractional (Probability o)
+<span class="lineno">  159 </span>        , Outcome o
+<span class="lineno">  160 </span>        )
+<span class="lineno">  161 </span>    =&gt; DeltaQ o
+<span class="lineno">  162 </span>  where
+<span class="lineno">  163 </span>    -- | Numerical type representing probabilities in \( [0,1] \).
+<span class="lineno">  164 </span>    --
+<span class="lineno">  165 </span>    -- For example 'Double' or 'Rational'.
+<span class="lineno">  166 </span>    type Probability o
+<span class="lineno">  167 </span>
+<span class="lineno">  168 </span>    -- | Left-biased random choice.
+<span class="lineno">  169 </span>    --
+<span class="lineno">  170 </span>    -- @choice p@ chooses the left argument with probablity @p@
+<span class="lineno">  171 </span>    -- and the right argument with probability @(1-p)@.
+<span class="lineno">  172 </span>    choice :: Probability o -&gt; o -&gt; o -&gt; o
+<span class="lineno">  173 </span>
+<span class="lineno">  174 </span>    -- | Random choice between multiple alternatives
+<span class="lineno">  175 </span>    --
+<span class="lineno">  176 </span>    -- @choices [(w_1, o_1), (w_2, o_2), …]@ chooses randomly between multiple
+<span class="lineno">  177 </span>    -- outcomes. The probability @p_i@ for choosing the outcome @o_i@ is
+<span class="lineno">  178 </span>    -- determined by the weights as @p_i = w_i / (w_1 + w_2 + …)@.
+<span class="lineno">  179 </span>    choices :: [(Probability o, o)] -&gt; o
+<span class="lineno">  180 </span>    <span class="decl"><span class="istickedoff">choices [] = never</span>
+<span class="lineno">  181 </span><span class="spaces">    </span><span class="istickedoff">choices wos =</span>
+<span class="lineno">  182 </span><span class="spaces">        </span><span class="istickedoff">foldr (uncurry choice) never</span>
+<span class="lineno">  183 </span><span class="spaces">        </span><span class="istickedoff">$ zipWith (\wtot (w, o) -&gt; (w / wtot, o)) ws wos</span>
+<span class="lineno">  184 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  185 </span><span class="spaces">        </span><span class="istickedoff">ws = scanr1 (+) (map fst wos)</span></span>
+<span class="lineno">  186 </span>
+<span class="lineno">  187 </span>    -- | Uniform probability distribution on a time interval.
+<span class="lineno">  188 </span>    uniform :: Duration o -&gt; Duration o -&gt; o
+<span class="lineno">  189 </span>
+<span class="lineno">  190 </span>    -- | Probability of /not/ finishing.
+<span class="lineno">  191 </span>    failure :: o -&gt; Probability o
+<span class="lineno">  192 </span>
+<span class="lineno">  193 </span>    -- | Probability of finishing within the given time @t@.
+<span class="lineno">  194 </span>    --
+<span class="lineno">  195 </span>    -- \&quot;Within\&quot; is inclusive,
+<span class="lineno">  196 </span>    -- i.e. this returns the probability that the finishing time is @&lt;= t@.
+<span class="lineno">  197 </span>    successWithin :: o -&gt; Duration o -&gt; Probability o
+<span class="lineno">  198 </span>
+<span class="lineno">  199 </span>    -- | Given a probability @p@, return the smallest time @t@
+<span class="lineno">  200 </span>    -- such that the probability of completing within that time
+<span class="lineno">  201 </span>    -- is at least @p@.
+<span class="lineno">  202 </span>    --
+<span class="lineno">  203 </span>    -- Return 'Abandoned' if the given probability
+<span class="lineno">  204 </span>    -- exceeds the probability of finishing.
+<span class="lineno">  205 </span>    quantile :: o -&gt; Probability o -&gt; Eventually (Duration o)
+<span class="lineno">  206 </span>
+<span class="lineno">  207 </span>    -- | The earliest finish time with non-zero probability.
+<span class="lineno">  208 </span>    --
+<span class="lineno">  209 </span>    -- Return 'Abandoned' if the outcome is 'never'.
+<span class="lineno">  210 </span>    earliest :: o -&gt; Eventually (Duration o)
+<span class="lineno">  211 </span>
+<span class="lineno">  212 </span>    -- | The last finish time which still has non-zero probability to occur.
+<span class="lineno">  213 </span>    --
+<span class="lineno">  214 </span>    -- Return 'Abandoned' if arbitrarily late times are possible.
+<span class="lineno">  215 </span>    deadline :: o -&gt; Eventually (Duration o)
+<span class="lineno">  216 </span>
+<span class="lineno">  217 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  218 </span>    Properties
+<span class="lineno">  219 </span>------------------------------------------------------------------------------}
+<span class="lineno">  220 </span>{-$properties
+<span class="lineno">  221 </span>All instances of the above type classes are expected to satisfy
+<span class="lineno">  222 </span>the following properties.
+<span class="lineno">  223 </span>
+<span class="lineno">  224 </span>For instances that use approximate arithmetic
+<span class="lineno">  225 </span>such as floating point arithmetic or fixed precision arithmetic,
+<span class="lineno">  226 </span>equality may be up to numerical accuracy.
+<span class="lineno">  227 </span>-}
+<span class="lineno">  228 </span>
+<span class="lineno">  229 </span>{-$properties-outcome
 <span class="lineno">  230 </span>
-<span class="lineno">  231 </span>{-$properties-outcome
+<span class="lineno">  231 </span>'never'
 <span class="lineno">  232 </span>
-<span class="lineno">  233 </span>'never'
-<span class="lineno">  234 </span>
-<span class="lineno">  235 </span>&gt; never .&gt;&gt;. y = never
-<span class="lineno">  236 </span>&gt; never ./\. y = never
-<span class="lineno">  237 </span>&gt; never .\/. y = y
-<span class="lineno">  238 </span>&gt;
-<span class="lineno">  239 </span>&gt; x .&gt;&gt;. never = never
-<span class="lineno">  240 </span>&gt; x ./\. never = never
-<span class="lineno">  241 </span>&gt; x .\/. never = x
+<span class="lineno">  233 </span>&gt; never .&gt;&gt;. y = never
+<span class="lineno">  234 </span>&gt; never ./\. y = never
+<span class="lineno">  235 </span>&gt; never .\/. y = y
+<span class="lineno">  236 </span>&gt;
+<span class="lineno">  237 </span>&gt; x .&gt;&gt;. never = never
+<span class="lineno">  238 </span>&gt; x ./\. never = never
+<span class="lineno">  239 </span>&gt; x .\/. never = x
+<span class="lineno">  240 </span>
+<span class="lineno">  241 </span>'wait'
 <span class="lineno">  242 </span>
-<span class="lineno">  243 </span>'wait'
-<span class="lineno">  244 </span>
-<span class="lineno">  245 </span>&gt; wait t .&gt;&gt;. wait s  =  wait (t+s)
-<span class="lineno">  246 </span>&gt; wait t ./\. wait s  =  wait (max t s)
-<span class="lineno">  247 </span>&gt; wait t .\/. wait s  =  wait (min t s)
+<span class="lineno">  243 </span>&gt; wait t .&gt;&gt;. wait s  =  wait (t+s)
+<span class="lineno">  244 </span>&gt; wait t ./\. wait s  =  wait (max t s)
+<span class="lineno">  245 </span>&gt; wait t .\/. wait s  =  wait (min t s)
+<span class="lineno">  246 </span>
+<span class="lineno">  247 </span>'(.&gt;&gt;.)'
 <span class="lineno">  248 </span>
-<span class="lineno">  249 </span>'(.&gt;&gt;.)'
+<span class="lineno">  249 </span>&gt; (x .&gt;&gt;. y) .&gt;&gt;. z  =  x .&gt;&gt;. (y .&gt;&gt;. z)
 <span class="lineno">  250 </span>
-<span class="lineno">  251 </span>&gt; (x .&gt;&gt;. y) .&gt;&gt;. z  =  x .&gt;&gt;. (y .&gt;&gt;. z)
+<span class="lineno">  251 </span>'(./\.)'
 <span class="lineno">  252 </span>
-<span class="lineno">  253 </span>'(./\.)'
-<span class="lineno">  254 </span>
-<span class="lineno">  255 </span>&gt; (x ./\. y) ./\. z  =  x ./\. (y ./\. z)
-<span class="lineno">  256 </span>&gt;
-<span class="lineno">  257 </span>&gt; x ./\. y  =  y ./\. x
+<span class="lineno">  253 </span>&gt; (x ./\. y) ./\. z  =  x ./\. (y ./\. z)
+<span class="lineno">  254 </span>&gt;
+<span class="lineno">  255 </span>&gt; x ./\. y  =  y ./\. x
+<span class="lineno">  256 </span>
+<span class="lineno">  257 </span>'(.\/.)'
 <span class="lineno">  258 </span>
-<span class="lineno">  259 </span>'(.\/.)'
-<span class="lineno">  260 </span>
-<span class="lineno">  261 </span>&gt; (x .\/. y) .\/. z  =  x .\/. (y .\/. z)
-<span class="lineno">  262 </span>&gt;
-<span class="lineno">  263 </span>&gt; x .\/. y  =  y .\/. x
+<span class="lineno">  259 </span>&gt; (x .\/. y) .\/. z  =  x .\/. (y .\/. z)
+<span class="lineno">  260 </span>&gt;
+<span class="lineno">  261 </span>&gt; x .\/. y  =  y .\/. x
+<span class="lineno">  262 </span>
+<span class="lineno">  263 </span>-}
 <span class="lineno">  264 </span>
-<span class="lineno">  265 </span>-}
+<span class="lineno">  265 </span>{-$properties-deltaq
 <span class="lineno">  266 </span>
-<span class="lineno">  267 </span>{-$properties-deltaq
+<span class="lineno">  267 </span>'choice'
 <span class="lineno">  268 </span>
-<span class="lineno">  269 </span>'choice'
-<span class="lineno">  270 </span>
-<span class="lineno">  271 </span>&gt; choice 1 x y = x
-<span class="lineno">  272 </span>&gt; choice 0 x y = y
-<span class="lineno">  273 </span>&gt;
-<span class="lineno">  274 </span>&gt; choice p x y .&gt;&gt;. z  =  choice p (x .&gt;&gt;. z) (y .&gt;&gt;. z)
-<span class="lineno">  275 </span>&gt; choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
-<span class="lineno">  276 </span>&gt; choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)
+<span class="lineno">  269 </span>&gt; choice 1 x y = x
+<span class="lineno">  270 </span>&gt; choice 0 x y = y
+<span class="lineno">  271 </span>&gt;
+<span class="lineno">  272 </span>&gt; choice p x y .&gt;&gt;. z  =  choice p (x .&gt;&gt;. z) (y .&gt;&gt;. z)
+<span class="lineno">  273 </span>&gt; choice p x y ./\. z  =  choice p (x ./\. z) (y ./\. z)
+<span class="lineno">  274 </span>&gt; choice p x y .\/. z  =  choice p (x .\/. z) (y .\/. z)
+<span class="lineno">  275 </span>
+<span class="lineno">  276 </span>'choices'
 <span class="lineno">  277 </span>
-<span class="lineno">  278 </span>'choices'
-<span class="lineno">  279 </span>
-<span class="lineno">  280 </span>&gt; choices [] = never
-<span class="lineno">  281 </span>&gt; choices ((w,o) : wos) = choice p o (choices wos)
-<span class="lineno">  282 </span>&gt;   where  p = w / (w + sum (map fst wos))
+<span class="lineno">  278 </span>&gt; choices [] = never
+<span class="lineno">  279 </span>&gt; choices ((w,o) : wos) = choice p o (choices wos)
+<span class="lineno">  280 </span>&gt;   where  p = w / (w + sum (map fst wos))
+<span class="lineno">  281 </span>
+<span class="lineno">  282 </span>'uniform'
 <span class="lineno">  283 </span>
-<span class="lineno">  284 </span>'uniform'
-<span class="lineno">  285 </span>
-<span class="lineno">  286 </span>&gt; wait t .&gt;&gt;. uniform r s  =  uniform (t+r) (t+s)
-<span class="lineno">  287 </span>&gt; uniform r s .&gt;&gt;. wait t  =  uniform (r+t) (s+t)
+<span class="lineno">  284 </span>&gt; wait t .&gt;&gt;. uniform r s  =  uniform (t+r) (t+s)
+<span class="lineno">  285 </span>&gt; uniform r s .&gt;&gt;. wait t  =  uniform (r+t) (s+t)
+<span class="lineno">  286 </span>
+<span class="lineno">  287 </span>'failure'
 <span class="lineno">  288 </span>
-<span class="lineno">  289 </span>'failure'
-<span class="lineno">  290 </span>
-<span class="lineno">  291 </span>&gt; failure never      = 1
-<span class="lineno">  292 </span>&gt; failure (wait t)   = 0
-<span class="lineno">  293 </span>&gt; failure (x .&gt;&gt;. y) = 1 - (1 - failure x) * (1 - failure y)
-<span class="lineno">  294 </span>&gt; failure (x ./\. y) = 1 - (1 - failure x) * (1 - failure y)
-<span class="lineno">  295 </span>&gt; failure (x .\/. y) = failure x * failure y
-<span class="lineno">  296 </span>&gt;
-<span class="lineno">  297 </span>&gt; failure (choice p x y) = p * failure x + (1-p) * failure y
-<span class="lineno">  298 </span>&gt; failure (uniform r s)  = 0
+<span class="lineno">  289 </span>&gt; failure never      = 1
+<span class="lineno">  290 </span>&gt; failure (wait t)   = 0
+<span class="lineno">  291 </span>&gt; failure (x .&gt;&gt;. y) = 1 - (1 - failure x) * (1 - failure y)
+<span class="lineno">  292 </span>&gt; failure (x ./\. y) = 1 - (1 - failure x) * (1 - failure y)
+<span class="lineno">  293 </span>&gt; failure (x .\/. y) = failure x * failure y
+<span class="lineno">  294 </span>&gt;
+<span class="lineno">  295 </span>&gt; failure (choice p x y) = p * failure x + (1-p) * failure y
+<span class="lineno">  296 </span>&gt; failure (uniform r s)  = 0
+<span class="lineno">  297 </span>
+<span class="lineno">  298 </span>'successWithin'
 <span class="lineno">  299 </span>
-<span class="lineno">  300 </span>'successWithin'
-<span class="lineno">  301 </span>
-<span class="lineno">  302 </span>&gt; successWithin never    t = 0
-<span class="lineno">  303 </span>&gt; successWithin (wait s) t = if t &lt; s then 0 else 1
-<span class="lineno">  304 </span>&gt;
-<span class="lineno">  305 </span>&gt; successWithin (x ./\. y) t =
-<span class="lineno">  306 </span>&gt;   successWithin t x * successWithin t y
-<span class="lineno">  307 </span>&gt; successWithin (x .\/. y) t =
-<span class="lineno">  308 </span>&gt;   1 - (1 - successWithin t x) * (1 - successWithin t y)
-<span class="lineno">  309 </span>&gt;
-<span class="lineno">  310 </span>&gt; successWithin (choice p x y) t =
-<span class="lineno">  311 </span>&gt;   p * successWithin t x + (1-p) * successWithin t y
-<span class="lineno">  312 </span>&gt; successWithin (uniform r s) t
-<span class="lineno">  313 </span>&gt;   | t &lt; r           = 0
-<span class="lineno">  314 </span>&gt;   | r &lt;= t &amp;&amp; t &lt; s = (t-r) / (s-r)
-<span class="lineno">  315 </span>&gt;   | s &lt;= t          = 1
+<span class="lineno">  300 </span>&gt; successWithin never    t = 0
+<span class="lineno">  301 </span>&gt; successWithin (wait s) t = if t &lt; s then 0 else 1
+<span class="lineno">  302 </span>&gt;
+<span class="lineno">  303 </span>&gt; successWithin (x ./\. y) t =
+<span class="lineno">  304 </span>&gt;   successWithin t x * successWithin t y
+<span class="lineno">  305 </span>&gt; successWithin (x .\/. y) t =
+<span class="lineno">  306 </span>&gt;   1 - (1 - successWithin t x) * (1 - successWithin t y)
+<span class="lineno">  307 </span>&gt;
+<span class="lineno">  308 </span>&gt; successWithin (choice p x y) t =
+<span class="lineno">  309 </span>&gt;   p * successWithin t x + (1-p) * successWithin t y
+<span class="lineno">  310 </span>&gt; successWithin (uniform r s) t
+<span class="lineno">  311 </span>&gt;   | t &lt; r           = 0
+<span class="lineno">  312 </span>&gt;   | r &lt;= t &amp;&amp; t &lt; s = (t-r) / (s-r)
+<span class="lineno">  313 </span>&gt;   | s &lt;= t          = 1
+<span class="lineno">  314 </span>
+<span class="lineno">  315 </span>'quantile'
 <span class="lineno">  316 </span>
-<span class="lineno">  317 </span>'quantile'
-<span class="lineno">  318 </span>
-<span class="lineno">  319 </span>&gt; p &lt;= q  implies  quantile o p &lt;= quantile o q
-<span class="lineno">  320 </span>&gt;
-<span class="lineno">  321 </span>&gt; quantile x        0 = Occurs 0
-<span class="lineno">  322 </span>&gt; quantile never    p = Abandoned       if p &gt; 0
-<span class="lineno">  323 </span>&gt; quantile (wait t) p = Occurs t        if p &gt; 0
-<span class="lineno">  324 </span>&gt;
-<span class="lineno">  325 </span>&gt; quantile (uniform r s) p  =  r + p*(s-t)  if p &gt; 0, r &lt;= s
+<span class="lineno">  317 </span>&gt; p &lt;= q  implies  quantile o p &lt;= quantile o q
+<span class="lineno">  318 </span>&gt;
+<span class="lineno">  319 </span>&gt; quantile x        0 = Occurs 0
+<span class="lineno">  320 </span>&gt; quantile never    p = Abandoned       if p &gt; 0
+<span class="lineno">  321 </span>&gt; quantile (wait t) p = Occurs t        if p &gt; 0
+<span class="lineno">  322 </span>&gt;
+<span class="lineno">  323 </span>&gt; quantile (uniform r s) p  =  r + p*(s-t)  if p &gt; 0, r &lt;= s
+<span class="lineno">  324 </span>
+<span class="lineno">  325 </span>'earliest'
 <span class="lineno">  326 </span>
-<span class="lineno">  327 </span>'earliest'
-<span class="lineno">  328 </span>
-<span class="lineno">  329 </span>&gt; earliest never      = Abandoned
-<span class="lineno">  330 </span>&gt; earliest (wait t)   = Occurs t
-<span class="lineno">  331 </span>&gt; earliest (x .&gt;&gt;. y) = (+) &lt;$&gt; earliest x &lt;*&gt; earliest y
-<span class="lineno">  332 </span>&gt; earliest (x ./\. y) = max (earliest x) (earliest y)
-<span class="lineno">  333 </span>&gt; earliest (x .\/. y) = min (earliest x) (earliest y)
-<span class="lineno">  334 </span>&gt;
-<span class="lineno">  335 </span>&gt; earliest (choice p x y) = min (earliest x) (earliest y)  if p ≠ 0, p ≠ 1
-<span class="lineno">  336 </span>&gt; earliest (uniform r s)  = Occurs r   if r &lt;= s
+<span class="lineno">  327 </span>&gt; earliest never      = Abandoned
+<span class="lineno">  328 </span>&gt; earliest (wait t)   = Occurs t
+<span class="lineno">  329 </span>&gt; earliest (x .&gt;&gt;. y) = (+) &lt;$&gt; earliest x &lt;*&gt; earliest y
+<span class="lineno">  330 </span>&gt; earliest (x ./\. y) = max (earliest x) (earliest y)
+<span class="lineno">  331 </span>&gt; earliest (x .\/. y) = min (earliest x) (earliest y)
+<span class="lineno">  332 </span>&gt;
+<span class="lineno">  333 </span>&gt; earliest (choice p x y) = min (earliest x) (earliest y)  if p ≠ 0, p ≠ 1
+<span class="lineno">  334 </span>&gt; earliest (uniform r s)  = Occurs r   if r &lt;= s
+<span class="lineno">  335 </span>
+<span class="lineno">  336 </span>'deadline'
 <span class="lineno">  337 </span>
-<span class="lineno">  338 </span>'deadline'
-<span class="lineno">  339 </span>
-<span class="lineno">  340 </span>&gt; deadline never      =  Abandoned
-<span class="lineno">  341 </span>&gt; deadline (wait t)   =  Occurs t
-<span class="lineno">  342 </span>&gt; deadline (x .&gt;&gt;. y) =  (+) &lt;$&gt; deadline x &lt;*&gt; deadline y
-<span class="lineno">  343 </span>&gt; deadline (x ./\. y) =  max (deadline x) (deadline y)
-<span class="lineno">  344 </span>&gt;
-<span class="lineno">  345 </span>&gt; deadline (x .\/. y) =  min (deadline x) (deadline y)
-<span class="lineno">  346 </span>&gt;   if failure x = 0, failure y = 0
-<span class="lineno">  347 </span>&gt;
-<span class="lineno">  348 </span>&gt; deadline (choice p x y) = max (deadline x) (deadline y)
-<span class="lineno">  349 </span>&gt;   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
-<span class="lineno">  350 </span>&gt;
-<span class="lineno">  351 </span>&gt;
-<span class="lineno">  352 </span>&gt; deadline (uniform r s)  = Occurs s   if r &lt;= s
-<span class="lineno">  353 </span>
-<span class="lineno">  354 </span>-}
+<span class="lineno">  338 </span>&gt; deadline never      =  Abandoned
+<span class="lineno">  339 </span>&gt; deadline (wait t)   =  Occurs t
+<span class="lineno">  340 </span>&gt; deadline (x .&gt;&gt;. y) =  (+) &lt;$&gt; deadline x &lt;*&gt; deadline y
+<span class="lineno">  341 </span>&gt; deadline (x ./\. y) =  max (deadline x) (deadline y)
+<span class="lineno">  342 </span>&gt;
+<span class="lineno">  343 </span>&gt; deadline (x .\/. y) =  min (deadline x) (deadline y)
+<span class="lineno">  344 </span>&gt;   if failure x = 0, failure y = 0
+<span class="lineno">  345 </span>&gt;
+<span class="lineno">  346 </span>&gt; deadline (choice p x y) = max (deadline x) (deadline y)
+<span class="lineno">  347 </span>&gt;   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
+<span class="lineno">  348 </span>&gt;
+<span class="lineno">  349 </span>&gt;
+<span class="lineno">  350 </span>&gt; deadline (uniform r s)  = Occurs s   if r &lt;= s
+<span class="lineno">  351 </span>
+<span class="lineno">  352 </span>-}
 
 </pre>
 </body>

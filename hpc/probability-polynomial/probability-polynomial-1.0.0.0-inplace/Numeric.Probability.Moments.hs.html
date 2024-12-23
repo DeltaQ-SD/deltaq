@@ -20,95 +20,94 @@ span.spaces    { background: white }
 <span class="lineno">    1 </span>{-# LANGUAGE NamedFieldPuns #-}
 <span class="lineno">    2 </span>
 <span class="lineno">    3 </span>{-|
-<span class="lineno">    4 </span>Copyright   : Predictable Network Solutions Ltd., 2024
+<span class="lineno">    4 </span>Copyright   : Predictable Network Solutions Ltd., 2020-2024
 <span class="lineno">    5 </span>License     : BSD-3-Clause
-<span class="lineno">    6 </span>Maintainer  : peter.thompson@pnsol.com
-<span class="lineno">    7 </span>Description : Moments of probability distributions.
-<span class="lineno">    8 </span>-}
-<span class="lineno">    9 </span>module Numeric.Probability.Moments
-<span class="lineno">   10 </span>    ( Moments (..)
-<span class="lineno">   11 </span>    , fromExpectedPowers
-<span class="lineno">   12 </span>    ) where
-<span class="lineno">   13 </span>
-<span class="lineno">   14 </span>{-----------------------------------------------------------------------------
-<span class="lineno">   15 </span>    Test
-<span class="lineno">   16 </span>------------------------------------------------------------------------------}
-<span class="lineno">   17 </span>
-<span class="lineno">   18 </span>-- | The first four commonly used moments of a probability distribution.
-<span class="lineno">   19 </span>data Moments a = Moments
-<span class="lineno">   20 </span>    { <span class="istickedoff"><span class="decl"><span class="istickedoff">mean</span></span></span> :: a
-<span class="lineno">   21 </span>    -- ^ [Mean or Expected Value](https://en.wikipedia.org/wiki/Expected_value)
-<span class="lineno">   22 </span>    -- \( \mu \).
-<span class="lineno">   23 </span>    -- Defined as \( \mu = E[X] \).
-<span class="lineno">   24 </span>    , <span class="istickedoff"><span class="decl"><span class="istickedoff">variance</span></span></span> :: a
-<span class="lineno">   25 </span>    -- ^ [Variance](https://en.wikipedia.org/wiki/Variance) \( \sigma^2 \).
-<span class="lineno">   26 </span>    -- Defined as \( \sigma^2 = E[(X - \mu)^2] \).
-<span class="lineno">   27 </span>    -- Equal to \( \sigma^2 = E[X^2] - \mu^2 \).
-<span class="lineno">   28 </span>    , <span class="istickedoff"><span class="decl"><span class="istickedoff">skewness</span></span></span> :: a
-<span class="lineno">   29 </span>    -- ^ [Skewness](https://en.wikipedia.org/wiki/Skewness) \( \gamma_1 \).
-<span class="lineno">   30 </span>    -- Defined as
-<span class="lineno">   31 </span>    -- \( \gamma_1 = E\left[\left(\frac{(X - \mu)}{\sigma}\right)^3 \right] \).
-<span class="lineno">   32 </span>    , <span class="istickedoff"><span class="decl"><span class="istickedoff">kurtosis</span></span></span> :: a
-<span class="lineno">   33 </span>    -- ^ [Kurtosis](https://en.wikipedia.org/wiki/Kurtosis) \( \kappa \).
-<span class="lineno">   34 </span>    -- Defined as
-<span class="lineno">   35 </span>    --  \( \kappa = E\left[\left(\frac{(X - \mu)}{\sigma}\right)^4 \right] \).
-<span class="lineno">   36 </span>    --
-<span class="lineno">   37 </span>    -- The kurtosis is bounded below: \( \kappa \geq \gamma_1^2 + 1 \).
-<span class="lineno">   38 </span>    }
-<span class="lineno">   39 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
-<span class="lineno">   40 </span>
-<span class="lineno">   41 </span>-- | Compute the 'Moments' of a probability distribution given
-<span class="lineno">   42 </span>-- the expectation values of the first four powers \( m_k = E[X^k] \).
-<span class="lineno">   43 </span>--
-<span class="lineno">   44 </span>-- &gt; fromExpectedPowers (m1,m2,m3,m4)
-<span class="lineno">   45 </span>fromExpectedPowers
-<span class="lineno">   46 </span>    :: (Ord a, Num a, Fractional a)
-<span class="lineno">   47 </span>    =&gt; (a, a, a, a) -&gt; Moments a
-<span class="lineno">   48 </span><span class="decl"><span class="istickedoff">fromExpectedPowers (mean, m2, m3, m4)</span>
-<span class="lineno">   49 </span><span class="spaces">    </span><span class="istickedoff">| variance == 0 =</span>
-<span class="lineno">   50 </span><span class="spaces">        </span><span class="istickedoff">Moments{mean, variance, skewness = 0, kurtosis = 1}</span>
-<span class="lineno">   51 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> =</span>
-<span class="lineno">   52 </span><span class="spaces">        </span><span class="istickedoff">Moments{<span class="nottickedoff">mean</span>, <span class="nottickedoff">variance</span>, skewness, kurtosis}</span>
-<span class="lineno">   53 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">   54 </span><span class="spaces">    </span><span class="istickedoff">meanSq = mean * mean</span>
-<span class="lineno">   55 </span><span class="spaces"></span><span class="istickedoff"></span>
-<span class="lineno">   56 </span><span class="spaces">    </span><span class="istickedoff">variance = m2 - meanSq</span>
-<span class="lineno">   57 </span><span class="spaces">    </span><span class="istickedoff">sigma = squareRoot variance</span>
-<span class="lineno">   58 </span><span class="spaces"></span><span class="istickedoff"></span>
-<span class="lineno">   59 </span><span class="spaces">    </span><span class="istickedoff">skewness =</span>
-<span class="lineno">   60 </span><span class="spaces">        </span><span class="istickedoff">(m3 - 3 * mean * variance - mean * meanSq</span>
-<span class="lineno">   61 </span><span class="spaces">        </span><span class="istickedoff">) / (sigma * variance)</span>
-<span class="lineno">   62 </span><span class="spaces"></span><span class="istickedoff"></span>
-<span class="lineno">   63 </span><span class="spaces">    </span><span class="istickedoff">kurtosis =</span>
-<span class="lineno">   64 </span><span class="spaces">        </span><span class="istickedoff">(m4</span>
-<span class="lineno">   65 </span><span class="spaces">            </span><span class="istickedoff">- 4 * mean * skewness * sigma * variance</span>
-<span class="lineno">   66 </span><span class="spaces">            </span><span class="istickedoff">- 6 * meanSq * variance</span>
-<span class="lineno">   67 </span><span class="spaces">            </span><span class="istickedoff">- meanSq * meanSq</span>
-<span class="lineno">   68 </span><span class="spaces">        </span><span class="istickedoff">) / (variance * variance)</span></span>
-<span class="lineno">   69 </span>
-<span class="lineno">   70 </span>-- | Helper function to approximate the square root.
-<span class="lineno">   71 </span>-- Precision: 1e-4 of the given value.
-<span class="lineno">   72 </span>--
-<span class="lineno">   73 </span>-- Uses Heron's iterative method.
-<span class="lineno">   74 </span>squareRoot :: (Ord a, Num a, Fractional a) =&gt; a -&gt; a
-<span class="lineno">   75 </span><span class="decl"><span class="istickedoff">squareRoot x</span>
-<span class="lineno">   76 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">x &lt; 0</span> = <span class="nottickedoff">error &quot;Negative square root input&quot;</span></span>
-<span class="lineno">   77 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">x == 0</span> = <span class="nottickedoff">0</span></span>
-<span class="lineno">   78 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = goRoot x0</span>
-<span class="lineno">   79 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">   80 </span><span class="spaces">    </span><span class="istickedoff">precision = x / 10000</span>
-<span class="lineno">   81 </span><span class="spaces">    </span><span class="istickedoff">x0 = x/2 -- initial guess</span>
-<span class="lineno">   82 </span><span class="spaces">    </span><span class="istickedoff">goRoot xi</span>
-<span class="lineno">   83 </span><span class="spaces">        </span><span class="istickedoff">| abs (x - xi * xi) &lt;= precision = xi</span>
-<span class="lineno">   84 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = goRoot ((xi + x / xi)/2)</span></span>
-<span class="lineno">   85 </span>
-<span class="lineno">   86 </span>{-sqRoot :: a -&gt; a
-<span class="lineno">   87 </span>sqRoot x = 
-<span class="lineno">   88 </span>    let
-<span class="lineno">   89 </span>        y :: Double
-<span class="lineno">   90 </span>        y = toRational x
-<span class="lineno">   91 </span>    in fromRational . toRational . sqrt y
-<span class="lineno">   92 </span>-}
+<span class="lineno">    6 </span>Description : Moments of probability distributions.
+<span class="lineno">    7 </span>-}
+<span class="lineno">    8 </span>module Numeric.Probability.Moments
+<span class="lineno">    9 </span>    ( Moments (..)
+<span class="lineno">   10 </span>    , fromExpectedPowers
+<span class="lineno">   11 </span>    ) where
+<span class="lineno">   12 </span>
+<span class="lineno">   13 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   14 </span>    Test
+<span class="lineno">   15 </span>------------------------------------------------------------------------------}
+<span class="lineno">   16 </span>
+<span class="lineno">   17 </span>-- | The first four commonly used moments of a probability distribution.
+<span class="lineno">   18 </span>data Moments a = Moments
+<span class="lineno">   19 </span>    { <span class="istickedoff"><span class="decl"><span class="istickedoff">mean</span></span></span> :: a
+<span class="lineno">   20 </span>    -- ^ [Mean or Expected Value](https://en.wikipedia.org/wiki/Expected_value)
+<span class="lineno">   21 </span>    -- \( \mu \).
+<span class="lineno">   22 </span>    -- Defined as \( \mu = E[X] \).
+<span class="lineno">   23 </span>    , <span class="istickedoff"><span class="decl"><span class="istickedoff">variance</span></span></span> :: a
+<span class="lineno">   24 </span>    -- ^ [Variance](https://en.wikipedia.org/wiki/Variance) \( \sigma^2 \).
+<span class="lineno">   25 </span>    -- Defined as \( \sigma^2 = E[(X - \mu)^2] \).
+<span class="lineno">   26 </span>    -- Equal to \( \sigma^2 = E[X^2] - \mu^2 \).
+<span class="lineno">   27 </span>    , <span class="istickedoff"><span class="decl"><span class="istickedoff">skewness</span></span></span> :: a
+<span class="lineno">   28 </span>    -- ^ [Skewness](https://en.wikipedia.org/wiki/Skewness) \( \gamma_1 \).
+<span class="lineno">   29 </span>    -- Defined as
+<span class="lineno">   30 </span>    -- \( \gamma_1 = E\left[\left(\frac{(X - \mu)}{\sigma}\right)^3 \right] \).
+<span class="lineno">   31 </span>    , <span class="istickedoff"><span class="decl"><span class="istickedoff">kurtosis</span></span></span> :: a
+<span class="lineno">   32 </span>    -- ^ [Kurtosis](https://en.wikipedia.org/wiki/Kurtosis) \( \kappa \).
+<span class="lineno">   33 </span>    -- Defined as
+<span class="lineno">   34 </span>    --  \( \kappa = E\left[\left(\frac{(X - \mu)}{\sigma}\right)^4 \right] \).
+<span class="lineno">   35 </span>    --
+<span class="lineno">   36 </span>    -- The kurtosis is bounded below: \( \kappa \geq \gamma_1^2 + 1 \).
+<span class="lineno">   37 </span>    }
+<span class="lineno">   38 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">   39 </span>
+<span class="lineno">   40 </span>-- | Compute the 'Moments' of a probability distribution given
+<span class="lineno">   41 </span>-- the expectation values of the first four powers \( m_k = E[X^k] \).
+<span class="lineno">   42 </span>--
+<span class="lineno">   43 </span>-- &gt; fromExpectedPowers (m1,m2,m3,m4)
+<span class="lineno">   44 </span>fromExpectedPowers
+<span class="lineno">   45 </span>    :: (Ord a, Num a, Fractional a)
+<span class="lineno">   46 </span>    =&gt; (a, a, a, a) -&gt; Moments a
+<span class="lineno">   47 </span><span class="decl"><span class="istickedoff">fromExpectedPowers (mean, m2, m3, m4)</span>
+<span class="lineno">   48 </span><span class="spaces">    </span><span class="istickedoff">| variance == 0 =</span>
+<span class="lineno">   49 </span><span class="spaces">        </span><span class="istickedoff">Moments{mean, variance, skewness = 0, kurtosis = 1}</span>
+<span class="lineno">   50 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> =</span>
+<span class="lineno">   51 </span><span class="spaces">        </span><span class="istickedoff">Moments{<span class="nottickedoff">mean</span>, <span class="nottickedoff">variance</span>, skewness, kurtosis}</span>
+<span class="lineno">   52 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">   53 </span><span class="spaces">    </span><span class="istickedoff">meanSq = mean * mean</span>
+<span class="lineno">   54 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">   55 </span><span class="spaces">    </span><span class="istickedoff">variance = m2 - meanSq</span>
+<span class="lineno">   56 </span><span class="spaces">    </span><span class="istickedoff">sigma = squareRoot variance</span>
+<span class="lineno">   57 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">   58 </span><span class="spaces">    </span><span class="istickedoff">skewness =</span>
+<span class="lineno">   59 </span><span class="spaces">        </span><span class="istickedoff">(m3 - 3 * mean * variance - mean * meanSq</span>
+<span class="lineno">   60 </span><span class="spaces">        </span><span class="istickedoff">) / (sigma * variance)</span>
+<span class="lineno">   61 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">   62 </span><span class="spaces">    </span><span class="istickedoff">kurtosis =</span>
+<span class="lineno">   63 </span><span class="spaces">        </span><span class="istickedoff">(m4</span>
+<span class="lineno">   64 </span><span class="spaces">            </span><span class="istickedoff">- 4 * mean * skewness * sigma * variance</span>
+<span class="lineno">   65 </span><span class="spaces">            </span><span class="istickedoff">- 6 * meanSq * variance</span>
+<span class="lineno">   66 </span><span class="spaces">            </span><span class="istickedoff">- meanSq * meanSq</span>
+<span class="lineno">   67 </span><span class="spaces">        </span><span class="istickedoff">) / (variance * variance)</span></span>
+<span class="lineno">   68 </span>
+<span class="lineno">   69 </span>-- | Helper function to approximate the square root.
+<span class="lineno">   70 </span>-- Precision: 1e-4 of the given value.
+<span class="lineno">   71 </span>--
+<span class="lineno">   72 </span>-- Uses Heron's iterative method.
+<span class="lineno">   73 </span>squareRoot :: (Ord a, Num a, Fractional a) =&gt; a -&gt; a
+<span class="lineno">   74 </span><span class="decl"><span class="istickedoff">squareRoot x</span>
+<span class="lineno">   75 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">x &lt; 0</span> = <span class="nottickedoff">error &quot;Negative square root input&quot;</span></span>
+<span class="lineno">   76 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">x == 0</span> = <span class="nottickedoff">0</span></span>
+<span class="lineno">   77 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = goRoot x0</span>
+<span class="lineno">   78 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">   79 </span><span class="spaces">    </span><span class="istickedoff">precision = x / 10000</span>
+<span class="lineno">   80 </span><span class="spaces">    </span><span class="istickedoff">x0 = x/2 -- initial guess</span>
+<span class="lineno">   81 </span><span class="spaces">    </span><span class="istickedoff">goRoot xi</span>
+<span class="lineno">   82 </span><span class="spaces">        </span><span class="istickedoff">| abs (x - xi * xi) &lt;= precision = xi</span>
+<span class="lineno">   83 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = goRoot ((xi + x / xi)/2)</span></span>
+<span class="lineno">   84 </span>
+<span class="lineno">   85 </span>{-sqRoot :: a -&gt; a
+<span class="lineno">   86 </span>sqRoot x = 
+<span class="lineno">   87 </span>    let
+<span class="lineno">   88 </span>        y :: Double
+<span class="lineno">   89 </span>        y = toRational x
+<span class="lineno">   90 </span>    in fromRational . toRational . sqrt y
+<span class="lineno">   91 </span>-}
 
 </pre>
 </body>
