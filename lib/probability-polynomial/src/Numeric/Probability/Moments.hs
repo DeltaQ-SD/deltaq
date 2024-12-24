@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
 {-|
@@ -35,7 +36,7 @@ data Moments a = Moments
     --
     -- The kurtosis is bounded below: \( \kappa \geq \gamma_1^2 + 1 \).
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Functor)
 
 -- | Compute the 'Moments' of a probability distribution given
 -- the expectation values of the first four powers \( m_k = E[X^k] \).
