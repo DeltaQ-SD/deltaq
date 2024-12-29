@@ -604,37 +604,40 @@ span.spaces    { background: white }
 <span class="lineno">  585 </span><span class="spaces">    </span><span class="istickedoff">-- if the polynomial has degree 1, can calculate the root exactly</span>
 <span class="lineno">  586 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">degp == 1</span> = <span class="nottickedoff">Just (-(head ps / last ps))</span> -- p0 + p1x = 0 =&gt; x = -p0/p1</span>
 <span class="lineno">  587 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">precision &lt;= 0</span> = <span class="nottickedoff">error &quot;Invalid precision value&quot;</span></span>
-<span class="lineno">  588 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Just (halveInterval precision l u pl <span class="nottickedoff">pu</span>)</span>
+<span class="lineno">  588 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Just (halveInterval precision l u pl pu)</span>
 <span class="lineno">  589 </span><span class="spaces">  </span><span class="istickedoff">where</span>
 <span class="lineno">  590 </span><span class="spaces">    </span><span class="istickedoff">Poly ps = <span class="nottickedoff">p</span></span>
 <span class="lineno">  591 </span><span class="spaces">    </span><span class="istickedoff">degp = degree p</span>
-<span class="lineno">  592 </span><span class="spaces">    </span><span class="istickedoff"><span class="nottickedoff">pu = eval p u</span></span>
+<span class="lineno">  592 </span><span class="spaces">    </span><span class="istickedoff">pu = eval p u</span>
 <span class="lineno">  593 </span><span class="spaces">    </span><span class="istickedoff">pl = eval p l</span>
 <span class="lineno">  594 </span><span class="spaces">    </span><span class="istickedoff">halveInterval eps x y px py</span>
-<span class="lineno">  595 </span><span class="spaces">        </span><span class="istickedoff">-- when the interval is small enough, stop:</span>
-<span class="lineno">  596 </span><span class="spaces">        </span><span class="istickedoff">-- the root is in this interval, so take the mid point</span>
-<span class="lineno">  597 </span><span class="spaces">        </span><span class="istickedoff">| width &lt;= eps = mid</span>
-<span class="lineno">  598 </span><span class="spaces">        </span><span class="istickedoff">-- choose the lower half,</span>
-<span class="lineno">  599 </span><span class="spaces">        </span><span class="istickedoff">-- as the polynomial has different signs at the ends</span>
-<span class="lineno">  600 </span><span class="spaces">        </span><span class="istickedoff">| px * pmid &lt; 0 = halveInterval eps x mid px <span class="nottickedoff">pmid</span></span>
-<span class="lineno">  601 </span><span class="spaces">        </span><span class="istickedoff">-- choose the upper half</span>
-<span class="lineno">  602 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = halveInterval eps mid y pmid <span class="nottickedoff">py</span></span>
-<span class="lineno">  603 </span><span class="spaces">      </span><span class="istickedoff">where</span>
-<span class="lineno">  604 </span><span class="spaces">        </span><span class="istickedoff">width = y - x</span>
-<span class="lineno">  605 </span><span class="spaces">        </span><span class="istickedoff">mid = x + width / 2</span>
-<span class="lineno">  606 </span><span class="spaces">        </span><span class="istickedoff">pmid = eval p mid</span></span>
-<span class="lineno">  607 </span>
-<span class="lineno">  608 </span>{-| Otherwise we have a polynomial:
-<span class="lineno">  609 </span>subtract the value we are looking for so that we seek a zero crossing
-<span class="lineno">  610 </span>-}
-<span class="lineno">  611 </span>root
-<span class="lineno">  612 </span>    :: (Ord a, Num a, Eq a, Fractional a)
-<span class="lineno">  613 </span>    =&gt; a
-<span class="lineno">  614 </span>    -&gt; a
-<span class="lineno">  615 </span>    -&gt; (a, a)
-<span class="lineno">  616 </span>    -&gt; Poly a
-<span class="lineno">  617 </span>    -&gt; Maybe a
-<span class="lineno">  618 </span><span class="decl"><span class="istickedoff">root e x (l, u) p = findRoot e (l, u) (p - constant x)</span></span>
+<span class="lineno">  595 </span><span class="spaces">        </span><span class="istickedoff">-- if we already have a root, chosse it</span>
+<span class="lineno">  596 </span><span class="spaces">        </span><span class="istickedoff">| px == 0 = x</span>
+<span class="lineno">  597 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">py == 0</span> = <span class="nottickedoff">y</span></span>
+<span class="lineno">  598 </span><span class="spaces">        </span><span class="istickedoff">-- when the interval is small enough, stop:</span>
+<span class="lineno">  599 </span><span class="spaces">        </span><span class="istickedoff">-- the root is in this interval, so take the mid point</span>
+<span class="lineno">  600 </span><span class="spaces">        </span><span class="istickedoff">| width &lt;= eps = mid</span>
+<span class="lineno">  601 </span><span class="spaces">        </span><span class="istickedoff">-- choose the lower half,</span>
+<span class="lineno">  602 </span><span class="spaces">        </span><span class="istickedoff">-- as the polynomial has different signs at the ends</span>
+<span class="lineno">  603 </span><span class="spaces">        </span><span class="istickedoff">| px * pmid &lt; 0 = halveInterval eps x mid px pmid</span>
+<span class="lineno">  604 </span><span class="spaces">        </span><span class="istickedoff">-- choose the upper half</span>
+<span class="lineno">  605 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = halveInterval eps mid y pmid py</span>
+<span class="lineno">  606 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  607 </span><span class="spaces">        </span><span class="istickedoff">width = y - x</span>
+<span class="lineno">  608 </span><span class="spaces">        </span><span class="istickedoff">mid = x + width / 2</span>
+<span class="lineno">  609 </span><span class="spaces">        </span><span class="istickedoff">pmid = eval p mid</span></span>
+<span class="lineno">  610 </span>
+<span class="lineno">  611 </span>{-| Otherwise we have a polynomial:
+<span class="lineno">  612 </span>subtract the value we are looking for so that we seek a zero crossing
+<span class="lineno">  613 </span>-}
+<span class="lineno">  614 </span>root
+<span class="lineno">  615 </span>    :: (Ord a, Num a, Eq a, Fractional a)
+<span class="lineno">  616 </span>    =&gt; a
+<span class="lineno">  617 </span>    -&gt; a
+<span class="lineno">  618 </span>    -&gt; (a, a)
+<span class="lineno">  619 </span>    -&gt; Poly a
+<span class="lineno">  620 </span>    -&gt; Maybe a
+<span class="lineno">  621 </span><span class="decl"><span class="istickedoff">root e x (l, u) p = findRoot e (l, u) (p - constant x)</span></span>
 
 </pre>
 </body>
