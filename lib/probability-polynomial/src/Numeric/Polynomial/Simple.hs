@@ -592,6 +592,9 @@ findRoot precision (l, u) p
     pu = eval p u
     pl = eval p l
     halveInterval eps x y px py
+        -- if we already have a root, chosse it
+        | px == 0 = x
+        | py == 0 = y
         -- when the interval is small enough, stop:
         -- the root is in this interval, so take the mid point
         | width <= eps = mid
