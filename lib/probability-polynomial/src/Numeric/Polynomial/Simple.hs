@@ -39,6 +39,7 @@ module Numeric.Polynomial.Simple
     , countRoots
     , isMonotonicallyIncreasingOn
     , root
+    , squareFreeFactorisation
     ) where
 
 import Control.DeepSeq
@@ -621,3 +622,46 @@ root
     -> Poly a
     -> Maybe a
 root e x (l, u) p = findRoot e (l, u) (p - constant x)
+
+-- | Greatest monic common divisor of two polynomials.
+gcdPoly :: forall a. (Fractional a, Eq a, Num a, Ord a) => Poly a -> Poly a -> Poly a
+gcdPoly a b = if b == zero then a else makeMonic (gcdPoly b (polyRemainder a b))
+  where
+    makeMonic :: Poly a -> Poly a
+    makeMonic (Poly as) = scale (1 / last as) (Poly as)
+    polyRemainder :: Poly a -> Poly a -> Poly a
+    polyRemainder x y = snd (euclidianDivision x y)
+
+{-|
+We compute the square-free factorisation of a polynomial using Yun's algorithm.
+Yun, David Y.Y. (1976). "On square-free decomposition algorithms". 
+SYMSAC '76 Proceedings of the third ACM Symposium on Symbolic and Algebraic Computation. 
+Association for Computing Machinery. pp. 26–35. doi:10.1145/800205.806320. ISBN 978-1-4503-7790-4. S2CID 12861227.
+https://dl.acm.org/doi/10.1145/800205.806320
+G <- gcd (P, P')
+C1 <- P / G
+D1 <- P' / G - C1'
+until Ci = 1 do
+    Pi <- gcd (Ci, Di)
+    Ci+1 <- Ci/Pi
+    Di+1 <- Di / Ai - Ci+1'
+-}
+squareFreeFactorisation
+    :: (Fractional a, Eq a, Num a, Ord a) => Poly a -> [Poly a]
+squareFreeFactorisation p = 
+    -- if p has degree <= 1 it can have no factors but itself
+    if degree p <= 1 then [p] else go c1 d1  
+  where
+    diffP = differentiate p
+    g0 = gcdPoly p diffP
+    c1 = p `divide` g0
+    d1 = (diffP `divide` g0) - differentiate c1
+    divide x y = fst (euclidianDivision x y)
+    go c d
+        | c == constant 1 = [] -- terminate the recursion
+        | a' == constant 1 = go c' d' -- skip over the constant polynomial
+        | otherwise = a' : go c' d'
+      where
+        a' = gcdPoly c d
+        c' = c `divide` a'
+        d' = (d `divide` a') - differentiate c'
