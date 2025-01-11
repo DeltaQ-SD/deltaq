@@ -65,6 +65,7 @@ library
     DeltaQ.Methods
     DeltaQ.PiecewisePolynomial
     DeltaQ.Plot
+    DeltaQ.Term
 
 test-suite test
   import:           warnings
