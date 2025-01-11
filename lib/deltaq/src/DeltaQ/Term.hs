@@ -16,7 +16,7 @@ using the numeric type 'Rational'.
 module DeltaQ.Term
     ( -- * Type
       O
-    , atom
+    , var
     , toOutcome
     ) where
 
@@ -36,18 +36,25 @@ import GHC.Generics
 {-----------------------------------------------------------------------------
     O
 ------------------------------------------------------------------------------}
--- | Outcome expression, represented as a term.
+-- | Outcome expression, represented as a normalized term.
 newtype O = O (Term String)
     -- INVARIANT: Terms are always normalized.
-    deriving (Eq, Show, Generic, NFData)
+    deriving (Show, Generic, NFData)
 
--- | Outcome, abstract, referenced by a unique name.
-atom :: String -> O
-atom = O . Atom
+-- | Two outcome expressions are equal if and only if they can be transformed
+-- into each other using the properties required by the 'Outcome' class,
+-- listed here: "DeltaQ.Class#p:Outcome".
+--
+-- Two 'var' are considered equal if and only if they have the same name.
+deriving instance Eq O
+
+-- | Outcome variable, referenced by a unique name.
+var :: String -> O
+var = O . Var
 
 -- | Abstract outcome expressions can be mapped to more concrete types,
 -- such as 'DeltaQ.PiecewisePolynomial.DQ',
--- provided that we know how to map 'atom'.
+-- provided that we know how to map 'var'.
 toOutcome
     ::  ( Outcome o
         , Duration o ~ Rational
@@ -55,7 +62,7 @@ toOutcome
     => (String -> o) -> O -> o
 toOutcome f (O term) = go term
   where
-    go (Atom v) = f v
+    go (Var v) = f v
     go Never = never
     go (Wait t) = wait t
     go (Seq xs) = foldr1 (.>>.) $ map go xs
@@ -84,7 +91,7 @@ instance Outcome O where
 -- * Combination of 'wait'
 -- * Commutativitiy of '(.>>.)', '(./\.)', and '(.\/.)'
 data Term v
-    = Atom v
+    = Var v
     | Never
     | Wait Rational
     | Seq [Term v]
