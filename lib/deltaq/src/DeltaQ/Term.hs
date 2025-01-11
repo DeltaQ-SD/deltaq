@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
@@ -14,10 +15,16 @@ Description : Instances via term representation.
 using the numeric type 'Rational'.
 -}
 module DeltaQ.Term
-    ( -- * Type
+    ( -- * Outcome expressions
       O
     , var
     , toOutcome
+    , termFromOutcome
+    , outcomeFromTerm
+
+    -- * Outcome terms
+    , Term (..)
+    , isNormalized
     ) where
 
 import Control.DeepSeq
@@ -69,6 +76,7 @@ toOutcome f (O term) = go term
     go (Last xs) = foldr1 (./\.) $ map go xs
     go (First xs) = foldr1 (.\/.) $ map go xs
 
+-- | Outcome expressions are instances of 'Outcome'.
 instance Outcome O where
     type Duration O = Rational
 
@@ -78,18 +86,28 @@ instance Outcome O where
     firstToFinish (O x) (O y) = O . normalize1 $ First [x,y]
     lastToFinish (O x) (O y) = O . normalize1 $ Last [x,y]
 
+-- | Convert an outcome expression to its normalized 'Term' representation.
+-- 
+-- > x == y  implies   termFromOutcome x == termFromOutcome y
+-- >
+-- > isNormalized (termFromOutcome x)  =  True
+termFromOutcome :: O -> Term String
+termFromOutcome (O term) = term
+
+-- | Construct an outcome expression 'O' from an outcome 'Term'.
+--
+-- Internally, the outcome expression will be represented
+-- as the normalization of the given term.
+outcomeFromTerm :: Term String -> O
+outcomeFromTerm = O . normalize
+
 {-----------------------------------------------------------------------------
     Terms
 ------------------------------------------------------------------------------}
 -- | Term representation for outcomes.
 --
--- Associativity of '(.>>.)', '(./\.)', and '(.\/.)' is baked into lists.
---
--- Normalization ensures that the required properties hold:
---
--- * Absorption of 'never'
--- * Combination of 'wait'
--- * Commutativitiy of '(.>>.)', '(./\.)', and '(.\/.)'
+-- Different terms may represent equal outcomes expressions.
+-- 
 data Term v
     = Var v
     | Never
@@ -99,7 +117,9 @@ data Term v
     | First [Term v]
     deriving (Show, Eq, Ord, Generic, NFData)
 
--- | Predicate that defines what it means for a term to be normalized.
+-- | Predicate that defines what it means for a 'Term' to be normalized.
+--
+-- Each 'Term' has a unique normalization.
 isNormalized :: Ord v => Term v -> Bool
 isNormalized (Seq xs) =
     not (null xs)
@@ -148,7 +168,42 @@ isNotBothWait _ _ = True
 pairsWith :: (a -> a -> b) -> [a] -> [b]
 pairsWith f xs = zipWith f xs (drop 1 xs)
 
--- | Normalize the term under the assumption
+-- | Normalize a term.
+--
+-- 'normalize' will give equal results
+-- if and only if two terms are equal according to the properties.
+--
+-- The strategy for normalization is as follows:
+--
+-- * Associativity of '(.>>.)', '(./\.)', and '(.\/.)' is
+--   enforced by the use of lists in the definition 'Seq', 'Last', 'First'.
+--
+-- * The following properties are handled by 'normalize1'
+--
+--   * Absorption of 'never'
+--   * Combination of 'wait'
+--   * Commutativitiy of '(./\.)', and '(.\/.)'
+--
+normalize :: Ord v => Term v -> Term v
+normalize = everywhere normalize1
+
+-- | Apply a transformation everywhere; bottom-up.
+--
+-- See also [Scrap your boilerplate
+-- ](https://www.microsoft.com/en-us/research/wp-content/uploads/2003/01/hmap.pdf)
+everywhere :: (Term v -> Term v) -> Term v -> Term v
+everywhere f = every
+  where
+    every = f . recurse
+
+    recurse a@(Var _) = a
+    recurse a@Never = a
+    recurse a@(Wait _) = a
+    recurse (Seq xs) = Seq $ map every xs
+    recurse (Last xs) = Last $ map every xs
+    recurse (First xs) = First $ map every xs
+
+-- | Normalize a term under the assumption
 -- that the arguments to the outermost constructor are already normalized.
 normalize1 :: Ord v => Term v -> Term v
 normalize1 = id
