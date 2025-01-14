@@ -600,7 +600,7 @@ findRoot precision (lower, upper) poly = if null rootFactors then Nothing
         degp = degree p
         {- We bisect the interval exploiting the Intermediate Value Theorem: 
         if a polynomial has different signs at the ends of an interval, it must be zero somewhere in the interval.
-        If there is no change of sign, use use countRoots to find which side of the interval the root is on.
+        If there is no change of sign, use countRoots to find which side of the interval the root is on.
         -}
         bisect :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> (a, a) -> Poly a -> Maybe a
         bisect e (x, y) (px, py) p'
@@ -618,7 +618,7 @@ findRoot precision (lower, upper) poly = if null rootFactors then Nothing
           -- no sign change found, so we resort to counting roots
           | countRoots (x, mid, p') > 0 = bisect e (x, mid) (px, pmid) p'
           | countRoots (mid, y, p') > 0 = bisect e (mid, y) (pmid, py) p'
-          | otherwise = error "findRoot: No root found"
+          | otherwise = Nothing
           where
             width = y - x
             mid = x + width / 2
