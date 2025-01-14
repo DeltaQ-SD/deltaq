@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -567,26 +567,25 @@ compareToZero (l, u, p)
     upper = eval p u
 
 {-|
-Find the root of a polynomial in a given interval,
-assuming that there is exactly one root in the given interval.
-This precondition has to be checked through other means,
-e.g. 'countRoots'.
+Find a root of a polynomial in a given interval.
+
+Return 'Nothing' if the polynomial does not have a root in the given interval.
 
 We find the root by first forming the square-free factorisation of the polynomial,
-to eliminate repeated roots. One of the factors will have a root in the interval,
+to eliminate repeated roots. One of the factors may have a root in the interval,
 so we count roots for each factor until we find the one with a root in the interval.
-Then we use the bisection method to find the root.
+Then we use the bisection method to find the root,
 repeatedly halving the interval in which the root must lie
 until its width is less than the specified precision.
 Constant and linear polynomials, @degree p <= 1@, are treated as special cases.
 -}
 findRoot
-    :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
-findRoot precision (lower, upper) p = if null rootFactors then Nothing
+    :: forall a. (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
+findRoot precision (lower, upper) poly = if null rootFactors then Nothing
                               else getRoot precision (lower, upper) (head rootFactors)
   where
-    rootFactors = filter (\x -> countRoots (lower, upper, x) /= 0) (squareFreeFactorisation p)
-    getRoot :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
+    rootFactors = filter (\x -> countRoots (lower, upper, x) /= 0) (squareFreeFactorisation poly)
+    --getRoot :: forall a. (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
     getRoot eps (l, u) p
       -- if the polynomial is zero, the whole interval is a root, so return the basepoint
       | degp < 0 = Just l
@@ -595,13 +594,16 @@ findRoot precision (lower, upper) p = if null rootFactors then Nothing
       -- if the polynomial has degree 1, can calculate the root exactly
       | degp == 1 = Just (-(head ps / last ps)) -- p0 + p1x = 0 => x = -p0/p1
       | eps <= 0 = error "Invalid precision value"
-      | otherwise = bisect eps l u pl pu
+      | otherwise = bisect eps (l, u) (eval p l, eval p u) p
       where
         ps = toCoefficients p
         degp = degree p
-        pu = eval p u
-        pl = eval p l
-        bisect e x y px py
+        {- We bisect the interval exploiting the Intermediate Value Theorem: 
+        if a polynomial has different signs at the ends of an interval, it must be zero somewhere in the interval.
+        If there is no change of sign, use use countRoots to find which side of the interval the root is on.
+        -}
+        bisect :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> (a, a) -> Poly a -> Maybe a
+        bisect e (x, y) (px, py) p'
           -- if we already have a root, choose it
           | px == 0 = Just x
           | py == 0 = Just y
@@ -610,18 +612,22 @@ findRoot precision (lower, upper) p = if null rootFactors then Nothing
           -- the root is in this interval, so take the mid point
           | width <= e = Just mid
           -- choose the lower half, if the polynomial has different signs at the ends
-          | px * pmid < 0 = bisect e x mid px pmid
-          -- otherwise choose the upper half
-          | otherwise = bisect e mid y pmid py
+          | signum px /= signum pmid = bisect e (x, mid) (px, pmid) p'
+          -- choose the upper half, if the polynomial has different signs at the ends
+          | signum py /= signum pmid = bisect e (mid, y) (pmid, py) p'
+          -- no sign change found, so we resort to counting roots
+          | countRoots (x, mid, p') > 0 = bisect e (x, mid) (px, pmid) p'
+          | countRoots (mid, y, p') > 0 = bisect e (mid, y) (pmid, py) p'
+          | otherwise = error "findRoot: No root found"
           where
             width = y - x
             mid = x + width / 2
-            pmid = eval p mid
+            pmid = eval p' mid
 
 {-| We are seeking the point at which a polynomial has a specific value.:
 subtract the value we are looking for so that we seek a zero crossing
 -}
-root
+root --TODO: this should probably be called something else such as 'findCrossing'
     :: (Ord a, Num a, Eq a, Fractional a)
     => a
     -> a
