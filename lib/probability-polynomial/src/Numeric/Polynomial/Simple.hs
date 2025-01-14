@@ -189,8 +189,8 @@ Evaluate a polynomial at a point.
 > eval :: Poly a -> a -> a
 -}
 instance Num a => Fun.Function (Poly a) where
-    type instance Domain (Poly a) = a
-    type instance Codomain (Poly a) = a
+    type Domain (Poly a) = a
+    type Codomain (Poly a) = a
     eval = eval
 
 {-|
@@ -228,13 +228,13 @@ We always display the last point as well.
 -}
 display :: (Ord a, Eq a, Num a) => Poly a -> (a, a) -> a -> [(a, a)]
 display p (l, u) s
-  | s == 0 = map evalPoint [l, u]
-  | otherwise = map evalPoint (l : go (l + s))
+    | s == 0 = map evalPoint [l, u]
+    | otherwise = map evalPoint (l : go (l + s))
   where
     evalPoint x = (x, eval p x)
     go x
-      | x >= u = [u] -- always include the last point
-      | otherwise = x : go (x + s)
+        | x >= u = [u] -- always include the last point
+        | otherwise = x : go (x + s)
 
 {-| Linear polymonial connecting the points @(x1, y1)@ and @(x2, y2)@,
 assuming that @x1 ≠ x2@.
@@ -537,13 +537,14 @@ reversedSturmSequence p =
         remainder = snd $ euclidianDivision pIminusOne pI
     go _ = error "reversedSturmSequence: impossible"
 
--- | Check whether a polynomial is monotonically increasing on
--- a given interval.
+{-| Check whether a polynomial is monotonically increasing on
+a given interval.
+-}
 isMonotonicallyIncreasingOn
-    :: (Fractional a, Eq a, Ord a) => Poly a -> (a,a) -> Bool
-isMonotonicallyIncreasingOn p (x1,x2) =
+    :: (Fractional a, Eq a, Ord a) => Poly a -> (a, a) -> Bool
+isMonotonicallyIncreasingOn p (x1, x2) =
     eval p x1 <= eval p x2
-    && countRoots (x1, x2, differentiate p) == 0
+        && countRoots (x1, x2, differentiate p) == 0
 
 {-|
 Measure whether or not a polynomial is consistently above or below zero,
@@ -581,44 +582,48 @@ Constant and linear polynomials, @degree p <= 1@, are treated as special cases.
 -}
 findRoot
     :: forall a. (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
-findRoot precision (lower, upper) poly = if null rootFactors then Nothing
-                              else getRoot precision (lower, upper) (head rootFactors)
+findRoot precision (lower, upper) poly =
+    if null rootFactors
+        then Nothing
+        else getRoot precision (lower, upper) (head rootFactors)
   where
-    rootFactors = filter (\x -> countRoots (lower, upper, x) /= 0) (squareFreeFactorisation poly)
-    --getRoot :: forall a. (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
+    rootFactors =
+        filter (\x -> countRoots (lower, upper, x) /= 0) (squareFreeFactorisation poly)
+    -- getRoot :: forall a. (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> Poly a -> Maybe a
     getRoot eps (l, u) p
-      -- if the polynomial is zero, the whole interval is a root, so return the basepoint
-      | degp < 0 = Just l
-      -- if the poly is a non-zero constant, no root is present
-      | degp == 0 = Nothing
-      -- if the polynomial has degree 1, can calculate the root exactly
-      | degp == 1 = Just (-(head ps / last ps)) -- p0 + p1x = 0 => x = -p0/p1
-      | eps <= 0 = error "Invalid precision value"
-      | otherwise = bisect eps (l, u) (eval p l, eval p u) p
+        -- if the polynomial is zero, the whole interval is a root, so return the basepoint
+        | degp < 0 = Just l
+        -- if the poly is a non-zero constant, no root is present
+        | degp == 0 = Nothing
+        -- if the polynomial has degree 1, can calculate the root exactly
+        | degp == 1 = Just (-(head ps / last ps)) -- p0 + p1x = 0 => x = -p0/p1
+        | eps <= 0 = error "Invalid precision value"
+        | otherwise = bisect eps (l, u) (eval p l, eval p u) p
       where
         ps = toCoefficients p
         degp = degree p
-        {- We bisect the interval exploiting the Intermediate Value Theorem: 
+        {- We bisect the interval exploiting the Intermediate Value Theorem:
         if a polynomial has different signs at the ends of an interval, it must be zero somewhere in the interval.
         If there is no change of sign, use countRoots to find which side of the interval the root is on.
         -}
-        bisect :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> (a, a) -> Poly a -> Maybe a
+        bisect
+            :: (Fractional a, Eq a, Num a, Ord a) => a -> (a, a) -> (a, a) -> Poly a -> Maybe a
         bisect e (x, y) (px, py) p'
-          -- if we already have a root, choose it
-          | px == 0 = Just x
-          | py == 0 = Just y
-          | pmid == 0 = Just mid
-          -- when the interval is small enough, stop:
-          -- the root is in this interval, so take the mid point
-          | width <= e = Just mid
-          -- choose the lower half, if the polynomial has different signs at the ends
-          | signum px /= signum pmid = bisect e (x, mid) (px, pmid) p'
-          -- choose the upper half, if the polynomial has different signs at the ends
-          | signum py /= signum pmid = bisect e (mid, y) (pmid, py) p'
-          -- no sign change found, so we resort to counting roots
-          | countRoots (x, mid, p') > 0 = bisect e (x, mid) (px, pmid) p'
-          | countRoots (mid, y, p') > 0 = bisect e (mid, y) (pmid, py) p'
-          | otherwise = Nothing
+            -- if we already have a root, choose it
+            | px == 0 = Just x
+            | py == 0 = Just y
+            | pmid == 0 = Just mid
+            -- when the interval is small enough, stop:
+            -- the root is in this interval, so take the mid point
+            | width <= e = Just mid
+            -- choose the lower half, if the polynomial has different signs at the ends
+            | signum px /= signum pmid = bisect e (x, mid) (px, pmid) p'
+            -- choose the upper half, if the polynomial has different signs at the ends
+            | signum py /= signum pmid = bisect e (mid, y) (pmid, py) p'
+            -- no sign change found, so we resort to counting roots
+            | countRoots (x, mid, p') > 0 = bisect e (x, mid) (px, pmid) p'
+            | countRoots (mid, y, p') > 0 = bisect e (mid, y) (pmid, py) p'
+            | otherwise = Nothing
           where
             width = y - x
             mid = x + width / 2
@@ -627,7 +632,7 @@ findRoot precision (lower, upper) poly = if null rootFactors then Nothing
 {-| We are seeking the point at which a polynomial has a specific value.:
 subtract the value we are looking for so that we seek a zero crossing
 -}
-root --TODO: this should probably be called something else such as 'findCrossing'
+root -- TODO: this should probably be called something else such as 'findCrossing'
     :: (Ord a, Num a, Eq a, Fractional a)
     => a
     -> a
@@ -637,7 +642,8 @@ root --TODO: this should probably be called something else such as 'findCrossing
 root e x (l, u) p = findRoot e (l, u) (p - constant x)
 
 -- | Greatest monic common divisor of two polynomials.
-gcdPoly :: forall a. (Fractional a, Eq a, Num a, Ord a) => Poly a -> Poly a -> Poly a
+gcdPoly
+    :: forall a. (Fractional a, Eq a, Num a, Ord a) => Poly a -> Poly a -> Poly a
 gcdPoly a b = if b == zero then a else makeMonic (gcdPoly b (polyRemainder a b))
   where
     makeMonic :: Poly a -> Poly a
@@ -647,8 +653,8 @@ gcdPoly a b = if b == zero then a else makeMonic (gcdPoly b (polyRemainder a b))
 
 {-|
 We compute the square-free factorisation of a polynomial using Yun's algorithm.
-Yun, David Y.Y. (1976). "On square-free decomposition algorithms". 
-SYMSAC '76 Proceedings of the third ACM Symposium on Symbolic and Algebraic Computation. 
+Yun, David Y.Y. (1976). "On square-free decomposition algorithms".
+SYMSAC '76 Proceedings of the third ACM Symposium on Symbolic and Algebraic Computation.
 Association for Computing Machinery. pp. 26–35. doi:10.1145/800205.806320. ISBN 978-1-4503-7790-4. S2CID 12861227.
 https://dl.acm.org/doi/10.1145/800205.806320
 G <- gcd (P, P')
