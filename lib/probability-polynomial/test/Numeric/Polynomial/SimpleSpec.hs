@@ -45,22 +45,18 @@ import Numeric.Polynomial.Simple
     )
 import Test.Hspec
     ( Spec
-    , before_
     , describe
     , it
-    , pendingWith
     )
 import Test.QuickCheck
     ( Arbitrary
     , Gen
     , NonNegative (..)
     , Positive (..)
-    , Property
     , (===)
     , (==>)
     , (.&&.)
     , arbitrary
-    , counterexample
     , forAll
     , frequency
     , listOf
@@ -74,9 +70,6 @@ import qualified Test.QuickCheck as QC
 {-----------------------------------------------------------------------------
     Tests
 ------------------------------------------------------------------------------}
-xit' :: String -> String -> Property -> Spec
-xit' reason label = before_ (pendingWith reason) . it label
-
 spec :: Spec
 spec = do
     describe "constant" $ do
@@ -228,15 +221,18 @@ spec = do
                     epsilon = (x3-x1)/(1000*1000*50)
                     Just x2' = root epsilon 0 (l, u) p
                 in
-                    id
-                    $ counterexample ("interval = " <> show (l,u))
-                    $ counterexample ("countRoots = " <> show (countRoots (l, u, p)))
-                    $ counterexample ("expected root = " <> show x2)
-                    $ counterexample ("eval polynomial at expected root = " <> show (eval p x2))
-                    $ counterexample ("epsilon = " <> show epsilon)
-                    $ counterexample ("found root = " <> show x2')
-                    $ counterexample ("root within range of other root " <> show (abs (x2' - x3) <= 20*epsilon))
-                    $ property $ abs (x2' - x2) <= epsilon
+                    abs (x2' - x2) <= epsilon
+
+        it "high-degree polynomial, repeated root" $ property $ mapSize (`div` 5) $
+            \(Positive (x1 :: Rational)) (Positive (n :: Integer)) ->
+                let xx = scaleX (constant 1) :: Poly Rational
+                    p = xx*(xx - constant x1)^n
+                    l = x1 - 100 * epsilon
+                    u = x1 + 100 * epsilon
+                    epsilon = x1/(1000*1000*50)
+                    Just x2' = root epsilon 0 (l, u) p
+                in
+                    abs (x2' - x1) <= epsilon
 
     describe "isMonotonicallyIncreasingOn" $
         it "quadratic polynomial" $ property $
