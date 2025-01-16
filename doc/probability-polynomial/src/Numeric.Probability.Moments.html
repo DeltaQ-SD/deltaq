@@ -16,31 +16,31 @@ Description : Moments of probability distributions.
 ------------------------------------------------------------------------------}</span><span>
 </span><span id="line-17"></span><span>
 </span><span id="line-18"></span><span class="annot"><span class="hs-comment">-- | The first four commonly used moments of a probability distribution.</span></span><span>
-</span><span id="line-19"></span><span class="hs-keyword">data</span><span> </span><span id="Moments"><span class="annot"><a href="Numeric.Probability.Moments.html#Moments"><span class="hs-identifier hs-var">Moments</span></a></span></span><span> </span><span id="local-6989586621679065194"><span class="annot"><a href="#local-6989586621679065194"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Moments"><span class="annot"><a href="Numeric.Probability.Moments.html#Moments"><span class="hs-identifier hs-var">Moments</span></a></span></span><span>
+</span><span id="line-19"></span><span class="hs-keyword">data</span><span> </span><span id="Moments"><span class="annot"><a href="Numeric.Probability.Moments.html#Moments"><span class="hs-identifier hs-var">Moments</span></a></span></span><span> </span><span id="local-6989586621679065922"><span class="annot"><a href="#local-6989586621679065922"><span class="hs-identifier hs-type">a</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="Moments"><span class="annot"><a href="Numeric.Probability.Moments.html#Moments"><span class="hs-identifier hs-var">Moments</span></a></span></span><span>
 </span><span id="line-20"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="mean"><span class="annot"><span class="annottext">forall a. Moments a -&gt; a
-</span><a href="Numeric.Probability.Moments.html#mean"><span class="hs-identifier hs-var hs-var">mean</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065194"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="Numeric.Probability.Moments.html#mean"><span class="hs-identifier hs-var hs-var">mean</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065922"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-21"></span><span>    </span><span class="hs-comment">-- ^ [Mean or Expected Value](https://en.wikipedia.org/wiki/Expected_value)</span><span>
 </span><span id="line-22"></span><span>    </span><span class="hs-comment">-- \( \mu \).</span><span>
 </span><span id="line-23"></span><span>    </span><span class="hs-comment">-- Defined as \( \mu = E[X] \).</span><span>
 </span><span id="line-24"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="variance"><span class="annot"><span class="annottext">forall a. Moments a -&gt; a
-</span><a href="Numeric.Probability.Moments.html#variance"><span class="hs-identifier hs-var hs-var">variance</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065194"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="Numeric.Probability.Moments.html#variance"><span class="hs-identifier hs-var hs-var">variance</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065922"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-25"></span><span>    </span><span class="hs-comment">-- ^ [Variance](https://en.wikipedia.org/wiki/Variance) \( \sigma^2 \).</span><span>
 </span><span id="line-26"></span><span>    </span><span class="hs-comment">-- Defined as \( \sigma^2 = E[(X - \mu)^2] \).</span><span>
 </span><span id="line-27"></span><span>    </span><span class="hs-comment">-- Equal to \( \sigma^2 = E[X^2] - \mu^2 \).</span><span>
 </span><span id="line-28"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="skewness"><span class="annot"><span class="annottext">forall a. Moments a -&gt; a
-</span><a href="Numeric.Probability.Moments.html#skewness"><span class="hs-identifier hs-var hs-var">skewness</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065194"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="Numeric.Probability.Moments.html#skewness"><span class="hs-identifier hs-var hs-var">skewness</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065922"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-29"></span><span>    </span><span class="hs-comment">-- ^ [Skewness](https://en.wikipedia.org/wiki/Skewness) \( \gamma_1 \).</span><span>
 </span><span id="line-30"></span><span>    </span><span class="hs-comment">-- Defined as</span><span>
 </span><span id="line-31"></span><span>    </span><span class="hs-comment">-- \( \gamma_1 = E\left[\left(\frac{(X - \mu)}{\sigma}\right)^3 \right] \).</span><span>
 </span><span id="line-32"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="kurtosis"><span class="annot"><span class="annottext">forall a. Moments a -&gt; a
-</span><a href="Numeric.Probability.Moments.html#kurtosis"><span class="hs-identifier hs-var hs-var">kurtosis</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065194"><span class="hs-identifier hs-type">a</span></a></span><span>
+</span><a href="Numeric.Probability.Moments.html#kurtosis"><span class="hs-identifier hs-var hs-var">kurtosis</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="#local-6989586621679065922"><span class="hs-identifier hs-type">a</span></a></span><span>
 </span><span id="line-33"></span><span>    </span><span class="hs-comment">-- ^ [Kurtosis](https://en.wikipedia.org/wiki/Kurtosis) \( \kappa \).</span><span>
 </span><span id="line-34"></span><span>    </span><span class="hs-comment">-- Defined as</span><span>
 </span><span id="line-35"></span><span>    </span><span class="hs-comment">--  \( \kappa = E\left[\left(\frac{(X - \mu)}{\sigma}\right)^4 \right] \).</span><span>
 </span><span id="line-36"></span><span>    </span><span class="hs-comment">--</span><span>
 </span><span id="line-37"></span><span>    </span><span class="hs-comment">-- The kurtosis is bounded below: \( \kappa \geq \gamma_1^2 + 1 \).</span><span>
 </span><span id="line-38"></span><span>    </span><span class="hs-special">}</span><span>
-</span><span id="line-39"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679065230"><span id="local-6989586621679065236"><span class="annot"><span class="annottext">Moments a -&gt; Moments a -&gt; Bool
+</span><span id="line-39"></span><span>    </span><span class="hs-keyword">deriving</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679065958"><span id="local-6989586621679065964"><span class="annot"><span class="annottext">Moments a -&gt; Moments a -&gt; Bool
 (Moments a -&gt; Moments a -&gt; Bool)
 -&gt; (Moments a -&gt; Moments a -&gt; Bool) -&gt; Eq (Moments a)
 forall a. Eq a =&gt; Moments a -&gt; Moments a -&gt; Bool
@@ -49,7 +49,7 @@ $c== :: forall a. Eq a =&gt; Moments a -&gt; Moments a -&gt; Bool
 == :: Moments a -&gt; Moments a -&gt; Bool
 $c/= :: forall a. Eq a =&gt; Moments a -&gt; Moments a -&gt; Bool
 /= :: Moments a -&gt; Moments a -&gt; Bool
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679065242"><span id="local-6989586621679065250"><span id="local-6989586621679065254"><span class="annot"><span class="annottext">Int -&gt; Moments a -&gt; ShowS
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679065970"><span id="local-6989586621679065978"><span id="local-6989586621679065982"><span class="annot"><span class="annottext">Int -&gt; Moments a -&gt; ShowS
 [Moments a] -&gt; ShowS
 Moments a -&gt; String
 (Int -&gt; Moments a -&gt; ShowS)
@@ -67,7 +67,7 @@ $cshow :: forall a. Show a =&gt; Moments a -&gt; String
 show :: Moments a -&gt; String
 $cshowList :: forall a. Show a =&gt; [Moments a] -&gt; ShowS
 showList :: [Moments a] -&gt; ShowS
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679065259"><span id="local-6989586621679065261"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Moments a -&gt; Moments b)
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Show</span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679065987"><span id="local-6989586621679065989"><span class="annot"><span class="annottext">(forall a b. (a -&gt; b) -&gt; Moments a -&gt; Moments b)
 -&gt; (forall a b. a -&gt; Moments b -&gt; Moments a) -&gt; Functor Moments
 forall a b. a -&gt; Moments b -&gt; Moments a
 forall a b. (a -&gt; b) -&gt; Moments a -&gt; Moments b
@@ -84,17 +84,17 @@ $c&lt;$ :: forall a b. a -&gt; Moments b -&gt; Moments a
 </span><span id="line-42"></span><span class="hs-comment">-- the expectation values of the first four powers \( m_k = E[X^k] \).</span><span>
 </span><span id="line-43"></span><span class="hs-comment">--</span><span>
 </span><span id="line-44"></span><span class="hs-comment">-- &gt; fromExpectedPowers (m1,m2,m3,m4)</span><span>
-</span><span id="line-45"></span><span id="local-6989586621679065212"><span class="annot"><a href="Numeric.Probability.Moments.html#fromExpectedPowers"><span class="hs-identifier hs-type">fromExpectedPowers</span></a></span><span>
-</span><span id="line-46"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-47"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Probability.Moments.html#Moments"><span class="hs-identifier hs-type">Moments</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679065212"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-45"></span><span id="local-6989586621679065940"><span class="annot"><a href="Numeric.Probability.Moments.html#fromExpectedPowers"><span class="hs-identifier hs-type">fromExpectedPowers</span></a></span><span>
+</span><span id="line-46"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Probability.Moments.html#Moments"><span class="hs-identifier hs-type">Moments</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679065940"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-48"></span><span id="fromExpectedPowers"><span class="annot"><span class="annottext">fromExpectedPowers :: forall a. (Ord a, Num a, Fractional a) =&gt; (a, a, a, a) -&gt; Moments a
-</span><a href="Numeric.Probability.Moments.html#fromExpectedPowers"><span class="hs-identifier hs-var hs-var">fromExpectedPowers</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679065274"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065274"><span class="hs-identifier hs-var">mean</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679065275"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065275"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679065276"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065276"><span class="hs-identifier hs-var">m3</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679065277"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065277"><span class="hs-identifier hs-var">m4</span></a></span></span><span class="hs-special">)</span><span>
+</span><a href="Numeric.Probability.Moments.html#fromExpectedPowers"><span class="hs-identifier hs-var hs-var">fromExpectedPowers</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066002"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066002"><span class="hs-identifier hs-var">mean</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066003"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066003"><span class="hs-identifier hs-var">m2</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066004"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066004"><span class="hs-identifier hs-var">m3</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066005"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066005"><span class="hs-identifier hs-var">m4</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-49"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span>
@@ -125,107 +125,107 @@ kurtosis :: a
 kurtosis :: a
 </span><a href="Numeric.Probability.Moments.html#kurtosis"><span class="hs-identifier hs-var hs-var">kurtosis</span></a></span><span class="hs-special">}</span><span>
 </span><span id="line-53"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-54"></span><span>    </span><span id="local-6989586621679065282"><span class="annot"><span class="annottext">meanSq :: a
-</span><a href="#local-6989586621679065282"><span class="hs-identifier hs-var hs-var">meanSq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065274"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679066010"><span class="annot"><span class="annottext">meanSq :: a
+</span><a href="#local-6989586621679066010"><span class="hs-identifier hs-var hs-var">meanSq</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066002"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065274"><span class="hs-identifier hs-var">mean</span></a></span><span>
+</span><a href="#local-6989586621679066002"><span class="hs-identifier hs-var">mean</span></a></span><span>
 </span><span id="line-55"></span><span>
-</span><span id="line-56"></span><span>    </span><span id="local-6989586621679065278"><span class="annot"><span class="annottext">variance :: a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var hs-var">variance</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065275"><span class="hs-identifier hs-var">m2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><span id="line-56"></span><span>    </span><span id="local-6989586621679066006"><span class="annot"><span class="annottext">variance :: a
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var hs-var">variance</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066003"><span class="hs-identifier hs-var">m2</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065282"><span class="hs-identifier hs-var">meanSq</span></a></span><span>
-</span><span id="line-57"></span><span>    </span><span id="local-6989586621679065290"><span class="annot"><span class="annottext">sigma :: a
-</span><a href="#local-6989586621679065290"><span class="hs-identifier hs-var hs-var">sigma</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
+</span><a href="#local-6989586621679066010"><span class="hs-identifier hs-var">meanSq</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span id="local-6989586621679066018"><span class="annot"><span class="annottext">sigma :: a
+</span><a href="#local-6989586621679066018"><span class="hs-identifier hs-var hs-var">sigma</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
 forall a. (Ord a, Num a, Fractional a) =&gt; a -&gt; a
 </span><a href="Numeric.Probability.Moments.html#squareRoot"><span class="hs-identifier hs-var">squareRoot</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span>
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span>
 </span><span id="line-58"></span><span>
-</span><span id="line-59"></span><span>    </span><span id="local-6989586621679065279"><span class="annot"><span class="annottext">skewness :: a
-</span><a href="#local-6989586621679065279"><span class="hs-identifier hs-var hs-var">skewness</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-59"></span><span>    </span><span id="local-6989586621679066007"><span class="annot"><span class="annottext">skewness :: a
+</span><a href="#local-6989586621679066007"><span class="hs-identifier hs-var hs-var">skewness</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-60"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065276"><span class="hs-identifier hs-var">m3</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066004"><span class="hs-identifier hs-var">m3</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">3</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065274"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066002"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065274"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066002"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065282"><span class="hs-identifier hs-var">meanSq</span></a></span><span>
+</span><a href="#local-6989586621679066010"><span class="hs-identifier hs-var">meanSq</span></a></span><span>
 </span><span id="line-61"></span><span>        </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065290"><span class="hs-identifier hs-var">sigma</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066018"><span class="hs-identifier hs-var">sigma</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-62"></span><span>
-</span><span id="line-63"></span><span>    </span><span id="local-6989586621679065280"><span class="annot"><span class="annottext">kurtosis :: a
-</span><a href="#local-6989586621679065280"><span class="hs-identifier hs-var hs-var">kurtosis</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679066008"><span class="annot"><span class="annottext">kurtosis :: a
+</span><a href="#local-6989586621679066008"><span class="hs-identifier hs-var hs-var">kurtosis</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-64"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065277"><span class="hs-identifier hs-var">m4</span></a></span><span>
+</span><a href="#local-6989586621679066005"><span class="hs-identifier hs-var">m4</span></a></span><span>
 </span><span id="line-65"></span><span>            </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">4</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065274"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066002"><span class="hs-identifier hs-var">mean</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065279"><span class="hs-identifier hs-var">skewness</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066007"><span class="hs-identifier hs-var">skewness</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065290"><span class="hs-identifier hs-var">sigma</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066018"><span class="hs-identifier hs-var">sigma</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span>
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span>
 </span><span id="line-66"></span><span>            </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">6</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065282"><span class="hs-identifier hs-var">meanSq</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066010"><span class="hs-identifier hs-var">meanSq</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span>
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span>
 </span><span id="line-67"></span><span>            </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065282"><span class="hs-identifier hs-var">meanSq</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066010"><span class="hs-identifier hs-var">meanSq</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065282"><span class="hs-identifier hs-var">meanSq</span></a></span><span>
+</span><a href="#local-6989586621679066010"><span class="hs-identifier hs-var">meanSq</span></a></span><span>
 </span><span id="line-68"></span><span>        </span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065278"><span class="hs-identifier hs-var">variance</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679066006"><span class="hs-identifier hs-var">variance</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-69"></span><span>
 </span><span id="line-70"></span><span class="hs-comment">-- | Helper function to approximate the square root.</span><span>
 </span><span id="line-71"></span><span class="hs-comment">-- Precision: 1e-4 of the given value.</span><span>
 </span><span id="line-72"></span><span class="hs-comment">--</span><span>
 </span><span id="line-73"></span><span class="hs-comment">-- Uses Heron's iterative method.</span><span>
-</span><span id="line-74"></span><span id="local-6989586621679065216"><span class="annot"><a href="Numeric.Probability.Moments.html#squareRoot"><span class="hs-identifier hs-type">squareRoot</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679065216"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679065216"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679065216"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679065216"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679065216"><span class="hs-identifier hs-type">a</span></a></span></span><span>
+</span><span id="line-74"></span><span id="local-6989586621679065944"><span class="annot"><a href="Numeric.Probability.Moments.html#squareRoot"><span class="hs-identifier hs-type">squareRoot</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679065944"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Num</span></span><span> </span><span class="annot"><a href="#local-6989586621679065944"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679065944"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679065944"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679065944"><span class="hs-identifier hs-type">a</span></a></span></span><span>
 </span><span id="line-75"></span><span id="squareRoot"><span class="annot"><span class="annottext">squareRoot :: forall a. (Ord a, Num a, Fractional a) =&gt; a -&gt; a
-</span><a href="Numeric.Probability.Moments.html#squareRoot"><span class="hs-identifier hs-var hs-var">squareRoot</span></a></span></span><span> </span><span id="local-6989586621679065328"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065328"><span class="hs-identifier hs-var">x</span></a></span></span><span>
+</span><a href="Numeric.Probability.Moments.html#squareRoot"><span class="hs-identifier hs-var hs-var">squareRoot</span></a></span></span><span> </span><span id="local-6989586621679066056"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066056"><span class="hs-identifier hs-var">x</span></a></span></span><span>
 </span><span id="line-76"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065328"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679066056"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; a
@@ -233,55 +233,55 @@ forall a. HasCallStack =&gt; String -&gt; a
 </span><span class="hs-identifier hs-var">error</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;Negative square root input&quot;</span></span><span>
 </span><span id="line-77"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065328"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679066056"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">0</span></span><span>
 </span><span id="line-78"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679065331"><span class="hs-identifier hs-var">goRoot</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065332"><span class="hs-identifier hs-var">x0</span></a></span><span>
+</span><a href="#local-6989586621679066059"><span class="hs-identifier hs-var">goRoot</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066060"><span class="hs-identifier hs-var">x0</span></a></span><span>
 </span><span id="line-79"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-80"></span><span>    </span><span id="local-6989586621679065336"><span class="annot"><span class="annottext">precision :: a
-</span><a href="#local-6989586621679065336"><span class="hs-identifier hs-var hs-var">precision</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065328"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679066064"><span class="annot"><span class="annottext">precision :: a
+</span><a href="#local-6989586621679066064"><span class="hs-identifier hs-var hs-var">precision</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066056"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">10000</span></span><span>
-</span><span id="line-81"></span><span>    </span><span id="local-6989586621679065332"><span class="annot"><span class="annottext">x0 :: a
-</span><a href="#local-6989586621679065332"><span class="hs-identifier hs-var hs-var">x0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065328"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><span id="line-81"></span><span>    </span><span id="local-6989586621679066060"><span class="annot"><span class="annottext">x0 :: a
+</span><a href="#local-6989586621679066060"><span class="hs-identifier hs-var hs-var">x0</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066056"><span class="hs-identifier hs-var">x</span></a></span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">2</span></span><span> </span><span class="hs-comment">-- initial guess</span><span>
-</span><span id="line-82"></span><span>    </span><span id="local-6989586621679065331"><span class="annot"><span class="annottext">goRoot :: a -&gt; a
-</span><a href="#local-6989586621679065331"><span class="hs-identifier hs-var hs-var">goRoot</span></a></span></span><span> </span><span id="local-6989586621679065350"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065350"><span class="hs-identifier hs-var">xi</span></a></span></span><span>
+</span><span id="line-82"></span><span>    </span><span id="local-6989586621679066059"><span class="annot"><span class="annottext">goRoot :: a -&gt; a
+</span><a href="#local-6989586621679066059"><span class="hs-identifier hs-var hs-var">goRoot</span></a></span></span><span> </span><span id="local-6989586621679066078"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066078"><span class="hs-identifier hs-var">xi</span></a></span></span><span>
 </span><span id="line-83"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
 forall a. Num a =&gt; a -&gt; a
 </span><span class="hs-identifier hs-var">abs</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065328"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066056"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065350"><span class="hs-identifier hs-var">xi</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066078"><span class="hs-identifier hs-var">xi</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065350"><span class="hs-identifier hs-var">xi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679066078"><span class="hs-identifier hs-var">xi</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065336"><span class="hs-identifier hs-var">precision</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065350"><span class="hs-identifier hs-var">xi</span></a></span><span>
+</span><a href="#local-6989586621679066064"><span class="hs-identifier hs-var">precision</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066078"><span class="hs-identifier hs-var">xi</span></a></span><span>
 </span><span id="line-84"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; a
-</span><a href="#local-6989586621679065331"><span class="hs-identifier hs-var">goRoot</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065350"><span class="hs-identifier hs-var">xi</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066059"><span class="hs-identifier hs-var">goRoot</span></a></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066078"><span class="hs-identifier hs-var">xi</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065328"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066056"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679065350"><span class="hs-identifier hs-var">xi</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+</span><a href="#local-6989586621679066078"><span class="hs-identifier hs-var">xi</span></a></span><span class="hs-special">)</span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">a
 </span><span class="hs-number">2</span></span><span class="hs-special">)</span><span>
