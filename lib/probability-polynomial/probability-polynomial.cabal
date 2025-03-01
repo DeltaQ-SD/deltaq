@@ -48,7 +48,7 @@ library
 
   build-depends:
     , base >= 4.14.3.0 && < 5
-    , containers >= 0.6 && < 0.8
+    , containers >= 0.6 && < 0.9
     , deepseq >= 1.4.4.0 && < 1.6
     , exact-combinatorics >= 0.2 && < 0.3
 

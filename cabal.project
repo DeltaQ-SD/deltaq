@@ -1,4 +1,4 @@
-index-state: 2024-10-26T10:13:37Z
+index-state: 2025-03-01T13:51:25Z
 
 packages:
     lib/deltaq/
@@ -6,3 +6,13 @@ packages:
 
 tests:
   True
+
+--
+-- Use `contraints` and `allow-newer` to test against
+-- a new release of a dependency.
+--
+-- constraints:
+--    containers == 0.8
+--
+-- allow-newer:
+--    *:containers
