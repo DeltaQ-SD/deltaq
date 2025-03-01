@@ -6,3 +6,13 @@ packages:
 
 tests:
   True
+
+--
+-- Use `contraints` and `allow-newer` to test against
+-- a new release of a dependency.
+--
+-- constraints:
+--    containers == 0.8
+--
+-- allow-newer:
+--    *:containers
