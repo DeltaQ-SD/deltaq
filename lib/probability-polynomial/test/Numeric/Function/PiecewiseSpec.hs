@@ -67,6 +67,10 @@ spec = do
                 member z (intersect x y)  ===  (member z x && member z y)
 
     describe "fromInterval" $ do
+        it "zero" $ property $
+            \(x :: Rational) (o :: Constant) ->
+                eval (fromInterval (x, x) o) x  ===  0
+
         it "intervals" $ property $
             \(x :: Rational) (Positive d) (o :: Constant) ->
                 let y = x + d
