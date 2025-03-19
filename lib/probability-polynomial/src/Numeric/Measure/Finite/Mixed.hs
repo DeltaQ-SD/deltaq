@@ -24,6 +24,8 @@ module Numeric.Measure.Finite.Mixed
     , add
     , scale
     , translate
+    , beforeOrAt
+    , after
     , convolve
     ) where
 
@@ -41,6 +43,7 @@ import Numeric.Function.Piecewise
     )
 import Numeric.Polynomial.Simple
     ( Poly
+    , constant
     )
 
 import qualified Data.Map.Strict as Map
@@ -80,7 +83,7 @@ fromDistribution pieces
     | isEventuallyConstant pieces = Just $ Measure $ trim pieces
     | otherwise = Nothing
 
--- | Test whether a piecewise polynomial is consant as x -> ∞.
+-- | Test whether a piecewise polynomial is constant as x -> ∞.
 isEventuallyConstant :: (Ord a, Num a) => Piecewise (Poly a) -> Bool
 isEventuallyConstant pieces
     | null xpolys = True
@@ -192,6 +195,38 @@ scale x (Measure m) = Measure $ Piecewise.mapPieces (Poly.scale x) m
 translate :: (Ord a, Num a, Fractional a) => a -> Measure a -> Measure a
 translate y (Measure m) =
     Measure $ Piecewise.translateWith Poly.translate y m
+
+{-----------------------------------------------------------------------------
+    Operations
+    Intersection
+------------------------------------------------------------------------------}
+-- | Intersect a measure with the interval @(-∞, x]@.
+--
+-- The measure of the interval @(-∞, t]@ with @beforeOrAt x m@ is the same as
+-- the measure of the intersection @(-∞, t] ∩ (-∞, x]@ with @m@. 
+beforeOrAt :: (Ord a, Num a) => a -> Measure a -> Measure a
+beforeOrAt x (Measure m) =
+    case Piecewise.toAscPieces m of
+        [] -> zero
+        ((x1, _):_) ->
+            let indicatorToX = Piecewise.fromInterval (x1,x) 1
+                scaledIndicatorAfterX v =
+                    Piecewise.fromAscPieces [(x, constant v)]
+            in  Measure
+                $ trim
+                $ indicatorToX * m + scaledIndicatorAfterX (eval m x)
+
+-- | Intersect a measure with the interval @(x, +∞)@.
+--
+-- The measure of the interval @(-∞, t]@ with @after x m@ is the same as
+-- the measure of the intersection @(-∞, t] ∩ (x, +∞)@ with @m@. 
+after :: (Ord a, Num a) => a -> Measure a -> Measure a
+after x (Measure m) =
+    let scaledIndicatorAfterX v = Piecewise.fromAscPieces [(x, constant v)]
+    in  Measure
+        $ trim
+        $ scaledIndicatorAfterX 1 * m
+            - scaledIndicatorAfterX (eval m x)
 
 {-----------------------------------------------------------------------------
     Operations
