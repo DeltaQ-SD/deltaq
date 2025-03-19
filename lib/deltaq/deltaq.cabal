@@ -2,10 +2,10 @@ cabal-version:   3.0
 name:            deltaq
 
 -- Package Versioning Policy: https://pvp.haskell.org
--- PVP summary:    +-+------- breaking API changes
---                 | | +----- non-breaking API additions
---                 | | | +--- code changes with no API change
-version:         1.0.0.0
+-- PVP summary:  +-+------- breaking API changes
+--               | | +----- non-breaking API additions
+--               | | | +--- code changes with no API change
+version:         1.0.1.0
 synopsis:        Framework for ∆Q System Development
 description:
   ∆Q System Development is a paradigm for developing distributed systems
