@@ -24,6 +24,7 @@ module DeltaQ.PiecewisePolynomial
     , meetsQTA
     , Moments (..)
     , moments
+    , timeout
 
     -- * Internal
     , complexity
@@ -266,3 +267,42 @@ moments (DQ m)
   where
     success = Measure.total m
     conditional = Prob.unsafeFromMeasure $ Measure.scale (1/success) m
+
+{-----------------------------------------------------------------------------
+    Operations
+    Timeout
+------------------------------------------------------------------------------}
+-- | Given a duration @dt@,
+-- decompose a probability distribution of completion times
+-- into two conditional probability distributions —
+-- one distribution conditional on finishing within @dt@,
+-- and the other distribution conditional on finishing after @dt@.
+--
+-- >   (within, p, after) = timeout dt o
+-- >
+-- > implies
+-- >
+-- >   o = choice p within (wait dt .>>. after)
+-- >   p = successWithin o dt
+-- >
+-- >   successWithin within dt = 1
+-- >     if p > 0
+--
+-- We define the corner cases as follows:
+--
+-- * @successWithin o dt = 0@ implies @before = never@.
+--
+-- * @successWithin o dt = 1@ implies @after = never@.
+--
+timeout :: Duration DQ -> DQ -> (DQ, Probability DQ, DQ)
+timeout dt (DQ m) = (beforeCond, p, afterCond)
+  where
+    before = Measure.beforeOrAt dt m
+    after = Measure.translate (- dt) $ Measure.after dt m
+    p = Measure.total before
+    beforeCond
+        | p == 0 = never
+        | otherwise = DQ $ Measure.scale (1/p) before
+    afterCond
+        | p == 1 = never
+        | otherwise = DQ $ Measure.scale (1/(1-p)) after
