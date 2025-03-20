@@ -33,6 +33,7 @@ import DeltaQ.PiecewisePolynomial
     , fromPositiveMeasure
     , meetsQTA
     , moments
+    , timeout
     )
 import Numeric.Probability.Moments
     ( Moments (..)
@@ -439,6 +440,32 @@ specImplementation = do
             \(NonNegative t) ->
                 let ms = Moments{mean = t, variance = 0, skewness = 0, kurtosis = 1}
                 in  moments (wait t)  ===  (1, ms)
+
+    describe "timeout" $ do
+        it "never" $ property $
+            \dt ->
+                timeout dt never  ===  (never, 0, never)
+
+        it "probability" $ property $
+            \x dt ->
+                let (_, p, _) = timeout dt x
+                in  p  ===  successWithin x dt
+
+        it "within" $ property $
+            \x dt ->
+                let (within, p, _) = timeout dt x
+                in  p > 0 ==>
+                        successWithin within dt  ===  1
+
+        it "wait" $ property $
+            \x dt (Positive d) ->
+                timeout dt (wait (dt + d) .>>. x)
+                    ===  (never, 0, wait d .>>. x)
+
+        it "choice" $ property $
+            \x dt ->
+                let (within, p, after) = timeout dt x
+                in  choice p within (wait dt .>>. after)  ===  x
 
     describe "complexity" $ do
         it "grows exponentially with .>>." $ withMaxSuccess 1 $ property $

@@ -2,10 +2,10 @@ cabal-version:   3.0
 name:            deltaq
 
 -- Package Versioning Policy: https://pvp.haskell.org
--- PVP summary:    +-+------- breaking API changes
---                 | | +----- non-breaking API additions
---                 | | | +--- code changes with no API change
-version:         1.0.0.0
+-- PVP summary:  +-+------- breaking API changes
+--               | | +----- non-breaking API additions
+--               | | | +--- code changes with no API change
+version:         1.0.1.0
 synopsis:        Framework for ∆Q System Development
 description:
   ∆Q System Development is a paradigm for developing distributed systems
@@ -57,7 +57,7 @@ library
     , deepseq >= 1.4.4.0 && < 1.6
     , Chart >= 1.8 && < 2.0
     , lattices >= 2.2 && < 2.3
-    , probability-polynomial >= 1.0 && < 1.1
+    , probability-polynomial >= 1.0.1 && < 1.1
 
   exposed-modules:
     DeltaQ

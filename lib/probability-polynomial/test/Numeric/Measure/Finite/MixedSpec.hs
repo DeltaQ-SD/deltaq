@@ -21,6 +21,8 @@ import Data.Maybe
 import Numeric.Measure.Finite.Mixed
     ( Measure
     , add
+    , after
+    , beforeOrAt
     , convolve
     , dirac
     , distribution
@@ -195,6 +197,44 @@ spec = do
                 let f = Poly.fromCoefficients [0,1]
                 in  integrate f (scale a mx)
                         === a * integrate f mx
+
+    describe "beforeOrAt and after" $ do
+        it "add beforeOrAt after" $ property $
+            \(mx :: Measure Rational) t ->
+                add (beforeOrAt t mx) (after t mx)  ===  mx
+
+        it "support after" $ property $
+            \(mx :: Measure Rational) t ->
+                let isAfterOrAt Nothing = True
+                    isAfterOrAt (Just (x1, _)) = x1 >= t
+                in  isAfterOrAt (support (after t mx))
+
+        it "support beforeOrAt" $ property $
+            \(mx :: Measure Rational) t ->
+                let isBeforeOrAt Nothing = True
+                    isBeforeOrAt (Just (_, x2)) = x2 <= t
+                in  isBeforeOrAt (support (beforeOrAt t mx))
+
+        it "eval distribution after" $ property $
+            \(mx :: Measure Rational) t ->
+                eval (distribution (after t mx)) t  ===  0
+
+        it "after support" $ property $
+            \(mx :: Measure Rational) ->
+                case support mx of
+                    Nothing -> property True
+                    Just (_, x2) ->
+                        cover 70 True "non-trivial" $
+                            after x2 mx  ===  zero
+
+        it "beforeOrAt support" $ property $
+            \(mx :: Measure Rational) ->
+                case support mx of
+                    Nothing -> property True
+                    Just (x1, _) ->
+                        let value1 = eval (distribution mx) x1
+                        in  cover 70 True "non-trivial" $
+                                beforeOrAt x1 mx  ===  scale value1 (dirac x1)
 
 {-----------------------------------------------------------------------------
     Random generators

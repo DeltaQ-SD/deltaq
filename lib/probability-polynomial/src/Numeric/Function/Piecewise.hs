@@ -111,12 +111,17 @@ zero = Pieces []
 
 -- | @fromInterval (x1,x2) o@ creates a 'Piecewise' function
 -- from a single function @o@ by restricting it to the
--- to half-open interval @x1 <= x < x2@.
+-- to half-open interval @y1 <= x < y2@
+-- where @y1 = min x1 x2@ and @y2 = max x1 x2@.
+--
 -- The result is zero outside this interval.
+-- As a special case, the result is 'zero' when @x1 == x2@.
 fromInterval
     :: (Ord (Fun.Domain o), Num o)
     => (Fun.Domain o, Fun.Domain o) -> o -> Piecewise o
-fromInterval (x,y) o = Pieces [Piece start o, Piece end 0]
+fromInterval (x,y) o
+    | start < end = Pieces [Piece start o, Piece end 0]
+    | otherwise = zero
   where
     start = min x y
     end = max x y

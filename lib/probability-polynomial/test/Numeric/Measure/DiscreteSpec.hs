@@ -17,6 +17,8 @@ import Data.Function.Class
 import Numeric.Measure.Discrete
     ( Discrete
     , add
+    , after
+    , beforeOrAt
     , convolve
     , dirac
     , distribution
@@ -101,6 +103,15 @@ spec = do
             \(m :: Discrete Rational) y x ->
                 eval (distribution (translate y m)) x
                     ===  eval (distribution m) (x - y)
+
+    describe "beforeOrAt and after" $ do
+        it "add beforeOrAt after" $ property $
+            \(mx :: Discrete Rational) t ->
+                add (beforeOrAt t mx) (after t mx)  ===  mx
+
+        it "eval distribution after" $ property $
+            \(mx :: Discrete Rational) t ->
+                eval (distribution (after t mx)) t  ===  0
 
     describe "convolve" $ do
         it "dirac" $ property $

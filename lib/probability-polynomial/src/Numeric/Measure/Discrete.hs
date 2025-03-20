@@ -20,6 +20,8 @@ module Numeric.Measure.Discrete
     , add
     , scale
     , translate
+    , beforeOrAt
+    , after
     , convolve
     ) where
 
@@ -129,6 +131,20 @@ scale s (Discrete m) = Discrete $ Map.map (s *) m
 -- >    = eval (distribution m) (x - y)
 translate :: (Ord a, Num a) => a -> Discrete a -> Discrete a
 translate y (Discrete m) = Discrete $ Map.mapKeys (y +) m
+
+-- | Intersect a measure with the interval @(-∞, x]@.
+--
+-- The measure of the interval @(-∞, t]@ with @beforeOrAt x m@ is the same as
+-- the measure of the intersection @(-∞, t] ∩ (-∞, x]@ with @m@. 
+beforeOrAt :: (Ord a, Num a) => a -> Discrete a -> Discrete a
+beforeOrAt x (Discrete m) = Discrete $ Map.filterWithKey (\t _ -> t <= x) m
+
+-- | Intersect a measure with the interval @(x, +∞)@.
+--
+-- The measure of the interval @(-∞, t]@ with @after x m@ is the same as
+-- the measure of the intersection @(-∞, t] ∩ (x, +∞)@ with @m@. 
+after :: (Ord a, Num a) => a -> Discrete a -> Discrete a
+after x (Discrete m) = Discrete $ Map.filterWithKey (\t _ -> x < t) m
 
 -- | Additive convolution of two measures.
 --
