@@ -18,10 +18,12 @@ import DeltaQ.Class
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ
+    , timeout
     )
 import DeltaQ.Methods
     ( SlackOrHazard (..)
     , meetsRequirement
+    , retryOverlap
     )
 import Test.Hspec
     ( Spec
@@ -33,6 +35,7 @@ import Test.QuickCheck
     , Positive (..)
     , property
     , withMaxSuccess
+    , (===)
     )
 
 {-----------------------------------------------------------------------------
@@ -62,3 +65,27 @@ spec = do
                 in  case deltaq `meetsRequirement` (0, 0.9) of
                         Hazard (Occurs dt) dp -> dt >= 0 && dp >= 0
                         _ -> False
+
+    describe "retryOverlap" $ do
+        it "documentation" $ property $
+            \(Positive d) (dts' :: [Positive Rational]) ->
+                let r = 0
+                    s = r + d
+                    dts = map (\(Positive dt) -> dt) dts'
+                    o = uniform r s :: DQ
+                in
+                    retryOverlap dts o  ===  retryOverlap' dts o
+
+-- | Implementation of 'retryOverlap' that matches the description
+-- in the documentation. 
+retryOverlap' :: [Duration DQ] -> DQ -> DQ
+retryOverlap' dts o =
+    cutoff (sum dts)
+        $ foldr (.\/.) never
+            [ wait dt .>>. o
+            | dt <- init (scanl (+) 0 dts)
+            ]
+  where
+    cutoff dt x = choice p before never
+      where
+        (before, p, _) = timeout dt x
