@@ -255,9 +255,12 @@ isNonNegativeOnSegment (End _ y) =
     Operations
     Moments
 ------------------------------------------------------------------------------}
--- | Compute the success probability of a 'DQ',
--- and the first commonly used 'Moments' of the
--- probability distribution conditioned on success.
+-- | For a given 'DQ', compute
+--
+-- * the success probability, and
+--
+-- * the 'Moments' of the conditional probability (distribution)
+--   given that the outcome has succeeded.
 moments :: DQ -> (Rational, Moments Rational)
 moments (DQ m)
     | success == 0 =
