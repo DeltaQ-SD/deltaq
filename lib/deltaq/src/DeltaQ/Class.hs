@@ -176,6 +176,10 @@ class   ( Ord (Probability o)
     -- @choices [(w_1, o_1), (w_2, o_2), …]@ chooses randomly between multiple
     -- outcomes. The probability @p_i@ for choosing the outcome @o_i@ is
     -- determined by the weights as @p_i = w_i / (w_1 + w_2 + …)@.
+    --
+    -- Note: The weights @w_i@ have the numeric type @Probability o@,
+    -- but for convenience, and unlike probabilities,
+    -- they are not restricted to the unit interval \( [0,1] \).
     choices :: [(Probability o, o)] -> o
     choices [] = never
     choices wos =
