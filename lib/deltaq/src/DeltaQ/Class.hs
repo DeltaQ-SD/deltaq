@@ -345,10 +345,16 @@ equality may be up to numerical accuracy.
 > deadline (x ./\. y) =  max (deadline x) (deadline y)
 >
 > deadline (x .\/. y) =  min (deadline x) (deadline y)
->   if failure x = 0, failure y = 0
+>   if failure x = 0 and failure y = 0
+>
+> deadline (x .\/. y) =  deadline x
+>   if failure x = 0 and failure y > 0
+>
+> deadline (x .\/. y) =  max (deadline x) (deadline y)
+>   if 1 > failure x > 0 and 1 > failure y > 0
 >
 > deadline (choice p x y) = max (deadline x) (deadline y)
->   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
+>   if p ≠ 0 and p ≠ 1 and failure x < 1 and failure y < 1
 >
 >
 > deadline (uniform r s)  = Occurs s   if r <= s

@@ -354,15 +354,30 @@ specProperties = do
                 deadline' (x ./\. y)
                     ===  max (deadline' x) (deadline' y)
 
-        it ".\\/." $ property $
+        it ".\\/., zero failure" $ property $
             \x y ->
                 (failure x == 0 && failure y == 0) ==>
                     deadline' (x .\/. y)
                         ===  min (deadline' x) (deadline' y)
 
+        it ".\\/., one failure" $ property $
+            \(Probability p) x y -> 0 < p && p < 1
+                ==> let y' = choice p y never
+                    in failure x == 0  ==>
+                    deadline' (x .\/. y')
+                        ===  deadline' x
+
+        it ".\\/., two failure" $ property $
+            \(Probability p) x y -> 0 < p && p < 1
+                ==> let x' = choice p x never
+                        y' = choice p y never
+                    in  (failure x < 1 && failure y < 1)
+                    ==> deadline' (x' .\/. y')
+                        ===  max (deadline' x') (deadline' y')
+
         it "choice" $ property $
             \(Probability p) x y ->
-                (0 < p && p < 1 && failure x == 0 && failure y == 0) ==>
+                (0 < p && p < 1 && failure x < 1 && failure y < 1) ==>
                     deadline' (choice p x y)
                         === max (deadline' x) (deadline' y)
 
