@@ -677,7 +677,7 @@ squareFreeFactorisation p =
     d1 = (diffP `divide` g0) - differentiate c1
     divide x y = fst (euclidianDivision x y)
     go c d
-        | c == constant 1 = [] -- terminate the recursion
+        | degree c  == 0 = [] -- terminate the recursion
         | degree a' == 0 = go c' d' -- skip over constant polynomials
         | otherwise = a' : go c' d'
       where
