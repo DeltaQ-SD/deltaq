@@ -274,57 +274,60 @@ span.spaces    { background: white }
 <span class="lineno">  255 </span>    Operations
 <span class="lineno">  256 </span>    Moments
 <span class="lineno">  257 </span>------------------------------------------------------------------------------}
-<span class="lineno">  258 </span>-- | Compute the success probability of a 'DQ',
-<span class="lineno">  259 </span>-- and the first commonly used 'Moments' of the
-<span class="lineno">  260 </span>-- probability distribution conditioned on success.
-<span class="lineno">  261 </span>moments :: DQ -&gt; (Rational, Moments Rational)
-<span class="lineno">  262 </span><span class="decl"><span class="istickedoff">moments (DQ m)</span>
-<span class="lineno">  263 </span><span class="spaces">    </span><span class="istickedoff">| success == 0 =</span>
-<span class="lineno">  264 </span><span class="spaces">        </span><span class="istickedoff">(0, <span class="nottickedoff">Moments{mean = 0, variance = 0, skewness = 0, kurtosis = 1}</span>)</span>
-<span class="lineno">  265 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> =</span>
-<span class="lineno">  266 </span><span class="spaces">        </span><span class="istickedoff">(success, Prob.moments conditional)</span>
-<span class="lineno">  267 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">  268 </span><span class="spaces">    </span><span class="istickedoff">success = Measure.total m</span>
-<span class="lineno">  269 </span><span class="spaces">    </span><span class="istickedoff">conditional = Prob.unsafeFromMeasure $ Measure.scale (1/success) m</span></span>
-<span class="lineno">  270 </span>
-<span class="lineno">  271 </span>{-----------------------------------------------------------------------------
-<span class="lineno">  272 </span>    Operations
-<span class="lineno">  273 </span>    Timeout
-<span class="lineno">  274 </span>------------------------------------------------------------------------------}
-<span class="lineno">  275 </span>-- | Given a duration @dt@,
-<span class="lineno">  276 </span>-- decompose a probability distribution of completion times
-<span class="lineno">  277 </span>-- into two conditional probability distributions —
-<span class="lineno">  278 </span>-- one distribution conditional on finishing within @dt@,
-<span class="lineno">  279 </span>-- and the other distribution conditional on finishing after @dt@.
-<span class="lineno">  280 </span>--
-<span class="lineno">  281 </span>-- &gt;   (within, p, after) = timeout dt o
-<span class="lineno">  282 </span>-- &gt;
-<span class="lineno">  283 </span>-- &gt; implies
-<span class="lineno">  284 </span>-- &gt;
-<span class="lineno">  285 </span>-- &gt;   o = choice p within (wait dt .&gt;&gt;. after)
-<span class="lineno">  286 </span>-- &gt;   p = successWithin o dt
+<span class="lineno">  258 </span>-- | For a given 'DQ', compute
+<span class="lineno">  259 </span>--
+<span class="lineno">  260 </span>-- * the success probability, and
+<span class="lineno">  261 </span>--
+<span class="lineno">  262 </span>-- * the 'Moments' of the conditional probability (distribution)
+<span class="lineno">  263 </span>--   given that the outcome has succeeded.
+<span class="lineno">  264 </span>moments :: DQ -&gt; (Rational, Moments Rational)
+<span class="lineno">  265 </span><span class="decl"><span class="istickedoff">moments (DQ m)</span>
+<span class="lineno">  266 </span><span class="spaces">    </span><span class="istickedoff">| success == 0 =</span>
+<span class="lineno">  267 </span><span class="spaces">        </span><span class="istickedoff">(0, <span class="nottickedoff">Moments{mean = 0, variance = 0, skewness = 0, kurtosis = 1}</span>)</span>
+<span class="lineno">  268 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> =</span>
+<span class="lineno">  269 </span><span class="spaces">        </span><span class="istickedoff">(success, Prob.moments conditional)</span>
+<span class="lineno">  270 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  271 </span><span class="spaces">    </span><span class="istickedoff">success = Measure.total m</span>
+<span class="lineno">  272 </span><span class="spaces">    </span><span class="istickedoff">conditional = Prob.unsafeFromMeasure $ Measure.scale (1/success) m</span></span>
+<span class="lineno">  273 </span>
+<span class="lineno">  274 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  275 </span>    Operations
+<span class="lineno">  276 </span>    Timeout
+<span class="lineno">  277 </span>------------------------------------------------------------------------------}
+<span class="lineno">  278 </span>-- | Given a duration @dt@,
+<span class="lineno">  279 </span>-- decompose a probability distribution of completion times
+<span class="lineno">  280 </span>-- into two conditional probability distributions —
+<span class="lineno">  281 </span>-- one distribution conditional on finishing within @dt@,
+<span class="lineno">  282 </span>-- and the other distribution conditional on finishing after @dt@.
+<span class="lineno">  283 </span>--
+<span class="lineno">  284 </span>-- &gt;   (within, p, after) = timeout dt o
+<span class="lineno">  285 </span>-- &gt;
+<span class="lineno">  286 </span>-- &gt; implies
 <span class="lineno">  287 </span>-- &gt;
-<span class="lineno">  288 </span>-- &gt;   successWithin within dt = 1
-<span class="lineno">  289 </span>-- &gt;     if p &gt; 0
-<span class="lineno">  290 </span>--
-<span class="lineno">  291 </span>-- We define the corner cases as follows:
-<span class="lineno">  292 </span>--
-<span class="lineno">  293 </span>-- * @successWithin o dt = 0@ implies @before = never@.
-<span class="lineno">  294 </span>--
-<span class="lineno">  295 </span>-- * @successWithin o dt = 1@ implies @after = never@.
-<span class="lineno">  296 </span>--
-<span class="lineno">  297 </span>timeout :: Duration DQ -&gt; DQ -&gt; (DQ, Probability DQ, DQ)
-<span class="lineno">  298 </span><span class="decl"><span class="istickedoff">timeout dt (DQ m) = (beforeCond, p, afterCond)</span>
-<span class="lineno">  299 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">  300 </span><span class="spaces">    </span><span class="istickedoff">before = Measure.beforeOrAt dt m</span>
-<span class="lineno">  301 </span><span class="spaces">    </span><span class="istickedoff">after = Measure.translate (- dt) $ Measure.after dt m</span>
-<span class="lineno">  302 </span><span class="spaces">    </span><span class="istickedoff">p = Measure.total before</span>
-<span class="lineno">  303 </span><span class="spaces">    </span><span class="istickedoff">beforeCond</span>
-<span class="lineno">  304 </span><span class="spaces">        </span><span class="istickedoff">| p == 0 = never</span>
-<span class="lineno">  305 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = DQ $ Measure.scale (1/p) before</span>
-<span class="lineno">  306 </span><span class="spaces">    </span><span class="istickedoff">afterCond</span>
-<span class="lineno">  307 </span><span class="spaces">        </span><span class="istickedoff">| p == 1 = never</span>
-<span class="lineno">  308 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = DQ $ Measure.scale (1/(1-p)) after</span></span>
+<span class="lineno">  288 </span>-- &gt;   o = choice p within (wait dt .&gt;&gt;. after)
+<span class="lineno">  289 </span>-- &gt;   p = successWithin o dt
+<span class="lineno">  290 </span>-- &gt;
+<span class="lineno">  291 </span>-- &gt;   successWithin within dt = 1
+<span class="lineno">  292 </span>-- &gt;     if p &gt; 0
+<span class="lineno">  293 </span>--
+<span class="lineno">  294 </span>-- We define the corner cases as follows:
+<span class="lineno">  295 </span>--
+<span class="lineno">  296 </span>-- * @successWithin o dt = 0@ implies @before = never@.
+<span class="lineno">  297 </span>--
+<span class="lineno">  298 </span>-- * @successWithin o dt = 1@ implies @after = never@.
+<span class="lineno">  299 </span>--
+<span class="lineno">  300 </span>timeout :: Duration DQ -&gt; DQ -&gt; (DQ, Probability DQ, DQ)
+<span class="lineno">  301 </span><span class="decl"><span class="istickedoff">timeout dt (DQ m) = (beforeCond, p, afterCond)</span>
+<span class="lineno">  302 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  303 </span><span class="spaces">    </span><span class="istickedoff">before = Measure.beforeOrAt dt m</span>
+<span class="lineno">  304 </span><span class="spaces">    </span><span class="istickedoff">after = Measure.translate (- dt) $ Measure.after dt m</span>
+<span class="lineno">  305 </span><span class="spaces">    </span><span class="istickedoff">p = Measure.total before</span>
+<span class="lineno">  306 </span><span class="spaces">    </span><span class="istickedoff">beforeCond</span>
+<span class="lineno">  307 </span><span class="spaces">        </span><span class="istickedoff">| p == 0 = never</span>
+<span class="lineno">  308 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = DQ $ Measure.scale (1/p) before</span>
+<span class="lineno">  309 </span><span class="spaces">    </span><span class="istickedoff">afterCond</span>
+<span class="lineno">  310 </span><span class="spaces">        </span><span class="istickedoff">| p == 1 = never</span>
+<span class="lineno">  311 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = DQ $ Measure.scale (1/(1-p)) after</span></span>
 
 </pre>
 </body>

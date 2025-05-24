@@ -890,19 +890,22 @@ forall a. Ord a =&gt; a -&gt; a -&gt; Bool
     Operations
     Moments
 ------------------------------------------------------------------------------}</span><span>
-</span><span id="line-258"></span><span class="hs-comment">-- | Compute the success probability of a 'DQ',</span><span>
-</span><span id="line-259"></span><span class="hs-comment">-- and the first commonly used 'Moments' of the</span><span>
-</span><span id="line-260"></span><span class="hs-comment">-- probability distribution conditioned on success.</span><span>
-</span><span id="line-261"></span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#moments"><span class="hs-identifier hs-type">moments</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Moments</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span>
-</span><span id="line-262"></span><span id="moments"><span class="annot"><span class="annottext">moments :: DQ -&gt; (Rational, Moments Rational)
+</span><span id="line-258"></span><span class="hs-comment">-- | For a given 'DQ', compute</span><span>
+</span><span id="line-259"></span><span class="hs-comment">--</span><span>
+</span><span id="line-260"></span><span class="hs-comment">-- * the success probability, and</span><span>
+</span><span id="line-261"></span><span class="hs-comment">--</span><span>
+</span><span id="line-262"></span><span class="hs-comment">-- * the 'Moments' of the conditional probability (distribution)</span><span>
+</span><span id="line-263"></span><span class="hs-comment">--   given that the outcome has succeeded.</span><span>
+</span><span id="line-264"></span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#moments"><span class="hs-identifier hs-type">moments</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Moments</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Rational</span></span><span class="hs-special">)</span><span>
+</span><span id="line-265"></span><span id="moments"><span class="annot"><span class="annottext">moments :: DQ -&gt; (Rational, Moments Rational)
 </span><a href="DeltaQ.PiecewisePolynomial.html#moments"><span class="hs-identifier hs-var hs-var">moments</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679114379"><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114379"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span>
-</span><span id="line-263"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span id="line-266"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
 </span><a href="#local-6989586621679114380"><span class="hs-identifier hs-var">success</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-264"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><span id="line-267"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Moments</span></span><span class="hs-special">{</span><span class="annot"><span class="annottext">mean :: Rational
 </span><span class="hs-identifier hs-var">mean</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">variance :: Rational
@@ -912,20 +915,20 @@ forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">kurtosis :: Rational
 </span><span class="hs-identifier hs-var">kurtosis</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">1</span></span><span class="hs-special">}</span><span class="hs-special">)</span><span>
-</span><span id="line-265"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-268"></span><span>    </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-266"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
+</span><span id="line-269"></span><span>        </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational
 </span><a href="#local-6989586621679114380"><span class="hs-identifier hs-var">success</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Prob Rational -&gt; Moments Rational
 forall a. (Ord a, Num a, Fractional a) =&gt; Prob a -&gt; Moments a
 </span><span class="hs-identifier hs-var">Prob.moments</span></span><span> </span><span class="annot"><span class="annottext">Prob Rational
 </span><a href="#local-6989586621679114386"><span class="hs-identifier hs-var">conditional</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-267"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-268"></span><span>    </span><span id="local-6989586621679114380"><span class="annot"><span class="annottext">success :: Rational
+</span><span id="line-270"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-271"></span><span>    </span><span id="local-6989586621679114380"><span class="annot"><span class="annottext">success :: Rational
 </span><a href="#local-6989586621679114380"><span class="hs-identifier hs-var hs-var">success</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; Rational
 forall a. (Ord a, Num a) =&gt; Measure a -&gt; a
 </span><span class="hs-identifier hs-var">Measure.total</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114379"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-269"></span><span>    </span><span id="local-6989586621679114386"><span class="annot"><span class="annottext">conditional :: Prob Rational
+</span><span id="line-272"></span><span>    </span><span id="local-6989586621679114386"><span class="annot"><span class="annottext">conditional :: Prob Rational
 </span><a href="#local-6989586621679114386"><span class="hs-identifier hs-var hs-var">conditional</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; Prob Rational
 forall a. Measure a -&gt; Prob a
 </span><span class="hs-identifier hs-var">Prob.unsafeFromMeasure</span></span><span> </span><span class="annot"><span class="annottext">(Measure Rational -&gt; Prob Rational)
@@ -939,35 +942,35 @@ forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">Rational
 </span><a href="#local-6989586621679114380"><span class="hs-identifier hs-var">success</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114379"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-270"></span><span>
-</span><span id="line-271"></span><span class="hs-comment">{-----------------------------------------------------------------------------
+</span><span id="line-273"></span><span>
+</span><span id="line-274"></span><span class="hs-comment">{-----------------------------------------------------------------------------
     Operations
     Timeout
 ------------------------------------------------------------------------------}</span><span>
-</span><span id="line-275"></span><span class="hs-comment">-- | Given a duration @dt@,</span><span>
-</span><span id="line-276"></span><span class="hs-comment">-- decompose a probability distribution of completion times</span><span>
-</span><span id="line-277"></span><span class="hs-comment">-- into two conditional probability distributions &#8212;</span><span>
-</span><span id="line-278"></span><span class="hs-comment">-- one distribution conditional on finishing within @dt@,</span><span>
-</span><span id="line-279"></span><span class="hs-comment">-- and the other distribution conditional on finishing after @dt@.</span><span>
-</span><span id="line-280"></span><span class="hs-comment">--</span><span>
-</span><span id="line-281"></span><span class="hs-comment">-- &gt;   (within, p, after) = timeout dt o</span><span>
-</span><span id="line-282"></span><span class="hs-comment">-- &gt;</span><span>
-</span><span id="line-283"></span><span class="hs-comment">-- &gt; implies</span><span>
-</span><span id="line-284"></span><span class="hs-comment">-- &gt;</span><span>
-</span><span id="line-285"></span><span class="hs-comment">-- &gt;   o = choice p within (wait dt .&gt;&gt;. after)</span><span>
-</span><span id="line-286"></span><span class="hs-comment">-- &gt;   p = successWithin o dt</span><span>
+</span><span id="line-278"></span><span class="hs-comment">-- | Given a duration @dt@,</span><span>
+</span><span id="line-279"></span><span class="hs-comment">-- decompose a probability distribution of completion times</span><span>
+</span><span id="line-280"></span><span class="hs-comment">-- into two conditional probability distributions &#8212;</span><span>
+</span><span id="line-281"></span><span class="hs-comment">-- one distribution conditional on finishing within @dt@,</span><span>
+</span><span id="line-282"></span><span class="hs-comment">-- and the other distribution conditional on finishing after @dt@.</span><span>
+</span><span id="line-283"></span><span class="hs-comment">--</span><span>
+</span><span id="line-284"></span><span class="hs-comment">-- &gt;   (within, p, after) = timeout dt o</span><span>
+</span><span id="line-285"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-286"></span><span class="hs-comment">-- &gt; implies</span><span>
 </span><span id="line-287"></span><span class="hs-comment">-- &gt;</span><span>
-</span><span id="line-288"></span><span class="hs-comment">-- &gt;   successWithin within dt = 1</span><span>
-</span><span id="line-289"></span><span class="hs-comment">-- &gt;     if p &gt; 0</span><span>
-</span><span id="line-290"></span><span class="hs-comment">--</span><span>
-</span><span id="line-291"></span><span class="hs-comment">-- We define the corner cases as follows:</span><span>
-</span><span id="line-292"></span><span class="hs-comment">--</span><span>
-</span><span id="line-293"></span><span class="hs-comment">-- * @successWithin o dt = 0@ implies @before = never@.</span><span>
-</span><span id="line-294"></span><span class="hs-comment">--</span><span>
-</span><span id="line-295"></span><span class="hs-comment">-- * @successWithin o dt = 1@ implies @after = never@.</span><span>
-</span><span id="line-296"></span><span class="hs-comment">--</span><span>
-</span><span id="line-297"></span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#timeout"><span class="hs-identifier hs-type">timeout</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-298"></span><span id="timeout"><span class="annot"><span class="annottext">timeout :: Duration DQ -&gt; DQ -&gt; (DQ, Probability DQ, DQ)
+</span><span id="line-288"></span><span class="hs-comment">-- &gt;   o = choice p within (wait dt .&gt;&gt;. after)</span><span>
+</span><span id="line-289"></span><span class="hs-comment">-- &gt;   p = successWithin o dt</span><span>
+</span><span id="line-290"></span><span class="hs-comment">-- &gt;</span><span>
+</span><span id="line-291"></span><span class="hs-comment">-- &gt;   successWithin within dt = 1</span><span>
+</span><span id="line-292"></span><span class="hs-comment">-- &gt;     if p &gt; 0</span><span>
+</span><span id="line-293"></span><span class="hs-comment">--</span><span>
+</span><span id="line-294"></span><span class="hs-comment">-- We define the corner cases as follows:</span><span>
+</span><span id="line-295"></span><span class="hs-comment">--</span><span>
+</span><span id="line-296"></span><span class="hs-comment">-- * @successWithin o dt = 0@ implies @before = never@.</span><span>
+</span><span id="line-297"></span><span class="hs-comment">--</span><span>
+</span><span id="line-298"></span><span class="hs-comment">-- * @successWithin o dt = 1@ implies @after = never@.</span><span>
+</span><span id="line-299"></span><span class="hs-comment">--</span><span>
+</span><span id="line-300"></span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#timeout"><span class="hs-identifier hs-type">timeout</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-301"></span><span id="timeout"><span class="annot"><span class="annottext">timeout :: Duration DQ -&gt; DQ -&gt; (DQ, Probability DQ, DQ)
 </span><a href="DeltaQ.PiecewisePolynomial.html#timeout"><span class="hs-identifier hs-var hs-var">timeout</span></a></span></span><span> </span><span id="local-6989586621679114389"><span class="annot"><span class="annottext">Duration DQ
 </span><a href="#local-6989586621679114389"><span class="hs-identifier hs-var">dt</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-type">DQ</span></a></span><span> </span><span id="local-6989586621679114390"><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114390"><span class="hs-identifier hs-var">m</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">DQ
@@ -975,15 +978,15 @@ forall a. Fractional a =&gt; a -&gt; a -&gt; a
 Probability DQ
 </span><a href="#local-6989586621679114392"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">DQ
 </span><a href="#local-6989586621679114393"><span class="hs-identifier hs-var">afterCond</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-299"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-300"></span><span>    </span><span id="local-6989586621679114394"><span class="annot"><span class="annottext">before :: Measure Rational
+</span><span id="line-302"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-303"></span><span>    </span><span id="local-6989586621679114394"><span class="annot"><span class="annottext">before :: Measure Rational
 </span><a href="#local-6989586621679114394"><span class="hs-identifier hs-var hs-var">before</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Measure Rational -&gt; Measure Rational
 forall a. (Ord a, Num a) =&gt; a -&gt; Measure a -&gt; Measure a
 </span><span class="hs-identifier hs-var">Measure.beforeOrAt</span></span><span> </span><span class="annot"><span class="annottext">Rational
 Duration DQ
 </span><a href="#local-6989586621679114389"><span class="hs-identifier hs-var">dt</span></a></span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114390"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-301"></span><span>    </span><span id="local-6989586621679114396"><span class="annot"><span class="annottext">after :: Measure Rational
+</span><span id="line-304"></span><span>    </span><span id="local-6989586621679114396"><span class="annot"><span class="annottext">after :: Measure Rational
 </span><a href="#local-6989586621679114396"><span class="hs-identifier hs-var hs-var">after</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Measure Rational -&gt; Measure Rational
 forall a.
 (Ord a, Num a, Fractional a) =&gt;
@@ -999,21 +1002,21 @@ forall a. (Ord a, Num a) =&gt; a -&gt; Measure a -&gt; Measure a
 Duration DQ
 </span><a href="#local-6989586621679114389"><span class="hs-identifier hs-var">dt</span></a></span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114390"><span class="hs-identifier hs-var">m</span></a></span><span>
-</span><span id="line-302"></span><span>    </span><span id="local-6989586621679114392"><span class="annot"><span class="annottext">p :: Rational
+</span><span id="line-305"></span><span>    </span><span id="local-6989586621679114392"><span class="annot"><span class="annottext">p :: Rational
 </span><a href="#local-6989586621679114392"><span class="hs-identifier hs-var hs-var">p</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; Rational
 forall a. (Ord a, Num a) =&gt; Measure a -&gt; a
 </span><span class="hs-identifier hs-var">Measure.total</span></span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114394"><span class="hs-identifier hs-var">before</span></a></span><span>
-</span><span id="line-303"></span><span>    </span><span id="local-6989586621679114391"><span class="annot"><span class="annottext">beforeCond :: DQ
+</span><span id="line-306"></span><span>    </span><span id="local-6989586621679114391"><span class="annot"><span class="annottext">beforeCond :: DQ
 </span><a href="#local-6989586621679114391"><span class="hs-identifier hs-var hs-var">beforeCond</span></a></span></span><span>
-</span><span id="line-304"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span id="line-307"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
 </span><a href="#local-6989586621679114392"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DQ
 forall o. Outcome o =&gt; o
 </span><a href="DeltaQ.Class.html#never"><span class="hs-identifier hs-var">never</span></a></span><span>
-</span><span id="line-305"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-308"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; DQ
 </span><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span><span> </span><span class="annot"><span class="annottext">(Measure Rational -&gt; DQ) -&gt; Measure Rational -&gt; DQ
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -1025,16 +1028,16 @@ forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span class="annot"><span class="annottext">Rational
 </span><a href="#local-6989586621679114392"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114394"><span class="hs-identifier hs-var">before</span></a></span><span>
-</span><span id="line-306"></span><span>    </span><span id="local-6989586621679114393"><span class="annot"><span class="annottext">afterCond :: DQ
+</span><span id="line-309"></span><span>    </span><span id="local-6989586621679114393"><span class="annot"><span class="annottext">afterCond :: DQ
 </span><a href="#local-6989586621679114393"><span class="hs-identifier hs-var hs-var">afterCond</span></a></span></span><span>
-</span><span id="line-307"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
+</span><span id="line-310"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Rational
 </span><a href="#local-6989586621679114392"><span class="hs-identifier hs-var">p</span></a></span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Rational -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Rational
 </span><span class="hs-number">1</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">DQ
 forall o. Outcome o =&gt; o
 </span><a href="DeltaQ.Class.html#never"><span class="hs-identifier hs-var">never</span></a></span><span>
-</span><span id="line-308"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span id="line-311"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Measure Rational -&gt; DQ
 </span><a href="DeltaQ.PiecewisePolynomial.html#DQ"><span class="hs-identifier hs-var">DQ</span></a></span><span> </span><span class="annot"><span class="annottext">(Measure Rational -&gt; DQ) -&gt; Measure Rational -&gt; DQ
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -1049,4 +1052,4 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span class="annot"><span class="annottext">Rational
 </span><a href="#local-6989586621679114392"><span class="hs-identifier hs-var">p</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Measure Rational
 </span><a href="#local-6989586621679114396"><span class="hs-identifier hs-var">after</span></a></span><span>
-</span><span id="line-309"></span></pre></body></html>
+</span><span id="line-312"></span></pre></body></html>
