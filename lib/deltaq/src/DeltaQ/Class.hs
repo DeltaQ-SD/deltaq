@@ -176,6 +176,10 @@ class   ( Ord (Probability o)
     -- @choices [(w_1, o_1), (w_2, o_2), …]@ chooses randomly between multiple
     -- outcomes. The probability @p_i@ for choosing the outcome @o_i@ is
     -- determined by the weights as @p_i = w_i / (w_1 + w_2 + …)@.
+    --
+    -- Note: The weights @w_i@ have the numeric type @Probability o@,
+    -- but for convenience, and unlike probabilities,
+    -- they are not restricted to the unit interval \( [0,1] \).
     choices :: [(Probability o, o)] -> o
     choices [] = never
     choices wos =
@@ -341,10 +345,16 @@ equality may be up to numerical accuracy.
 > deadline (x ./\. y) =  max (deadline x) (deadline y)
 >
 > deadline (x .\/. y) =  min (deadline x) (deadline y)
->   if failure x = 0, failure y = 0
+>   if failure x = 0 and failure y = 0
+>
+> deadline (x .\/. y) =  deadline x
+>   if failure x = 0 and failure y > 0
+>
+> deadline (x .\/. y) =  max (deadline x) (deadline y)
+>   if 1 > failure x > 0 and 1 > failure y > 0
 >
 > deadline (choice p x y) = max (deadline x) (deadline y)
->   if p ≠ 0, p ≠ 1, failure x = 0, failure y = 0
+>   if p ≠ 0 and p ≠ 1 and failure x < 1 and failure y < 1
 >
 >
 > deadline (uniform r s)  = Occurs s   if r <= s
