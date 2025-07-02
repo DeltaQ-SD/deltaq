@@ -79,7 +79,7 @@ test-suite test
     , deltaq
     , probability-polynomial
     , hspec >= 2.11.0 && < 2.12
-    , QuickCheck >= 2.14 && < 2.16
+    , QuickCheck >= 2.14 && < 2.17
 
   main-is:
     Spec.hs
@@ -103,7 +103,7 @@ benchmark basic
     , criterion >= 1.6 && < 1.7
     , deepseq
     , hvega >= 0.12 && < 0.13
-    , optparse-applicative >= 0.18.1.0 && < 0.19
+    , optparse-applicative >= 0.18.1.0 && < 0.20
     , statistics >= 0.16 && < 0.17
     , vector >= 0.12 && < 0.14
 
