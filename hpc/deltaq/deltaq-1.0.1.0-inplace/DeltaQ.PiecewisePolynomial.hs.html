@@ -240,8 +240,8 @@ span.spaces    { background: white }
 <span class="lineno">  221 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Poly.root precision y (x1, x2) o</span>
 <span class="lineno">  222 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
 <span class="lineno">  223 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (End x1 y1 : _) y</span>
-<span class="lineno">  224 </span><span class="spaces">        </span><span class="istickedoff">| <span class="nottickedoff">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
-<span class="lineno">  225 </span><span class="spaces">        </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">Nothing</span></span></span>
+<span class="lineno">  224 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
+<span class="lineno">  225 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span></span>
 <span class="lineno">  226 </span>
 <span class="lineno">  227 </span>precision :: Rational
 <span class="lineno">  228 </span><span class="decl"><span class="istickedoff">precision = 1 / 10^(10 :: Integer)</span></span>
