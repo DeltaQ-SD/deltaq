@@ -36,52 +36,52 @@ Plot instances of 'DeltaQ' using &quot;Graphics.Rendering.Chart&quot;.
 ------------------------------------------------------------------------------}</span><span>
 </span><span id="line-37"></span><span class="hs-comment">-- | Plot the cumulative distribution function (CDF) of a 'DeltaQ',</span><span>
 </span><span id="line-38"></span><span class="hs-comment">-- with title.</span><span>
-</span><span id="line-39"></span><span id="local-6989586621679114721"><span class="annot"><a href="DeltaQ.Plot.html#plotCDF"><span class="hs-identifier hs-type">plotCDF</span></a></span><span>
-</span><span id="line-40"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114721"><span class="hs-identifier hs-type">o</span></a></span><span>
-</span><span id="line-41"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114721"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-42"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114721"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-43"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114721"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-44"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114721"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span id="local-6989586621679115887"><span class="annot"><a href="DeltaQ.Plot.html#plotCDF"><span class="hs-identifier hs-type">plotCDF</span></a></span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115887"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-41"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115887"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115887"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-43"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115887"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115887"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-45"></span><span>       </span><span class="hs-special">)</span><span>
 </span><span id="line-46"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Title</span></span><span>
-</span><span id="line-47"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114721"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to plot</span></span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115887"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to plot</span></span><span>
 </span><span id="line-48"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
 </span><span id="line-49"></span><span id="plotCDF"><span class="annot"><span class="annottext">plotCDF :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; o -&gt; Layout Double Double
-</span><a href="DeltaQ.Plot.html#plotCDF"><span class="hs-identifier hs-var hs-var">plotCDF</span></a></span></span><span> </span><span id="local-6989586621679114887"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679114887"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679114888"><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679114888"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="DeltaQ.Plot.html#plotCDF"><span class="hs-identifier hs-var hs-var">plotCDF</span></a></span></span><span> </span><span id="local-6989586621679116053"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116053"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679116054"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679116054"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-50"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; [(String, o)] -&gt; Layout Double Double
 forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; [(String, o)] -&gt; Layout Double Double
 </span><a href="DeltaQ.Plot.html#plotCDFs"><span class="hs-identifier hs-var">plotCDFs</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679114887"><span class="hs-identifier hs-var">title</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116053"><span class="hs-identifier hs-var">title</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679114888"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116054"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span class="hs-comment">-- | Plot multiple CDFs in a single plot,</span><span>
 </span><span id="line-53"></span><span class="hs-comment">-- with title.</span><span>
-</span><span id="line-54"></span><span id="local-6989586621679114727"><span class="annot"><a href="DeltaQ.Plot.html#plotCDFs"><span class="hs-identifier hs-type">plotCDFs</span></a></span><span>
-</span><span id="line-55"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114727"><span class="hs-identifier hs-type">o</span></a></span><span>
-</span><span id="line-56"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114727"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-57"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114727"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-58"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114727"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-59"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114727"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-54"></span><span id="local-6989586621679115893"><span class="annot"><a href="DeltaQ.Plot.html#plotCDFs"><span class="hs-identifier hs-type">plotCDFs</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115893"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-56"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115893"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-57"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115893"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-58"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115893"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-59"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115893"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-60"></span><span>       </span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Title</span></span><span>
-</span><span id="line-62"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679114727"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcomes with names</span></span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679115893"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcomes with names</span></span><span>
 </span><span id="line-63"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
 </span><span id="line-64"></span><span id="plotCDFs"><span class="annot"><span class="annottext">plotCDFs :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; [(String, o)] -&gt; Layout Double Double
-</span><a href="DeltaQ.Plot.html#plotCDFs"><span class="hs-identifier hs-var hs-var">plotCDFs</span></a></span></span><span> </span><span id="local-6989586621679114936"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679114936"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679114937"><span class="annot"><span class="annottext">[(String, o)]
-</span><a href="#local-6989586621679114937"><span class="hs-identifier hs-var">namedOutcomes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) () -&gt; Layout Double Double
+</span><a href="DeltaQ.Plot.html#plotCDFs"><span class="hs-identifier hs-var hs-var">plotCDFs</span></a></span></span><span> </span><span id="local-6989586621679116102"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116102"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679116103"><span class="annot"><span class="annottext">[(String, o)]
+</span><a href="#local-6989586621679116103"><span class="hs-identifier hs-var">namedOutcomes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) () -&gt; Layout Double Double
 forall l a. Default l =&gt; EC l a -&gt; l
 </span><span class="hs-identifier hs-var">G.execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout Double Double) () -&gt; Layout Double Double)
 -&gt; EC (Layout Double Double) () -&gt; Layout Double Double
@@ -99,7 +99,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679114936"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><a href="#local-6989586621679116102"><span class="hs-identifier hs-var">title</span></a></span><span>
 </span><span id="line-66"></span><span>    </span><span class="annot"><span class="annottext">[o] -&gt; EC (Layout Double Double) ()
 forall o y.
 (DeltaQ o, Real (Duration o), Fractional (Duration o),
@@ -110,7 +110,7 @@ forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(String, o) -&gt; o
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">[(String, o)]
-</span><a href="#local-6989586621679114937"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679116103"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-67"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis Double -&gt; Identity (LayoutAxis Double))
 -&gt; Layout Double Double -&gt; Identity (Layout Double Double)
 forall x y (f :: * -&gt; *).
@@ -143,11 +143,11 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m ()
 </span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">(String, o) -&gt; EC (Layout Double Double) ()
-</span><a href="#local-6989586621679114946"><span class="hs-identifier hs-var">plotOne</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, o)]
-</span><a href="#local-6989586621679114937"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span>
+</span><a href="#local-6989586621679116112"><span class="hs-identifier hs-var">plotOne</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, o)]
+</span><a href="#local-6989586621679116103"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span>
 </span><span id="line-69"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-70"></span><span>    </span><span id="local-6989586621679114955"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
-</span><a href="#local-6989586621679114955"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679116121"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
+</span><a href="#local-6989586621679116121"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Double)
 -&gt; (Duration o -&gt; Rational) -&gt; Duration o -&gt; Double
@@ -155,8 +155,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-71"></span><span>    </span><span id="local-6989586621679114962"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; Double
-</span><a href="#local-6989586621679114962"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
+</span><span id="line-71"></span><span>    </span><span id="local-6989586621679116128"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; Double
+</span><a href="#local-6989586621679116128"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Double)
 -&gt; (Probability o -&gt; Rational) -&gt; Probability o -&gt; Double
@@ -164,10 +164,10 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-72"></span><span>    </span><span id="local-6989586621679114946"><span class="annot"><span class="annottext">plotOne :: (String, o) -&gt; EC (Layout Double Double) ()
-</span><a href="#local-6989586621679114946"><span class="hs-identifier hs-var hs-var">plotOne</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679114963"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679114963"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679114964"><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679114964"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) (PlotLines Double Double)
+</span><span id="line-72"></span><span>    </span><span id="local-6989586621679116112"><span class="annot"><span class="annottext">plotOne :: (String, o) -&gt; EC (Layout Double Double) ()
+</span><a href="#local-6989586621679116112"><span class="hs-identifier hs-var hs-var">plotOne</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116129"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116129"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679116130"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679116130"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) (PlotLines Double Double)
 -&gt; EC (Layout Double Double) ()
 forall (p :: * -&gt; * -&gt; *) x y.
 ToPlot p =&gt;
@@ -182,40 +182,40 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; EC (Layout Double Double) (PlotLines Double Double)
 forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
 </span><span class="hs-identifier hs-var">G.line</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679114963"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
-</span><a href="#local-6989586621679114955"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679114967"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Double
-</span><a href="#local-6989586621679114962"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679114968"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679114967"><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679114967"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679114968"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679114968"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
+</span><a href="#local-6989586621679116129"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
+</span><a href="#local-6989586621679116121"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116133"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Double
+</span><a href="#local-6989586621679116128"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116134"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116133"><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116133"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679116134"><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116134"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
 forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o)) =&gt;
 o -&gt; [(Duration o, Probability o)]
 </span><a href="DeltaQ.Plot.html#toXY"><span class="hs-identifier hs-var">toXY</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679114964"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116130"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-73"></span><span>
 </span><span id="line-74"></span><span class="hs-comment">-- | Plot the cumulative distribution function (CDF) of a 'DeltaQ',</span><span>
 </span><span id="line-75"></span><span class="hs-comment">-- with title, and annotated with quantiles.</span><span>
-</span><span id="line-76"></span><span id="local-6989586621679114789"><span class="annot"><a href="DeltaQ.Plot.html#plotCDFWithQuantiles"><span class="hs-identifier hs-type">plotCDFWithQuantiles</span></a></span><span>
-</span><span id="line-77"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114789"><span class="hs-identifier hs-type">o</span></a></span><span>
-</span><span id="line-78"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114789"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-79"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114789"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-80"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114789"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-81"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114789"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-76"></span><span id="local-6989586621679115955"><span class="annot"><a href="DeltaQ.Plot.html#plotCDFWithQuantiles"><span class="hs-identifier hs-type">plotCDFWithQuantiles</span></a></span><span>
+</span><span id="line-77"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115955"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-78"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115955"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-79"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115955"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-80"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115955"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-81"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115955"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-82"></span><span>       </span><span class="hs-special">)</span><span>
 </span><span id="line-83"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Title</span></span><span>
-</span><span id="line-84"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114789"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Quantiles to highlight</span></span><span>
-</span><span id="line-85"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114789"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to plot</span></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115955"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Quantiles to highlight</span></span><span>
+</span><span id="line-85"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115955"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to plot</span></span><span>
 </span><span id="line-86"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span></span><span>
 </span><span id="line-87"></span><span id="plotCDFWithQuantiles"><span class="annot"><span class="annottext">plotCDFWithQuantiles :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; [Probability o] -&gt; o -&gt; Layout Double Double
-</span><a href="DeltaQ.Plot.html#plotCDFWithQuantiles"><span class="hs-identifier hs-var hs-var">plotCDFWithQuantiles</span></a></span></span><span> </span><span id="local-6989586621679115013"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115013"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679115014"><span class="annot"><span class="annottext">[Probability o]
-</span><a href="#local-6989586621679115014"><span class="hs-identifier hs-var">quantiles</span></a></span></span><span> </span><span id="local-6989586621679115015"><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115015"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) () -&gt; Layout Double Double
+</span><a href="DeltaQ.Plot.html#plotCDFWithQuantiles"><span class="hs-identifier hs-var hs-var">plotCDFWithQuantiles</span></a></span></span><span> </span><span id="local-6989586621679116179"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116179"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679116180"><span class="annot"><span class="annottext">[Probability o]
+</span><a href="#local-6989586621679116180"><span class="hs-identifier hs-var">quantiles</span></a></span></span><span> </span><span id="local-6989586621679116181"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679116181"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) () -&gt; Layout Double Double
 forall l a. Default l =&gt; EC l a -&gt; l
 </span><span class="hs-identifier hs-var">G.execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout Double Double) () -&gt; Layout Double Double)
 -&gt; EC (Layout Double Double) () -&gt; Layout Double Double
@@ -233,14 +233,14 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115013"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><a href="#local-6989586621679116179"><span class="hs-identifier hs-var">title</span></a></span><span>
 </span><span id="line-89"></span><span>    </span><span class="annot"><span class="annottext">[o] -&gt; EC (Layout Double Double) ()
 forall o y.
 (DeltaQ o, Real (Duration o), Fractional (Duration o),
  PlotValue y) =&gt;
 [o] -&gt; EC (Layout Double y) ()
 </span><a href="DeltaQ.Plot.html#add_x_axis"><span class="hs-identifier hs-var">add_x_axis</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115015"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116181"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-90"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis Double -&gt; Identity (LayoutAxis Double))
 -&gt; Layout Double Double -&gt; Identity (Layout Double Double)
 forall x y (f :: * -&gt; *).
@@ -283,28 +283,28 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
 </span><span class="hs-identifier hs-var">G.line</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
-</span><a href="#local-6989586621679115016"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115017"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Double
-</span><a href="#local-6989586621679115018"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115019"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115017"><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115017"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115019"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115019"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
+</span><a href="#local-6989586621679116182"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116183"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Double
+</span><a href="#local-6989586621679116184"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116185"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116183"><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116183"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679116185"><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116185"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
 forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o)) =&gt;
 o -&gt; [(Duration o, Probability o)]
 </span><a href="DeltaQ.Plot.html#toXY"><span class="hs-identifier hs-var">toXY</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115015"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116181"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-92"></span><span>    </span><span class="annot"><span class="annottext">(Probability o -&gt; EC (Layout Double Double) ())
 -&gt; [Probability o] -&gt; EC (Layout Double Double) ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m ()
 </span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; EC (Layout Double Double) ()
-</span><a href="#local-6989586621679115020"><span class="hs-identifier hs-var">plotQuantile</span></a></span><span> </span><span class="annot"><span class="annottext">[Probability o]
-</span><a href="#local-6989586621679115014"><span class="hs-identifier hs-var">quantiles</span></a></span><span>
+</span><a href="#local-6989586621679116186"><span class="hs-identifier hs-var">plotQuantile</span></a></span><span> </span><span class="annot"><span class="annottext">[Probability o]
+</span><a href="#local-6989586621679116180"><span class="hs-identifier hs-var">quantiles</span></a></span><span>
 </span><span id="line-93"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-94"></span><span>    </span><span id="local-6989586621679115016"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
-</span><a href="#local-6989586621679115016"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
+</span><span id="line-94"></span><span>    </span><span id="local-6989586621679116182"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
+</span><a href="#local-6989586621679116182"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Double)
 -&gt; (Duration o -&gt; Rational) -&gt; Duration o -&gt; Double
@@ -312,8 +312,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-95"></span><span>    </span><span id="local-6989586621679115018"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; Double
-</span><a href="#local-6989586621679115018"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
+</span><span id="line-95"></span><span>    </span><span id="local-6989586621679116184"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; Double
+</span><a href="#local-6989586621679116184"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Double)
 -&gt; (Probability o -&gt; Rational) -&gt; Probability o -&gt; Double
@@ -321,20 +321,20 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-96"></span><span>    </span><span id="local-6989586621679115020"><span class="annot"><span class="annottext">plotQuantile :: Probability o -&gt; EC (Layout Double Double) ()
-</span><a href="#local-6989586621679115020"><span class="hs-identifier hs-var hs-var">plotQuantile</span></a></span></span><span> </span><span id="local-6989586621679115033"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115033"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">o -&gt; Probability o -&gt; Eventually (Duration o)
+</span><span id="line-96"></span><span>    </span><span id="local-6989586621679116186"><span class="annot"><span class="annottext">plotQuantile :: Probability o -&gt; EC (Layout Double Double) ()
+</span><a href="#local-6989586621679116186"><span class="hs-identifier hs-var hs-var">plotQuantile</span></a></span></span><span> </span><span id="local-6989586621679116199"><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116199"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">o -&gt; Probability o -&gt; Eventually (Duration o)
 forall o. DeltaQ o =&gt; o -&gt; Probability o -&gt; Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-var">quantile</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115015"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115033"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679116181"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116199"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-97"></span><span>        </span><span class="annot"><span class="annottext">Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#Abandoned"><span class="hs-identifier hs-var">Abandoned</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; EC (Layout Double Double) ()
 forall a. a -&gt; StateT (Layout Double Double) (State CState) a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-98"></span><span>        </span><span class="annot"><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-type">Occurs</span></a></span><span> </span><span id="local-6989586621679115037"><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115037"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) (PlotLines Double Double)
+</span><span id="line-98"></span><span>        </span><span class="annot"><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-type">Occurs</span></a></span><span> </span><span id="local-6989586621679116203"><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116203"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double Double) (PlotLines Double Double)
 -&gt; EC (Layout Double Double) ()
 forall (p :: * -&gt; * -&gt; *) x y.
 ToPlot p =&gt;
@@ -356,10 +356,10 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Double, Double) -&gt; PlotLines Double Double
 forall x y. (PlotValue x, PlotValue y) =&gt; (x, y) -&gt; PlotLines x y
 </span><a href="DeltaQ.Plot.html#focusOnPoint"><span class="hs-identifier hs-var">focusOnPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
-</span><a href="#local-6989586621679115016"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115037"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Double
-</span><a href="#local-6989586621679115018"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115033"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679116182"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116203"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Double
+</span><a href="#local-6989586621679116184"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116199"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-99"></span><span>
 </span><span id="line-100"></span><span class="hs-comment">{-----------------------------------------------------------------------------
     Plot
@@ -369,54 +369,54 @@ forall x y. (PlotValue x, PlotValue y) =&gt; (x, y) -&gt; PlotLines x y
 </span><span id="line-105"></span><span class="hs-comment">-- with title.</span><span>
 </span><span id="line-106"></span><span class="hs-comment">--</span><span>
 </span><span id="line-107"></span><span class="hs-comment">-- Visualizes the tail of the distribution better.</span><span>
-</span><span id="line-108"></span><span id="local-6989586621679114800"><span class="annot"><a href="DeltaQ.Plot.html#plotInverseCDF"><span class="hs-identifier hs-type">plotInverseCDF</span></a></span><span>
-</span><span id="line-109"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114800"><span class="hs-identifier hs-type">o</span></a></span><span>
-</span><span id="line-110"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114800"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-111"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114800"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-112"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114800"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-113"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114800"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-108"></span><span id="local-6989586621679115966"><span class="annot"><a href="DeltaQ.Plot.html#plotInverseCDF"><span class="hs-identifier hs-type">plotInverseCDF</span></a></span><span>
+</span><span id="line-109"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115966"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-110"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115966"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-111"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115966"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115966"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115966"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-114"></span><span>       </span><span class="hs-special">)</span><span>
 </span><span id="line-115"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Title</span></span><span>
-</span><span id="line-116"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114800"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome</span></span><span>
+</span><span id="line-116"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115966"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome</span></span><span>
 </span><span id="line-117"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.LogValue</span></span></span><span>
 </span><span id="line-118"></span><span id="plotInverseCDF"><span class="annot"><span class="annottext">plotInverseCDF :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; o -&gt; Layout Double LogValue
-</span><a href="DeltaQ.Plot.html#plotInverseCDF"><span class="hs-identifier hs-var hs-var">plotInverseCDF</span></a></span></span><span> </span><span id="local-6989586621679115049"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115049"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679115050"><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115050"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="DeltaQ.Plot.html#plotInverseCDF"><span class="hs-identifier hs-var hs-var">plotInverseCDF</span></a></span></span><span> </span><span id="local-6989586621679116215"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116215"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679116216"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679116216"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-119"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; [(String, o)] -&gt; Layout Double LogValue
 forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; [(String, o)] -&gt; Layout Double LogValue
 </span><a href="DeltaQ.Plot.html#plotInverseCDFs"><span class="hs-identifier hs-var">plotInverseCDFs</span></a></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115049"><span class="hs-identifier hs-var">title</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116215"><span class="hs-identifier hs-var">title</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115050"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116216"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-120"></span><span>
 </span><span id="line-121"></span><span class="hs-comment">-- | Plot the mulltiple inverse CDFs of a 'DeltaQ',</span><span>
 </span><span id="line-122"></span><span class="hs-comment">-- with title.</span><span>
 </span><span id="line-123"></span><span class="hs-comment">--</span><span>
 </span><span id="line-124"></span><span class="hs-comment">-- Visualizes the tail of the distribution better.</span><span>
-</span><span id="line-125"></span><span id="local-6989586621679114803"><span class="annot"><a href="DeltaQ.Plot.html#plotInverseCDFs"><span class="hs-identifier hs-type">plotInverseCDFs</span></a></span><span>
-</span><span id="line-126"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114803"><span class="hs-identifier hs-type">o</span></a></span><span>
-</span><span id="line-127"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114803"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-128"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114803"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-129"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114803"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-130"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114803"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-125"></span><span id="local-6989586621679115969"><span class="annot"><a href="DeltaQ.Plot.html#plotInverseCDFs"><span class="hs-identifier hs-type">plotInverseCDFs</span></a></span><span>
+</span><span id="line-126"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115969"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-127"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115969"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-128"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115969"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-129"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115969"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-130"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115969"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-131"></span><span>       </span><span class="hs-special">)</span><span>
 </span><span id="line-132"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Title</span></span><span>
-</span><span id="line-133"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679114803"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Outcomes with names</span><span>
+</span><span id="line-133"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="#local-6989586621679115969"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- Outcomes with names</span><span>
 </span><span id="line-134"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.LogValue</span></span></span><span>
 </span><span id="line-135"></span><span id="plotInverseCDFs"><span class="annot"><span class="annottext">plotInverseCDFs :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; [(String, o)] -&gt; Layout Double LogValue
-</span><a href="DeltaQ.Plot.html#plotInverseCDFs"><span class="hs-identifier hs-var hs-var">plotInverseCDFs</span></a></span></span><span> </span><span id="local-6989586621679115089"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115089"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679115090"><span class="annot"><span class="annottext">[(String, o)]
-</span><a href="#local-6989586621679115090"><span class="hs-identifier hs-var">namedOutcomes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) () -&gt; Layout Double LogValue
+</span><a href="DeltaQ.Plot.html#plotInverseCDFs"><span class="hs-identifier hs-var hs-var">plotInverseCDFs</span></a></span></span><span> </span><span id="local-6989586621679116255"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116255"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679116256"><span class="annot"><span class="annottext">[(String, o)]
+</span><a href="#local-6989586621679116256"><span class="hs-identifier hs-var">namedOutcomes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) () -&gt; Layout Double LogValue
 forall l a. Default l =&gt; EC l a -&gt; l
 </span><span class="hs-identifier hs-var">G.execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout Double LogValue) () -&gt; Layout Double LogValue)
 -&gt; EC (Layout Double LogValue) () -&gt; Layout Double LogValue
@@ -434,7 +434,7 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115089"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><a href="#local-6989586621679116255"><span class="hs-identifier hs-var">title</span></a></span><span>
 </span><span id="line-137"></span><span>    </span><span class="annot"><span class="annottext">[o] -&gt; EC (Layout Double LogValue) ()
 forall o y.
 (DeltaQ o, Real (Duration o), Fractional (Duration o),
@@ -445,7 +445,7 @@ forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
 </span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="annot"><span class="annottext">(String, o) -&gt; o
 forall a b. (a, b) -&gt; b
 </span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">[(String, o)]
-</span><a href="#local-6989586621679115090"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679116256"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-138"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis LogValue -&gt; Identity (LayoutAxis LogValue))
 -&gt; Layout Double LogValue -&gt; Identity (Layout Double LogValue)
 forall x y (f :: * -&gt; *).
@@ -478,11 +478,11 @@ forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m ()
 </span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">(String, o) -&gt; EC (Layout Double LogValue) ()
-</span><a href="#local-6989586621679115091"><span class="hs-identifier hs-var">plotOne</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, o)]
-</span><a href="#local-6989586621679115090"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span>
+</span><a href="#local-6989586621679116257"><span class="hs-identifier hs-var">plotOne</span></a></span><span> </span><span class="annot"><span class="annottext">[(String, o)]
+</span><a href="#local-6989586621679116256"><span class="hs-identifier hs-var">namedOutcomes</span></a></span><span>
 </span><span id="line-140"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-141"></span><span>    </span><span id="local-6989586621679115098"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
-</span><a href="#local-6989586621679115098"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
+</span><span id="line-141"></span><span>    </span><span id="local-6989586621679116264"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
+</span><a href="#local-6989586621679116264"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Double)
 -&gt; (Duration o -&gt; Rational) -&gt; Duration o -&gt; Double
@@ -490,8 +490,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-142"></span><span>    </span><span id="local-6989586621679115106"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; LogValue
-</span><a href="#local-6989586621679115106"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; LogValue
+</span><span id="line-142"></span><span>    </span><span id="local-6989586621679116272"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; LogValue
+</span><a href="#local-6989586621679116272"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; LogValue
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; LogValue)
 -&gt; (Probability o -&gt; Rational) -&gt; Probability o -&gt; LogValue
@@ -499,10 +499,10 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-143"></span><span>    </span><span id="local-6989586621679115091"><span class="annot"><span class="annottext">plotOne :: (String, o) -&gt; EC (Layout Double LogValue) ()
-</span><a href="#local-6989586621679115091"><span class="hs-identifier hs-var hs-var">plotOne</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115107"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115107"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115108"><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115108"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) (PlotLines Double LogValue)
+</span><span id="line-143"></span><span>    </span><span id="local-6989586621679116257"><span class="annot"><span class="annottext">plotOne :: (String, o) -&gt; EC (Layout Double LogValue) ()
+</span><a href="#local-6989586621679116257"><span class="hs-identifier hs-var hs-var">plotOne</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116273"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116273"><span class="hs-identifier hs-var">t</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679116274"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679116274"><span class="hs-identifier hs-var">o</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) (PlotLines Double LogValue)
 -&gt; EC (Layout Double LogValue) ()
 forall (p :: * -&gt; * -&gt; *) x y.
 ToPlot p =&gt;
@@ -517,45 +517,45 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; EC (Layout Double LogValue) (PlotLines Double LogValue)
 forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
 </span><span class="hs-identifier hs-var">G.line</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115107"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
-</span><a href="#local-6989586621679115098"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115109"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LogValue
+</span><a href="#local-6989586621679116273"><span class="hs-identifier hs-var">t</span></a></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
+</span><a href="#local-6989586621679116264"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116275"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LogValue
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">LogValue -&gt; LogValue -&gt; LogValue
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; LogValue
-</span><a href="#local-6989586621679115106"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115110"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115109"><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115109"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115110"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115110"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
+</span><a href="#local-6989586621679116272"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116276"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116275"><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116275"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679116276"><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116276"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
 forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o)) =&gt;
 o -&gt; [(Duration o, Probability o)]
 </span><a href="DeltaQ.Plot.html#toXY"><span class="hs-identifier hs-var">toXY</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115108"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116274"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-144"></span><span>
 </span><span id="line-145"></span><span class="hs-comment">-- | Plot the cumulative distribution function (CDF) of a 'DeltaQ',</span><span>
 </span><span id="line-146"></span><span class="hs-comment">-- with title, and annotated with quantiles.</span><span>
 </span><span id="line-147"></span><span class="hs-comment">--</span><span>
 </span><span id="line-148"></span><span class="hs-comment">-- Visualizes the tail of the distribution better.</span><span>
-</span><span id="line-149"></span><span id="local-6989586621679114806"><span class="annot"><a href="DeltaQ.Plot.html#plotInverseCDFWithQuantiles"><span class="hs-identifier hs-type">plotInverseCDFWithQuantiles</span></a></span><span>
-</span><span id="line-150"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114806"><span class="hs-identifier hs-type">o</span></a></span><span>
-</span><span id="line-151"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114806"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-152"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114806"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-153"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114806"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-154"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114806"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-149"></span><span id="local-6989586621679115972"><span class="annot"><a href="DeltaQ.Plot.html#plotInverseCDFWithQuantiles"><span class="hs-identifier hs-type">plotInverseCDFWithQuantiles</span></a></span><span>
+</span><span id="line-150"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115972"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-151"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115972"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-152"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115972"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-153"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115972"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-154"></span><span>       </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115972"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-155"></span><span>       </span><span class="hs-special">)</span><span>
 </span><span id="line-156"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Title</span></span><span>
-</span><span id="line-157"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114806"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Quantiles to highlight</span></span><span>
-</span><span id="line-158"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114806"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to plot</span></span><span>
+</span><span id="line-157"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115972"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="hs-comment">-- ^ Quantiles to highlight</span></span><span>
+</span><span id="line-158"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115972"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to plot</span></span><span>
 </span><span id="line-159"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.LogValue</span></span></span><span>
 </span><span id="line-160"></span><span id="plotInverseCDFWithQuantiles"><span class="annot"><span class="annottext">plotInverseCDFWithQuantiles :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o),
  Real (Duration o), Real (Probability o)) =&gt;
 String -&gt; [Probability o] -&gt; o -&gt; Layout Double LogValue
-</span><a href="DeltaQ.Plot.html#plotInverseCDFWithQuantiles"><span class="hs-identifier hs-var hs-var">plotInverseCDFWithQuantiles</span></a></span></span><span> </span><span id="local-6989586621679115156"><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115156"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679115157"><span class="annot"><span class="annottext">[Probability o]
-</span><a href="#local-6989586621679115157"><span class="hs-identifier hs-var">quantiles</span></a></span></span><span> </span><span id="local-6989586621679115158"><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115158"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) () -&gt; Layout Double LogValue
+</span><a href="DeltaQ.Plot.html#plotInverseCDFWithQuantiles"><span class="hs-identifier hs-var hs-var">plotInverseCDFWithQuantiles</span></a></span></span><span> </span><span id="local-6989586621679116322"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679116322"><span class="hs-identifier hs-var">title</span></a></span></span><span> </span><span id="local-6989586621679116323"><span class="annot"><span class="annottext">[Probability o]
+</span><a href="#local-6989586621679116323"><span class="hs-identifier hs-var">quantiles</span></a></span></span><span> </span><span id="local-6989586621679116324"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679116324"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) () -&gt; Layout Double LogValue
 forall l a. Default l =&gt; EC l a -&gt; l
 </span><span class="hs-identifier hs-var">G.execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (Layout Double LogValue) () -&gt; Layout Double LogValue)
 -&gt; EC (Layout Double LogValue) () -&gt; Layout Double LogValue
@@ -573,14 +573,14 @@ forall s (m :: * -&gt; *) a b.
 MonadState s m =&gt;
 ASetter s s a b -&gt; b -&gt; m ()
 </span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">String
-</span><a href="#local-6989586621679115156"><span class="hs-identifier hs-var">title</span></a></span><span>
+</span><a href="#local-6989586621679116322"><span class="hs-identifier hs-var">title</span></a></span><span>
 </span><span id="line-162"></span><span>    </span><span class="annot"><span class="annottext">[o] -&gt; EC (Layout Double LogValue) ()
 forall o y.
 (DeltaQ o, Real (Duration o), Fractional (Duration o),
  PlotValue y) =&gt;
 [o] -&gt; EC (Layout Double y) ()
 </span><a href="DeltaQ.Plot.html#add_x_axis"><span class="hs-identifier hs-var">add_x_axis</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115158"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116324"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-163"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis LogValue -&gt; Identity (LayoutAxis LogValue))
 -&gt; Layout Double LogValue -&gt; Identity (Layout Double LogValue)
 forall x y (f :: * -&gt; *).
@@ -623,31 +623,31 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 forall x y l. String -&gt; [[(x, y)]] -&gt; EC l (PlotLines x y)
 </span><span class="hs-identifier hs-var">G.line</span></span><span> </span><span class="annot"><span class="annottext">String
 </span><span class="hs-string">&quot;&quot;</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
-</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115160"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LogValue
+</span><a href="#local-6989586621679116325"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116326"><span class="hs-identifier hs-var">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">LogValue
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">LogValue -&gt; LogValue -&gt; LogValue
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; LogValue
-</span><a href="#local-6989586621679115161"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115162"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115160"><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115160"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679115162"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115162"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
+</span><a href="#local-6989586621679116327"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116328"><span class="hs-identifier hs-var">b</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">|</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116326"><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116326"><span class="hs-identifier hs-var">a</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679116328"><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116328"><span class="hs-identifier hs-var">b</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">o -&gt; [(Duration o, Probability o)]
 forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o)) =&gt;
 o -&gt; [(Duration o, Probability o)]
 </span><a href="DeltaQ.Plot.html#toXY"><span class="hs-identifier hs-var">toXY</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115158"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116324"><span class="hs-identifier hs-var">o</span></a></span><span class="hs-special">]</span><span class="hs-special">]</span><span>
 </span><span id="line-165"></span><span>    </span><span class="annot"><span class="annottext">(Probability o -&gt; EC (Layout Double LogValue) ())
 -&gt; [Probability o] -&gt; EC (Layout Double LogValue) ()
 forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
 (Foldable t, Monad m) =&gt;
 (a -&gt; m b) -&gt; t a -&gt; m ()
 </span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; EC (Layout Double LogValue) ()
-</span><a href="#local-6989586621679115163"><span class="hs-identifier hs-var">plotQuantile</span></a></span><span> </span><span class="annot"><span class="annottext">[Probability o]
-</span><a href="#local-6989586621679115157"><span class="hs-identifier hs-var">quantiles</span></a></span><span>
+</span><a href="#local-6989586621679116329"><span class="hs-identifier hs-var">plotQuantile</span></a></span><span> </span><span class="annot"><span class="annottext">[Probability o]
+</span><a href="#local-6989586621679116323"><span class="hs-identifier hs-var">quantiles</span></a></span><span>
 </span><span id="line-166"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-167"></span><span>    </span><span id="local-6989586621679115159"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
-</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
+</span><span id="line-167"></span><span>    </span><span id="local-6989586621679116325"><span class="annot"><span class="annottext">cv1 :: Duration o -&gt; Double
+</span><a href="#local-6989586621679116325"><span class="hs-identifier hs-var hs-var">cv1</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Double)
 -&gt; (Duration o -&gt; Rational) -&gt; Duration o -&gt; Double
@@ -655,8 +655,8 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-168"></span><span>    </span><span id="local-6989586621679115161"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; LogValue
-</span><a href="#local-6989586621679115161"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; LogValue
+</span><span id="line-168"></span><span>    </span><span id="local-6989586621679116327"><span class="annot"><span class="annottext">cv2 :: Probability o -&gt; LogValue
+</span><a href="#local-6989586621679116327"><span class="hs-identifier hs-var hs-var">cv2</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; LogValue
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; LogValue)
 -&gt; (Probability o -&gt; Rational) -&gt; Probability o -&gt; LogValue
@@ -664,20 +664,20 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-169"></span><span>    </span><span id="local-6989586621679115163"><span class="annot"><span class="annottext">plotQuantile :: Probability o -&gt; EC (Layout Double LogValue) ()
-</span><a href="#local-6989586621679115163"><span class="hs-identifier hs-var hs-var">plotQuantile</span></a></span></span><span> </span><span id="local-6989586621679115176"><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115176"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">o -&gt; Probability o -&gt; Eventually (Duration o)
+</span><span id="line-169"></span><span>    </span><span id="local-6989586621679116329"><span class="annot"><span class="annottext">plotQuantile :: Probability o -&gt; EC (Layout Double LogValue) ()
+</span><a href="#local-6989586621679116329"><span class="hs-identifier hs-var hs-var">plotQuantile</span></a></span></span><span> </span><span id="local-6989586621679116342"><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116342"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">o -&gt; Probability o -&gt; Eventually (Duration o)
 forall o. DeltaQ o =&gt; o -&gt; Probability o -&gt; Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#quantile"><span class="hs-identifier hs-var">quantile</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115158"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115176"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679116324"><span class="hs-identifier hs-var">o</span></a></span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116342"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-170"></span><span>        </span><span class="annot"><span class="annottext">Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#Abandoned"><span class="hs-identifier hs-var">Abandoned</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">() -&gt; EC (Layout Double LogValue) ()
 forall a. a -&gt; StateT (Layout Double LogValue) (State CState) a
 forall (f :: * -&gt; *) a. Applicative f =&gt; a -&gt; f a
 </span><span class="hs-identifier hs-var">pure</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
-</span><span id="line-171"></span><span>        </span><span class="annot"><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-type">Occurs</span></a></span><span> </span><span id="local-6989586621679115177"><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115177"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) (PlotLines Double LogValue)
+</span><span id="line-171"></span><span>        </span><span class="annot"><a href="DeltaQ.Class.html#Occurs"><span class="hs-identifier hs-type">Occurs</span></a></span><span> </span><span id="local-6989586621679116343"><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116343"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">EC (Layout Double LogValue) (PlotLines Double LogValue)
 -&gt; EC (Layout Double LogValue) ()
 forall (p :: * -&gt; * -&gt; *) x y.
 ToPlot p =&gt;
@@ -699,29 +699,29 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Double, LogValue) -&gt; PlotLines Double LogValue
 forall x y. (PlotValue x, PlotValue y) =&gt; (x, y) -&gt; PlotLines x y
 </span><a href="DeltaQ.Plot.html#focusOnPoint"><span class="hs-identifier hs-var">focusOnPoint</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o -&gt; Double
-</span><a href="#local-6989586621679115159"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115177"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; LogValue
-</span><a href="#local-6989586621679115161"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116325"><span class="hs-identifier hs-var">cv1</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116343"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; LogValue
+</span><a href="#local-6989586621679116327"><span class="hs-identifier hs-var">cv2</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Probability o
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Probability o -&gt; Probability o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115176"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679116342"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-172"></span><span>
 </span><span id="line-173"></span><span class="hs-comment">{-----------------------------------------------------------------------------
     Helper functions
     Plot
 ------------------------------------------------------------------------------}</span><span>
 </span><span id="line-177"></span><span class="annot"><span class="hs-comment">-- | Add a common @x@-axis to the plot.</span></span><span>
-</span><span id="line-178"></span><span id="local-6989586621679114763"><span id="local-6989586621679114764"><span class="annot"><a href="DeltaQ.Plot.html#add_x_axis"><span class="hs-identifier hs-type">add_x_axis</span></a></span><span> </span><span>
-</span><span id="line-179"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114763"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114763"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114763"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.PlotValue</span></span><span> </span><span class="annot"><a href="#local-6989586621679114764"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-180"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679114763"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">]</span><span>
-</span><span id="line-181"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.EC</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><a href="#local-6989586621679114764"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
+</span><span id="line-178"></span><span id="local-6989586621679115929"><span id="local-6989586621679115930"><span class="annot"><a href="DeltaQ.Plot.html#add_x_axis"><span class="hs-identifier hs-type">add_x_axis</span></a></span><span> </span><span>
+</span><span id="line-179"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115929"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Real</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115929"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115929"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.PlotValue</span></span><span> </span><span class="annot"><a href="#local-6989586621679115930"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-180"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679115929"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-181"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.EC</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">G.Layout</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><a href="#local-6989586621679115930"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span></span></span><span>
 </span><span id="line-182"></span><span id="add_x_axis"><span class="annot"><span class="annottext">add_x_axis :: forall o y.
 (DeltaQ o, Real (Duration o), Fractional (Duration o),
  PlotValue y) =&gt;
 [o] -&gt; EC (Layout Double y) ()
-</span><a href="DeltaQ.Plot.html#add_x_axis"><span class="hs-identifier hs-var hs-var">add_x_axis</span></a></span></span><span> </span><span id="local-6989586621679115211"><span class="annot"><span class="annottext">[o]
-</span><a href="#local-6989586621679115211"><span class="hs-identifier hs-var">outcomes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="DeltaQ.Plot.html#add_x_axis"><span class="hs-identifier hs-var hs-var">add_x_axis</span></a></span></span><span> </span><span id="local-6989586621679116377"><span class="annot"><span class="annottext">[o]
+</span><a href="#local-6989586621679116377"><span class="hs-identifier hs-var">outcomes</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-183"></span><span>    </span><span class="annot"><span class="annottext">(LayoutAxis Double -&gt; Identity (LayoutAxis Double))
 -&gt; Layout Double y -&gt; Identity (Layout Double y)
 forall x y (f :: * -&gt; *).
@@ -779,8 +779,8 @@ ASetter s s a b -&gt; b -&gt; m ()
 forall b a. b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
 </span><span class="hs-identifier hs-var">maybe</span></span><span> </span><span class="annot"><span class="annottext">AxisFn Double
 forall a. PlotValue a =&gt; AxisFn a
-</span><span class="hs-identifier hs-var">G.autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679115216"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679115216"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams Double -&gt; (Double, Double) -&gt; AxisFn Double
+</span><span class="hs-identifier hs-var">G.autoAxis</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679116382"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679116382"><span class="hs-identifier hs-var">u'</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">LinearAxisParams Double -&gt; (Double, Double) -&gt; AxisFn Double
 forall a. RealFloat a =&gt; LinearAxisParams a -&gt; (a, a) -&gt; AxisFn a
 </span><span class="hs-identifier hs-var">G.scaledAxis</span></span><span> </span><span class="annot"><span class="annottext">LinearAxisParams Double
 forall a. Default a =&gt; a
@@ -789,11 +789,11 @@ forall a. Default a =&gt; a
 </span><span class="hs-number">1.05</span></span><span> </span><span class="annot"><span class="annottext">Double -&gt; Double -&gt; Double
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679115216"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe Double
-</span><a href="#local-6989586621679115220"><span class="hs-identifier hs-var">maxX</span></a></span><span>
+</span><a href="#local-6989586621679116382"><span class="hs-identifier hs-var">u'</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Maybe Double
+</span><a href="#local-6989586621679116386"><span class="hs-identifier hs-var">maxX</span></a></span><span>
 </span><span id="line-187"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-188"></span><span>    </span><span id="local-6989586621679115227"><span class="annot"><span class="annottext">fromDuration :: Duration o -&gt; Double
-</span><a href="#local-6989586621679115227"><span class="hs-identifier hs-var hs-var">fromDuration</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
+</span><span id="line-188"></span><span>    </span><span id="local-6989586621679116393"><span class="annot"><span class="annottext">fromDuration :: Duration o -&gt; Double
+</span><a href="#local-6989586621679116393"><span class="hs-identifier hs-var hs-var">fromDuration</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Rational -&gt; Double
 forall a. Fractional a =&gt; Rational -&gt; a
 </span><span class="hs-identifier hs-var">fromRational</span></span><span> </span><span class="annot"><span class="annottext">(Rational -&gt; Double)
 -&gt; (Duration o -&gt; Rational) -&gt; Duration o -&gt; Double
@@ -801,9 +801,9 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Rational
 forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span>
-</span><span id="line-189"></span><span>    </span><span id="local-6989586621679115220"><span class="annot"><span class="annottext">maxX :: Maybe Double
-</span><a href="#local-6989586621679115220"><span class="hs-identifier hs-var hs-var">maxX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[o]
-</span><a href="#local-6989586621679115211"><span class="hs-identifier hs-var">outcomes</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-189"></span><span>    </span><span id="local-6989586621679116386"><span class="annot"><span class="annottext">maxX :: Maybe Double
+</span><a href="#local-6989586621679116386"><span class="hs-identifier hs-var hs-var">maxX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[o]
+</span><a href="#local-6989586621679116377"><span class="hs-identifier hs-var">outcomes</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-190"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Maybe Double
 forall a. Maybe a
 </span><span class="hs-identifier hs-var">Nothing</span></span><span>
@@ -813,7 +813,7 @@ forall a. Maybe a
 forall a b. (a -&gt; b) -&gt; Maybe a -&gt; Maybe b
 forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
 </span><span class="hs-identifier hs-var">fmap</span></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Double
-</span><a href="#local-6989586621679115227"><span class="hs-identifier hs-var">fromDuration</span></a></span><span>
+</span><a href="#local-6989586621679116393"><span class="hs-identifier hs-var">fromDuration</span></a></span><span>
 </span><span id="line-193"></span><span>            </span><span class="annot"><span class="annottext">(Maybe (Duration o) -&gt; Maybe Double)
 -&gt; Maybe (Duration o) -&gt; Maybe Double
 forall a b. (a -&gt; b) -&gt; a -&gt; b
@@ -834,16 +834,16 @@ forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
 </span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">o -&gt; Eventually (Duration o)
 forall o. DeltaQ o =&gt; o -&gt; Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#deadline"><span class="hs-identifier hs-var">deadline</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[o]
-</span><a href="#local-6989586621679115211"><span class="hs-identifier hs-var">outcomes</span></a></span><span>
+</span><a href="#local-6989586621679116377"><span class="hs-identifier hs-var">outcomes</span></a></span><span>
 </span><span id="line-195"></span><span>
 </span><span id="line-196"></span><span class="annot"><span class="hs-comment">-- | Focus on a point by plotting dashed lines that connect it to the axes.</span></span><span>
-</span><span id="line-197"></span><span id="local-6989586621679114798"><span id="local-6989586621679114799"><span class="annot"><a href="DeltaQ.Plot.html#focusOnPoint"><span class="hs-identifier hs-type">focusOnPoint</span></a></span><span>
-</span><span id="line-198"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">G.PlotValue</span></span><span> </span><span class="annot"><a href="#local-6989586621679114798"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.PlotValue</span></span><span> </span><span class="annot"><a href="#local-6989586621679114799"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-199"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679114798"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679114799"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.PlotLines</span></span><span> </span><span class="annot"><a href="#local-6989586621679114798"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114799"><span class="hs-identifier hs-type">y</span></a></span></span></span><span>
+</span><span id="line-197"></span><span id="local-6989586621679115964"><span id="local-6989586621679115965"><span class="annot"><a href="DeltaQ.Plot.html#focusOnPoint"><span class="hs-identifier hs-type">focusOnPoint</span></a></span><span>
+</span><span id="line-198"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">G.PlotValue</span></span><span> </span><span class="annot"><a href="#local-6989586621679115964"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.PlotValue</span></span><span> </span><span class="annot"><a href="#local-6989586621679115965"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-199"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="#local-6989586621679115964"><span class="hs-identifier hs-type">x</span></a></span><span class="hs-special">,</span><span class="annot"><a href="#local-6989586621679115965"><span class="hs-identifier hs-type">y</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">G.PlotLines</span></span><span> </span><span class="annot"><a href="#local-6989586621679115964"><span class="hs-identifier hs-type">x</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115965"><span class="hs-identifier hs-type">y</span></a></span></span></span><span>
 </span><span id="line-200"></span><span id="focusOnPoint"><span class="annot"><span class="annottext">focusOnPoint :: forall x y. (PlotValue x, PlotValue y) =&gt; (x, y) -&gt; PlotLines x y
-</span><a href="DeltaQ.Plot.html#focusOnPoint"><span class="hs-identifier hs-var hs-var">focusOnPoint</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115248"><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679115248"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679115249"><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679115249"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotLines x y) () -&gt; PlotLines x y
+</span><a href="DeltaQ.Plot.html#focusOnPoint"><span class="hs-identifier hs-var hs-var">focusOnPoint</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116414"><span class="annot"><span class="annottext">x
+</span><a href="#local-6989586621679116414"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span id="local-6989586621679116415"><span class="annot"><span class="annottext">y
+</span><a href="#local-6989586621679116415"><span class="hs-identifier hs-var">y</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">EC (PlotLines x y) () -&gt; PlotLines x y
 forall l a. Default l =&gt; EC l a -&gt; l
 </span><span class="hs-identifier hs-var">G.execEC</span></span><span> </span><span class="annot"><span class="annottext">(EC (PlotLines x y) () -&gt; PlotLines x y)
 -&gt; EC (PlotLines x y) () -&gt; PlotLines x y
@@ -918,23 +918,23 @@ forall a. Limit a
 </span><span class="hs-identifier hs-var">G.LMin</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">y -&gt; Limit y
 forall a. a -&gt; Limit a
 </span><span class="hs-identifier hs-var">G.LValue</span></span><span> </span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679115249"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x -&gt; Limit x
+</span><a href="#local-6989586621679116415"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x -&gt; Limit x
 forall a. a -&gt; Limit a
 </span><span class="hs-identifier hs-var">G.LValue</span></span><span> </span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679115248"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">y -&gt; Limit y
+</span><a href="#local-6989586621679116414"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">y -&gt; Limit y
 forall a. a -&gt; Limit a
 </span><span class="hs-identifier hs-var">G.LValue</span></span><span> </span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679115249"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116415"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-205"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">x -&gt; Limit x
 forall a. a -&gt; Limit a
 </span><span class="hs-identifier hs-var">G.LValue</span></span><span> </span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679115248"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">y -&gt; Limit y
+</span><a href="#local-6989586621679116414"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">y -&gt; Limit y
 forall a. a -&gt; Limit a
 </span><span class="hs-identifier hs-var">G.LValue</span></span><span> </span><span class="annot"><span class="annottext">y
-</span><a href="#local-6989586621679115249"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x -&gt; Limit x
+</span><a href="#local-6989586621679116415"><span class="hs-identifier hs-var">y</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">x -&gt; Limit x
 forall a. a -&gt; Limit a
 </span><span class="hs-identifier hs-var">G.LValue</span></span><span> </span><span class="annot"><span class="annottext">x
-</span><a href="#local-6989586621679115248"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Limit y
+</span><a href="#local-6989586621679116414"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Limit y
 forall a. Limit a
 </span><span class="hs-identifier hs-var">G.LMin</span></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
 </span><span id="line-206"></span><span>        </span><span class="hs-special">]</span><span>
@@ -944,10 +944,10 @@ forall a. Limit a
     Calculations
 ------------------------------------------------------------------------------}</span><span>
 </span><span id="line-212"></span><span class="annot"><span class="hs-comment">-- | Create a graph for an 'Outcome', with sensible defaults for plotting.</span></span><span>
-</span><span id="line-213"></span><span id="local-6989586621679114788"><span class="annot"><a href="DeltaQ.Plot.html#toXY"><span class="hs-identifier hs-type">toXY</span></a></span><span>
-</span><span id="line-214"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114788"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114788"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114788"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-215"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114788"><span class="hs-identifier hs-type">o</span></a></span><span>
-</span><span id="line-216"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114788"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114788"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span><span>
+</span><span id="line-213"></span><span id="local-6989586621679115954"><span class="annot"><a href="DeltaQ.Plot.html#toXY"><span class="hs-identifier hs-type">toXY</span></a></span><span>
+</span><span id="line-214"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115954"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115954"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115954"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-215"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679115954"><span class="hs-identifier hs-type">o</span></a></span><span>
+</span><span id="line-216"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115954"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679115954"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span><span>
 </span><span id="line-217"></span><span id="toXY"><span class="annot"><span class="annottext">toXY :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o)) =&gt;
 o -&gt; [(Duration o, Probability o)]
@@ -960,51 +960,51 @@ Int -&gt; Double -&gt; o -&gt; [(Duration o, Probability o)]
 </span><span class="hs-number">0.05</span></span><span>
 </span><span id="line-218"></span><span>
 </span><span id="line-219"></span><span class="annot"><span class="hs-comment">-- | Create a graph for an 'Outcome', given some parameters.</span></span><span>
-</span><span id="line-220"></span><span id="local-6989586621679114850"><span class="annot"><a href="DeltaQ.Plot.html#toXY%27"><span class="hs-identifier hs-type">toXY'</span></a></span><span>
-</span><span id="line-221"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114850"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114850"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114850"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-220"></span><span id="local-6989586621679116016"><span class="annot"><a href="DeltaQ.Plot.html#toXY%27"><span class="hs-identifier hs-type">toXY'</span></a></span><span>
+</span><span id="line-221"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#DeltaQ"><span class="hs-identifier hs-type">DeltaQ</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679116016"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Enum</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679116016"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679116016"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-222"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Int</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Number of points to plot.</span></span><span>
 </span><span id="line-223"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Double</span></span><span> </span><span class="annot"><span class="hs-comment">-- ^ \&quot;Overshoot\&quot; (as a fraction of the range)</span></span><span>
-</span><span id="line-224"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679114850"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to convert</span></span><span>
-</span><span id="line-225"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114850"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679114850"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span><span>
+</span><span id="line-224"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="#local-6989586621679116016"><span class="hs-identifier hs-type">o</span></a></span><span> </span><span class="annot"><span class="hs-comment">-- ^ Outcome to convert</span></span><span>
+</span><span id="line-225"></span><span>    </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><a href="DeltaQ.Class.html#Duration"><span class="hs-identifier hs-type">Duration</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679116016"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="DeltaQ.Class.html#Probability"><span class="hs-identifier hs-type">Probability</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679116016"><span class="hs-identifier hs-type">o</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span></span><span>
 </span><span id="line-226"></span><span id="toXY%27"><span class="annot"><span class="annottext">toXY' :: forall o.
 (DeltaQ o, Enum (Duration o), Fractional (Duration o)) =&gt;
 Int -&gt; Double -&gt; o -&gt; [(Duration o, Probability o)]
-</span><a href="DeltaQ.Plot.html#toXY%27"><span class="hs-identifier hs-var hs-var">toXY'</span></a></span></span><span> </span><span id="local-6989586621679115311"><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679115311"><span class="hs-identifier hs-var">numPoints</span></a></span></span><span> </span><span id="local-6989586621679115312"><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679115312"><span class="hs-identifier hs-var">overshoot</span></a></span></span><span> </span><span id="local-6989586621679115313"><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115313"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="DeltaQ.Plot.html#toXY%27"><span class="hs-identifier hs-var hs-var">toXY'</span></a></span></span><span> </span><span id="local-6989586621679116477"><span class="annot"><span class="annottext">Int
+</span><a href="#local-6989586621679116477"><span class="hs-identifier hs-var">numPoints</span></a></span></span><span> </span><span id="local-6989586621679116478"><span class="annot"><span class="annottext">Double
+</span><a href="#local-6989586621679116478"><span class="hs-identifier hs-var">overshoot</span></a></span></span><span> </span><span id="local-6989586621679116479"><span class="annot"><span class="annottext">o
+</span><a href="#local-6989586621679116479"><span class="hs-identifier hs-var">o</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-227"></span><span>    </span><span class="annot"><span class="annottext">[(Duration o, Probability o)] -&gt; [(Duration o, Probability o)]
 forall a. Eq a =&gt; [a] -&gt; [a]
 </span><a href="DeltaQ.Plot.html#deduplicate"><span class="hs-identifier hs-var">deduplicate</span></a></span><span> </span><span class="annot"><span class="annottext">([(Duration o, Probability o)] -&gt; [(Duration o, Probability o)])
 -&gt; [(Duration o, Probability o)] -&gt; [(Duration o, Probability o)]
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">[(Duration o, Probability o)]
-</span><a href="#local-6989586621679115315"><span class="hs-identifier hs-var">leftEdge</span></a></span><span> </span><span class="annot"><span class="annottext">[(Duration o, Probability o)]
+</span><a href="#local-6989586621679116481"><span class="hs-identifier hs-var">leftEdge</span></a></span><span> </span><span class="annot"><span class="annottext">[(Duration o, Probability o)]
 -&gt; [(Duration o, Probability o)] -&gt; [(Duration o, Probability o)]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[(Duration o, Probability o)]
-</span><a href="#local-6989586621679115316"><span class="hs-identifier hs-var">middle</span></a></span><span> </span><span class="annot"><span class="annottext">[(Duration o, Probability o)]
+</span><a href="#local-6989586621679116482"><span class="hs-identifier hs-var">middle</span></a></span><span> </span><span class="annot"><span class="annottext">[(Duration o, Probability o)]
 -&gt; [(Duration o, Probability o)] -&gt; [(Duration o, Probability o)]
 forall a. Semigroup a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">&lt;&gt;</span></span><span> </span><span class="annot"><span class="annottext">[(Duration o, Probability o)]
-</span><a href="#local-6989586621679115317"><span class="hs-identifier hs-var">rightEdge</span></a></span><span>
+</span><a href="#local-6989586621679116483"><span class="hs-identifier hs-var">rightEdge</span></a></span><span>
 </span><span id="line-228"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-229"></span><span>    </span><span id="local-6989586621679115318"><span class="annot"><span class="annottext">range :: Duration o
-</span><a href="#local-6989586621679115318"><span class="hs-identifier hs-var hs-var">range</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115319"><span class="hs-identifier hs-var">upperX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><span id="line-229"></span><span>    </span><span id="local-6989586621679116484"><span class="annot"><span class="annottext">range :: Duration o
+</span><a href="#local-6989586621679116484"><span class="hs-identifier hs-var hs-var">range</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116485"><span class="hs-identifier hs-var">upperX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115320"><span class="hs-identifier hs-var">lowerX</span></a></span><span>
-</span><span id="line-230"></span><span>    </span><span id="local-6989586621679115321"><span class="annot"><span class="annottext">eps :: Duration o
-</span><a href="#local-6989586621679115321"><span class="hs-identifier hs-var hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115318"><span class="hs-identifier hs-var">range</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116486"><span class="hs-identifier hs-var">lowerX</span></a></span><span>
+</span><span id="line-230"></span><span>    </span><span id="local-6989586621679116487"><span class="annot"><span class="annottext">eps :: Duration o
+</span><a href="#local-6989586621679116487"><span class="hs-identifier hs-var hs-var">eps</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116484"><span class="hs-identifier hs-var">range</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Fractional a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">/</span></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Duration o
 forall a b. (Integral a, Num b) =&gt; a -&gt; b
 </span><span class="hs-identifier hs-var">fromIntegral</span></span><span> </span><span class="annot"><span class="annottext">Int
-</span><a href="#local-6989586621679115311"><span class="hs-identifier hs-var">numPoints</span></a></span><span>
-</span><span id="line-231"></span><span>    </span><span id="local-6989586621679115320"><span class="annot"><span class="annottext">lowerX :: Duration o
-</span><a href="#local-6989586621679115320"><span class="hs-identifier hs-var hs-var">lowerX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116477"><span class="hs-identifier hs-var">numPoints</span></a></span><span>
+</span><span id="line-231"></span><span>    </span><span id="local-6989586621679116486"><span class="annot"><span class="annottext">lowerX :: Duration o
+</span><a href="#local-6989586621679116486"><span class="hs-identifier hs-var hs-var">lowerX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
 -&gt; (Duration o -&gt; Duration o)
 -&gt; Eventually (Duration o)
 -&gt; Duration o
@@ -1018,15 +1018,15 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">o -&gt; Eventually (Duration o)
 forall o. DeltaQ o =&gt; o -&gt; Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#earliest"><span class="hs-identifier hs-var">earliest</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115313"><span class="hs-identifier hs-var">o</span></a></span><span>
-</span><span id="line-232"></span><span>    </span><span id="local-6989586621679115319"><span class="annot"><span class="annottext">upperX :: Duration o
-</span><a href="#local-6989586621679115319"><span class="hs-identifier hs-var hs-var">upperX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116479"><span class="hs-identifier hs-var">o</span></a></span><span>
+</span><span id="line-232"></span><span>    </span><span id="local-6989586621679116485"><span class="annot"><span class="annottext">upperX :: Duration o
+</span><a href="#local-6989586621679116485"><span class="hs-identifier hs-var hs-var">upperX</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
 -&gt; (Duration o -&gt; Duration o)
 -&gt; Eventually (Duration o)
 -&gt; Duration o
 forall b a. b -&gt; (a -&gt; b) -&gt; Eventually a -&gt; b
 </span><a href="DeltaQ.Class.html#eventually"><span class="hs-identifier hs-var">eventually</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115325"><span class="hs-identifier hs-var">halfLifeCarbon14</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116491"><span class="hs-identifier hs-var">halfLifeCarbon14</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o
 forall a. a -&gt; a
 </span><span class="hs-identifier hs-var">id</span></span><span> </span><span class="annot"><span class="annottext">(Eventually (Duration o) -&gt; Duration o)
 -&gt; Eventually (Duration o) -&gt; Duration o
@@ -1034,9 +1034,9 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">o -&gt; Eventually (Duration o)
 forall o. DeltaQ o =&gt; o -&gt; Eventually (Duration o)
 </span><a href="DeltaQ.Class.html#deadline"><span class="hs-identifier hs-var">deadline</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115313"><span class="hs-identifier hs-var">o</span></a></span><span>
-</span><span id="line-233"></span><span>    </span><span id="local-6989586621679115325"><span class="annot"><span class="annottext">halfLifeCarbon14 :: Duration o
-</span><a href="#local-6989586621679115325"><span class="hs-identifier hs-var hs-var">halfLifeCarbon14</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116479"><span class="hs-identifier hs-var">o</span></a></span><span>
+</span><span id="line-233"></span><span>    </span><span id="local-6989586621679116491"><span class="annot"><span class="annottext">halfLifeCarbon14 :: Duration o
+</span><a href="#local-6989586621679116491"><span class="hs-identifier hs-var hs-var">halfLifeCarbon14</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Duration o
 </span><span class="hs-number">5730</span></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Duration o
@@ -1050,39 +1050,39 @@ forall a. Num a =&gt; a -&gt; a -&gt; a
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Duration o
 </span><span class="hs-number">60</span></span><span>
-</span><span id="line-234"></span><span>    </span><span id="local-6989586621679115335"><span class="annot"><span class="annottext">success :: Probability o
-</span><a href="#local-6989586621679115335"><span class="hs-identifier hs-var hs-var">success</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><span id="line-234"></span><span>    </span><span id="local-6989586621679116501"><span class="annot"><span class="annottext">success :: Probability o
+</span><a href="#local-6989586621679116501"><span class="hs-identifier hs-var hs-var">success</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Probability o
 </span><span class="hs-number">1</span></span><span> </span><span class="annot"><span class="annottext">Probability o -&gt; Probability o -&gt; Probability o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">o -&gt; Probability o
 forall o. DeltaQ o =&gt; o -&gt; Probability o
 </span><a href="DeltaQ.Class.html#failure"><span class="hs-identifier hs-var">failure</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115313"><span class="hs-identifier hs-var">o</span></a></span><span>
-</span><span id="line-235"></span><span>    </span><span id="local-6989586621679115337"><span class="annot"><span class="annottext">sw :: Duration o -&gt; Probability o
-</span><a href="#local-6989586621679115337"><span class="hs-identifier hs-var hs-var">sw</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">o -&gt; Duration o -&gt; Probability o
+</span><a href="#local-6989586621679116479"><span class="hs-identifier hs-var">o</span></a></span><span>
+</span><span id="line-235"></span><span>    </span><span id="local-6989586621679116503"><span class="annot"><span class="annottext">sw :: Duration o -&gt; Probability o
+</span><a href="#local-6989586621679116503"><span class="hs-identifier hs-var hs-var">sw</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">o -&gt; Duration o -&gt; Probability o
 forall o. DeltaQ o =&gt; o -&gt; Duration o -&gt; Probability o
 </span><a href="DeltaQ.Class.html#successWithin"><span class="hs-identifier hs-var">successWithin</span></a></span><span> </span><span class="annot"><span class="annottext">o
-</span><a href="#local-6989586621679115313"><span class="hs-identifier hs-var">o</span></a></span><span>
-</span><span id="line-236"></span><span>    </span><span id="local-6989586621679115315"><span class="annot"><span class="annottext">leftEdge :: [(Duration o, Probability o)]
-</span><a href="#local-6989586621679115315"><span class="hs-identifier hs-var hs-var">leftEdge</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679116479"><span class="hs-identifier hs-var">o</span></a></span><span>
+</span><span id="line-236"></span><span>    </span><span id="local-6989586621679116481"><span class="annot"><span class="annottext">leftEdge :: [(Duration o, Probability o)]
+</span><a href="#local-6989586621679116481"><span class="hs-identifier hs-var hs-var">leftEdge</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-237"></span><span>        </span><span class="hs-special">[</span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o
 </span><span class="hs-number">0</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115320"><span class="hs-identifier hs-var">lowerX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116486"><span class="hs-identifier hs-var">lowerX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115321"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116487"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o
 </span><span class="hs-number">0</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115320"><span class="hs-identifier hs-var">lowerX</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Probability o
-</span><a href="#local-6989586621679115337"><span class="hs-identifier hs-var">sw</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115320"><span class="hs-identifier hs-var">lowerX</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
-</span><span id="line-238"></span><span>    </span><span id="local-6989586621679115317"><span class="annot"><span class="annottext">rightEdge :: [(Duration o, Probability o)]
-</span><a href="#local-6989586621679115317"><span class="hs-identifier hs-var hs-var">rightEdge</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="#local-6989586621679116486"><span class="hs-identifier hs-var">lowerX</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Probability o
+</span><a href="#local-6989586621679116503"><span class="hs-identifier hs-var">sw</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116486"><span class="hs-identifier hs-var">lowerX</span></a></span><span class="hs-special">)</span><span class="hs-special">]</span><span>
+</span><span id="line-238"></span><span>    </span><span id="local-6989586621679116483"><span class="annot"><span class="annottext">rightEdge :: [(Duration o, Probability o)]
+</span><a href="#local-6989586621679116483"><span class="hs-identifier hs-var hs-var">rightEdge</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-239"></span><span>        </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115319"><span class="hs-identifier hs-var">upperX</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115335"><span class="hs-identifier hs-var">success</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679116485"><span class="hs-identifier hs-var">upperX</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116501"><span class="hs-identifier hs-var">success</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-240"></span><span>        </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115319"><span class="hs-identifier hs-var">upperX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116485"><span class="hs-identifier hs-var">upperX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Rational -&gt; Duration o
 forall a. Fractional a =&gt; Rational -&gt; a
@@ -1094,80 +1094,80 @@ forall a. Real a =&gt; a -&gt; Rational
 </span><span class="hs-identifier hs-var">toRational</span></span><span> </span><span class="annot"><span class="annottext">(Double -&gt; Duration o) -&gt; Double -&gt; Duration o
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Double
-</span><a href="#local-6989586621679115312"><span class="hs-identifier hs-var">overshoot</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116478"><span class="hs-identifier hs-var">overshoot</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115318"><span class="hs-identifier hs-var">range</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o
-</span><a href="#local-6989586621679115335"><span class="hs-identifier hs-var">success</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679116484"><span class="hs-identifier hs-var">range</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Probability o
+</span><a href="#local-6989586621679116501"><span class="hs-identifier hs-var">success</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-241"></span><span>        </span><span class="hs-special">]</span><span>
-</span><span id="line-242"></span><span>    </span><span id="local-6989586621679115316"><span class="annot"><span class="annottext">middle :: [(Duration o, Probability o)]
-</span><a href="#local-6989586621679115316"><span class="hs-identifier hs-var hs-var">middle</span></a></span></span><span>
+</span><span id="line-242"></span><span>    </span><span id="local-6989586621679116482"><span class="annot"><span class="annottext">middle :: [(Duration o, Probability o)]
+</span><a href="#local-6989586621679116482"><span class="hs-identifier hs-var hs-var">middle</span></a></span></span><span>
 </span><span id="line-243"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115321"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Bool
+</span><a href="#local-6989586621679116487"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Bool
 forall a. Ord a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">&lt;=</span></span><span> </span><span class="annot"><span class="annottext">Duration o
 </span><span class="hs-number">0</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
 </span><span id="line-244"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-245"></span><span>            </span><span class="hs-special">[</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115341"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Probability o
-</span><a href="#local-6989586621679115337"><span class="hs-identifier hs-var">sw</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115341"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-246"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679115341"><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115341"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115320"><span class="hs-identifier hs-var">lowerX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116507"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Probability o
+</span><a href="#local-6989586621679116503"><span class="hs-identifier hs-var">sw</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116507"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-246"></span><span>            </span><span class="hs-glyph">|</span><span> </span><span id="local-6989586621679116507"><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116507"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116486"><span class="hs-identifier hs-var">lowerX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115321"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115320"><span class="hs-identifier hs-var">lowerX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116487"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116486"><span class="hs-identifier hs-var">lowerX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">Duration o
 </span><span class="hs-number">2</span></span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-operator hs-var">*</span></span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115321"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115319"><span class="hs-identifier hs-var">upperX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
+</span><a href="#local-6989586621679116487"><span class="hs-identifier hs-var">eps</span></a></span><span> </span><span class="hs-glyph">..</span><span> </span><span class="annot"><span class="annottext">Duration o
+</span><a href="#local-6989586621679116485"><span class="hs-identifier hs-var">upperX</span></a></span><span> </span><span class="annot"><span class="annottext">Duration o -&gt; Duration o -&gt; Duration o
 forall a. Num a =&gt; a -&gt; a -&gt; a
 </span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Duration o
-</span><a href="#local-6989586621679115321"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">]</span><span>
+</span><a href="#local-6989586621679116487"><span class="hs-identifier hs-var">eps</span></a></span><span class="hs-special">]</span><span>
 </span><span id="line-247"></span><span>            </span><span class="hs-special">]</span><span>
 </span><span id="line-248"></span><span>
 </span><span id="line-249"></span><span class="annot"><span class="hs-comment">-- | Remove neighboring occurrences of the same element from the list.</span></span><span>
-</span><span id="line-250"></span><span id="local-6989586621679114857"><span class="annot"><a href="DeltaQ.Plot.html#deduplicate"><span class="hs-identifier hs-type">deduplicate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679114857"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679114857"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679114857"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
+</span><span id="line-250"></span><span id="local-6989586621679116023"><span class="annot"><a href="DeltaQ.Plot.html#deduplicate"><span class="hs-identifier hs-type">deduplicate</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Eq</span></span><span> </span><span class="annot"><a href="#local-6989586621679116023"><span class="hs-identifier hs-type">a</span></a></span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679116023"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="#local-6989586621679116023"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">]</span></span><span>
 </span><span id="line-251"></span><span id="deduplicate"><span class="annot"><span class="annottext">deduplicate :: forall a. Eq a =&gt; [a] -&gt; [a]
 </span><a href="DeltaQ.Plot.html#deduplicate"><span class="hs-identifier hs-var hs-var">deduplicate</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-252"></span><span class="annot"><a href="DeltaQ.Plot.html#deduplicate"><span class="hs-identifier hs-var">deduplicate</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115344"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115344"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679115345"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679115345"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115344"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><span id="line-252"></span><span class="annot"><a href="DeltaQ.Plot.html#deduplicate"><span class="hs-identifier hs-var">deduplicate</span></a></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116510"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679116510"><span class="hs-identifier hs-var">x</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679116511"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679116511"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679116510"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall {a}. Eq a =&gt; a -&gt; [a] -&gt; [a]
-</span><a href="#local-6989586621679115346"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115344"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679115345"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><a href="#local-6989586621679116512"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679116510"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679116511"><span class="hs-identifier hs-var">xs</span></a></span><span>
 </span><span id="line-253"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-254"></span><span>    </span><span id="local-6989586621679115346"><span class="annot"><span class="annottext">dedup' :: a -&gt; [a] -&gt; [a]
-</span><a href="#local-6989586621679115346"><span class="hs-identifier hs-var hs-var">dedup'</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
+</span><span id="line-254"></span><span>    </span><span id="local-6989586621679116512"><span class="annot"><span class="annottext">dedup' :: a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679116512"><span class="hs-identifier hs-var hs-var">dedup'</span></a></span></span><span> </span><span class="annot"><span class="annottext">a
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
-</span><span id="line-255"></span><span>    </span><span class="annot"><a href="#local-6989586621679115346"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span id="local-6989586621679115349"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115349"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679115350"><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115350"><span class="hs-identifier hs-var">y'</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679115351"><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679115351"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span>
+</span><span id="line-255"></span><span>    </span><span class="annot"><a href="#local-6989586621679116512"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span id="local-6989586621679116515"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679116515"><span class="hs-identifier hs-var">y</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679116516"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679116516"><span class="hs-identifier hs-var">y'</span></a></span></span><span> </span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span> </span><span id="local-6989586621679116517"><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679116517"><span class="hs-identifier hs-var">ys</span></a></span></span><span class="hs-special">)</span><span>
 </span><span id="line-256"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115349"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
+</span><a href="#local-6989586621679116515"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; Bool
 forall a. Eq a =&gt; a -&gt; a -&gt; Bool
 </span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115350"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
-</span><a href="#local-6989586621679115346"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115349"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679115351"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><a href="#local-6989586621679116516"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679116512"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679116515"><span class="hs-identifier hs-var">y</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679116517"><span class="hs-identifier hs-var">ys</span></a></span><span>
 </span><span id="line-257"></span><span>        </span><span class="hs-glyph">|</span><span> </span><span class="annot"><span class="annottext">Bool
 </span><span class="hs-identifier hs-var">otherwise</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115350"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
+</span><a href="#local-6989586621679116516"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
 forall a. a -&gt; [a] -&gt; [a]
 </span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; [a] -&gt; [a]
-</span><a href="#local-6989586621679115346"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span class="annot"><span class="annottext">a
-</span><a href="#local-6989586621679115350"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
-</span><a href="#local-6989586621679115351"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><a href="#local-6989586621679116512"><span class="hs-identifier hs-var">dedup'</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679116516"><span class="hs-identifier hs-var">y'</span></a></span><span> </span><span class="annot"><span class="annottext">[a]
+</span><a href="#local-6989586621679116517"><span class="hs-identifier hs-var">ys</span></a></span><span>
 </span><span id="line-258"></span></pre></body></html>
