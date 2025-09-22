@@ -280,6 +280,15 @@ specProperties = do
                 in
                     p' <= q'  ==>  quantile' o p' <= quantile' o q'
 
+        it "interval boundary" $ property $
+            \(Probability p) (NonNegative t0) (Positive d1) (Positive d2) ->
+                let t1 = t0 + d1
+                    t2 = t1 + d2
+                in
+                p > 0 ==>
+                    quantile' (choice p (uniform t0 t1) (wait t2)) p
+                        === Occurs t1
+
         it "never" $ property $
             \(Probability p) ->
                 p > 0 ==>

@@ -187,7 +187,7 @@ toSegments = goJump 0 . Piecewise.toAscPieces
   where
     goJump _ [] = []
     goJump prev ((x1, o) : xos)
-        | y1 - y0 > 0 = Jump x1 (y0, y1) : nexts
+        | y0 < y1   = Jump x1 (y0, y1) : nexts
         | otherwise = nexts
       where
         y1 = Poly.eval o x1
@@ -198,7 +198,6 @@ toSegments = goJump 0 . Piecewise.toAscPieces
         End x1 y1 : goJump o []
     goPoly x1 y1 o xos@((x2, _) : _) =
         Polynomial (x1, x2) (y1, Poly.eval o x2) o : goJump o xos
-        -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
 
 {-----------------------------------------------------------------------------
     Operations
@@ -215,13 +214,14 @@ quantileFromMonotone pieces = findInSegments segments
     findInSegments [] _
         = Nothing
     findInSegments (Jump x1 (y1, y2) : xys) y
-        | y1 < y && y <= y2 = Just x1
-        | otherwise = findInSegments xys y
+        | y1 <= y && y < y2 = Just x1
+        | otherwise         = findInSegments xys y
     findInSegments (Polynomial (x1, x2) (y1, y2) o : xys) y
-        | y1 < y && y <= y2 = Poly.root precision y (x1, x2) o
+        | y1 == y           = Just x1
+        | y1 <  y && y < y2 = Poly.root precision y (x1, x2) o
         | otherwise = findInSegments xys y
     findInSegments (End x1 y1 : _) y
-        | y1 == y = Just x1
+        | y1 == y   = Just x1
         | otherwise = Nothing
 
 precision :: Rational
