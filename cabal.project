@@ -2,6 +2,7 @@ index-state: 2025-07-02T07:56:17Z
 
 packages:
     lib/deltaq/
+    lib/deltaq-examples/
     lib/probability-polynomial/
 
 tests:
