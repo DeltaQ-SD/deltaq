@@ -206,7 +206,7 @@ span.spaces    { background: white }
 <span class="lineno">  187 </span><span class="spaces">  </span><span class="istickedoff">where</span>
 <span class="lineno">  188 </span><span class="spaces">    </span><span class="istickedoff">goJump _ [] = []</span>
 <span class="lineno">  189 </span><span class="spaces">    </span><span class="istickedoff">goJump prev ((x1, o) : xos)</span>
-<span class="lineno">  190 </span><span class="spaces">        </span><span class="istickedoff">| y1 - y0 &gt; 0 = Jump x1 (y0, y1) : nexts</span>
+<span class="lineno">  190 </span><span class="spaces">        </span><span class="istickedoff">| y0 &lt; y1   = Jump x1 (y0, y1) : nexts</span>
 <span class="lineno">  191 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = nexts</span>
 <span class="lineno">  192 </span><span class="spaces">      </span><span class="istickedoff">where</span>
 <span class="lineno">  193 </span><span class="spaces">        </span><span class="istickedoff">y1 = Poly.eval o x1</span>
@@ -217,30 +217,30 @@ span.spaces    { background: white }
 <span class="lineno">  198 </span><span class="spaces">        </span><span class="istickedoff">End <span class="nottickedoff">x1</span> y1 : goJump <span class="nottickedoff">o</span> []</span>
 <span class="lineno">  199 </span><span class="spaces">    </span><span class="istickedoff">goPoly x1 y1 o xos@((x2, _) : _) =</span>
 <span class="lineno">  200 </span><span class="spaces">        </span><span class="istickedoff">Polynomial (x1, x2) (y1, Poly.eval o x2) o : goJump o xos</span></span>
-<span class="lineno">  201 </span>        -- TODO: What about the case where y1 == y2, i.e. a constant Polynomial?
-<span class="lineno">  202 </span>
-<span class="lineno">  203 </span>{-----------------------------------------------------------------------------
-<span class="lineno">  204 </span>    Operations
-<span class="lineno">  205 </span>    quantile
-<span class="lineno">  206 </span>------------------------------------------------------------------------------}
-<span class="lineno">  207 </span>-- | Compute a quantile from a monotonically increasing function.
-<span class="lineno">  208 </span>quantileFromMonotone :: (a ~ Rational) =&gt; Piecewise (Poly a) -&gt; a -&gt; Maybe a
-<span class="lineno">  209 </span><span class="decl"><span class="istickedoff">quantileFromMonotone pieces = findInSegments segments</span>
-<span class="lineno">  210 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">  211 </span><span class="spaces">    </span><span class="istickedoff">segments = toSegments pieces</span>
-<span class="lineno">  212 </span><span class="spaces"></span><span class="istickedoff"></span>
-<span class="lineno">  213 </span><span class="spaces">    </span><span class="istickedoff">findInSegments _ 0</span>
-<span class="lineno">  214 </span><span class="spaces">        </span><span class="istickedoff">= Just 0</span>
-<span class="lineno">  215 </span><span class="spaces">    </span><span class="istickedoff">findInSegments [] _</span>
-<span class="lineno">  216 </span><span class="spaces">        </span><span class="istickedoff">= Nothing</span>
-<span class="lineno">  217 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Jump x1 (y1, y2) : xys) y</span>
-<span class="lineno">  218 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Just x1</span>
-<span class="lineno">  219 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
-<span class="lineno">  220 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Polynomial (x1, x2) (y1, y2) o : xys) y</span>
-<span class="lineno">  221 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt; y &amp;&amp; y &lt;= y2 = Poly.root precision y (x1, x2) o</span>
+<span class="lineno">  201 </span>
+<span class="lineno">  202 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  203 </span>    Operations
+<span class="lineno">  204 </span>    quantile
+<span class="lineno">  205 </span>------------------------------------------------------------------------------}
+<span class="lineno">  206 </span>-- | Compute a quantile from a monotonically increasing function.
+<span class="lineno">  207 </span>quantileFromMonotone :: (a ~ Rational) =&gt; Piecewise (Poly a) -&gt; a -&gt; Maybe a
+<span class="lineno">  208 </span><span class="decl"><span class="istickedoff">quantileFromMonotone pieces = findInSegments segments</span>
+<span class="lineno">  209 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  210 </span><span class="spaces">    </span><span class="istickedoff">segments = toSegments pieces</span>
+<span class="lineno">  211 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  212 </span><span class="spaces">    </span><span class="istickedoff">findInSegments _ 0</span>
+<span class="lineno">  213 </span><span class="spaces">        </span><span class="istickedoff">= Just 0</span>
+<span class="lineno">  214 </span><span class="spaces">    </span><span class="istickedoff">findInSegments [] _</span>
+<span class="lineno">  215 </span><span class="spaces">        </span><span class="istickedoff">= Nothing</span>
+<span class="lineno">  216 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Jump x1 (y1, y2) : xys) y</span>
+<span class="lineno">  217 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt;= y &amp;&amp; y &lt; y2 = Just x1</span>
+<span class="lineno">  218 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span>         = findInSegments xys y</span>
+<span class="lineno">  219 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (Polynomial (x1, x2) (y1, y2) o : xys) y</span>
+<span class="lineno">  220 </span><span class="spaces">        </span><span class="istickedoff">| y1 == y           = Just x1</span>
+<span class="lineno">  221 </span><span class="spaces">        </span><span class="istickedoff">| y1 &lt;  y &amp;&amp; y &lt; y2 = Poly.root precision y (x1, x2) o</span>
 <span class="lineno">  222 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = findInSegments xys y</span>
 <span class="lineno">  223 </span><span class="spaces">    </span><span class="istickedoff">findInSegments (End x1 y1 : _) y</span>
-<span class="lineno">  224 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y1 == y</span> = <span class="nottickedoff">Just x1</span></span>
+<span class="lineno">  224 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">y1 == y</span>   = <span class="nottickedoff">Just x1</span></span>
 <span class="lineno">  225 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Nothing</span></span>
 <span class="lineno">  226 </span>
 <span class="lineno">  227 </span>precision :: Rational
