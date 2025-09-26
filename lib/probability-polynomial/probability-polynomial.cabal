@@ -38,7 +38,7 @@ common warnings
 
 source-repository head
   type:     git
-  location: git://github.com/DeltaQ-SD/deltaq.git
+  location: https://github.com/DeltaQ-SD/deltaq.git
   subdir:   lib/probability-polynomial
 
 library

@@ -45,7 +45,7 @@ common warnings
 
 source-repository head
   type:     git
-  location: git://github.com/DeltaQ-SD/deltaq.git
+  location: https://github.com/DeltaQ-SD/deltaq.git
   subdir:   lib/deltaq
 
 library
@@ -55,7 +55,7 @@ library
   build-depends:
     , base >= 4.14.3.0 && < 5
     , deepseq >= 1.4.4.0 && < 1.6
-    , Chart >= 1.8 && < 2.0
+    , Chart >= 1.8 && < 2
     , lattices >= 2.2 && < 2.3
     , probability-polynomial >= 1.0.1 && < 1.1
 
