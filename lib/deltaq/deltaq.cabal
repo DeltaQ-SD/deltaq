@@ -54,6 +54,8 @@ library
     , deepseq                 >=1.4.4.0  && <1.6
     , lattices                >=2.2      && <2.3
     , probability-polynomial  >=1.0.1    && <1.1
+    , diagrams-lib
+    , diagrams-svg
 
   exposed-modules:
     DeltaQ
@@ -61,6 +63,7 @@ library
     DeltaQ.Methods
     DeltaQ.PiecewisePolynomial
     DeltaQ.Plot
+    DeltaQ.Diagram
 
 test-suite test
   import:             warnings
