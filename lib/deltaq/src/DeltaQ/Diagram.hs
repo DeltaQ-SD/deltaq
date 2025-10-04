@@ -10,9 +10,8 @@ import Diagrams.Prelude hiding (First, Last)
 import Diagrams.Backend.SVG
 
 -- main = renderSVG "test.svg" (mkWidth 250) (circle 1 :: Dia)
-main1 = renderSVG "xtiles.svg" (mkWidth 500) (renderTiles exampleTiles)
 
-main = out example2
+main = out example3
 
 out :: Term String -> IO ()
 out =
@@ -26,7 +25,13 @@ out =
 type X = Int
 type Y = Int
 
-type Token = String
+data Token
+    = VarT String
+    | Horizontal
+    | Close
+    | OpenFirst
+    | OpenLast
+    deriving (Eq, Ord, Show)
 
 data Tile = Tile X Y Token
     deriving (Eq, Ord, Show)
@@ -36,21 +41,19 @@ type Dia = Diagram B
 renderTiles :: [Tile] -> Dia
 renderTiles = position . map renderTile
   where
-    renderTile (Tile x y s) =
+    renderTile (Tile x y token) =
         ( mkP2 (fromIntegral x) (negate $ fromIntegral y)
-        , scale 0.6 (text s) <> square 1
+        , renderToken token <> (square 1 & lc gray & lw 1)
         )
 
-exampleTiles :: [Tile]
-exampleTiles =
-    [ Tile 0 0 "x"
-    , Tile 1 0 "A"
-    , Tile 2 0 "E"
-    , Tile 3 0 "O1", Tile 3 1 "O2", Tile 3 2 "O3"
-    , Tile 4 0 "x" , Tile 4 1 "x" , Tile 4 2 "x"
-    , Tile 5 0 "O1", Tile 5 1 "O2", Tile 5 2 "O3"
-    , Tile 6 0 "." , Tile 6 2 "x"
-    ]
+renderToken :: Token -> Dia
+renderToken (VarT s)   =
+    (circle 0.44 & lc orange & lw 4)
+    <> scale 0.3 (text s)
+renderToken Horizontal = hrule 1
+renderToken Close      = circle 0.05 & fc black
+renderToken OpenFirst  = scale 0.4 (text "∃" <> square 1)
+renderToken OpenLast   = scale 0.4 (text "∀" <> square 1)
 
 {-----------------------------------------------------------------------------
     Diagram Layout
@@ -122,8 +125,8 @@ emitVar x s =
     dropit (y, Just (Var _)     ) = twig (y, Nothing)
     dropit _ = error "emitSeq does not expect non-Var Tiles"
 
-    emit (y, Nothing     ) = Tile x y "-"
-    emit (y, Just (Var v)) = Tile x y v
+    emit (y, Nothing     ) = Tile x y Horizontal
+    emit (y, Just (Var v)) = Tile x y (VarT v)
     emit _ = error "emitSeq does not expect non-Var Tiles"
 
 -- | Emit a column with the next parallel items.
@@ -144,9 +147,9 @@ emitParallel x s =
         ds = map maxParallel terms
         ys = scanl (+) y ds
 
-    emit (y, Just (Last  _)) = Tile x y "∀"
-    emit (y, Just (First _)) = Tile x y "∃"
-    emit (y, _             ) = Tile x y "-"
+    emit (y, Just (Last  _)) = Tile x y OpenLast
+    emit (y, Just (First _)) = Tile x y OpenFirst
+    emit (y, _             ) = Tile x y Horizontal
 
 -- | Check whether there is a group of silent foliage that should
 -- be closed.
@@ -178,10 +181,10 @@ emitGroupClose :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitGroupClose x (Branch []) = ([], Branch [])
 emitGroupClose x (Branch ts)
     | all isRoot children && all isSilent labels && length children > 1 =
-        ([Tile x y "."], twig (y, Nothing))
+        ([Tile x y Close], twig (y, Nothing))
     | otherwise =
         let (tiles, children') = unzip $ map (emitGroupClose x) children
-            tiles2 = [ Tile x y "-" | ((y, _), Branch []) <- ts ]
+            tiles2 = [ Tile x y Horizontal | ((y, _), Branch []) <- ts ]
         in  (concat tiles <> tiles2, Branch (zip labels children'))
   where
     y        = fst $ head labels
