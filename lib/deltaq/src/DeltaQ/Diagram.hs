@@ -25,12 +25,14 @@ out =
 type X = Int
 type Y = Int
 
+data Op = OFirst | OLast
+    deriving (Eq, Ord, Show)
+
 data Token
     = VarT String
     | Horizontal
-    | Close
-    | OpenFirst
-    | OpenLast
+    | Close [Y]
+    | Open Op [Y]
     deriving (Eq, Ord, Show)
 
 data Tile = Tile X Y Token
@@ -42,18 +44,31 @@ renderTiles :: [Tile] -> Dia
 renderTiles = position . map renderTile
   where
     renderTile (Tile x y token) =
-        ( mkP2 (fromIntegral x) (negate $ fromIntegral y)
-        , renderToken token <> (square 1 & lc gray & lw 1)
+        ( p2 (fromIntegral x, negate $ fromIntegral y)
+        , renderToken token
+            <> (square 1 & lc gray & lw 1 & dashingN [0.01,0.01] 0)
         )
 
 renderToken :: Token -> Dia
-renderToken (VarT s)   =
+renderToken (VarT s)     =
     (circle 0.44 & lc orange & lw 4)
     <> scale 0.3 (text s)
-renderToken Horizontal = hrule 1
-renderToken Close      = circle 0.05 & fc black
-renderToken OpenFirst  = scale 0.4 (text "∃" <> square 1)
-renderToken OpenLast   = scale 0.4 (text "∀" <> square 1)
+renderToken Horizontal   = hrule 1
+renderToken (Close ds)   =
+    mconcat (map (renderLine . fromIntegral . negate) ds)
+    <> hrule 1
+  where
+    renderLine d = fromVertices [p2 (0, 0), p2 (-0.5, d)] & strokeLine
+renderToken (Open op ds) =
+    scale 0.4 (renderOp op <> (square 1 & fc white))
+    <> mconcat (map (renderLine . fromIntegral . negate) ds)
+    <> hrule 1
+  where
+    renderOp :: Op -> Dia
+    renderOp OFirst = text "∀"
+    renderOp OLast  = text "∃"
+
+    renderLine d = fromVertices [p2 (0, 0), p2 (0.5, d)] & strokeLine
 
 {-----------------------------------------------------------------------------
     Diagram Layout
@@ -141,15 +156,13 @@ emitParallel x s =
 
     close y terms =
         Branch [((y,Nothing), Branch [(e, root) | e <- verticals y terms])]
-    verticals y terms = zipWith (\y t -> (y, Just t)) ys terms
-      where
-        -- increase vertical distances
-        ds = map maxParallel terms
-        ys = scanl (+) y ds
+    verticals y terms =
+        zipWith (\z t -> (y + z, Just t)) (distances terms) terms 
+    distances = init . scanl (+) 0 . map maxParallel
 
-    emit (y, Just (Last  _)) = Tile x y OpenLast
-    emit (y, Just (First _)) = Tile x y OpenFirst
-    emit (y, _             ) = Tile x y Horizontal
+    emit (y, Just (Last  terms)) = Tile x y $ Open OLast  (distances terms)
+    emit (y, Just (First terms)) = Tile x y $ Open OFirst (distances terms)
+    emit (y, _                 ) = Tile x y Horizontal
 
 -- | Check whether there is a group of silent foliage that should
 -- be closed.
@@ -181,13 +194,14 @@ emitGroupClose :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitGroupClose x (Branch []) = ([], Branch [])
 emitGroupClose x (Branch ts)
     | all isRoot children && all isSilent labels && length children > 1 =
-        ([Tile x y Close], twig (y, Nothing))
+        ([Tile x y $ Close $ map (subtract y) ys], twig (y, Nothing))
     | otherwise =
         let (tiles, children') = unzip $ map (emitGroupClose x) children
             tiles2 = [ Tile x y Horizontal | ((y, _), Branch []) <- ts ]
         in  (concat tiles <> tiles2, Branch (zip labels children'))
   where
-    y        = fst $ head labels
+    y        = head ys
+    ys       = map fst labels
     labels   = map fst ts
     children = map snd ts
 
