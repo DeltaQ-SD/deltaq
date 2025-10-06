@@ -1,23 +1,36 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE BangPatterns #-}
 
-module DeltaQ.Diagram where
+{-|
+Copyright   : PLWORKZ R&D, 2025
+License     : BSD-3-Clause
+Description : Render outcome diagrams.
+
+Render outcome expressions as outcome diagrams.
+-}
+module DeltaQ.Diagram
+    ( -- * Outcome diagrams
+      renderOutcomeDiagram
+
+    -- * Outcome expressions
+    , Expr (..)
+    , var
+    , maxParallel
+    ) where
 
 import Prelude hiding (last, seq)
 
-import Control.Monad (ap)
-import Diagrams.Prelude hiding (First, Last)
+import Diagrams.Prelude hiding (First, Last, op)
 import Diagrams.Backend.SVG
 
--- main = renderSVG "test.svg" (mkWidth 250) (circle 1 :: Dia)
-
-main = out example3
-
-out :: Term String -> IO ()
+out :: Expr String -> IO ()
 out =
     renderSVG "xoutcomes.svg" (mkWidth 700)
-    . renderTiles
-    . layout
+    . renderOutcomeDiagram
+
+-- | Render an outcome expression as an outcome diagram.
+renderOutcomeDiagram :: Expr String -> Diagram SVG
+renderOutcomeDiagram = renderTiles . layout
 
 {-----------------------------------------------------------------------------
     Diagram rendering
@@ -28,6 +41,7 @@ type Y = Int
 data Op = OFirst | OLast
     deriving (Eq, Ord, Show)
 
+-- | Data attached to a 'Tile'.
 data Token
     = VarT String
     | Horizontal
@@ -38,18 +52,17 @@ data Token
 data Tile = Tile X Y Token
     deriving (Eq, Ord, Show)
 
-type Dia = Diagram B
-
-renderTiles :: [Tile] -> Dia
+-- | Render a collection of tiles.
+renderTiles :: [Tile] -> Diagram SVG
 renderTiles = position . map renderTile
   where
     renderTile (Tile x y token) =
         ( p2 (fromIntegral x, negate $ fromIntegral y)
         , renderToken token
-            <> (square 1 & lc gray & lw 1 & dashingN [0.01,0.01] 0)
         )
 
-renderToken :: Token -> Dia
+-- | Render a single 'Token' associated with a 'Tile'.
+renderToken :: Token -> Diagram SVG
 renderToken (VarT s)     =
     (circle 0.44 & lc orange & lw 4)
     <> scale 0.3 (text s)
@@ -64,7 +77,7 @@ renderToken (Open op ds) =
     <> mconcat (map (renderLine . fromIntegral . negate) ds)
     <> hrule 1
   where
-    renderOp :: Op -> Dia
+    renderOp :: Op -> Diagram SVG
     renderOp OFirst = text "∀"
     renderOp OLast  = text "∃"
 
@@ -91,10 +104,10 @@ and the root to the right, like this:
 
 -}
 
-type EdgeData = (Y, Maybe (Term String))
+type EdgeData = (Y, Maybe (Expr String))
 
 -- | Layout an outcome diagram.
-layout :: Term String -> [Tile]
+layout :: Expr String -> [Tile]
 layout t = go 0 $ twig (0, Just t)
   where
     go !x0 s0
@@ -107,16 +120,16 @@ layout t = go 0 $ twig (0, Just t)
 -- | Emit the next column, possible empty.
 emitColumn :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitColumn x s
-    | any (onTerm isSeq)      (foliage s) = ([], expandSeq s)
+    | any (onExpr isSeq)      (foliage s) = ([], expandSeq s)
     | hasIsolatedTwigs s                  = ([], dropIsolatedTwigs s)
     | hasGroupClose s                     = emitGroupClose x s
-    | any (onTerm isParallel) (foliage s) = emitParallel x s
-    | any (onTerm isVar)      (foliage s) = emitVar x s
+    | any (onExpr isParallel) (foliage s) = emitParallel x s
+    | any (onExpr isVar)      (foliage s) = emitVar x s
   where
-    onTerm p (_, Just t) = p t
-    onTerm p _ = False
+    onExpr p (_, Just t) = p t
+    onExpr _ _ = False
 
--- | Check that a given 'EdgeData' does not contain a term.
+-- | Check that a given 'EdgeData' does not contain a Expr.
 isSilent :: EdgeData -> Bool
 isSilent (_, Nothing) = True
 isSilent _ = False
@@ -125,8 +138,8 @@ isSilent _ = False
 expandSeq :: Shrub EdgeData -> Shrub EdgeData
 expandSeq = updateFoliage expand
   where
-    expand (y, Just (Seq terms)) =
-        foldl (\s term -> Branch [((y, Just term), s)]) root terms
+    expand (y, Just (Seq exprs)) =
+        foldl (\s expr -> Branch [((y, Just expr), s)]) root exprs
         -- Note: The Seq is left-to-right, but the Shrub is right-to-left.
         -- foldl reorders the sequence appropriately.
     expand edge = twig edge
@@ -150,18 +163,18 @@ emitParallel x s =
     (map emit $ foliage s, updateFoliage dropit s)
   where
     dropit (y, Nothing           ) = twig (y, Nothing)
-    dropit (y, Just (Last  terms)) = close y terms
-    dropit (y, Just (First terms)) = close y terms
+    dropit (y, Just (Last  exprs)) = close y exprs
+    dropit (y, Just (First exprs)) = close y exprs
     dropit (y, Just t            ) = twig (y, Just t)
 
-    close y terms =
-        Branch [((y,Nothing), Branch [(e, root) | e <- verticals y terms])]
-    verticals y terms =
-        zipWith (\z t -> (y + z, Just t)) (distances terms) terms 
+    close y exprs =
+        Branch [((y,Nothing), Branch [(e, root) | e <- verticals y exprs])]
+    verticals y exprs =
+        zipWith (\z t -> (y + z, Just t)) (distances exprs) exprs 
     distances = init . scanl (+) 0 . map maxParallel
 
-    emit (y, Just (Last  terms)) = Tile x y $ Open OLast  (distances terms)
-    emit (y, Just (First terms)) = Tile x y $ Open OFirst (distances terms)
+    emit (y, Just (Last  exprs)) = Tile x y $ Open OLast  (distances exprs)
+    emit (y, Just (First exprs)) = Tile x y $ Open OFirst (distances exprs)
     emit (y, _                 ) = Tile x y Horizontal
 
 -- | Check whether there is a group of silent foliage that should
@@ -173,7 +186,7 @@ hasGroupClose = any isGroupClose . foliageBushes
         length ts > 1 && all isSilent (map fst ts)
 
 -- | Check whether there are any foliage edges that
--- have no terms and no siblings.
+-- have no expressions and no siblings.
 hasIsolatedTwigs :: Shrub EdgeData -> Bool
 hasIsolatedTwigs = any isIsolatedTwig . foliageBushes
 
@@ -191,13 +204,13 @@ foliageBushes (Branch ts)
 -- | Emit a column that closes all groups that can be closed
 -- at the moment.
 emitGroupClose :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
-emitGroupClose x (Branch []) = ([], Branch [])
+emitGroupClose _ (Branch []) = ([], Branch [])
 emitGroupClose x (Branch ts)
     | all isRoot children && all isSilent labels && length children > 1 =
         ([Tile x y $ Close $ map (subtract y) ys], twig (y, Nothing))
     | otherwise =
         let (tiles, children') = unzip $ map (emitGroupClose x) children
-            tiles2 = [ Tile x y Horizontal | ((y, _), Branch []) <- ts ]
+            tiles2 = [ Tile x y2 Horizontal | ((y2, _), Branch []) <- ts ]
         in  (concat tiles <> tiles2, Branch (zip labels children'))
   where
     y        = head ys
@@ -205,7 +218,7 @@ emitGroupClose x (Branch ts)
     labels   = map fst ts
     children = map snd ts
 
--- | Drop all foliage edges that have no term and have no siblings.
+-- | Drop all foliage edges that have no expressions and have no siblings.
 dropIsolatedTwigs :: Shrub EdgeData -> Shrub EdgeData
 dropIsolatedTwigs (Branch []) = Branch []
 dropIsolatedTwigs (Branch ts)
@@ -215,7 +228,7 @@ dropIsolatedTwigs (Branch ts)
     labels   = map fst ts
     children = map snd ts
 
--- | Check whether a 'Shrub' is a twig without term
+-- | Check whether a 'Shrub' is a twig without expression.
 isIsolatedTwig :: Shrub EdgeData -> Bool
 isIsolatedTwig (Branch [((_,Nothing), Branch [])]) = True
 isIsolatedTwig _ = False
@@ -271,85 +284,84 @@ foliage (Branch bs) = concatMap go bs
 -- * If the new 'Shrub' is 'root', the foliage edge will be removed.
 -- * If the new 'Shrub' is a 'twig', the foliage edge will get a new label.
 updateFoliage :: (a -> Shrub a) -> Shrub a -> Shrub a
-updateFoliage f (Branch []) = Branch []
+updateFoliage _ (Branch []) = Branch []
 updateFoliage f (Branch bs) = Branch $ concatMap update bs
   where
     update (x, Branch []) = unBranch $ f x
     update (x, Branch cs) = [(x, Branch $ concatMap update cs)]
 
 {-----------------------------------------------------------------------------
-    Terms
+    Exprs
 ------------------------------------------------------------------------------}
--- | Outcome terms, with location annotations.
-data Term v
+-- | Outcome expressions.
+data Expr v
     = Var v
 --    | Never
 --    | Wait Rational
-    | Seq [Term v]
+    | Seq [Expr v]
         -- invariant: list nonempty
         -- invariant: items of the list are not seqs.
-    | Last [Term v]
-    | First [Term v]
---  | Choice loc [Term v]
+    | Last [Expr v]
+    | First [Expr v]
+--  | Choice loc [Expr v]
     deriving (Show, Eq, Ord)
 
 -- | Smart constructor for 'Var'.
-var :: v -> Term v
+var :: v -> Expr v
 var = Var
 
 -- | Smart constructor for sequential composition.
-seq :: [Term v] -> Term v
+seq :: [Expr v] -> Expr v
 seq = Seq . concatMap pop
   where
     pop (Seq ts) = ts
     pop t = [t]
 
 -- | Smart constructor for last-to-finish.
-last :: [Term v] -> Term v
+last :: [Expr v] -> Expr v
 last = Last . concatMap pop
   where
     pop (Last ts) = ts
     pop t = [t]
 
 -- | Smart constructor for first-to-finish.
-first :: [Term v] -> Term v
+first :: [Expr v] -> Expr v
 first = First . concatMap pop
   where
     pop (Last ts) = ts
     pop t = [t]
 
--- | Check whether a 'Term' is a 'Seq'.
-isSeq :: Term v -> Bool
+-- | Check whether a 'Expr' is a 'Seq'.
+isSeq :: Expr v -> Bool
 isSeq (Seq _) = True
 isSeq _       = False
 
--- | Check whether a 'Term' is a 'Var'.
-isVar :: Term v -> Bool
+-- | Check whether a 'Expr' is a 'Var'.
+isVar :: Expr v -> Bool
 isVar (Var _) = True
 isVar _       = False
 
--- | Check whether a 'Term' is a parallel operation.
-isParallel :: Term v -> Bool
+-- | Check whether a 'Expr' is a parallel operation.
+isParallel :: Expr v -> Bool
 isParallel (First ts) = not (null ts)
 isParallel (Last  ts) = not (null ts)
 isParallel _          = False
 
 -- | Maximal number of outcomes that run in parallel.
--- Needed to determine vertical position.
-maxParallel :: Term v -> Int
+maxParallel :: Expr v -> Int
 maxParallel (Var   _) = 1
 maxParallel (Seq   ts) = maximum (map maxParallel ts)
 maxParallel (Last  ts) = sum (map maxParallel ts)
 maxParallel (First ts) = sum (map maxParallel ts)
 
-example1 :: Term String
+example1 :: Expr String
 example1 =
     last
         [ var "AZ"
         , seq [var "AB", last [var "BZ", seq [var "BC", var "CZ"]]]
         ]
 
-example2 :: Term String
+example2 :: Expr String
 example2 =
     seq
         [ var "AB"
@@ -358,8 +370,8 @@ example2 =
         , last [var "YZ", seq [ var "YQ", var "QZ" ] ]
         ]
 
-exampleS :: Term String
+exampleS :: Expr String
 exampleS = seq [ first [var "S1", var "S2"], var "S3" ]
 
-example3 :: Term String
+example3 :: Expr String
 example3 = last [seq [exampleS, exampleS], exampleS, seq [example1, var "ZQ"]]

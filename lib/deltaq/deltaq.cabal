@@ -5,7 +5,7 @@ name:            deltaq
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.0.1.0
+version:         1.0.2.0
 synopsis:        Framework for ∆Q System Development
 description:
   ∆Q System Development is a paradigm for developing distributed systems
@@ -22,12 +22,15 @@ description:
   * outcomes and their combinations
   * evaluating the performance characteristics of outcomes,
     specifically the probability distribution of their completion times
+  * rendering outcomes as diagrams
 
 category:        DeltaQ, Distributed Systems, Probability
 homepage:        https://github.com/DeltaQ-SD/deltaq
 license:         BSD-3-Clause
 license-file:    LICENSE
-copyright:       Predictable Network Solutions Ltd., 2003-2025
+copyright:
+  Predictable Network Solutions Ltd., 2003-2025
+  PLWORKZ R&D, 2025
 author:          Neil Davies, Heinrich Apfelmus
 maintainer:      neil.davies@pnsol.ccom
 extra-doc-files:
@@ -60,10 +63,10 @@ library
   exposed-modules:
     DeltaQ
     DeltaQ.Class
+    DeltaQ.Diagram
     DeltaQ.Methods
     DeltaQ.PiecewisePolynomial
     DeltaQ.Plot
-    DeltaQ.Diagram
 
 test-suite test
   import:             warnings

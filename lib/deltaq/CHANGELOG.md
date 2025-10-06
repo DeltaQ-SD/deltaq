@@ -1,5 +1,9 @@
 # Revision history for `deltaq`
 
+## 1.0.2.0 — to be released
+
+* Add `DeltaQ.Diagram` for rendering outcomes as diagrams.
+
 ## 1.0.1.0 — 2025-09-26
 
 ### Added
