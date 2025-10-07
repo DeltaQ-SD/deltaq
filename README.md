@@ -49,7 +49,8 @@ cabal test deltaq
 
 # Thanks
 
-Development of this package has been generously supported by [IOG](https://iog.io).
+Development of this package has been generously supported by [IOG](https://iog.io)
+and PLWORKZ R&D.
 
 # Roadmap
 
