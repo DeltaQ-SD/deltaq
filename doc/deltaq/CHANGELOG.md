@@ -2,7 +2,8 @@
 
 ## 1.0.2.0 — to be released
 
-* Add `DeltaQ.Diagram` for rendering outcomes as diagrams.
+* Add `DeltaQ.Diagram` for rendering outcome expressions as diagrams.
+* Add `DeltaQ.Expr` with a data type `O` for outcome expressions.
 
 ## 1.0.1.0 — 2025-09-26
 
