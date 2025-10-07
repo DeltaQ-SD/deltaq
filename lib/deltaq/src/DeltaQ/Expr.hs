@@ -31,6 +31,12 @@ module DeltaQ.Expr
     , termFromOutcome
     , outcomeFromTerm
     , Term (..)
+    , isVar
+    , isSeq
+    , isLast
+    , isFirst
+    , isParallel
+    , maxParallel
     , everywhere
     , isNormalizedAssoc
     , normalizeAssoc
@@ -176,17 +182,39 @@ isNormalizedAssoc (First xs) =
 isNormalizedAssoc _ =
     True
 
+-- | Check whether a 'Term' is a 'Var'.
+isVar :: Term v -> Bool
+isVar (Var _) = True
+isVar _       = False
+
+-- | Check whether a 'Term' is a 'Seq'.
 isSeq :: Term v -> Bool
 isSeq (Seq _) = True
 isSeq _ = False
 
+-- | Check whether a 'Term' is a 'Last'.
 isLast :: Term v -> Bool
 isLast (Last _) = True
 isLast _ = False
 
+-- | Check whether a 'Term' is a 'First'.
 isFirst :: Term v -> Bool
 isFirst (First _) = True
 isFirst _ = False
+
+-- | Check whether a 'Term' is a parallel operation,
+-- i.e. 'Last' or 'First'.
+isParallel :: Term v -> Bool
+isParallel (First ts) = not (null ts)
+isParallel (Last  ts) = not (null ts)
+isParallel _          = False
+
+-- | Maximal number of outcomes that run in parallel.
+maxParallel :: Term v -> Int
+maxParallel (Seq   ts) = maximum (map maxParallel ts)
+maxParallel (Last  ts) = sum (map maxParallel ts)
+maxParallel (First ts) = sum (map maxParallel ts)
+maxParallel _          = 1
 
 -- | Normalize a term to \"associative normal form\".
 normalizeAssoc :: Term v -> Term v
