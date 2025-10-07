@@ -228,6 +228,8 @@ the following properties.
 For instances that use approximate arithmetic
 such as floating point arithmetic or fixed precision arithmetic,
 equality may be up to numerical accuracy.
+
+#p:Outcome#
 -}
 
 {-$properties-outcome

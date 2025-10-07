@@ -11,26 +11,32 @@ Render outcome expressions as outcome diagrams.
 module DeltaQ.Diagram
     ( -- * Outcome diagrams
       renderOutcomeDiagram
-
-    -- * Outcome expressions
-    , Expr (..)
-    , var
-    , maxParallel
     ) where
 
-import Prelude hiding (last, seq)
-
+import DeltaQ.Class
+    ( Outcome (..)
+    )
+import DeltaQ.Expr
+    ( O
+    , var
+    , Term (..)
+    , isParallel
+    , isSeq
+    , isVar
+    , maxParallel
+    , termFromOutcome
+    )
 import Diagrams.Prelude hiding (First, Last, op)
 import Diagrams.Backend.SVG
 
-out :: Expr String -> IO ()
+out :: O -> IO ()
 out =
     renderSVG "xoutcomes.svg" (mkWidth 700)
     . renderOutcomeDiagram
 
 -- | Render an outcome expression as an outcome diagram.
-renderOutcomeDiagram :: Expr String -> Diagram SVG
-renderOutcomeDiagram = renderTiles . layout
+renderOutcomeDiagram :: O -> Diagram SVG
+renderOutcomeDiagram = renderTiles . layout . termFromOutcome
 
 {-----------------------------------------------------------------------------
     Diagram rendering
@@ -54,7 +60,7 @@ data Tile = Tile X Y Token
 
 -- | Render a collection of tiles.
 renderTiles :: [Tile] -> Diagram SVG
-renderTiles = position . map renderTile
+renderTiles = frame 0.1 . position . map renderTile
   where
     renderTile (Tile x y token) =
         ( p2 (fromIntegral x, negate $ fromIntegral y)
@@ -64,8 +70,9 @@ renderTiles = position . map renderTile
 -- | Render a single 'Token' associated with a 'Tile'.
 renderToken :: Token -> Diagram SVG
 renderToken (VarT s)     =
-    (circle 0.44 & lc orange & lw 4)
-    <> scale 0.3 (text s)
+    scale 0.3 (text s)
+    <> (circle 0.44 & lc orange & lw 4 & fc white)
+    <> hrule 1
 renderToken Horizontal   = hrule 1
 renderToken (Close ds)   =
     mconcat (map (renderLine . fromIntegral . negate) ds)
@@ -78,8 +85,8 @@ renderToken (Open op ds) =
     <> hrule 1
   where
     renderOp :: Op -> Diagram SVG
-    renderOp OFirst = text "∀"
-    renderOp OLast  = text "∃"
+    renderOp OFirst = text "∃"
+    renderOp OLast  = text "∀"
 
     renderLine d = fromVertices [p2 (0, 0), p2 (0.5, d)] & strokeLine
 
@@ -104,10 +111,10 @@ and the root to the right, like this:
 
 -}
 
-type EdgeData = (Y, Maybe (Expr String))
+type EdgeData = (Y, Maybe (Term String))
 
 -- | Layout an outcome diagram.
-layout :: Expr String -> [Tile]
+layout :: Term String -> [Tile]
 layout t = go 0 $ twig (0, Just t)
   where
     go !x0 s0
@@ -291,87 +298,25 @@ updateFoliage f (Branch bs) = Branch $ concatMap update bs
     update (x, Branch cs) = [(x, Branch $ concatMap update cs)]
 
 {-----------------------------------------------------------------------------
-    Exprs
+    Example expressions
 ------------------------------------------------------------------------------}
--- | Outcome expressions.
-data Expr v
-    = Var v
---    | Never
---    | Wait Rational
-    | Seq [Expr v]
-        -- invariant: list nonempty
-        -- invariant: items of the list are not seqs.
-    | Last [Expr v]
-    | First [Expr v]
---  | Choice loc [Expr v]
-    deriving (Show, Eq, Ord)
-
--- | Smart constructor for 'Var'.
-var :: v -> Expr v
-var = Var
-
--- | Smart constructor for sequential composition.
-seq :: [Expr v] -> Expr v
-seq = Seq . concatMap pop
-  where
-    pop (Seq ts) = ts
-    pop t = [t]
-
--- | Smart constructor for last-to-finish.
-last :: [Expr v] -> Expr v
-last = Last . concatMap pop
-  where
-    pop (Last ts) = ts
-    pop t = [t]
-
--- | Smart constructor for first-to-finish.
-first :: [Expr v] -> Expr v
-first = First . concatMap pop
-  where
-    pop (Last ts) = ts
-    pop t = [t]
-
--- | Check whether a 'Expr' is a 'Seq'.
-isSeq :: Expr v -> Bool
-isSeq (Seq _) = True
-isSeq _       = False
-
--- | Check whether a 'Expr' is a 'Var'.
-isVar :: Expr v -> Bool
-isVar (Var _) = True
-isVar _       = False
-
--- | Check whether a 'Expr' is a parallel operation.
-isParallel :: Expr v -> Bool
-isParallel (First ts) = not (null ts)
-isParallel (Last  ts) = not (null ts)
-isParallel _          = False
-
--- | Maximal number of outcomes that run in parallel.
-maxParallel :: Expr v -> Int
-maxParallel (Var   _) = 1
-maxParallel (Seq   ts) = maximum (map maxParallel ts)
-maxParallel (Last  ts) = sum (map maxParallel ts)
-maxParallel (First ts) = sum (map maxParallel ts)
-
-example1 :: Expr String
+example1 :: O
 example1 =
-    last
-        [ var "AZ"
-        , seq [var "AB", last [var "BZ", seq [var "BC", var "CZ"]]]
-        ]
+    var "AZ"
+    ./\. (var "AB" .>>. (var "BZ" .\/. (var "BC" .>>. var "CZ")))
 
-example2 :: Expr String
+example2 :: O
 example2 =
-    seq
-        [ var "AB"
-        , first [var "BX", seq [ var "BC", var "CX" ] ]
-        , var "XY"
-        , last [var "YZ", seq [ var "YQ", var "QZ" ] ]
-        ]
+    var "AB"
+    .>>. (var "BX" .\/. (var "BC" .>>. var "CX"))
+    .>>. var "XY"
+    .>>. (var "YZ" .\/. (var "YQ" .>>. var "QZ"))
 
-exampleS :: Expr String
-exampleS = seq [ first [var "S1", var "S2"], var "S3" ]
+exampleS :: O
+exampleS = (var "S1" .\/. var "S2") .>>. var "S3"
 
-example3 :: Expr String
-example3 = last [seq [exampleS, exampleS], exampleS, seq [example1, var "ZQ"]]
+example3 :: O
+example3 =
+    (exampleS .>>. exampleS)
+    .\/. exampleS
+    .\/. (example1 .>>. var "ZQ")
