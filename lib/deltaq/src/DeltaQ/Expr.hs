@@ -50,6 +50,7 @@ import Control.DeepSeq
     )
 import DeltaQ.Class
     ( Outcome (..)
+    , DeltaQ (..)
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ
@@ -95,6 +96,7 @@ toDeltaQ f (O term) = go term
     go (Seq   xs) = foldr1 (.>>.) $ map go xs
     go (Last  xs) = foldr1 (./\.) $ map go xs
     go (First xs) = foldr1 (.\/.) $ map go xs
+    go (Choices wxs) = choices [ (w, go x) | (w, x) <- wxs ]
 
 -- | Outcome expressions are instances of 'Outcome'.
 instance Outcome O where
@@ -128,6 +130,9 @@ data Term v
         -- ^ Parallel composition, last to finish.
     | First [Term v]
         -- ^ Parallel composiiton, last to finish.
+    | Choices [(Rational, Term v)]
+        -- ^ Probabilistic choice.
+        -- The probabilities are proportional to the given weights.
     deriving (Show, Eq, Ord, Generic, Functor, NFData)
 
 instance Applicative Term where
