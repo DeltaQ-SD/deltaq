@@ -54,7 +54,7 @@ data Tile = Tile X Y Token
 
 -- | Render a collection of tiles.
 renderTiles :: [Tile] -> Diagram SVG
-renderTiles = position . map renderTile
+renderTiles = frame 0.1 . position . map renderTile
   where
     renderTile (Tile x y token) =
         ( p2 (fromIntegral x, negate $ fromIntegral y)
@@ -64,8 +64,9 @@ renderTiles = position . map renderTile
 -- | Render a single 'Token' associated with a 'Tile'.
 renderToken :: Token -> Diagram SVG
 renderToken (VarT s)     =
-    (circle 0.44 & lc orange & lw 4)
-    <> scale 0.3 (text s)
+    scale 0.3 (text s)
+    <> (circle 0.44 & lc orange & lw 4 & fc white)
+    <> hrule 1
 renderToken Horizontal   = hrule 1
 renderToken (Close ds)   =
     mconcat (map (renderLine . fromIntegral . negate) ds)
