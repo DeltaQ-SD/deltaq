@@ -25,6 +25,7 @@ module DeltaQ.Expr
       O
     , var
     , substitute
+    , choices'
     , toDeltaQ
 
     -- * Outcome terms
@@ -36,6 +37,7 @@ module DeltaQ.Expr
     , isLast
     , isFirst
     , isParallel
+    , isChoices
     , maxParallel
     , everywhere
     , isNormalizedAssoc
@@ -50,6 +52,7 @@ import Control.DeepSeq
     )
 import DeltaQ.Class
     ( Outcome (..)
+    , DeltaQ (..)
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ
@@ -95,6 +98,7 @@ toDeltaQ f (O term) = go term
     go (Seq   xs) = foldr1 (.>>.) $ map go xs
     go (Last  xs) = foldr1 (./\.) $ map go xs
     go (First xs) = foldr1 (.\/.) $ map go xs
+    go (Choices wxs) = choices [ (w, go x) | (w, x) <- wxs ]
 
 -- | Outcome expressions are instances of 'Outcome'.
 instance Outcome O where
@@ -105,6 +109,11 @@ instance Outcome O where
     sequentially  (O x) (O y) = O . normalize1Assoc $ Seq [x,y]
     firstToFinish (O x) (O y) = O . normalize1Assoc $ First [x,y]
     lastToFinish  (O x) (O y) = O . normalize1Assoc $ Last [x,y]
+
+-- | Specialization of 'choices' for outcome expressions.
+choices' :: [(Rational, O)] -> O
+choices' wos =
+    outcomeFromTerm $ Choices [ (w, termFromOutcome x) | (w, x) <- wos ]
 
 {-----------------------------------------------------------------------------
     Terms
@@ -128,6 +137,9 @@ data Term v
         -- ^ Parallel composition, last to finish.
     | First [Term v]
         -- ^ Parallel composiiton, last to finish.
+    | Choices [(Rational, Term v)]
+        -- ^ Probabilistic choice.
+        -- The probabilities are proportional to the given weights.
     deriving (Show, Eq, Ord, Generic, Functor, NFData)
 
 instance Applicative Term where
@@ -145,6 +157,7 @@ instance Monad Term where
         go (Seq   xs) = Seq   $ map go xs
         go (Last  xs) = Last  $ map go xs
         go (First xs) = First $ map go xs
+        go (Choices wxs) = Choices [ (w, go x) | (w, x) <- wxs ]
 
 -- | Inspect an outcome expression 'O' through its 'Term' representation.
 --
@@ -166,6 +179,11 @@ outcomeFromTerm = O . normalizeAssoc
 --   kind, i.e. @Seq [Seq …, First …]@ is not allowed because
 --   one of the list elements for a 'Seq' constructor
 --   is also a 'Seq' constructor.
+--
+-- and if the argument to the constructor 'Choices'
+--
+-- * is a nonempty list
+--
 isNormalizedAssoc ::Term v -> Bool 
 isNormalizedAssoc (Seq xs) =
     not (null xs)
@@ -179,6 +197,9 @@ isNormalizedAssoc (First xs) =
     not (null xs)
     && all (not . isFirst) xs
     && all isNormalizedAssoc xs
+isNormalizedAssoc (Choices wxs) =
+    not (null wxs)
+    && all isNormalizedAssoc (map snd wxs)
 isNormalizedAssoc _ =
     True
 
@@ -202,6 +223,11 @@ isFirst :: Term v -> Bool
 isFirst (First _) = True
 isFirst _ = False
 
+-- | Check whether a 'Term' is a 'Choices'.
+isChoices :: Term v -> Bool
+isChoices (Choices _) = True
+isChoices _ = False
+
 -- | Check whether a 'Term' is a parallel operation,
 -- i.e. 'Last' or 'First'.
 isParallel :: Term v -> Bool
@@ -210,11 +236,15 @@ isParallel (Last  ts) = not (null ts)
 isParallel _          = False
 
 -- | Maximal number of outcomes that run in parallel.
+--
+-- * The arguments of 'First' and 'Last' run in parallel.
+-- * The arguments of 'Seq' and 'Choices do _not_ run in parallel.
 maxParallel :: Term v -> Int
-maxParallel (Seq   ts) = maximum (map maxParallel ts)
-maxParallel (Last  ts) = sum (map maxParallel ts)
-maxParallel (First ts) = sum (map maxParallel ts)
-maxParallel _          = 1
+maxParallel (Seq   ts)    = maximum $ map maxParallel ts
+maxParallel (Last  ts)    = sum $ map maxParallel ts
+maxParallel (First ts)    = sum $ map maxParallel ts
+maxParallel (Choices wts) = maximum $ map (maxParallel . snd) wts
+maxParallel _             = 1
 
 -- | Normalize a term to \"associative normal form\".
 normalizeAssoc :: Term v -> Term v
@@ -237,6 +267,7 @@ everywhere f = every
     recurse (Seq   xs) = Seq $ map every xs
     recurse (Last  xs) = Last $ map every xs
     recurse (First xs) = First $ map every xs
+    recurse (Choices wxs) = Choices $ [ (w, every x) | (w, x) <- wxs]
 
 -- | Normalize a term to \"associative normal form\"
 -- under the assumptions
@@ -252,6 +283,7 @@ normalizeEmpty :: Term v -> Term v
 normalizeEmpty (Seq   []) = Wait0
 normalizeEmpty (Last  []) = Wait0
 normalizeEmpty (First []) = Wait0
+normalizeEmpty (Choices []) = Wait0
 normalizeEmpty x = x
 
 -- | Ensure that the lists in 'Seq', 'Last', 'First'

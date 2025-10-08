@@ -18,16 +18,19 @@ import DeltaQ.Class
     )
 import DeltaQ.Expr
     ( O
-    , var
     , Term (..)
-    , isParallel
+    , choices'
     , isSeq
     , isVar
-    , maxParallel
+    , outcomeFromTerm
     , termFromOutcome
+    , var
     )
 import Diagrams.Prelude hiding (First, Last, op)
 import Diagrams.Backend.SVG
+import Text.Printf
+    ( printf
+    )
 
 out :: O -> IO ()
 out =
@@ -43,8 +46,12 @@ renderOutcomeDiagram = renderTiles . layout . termFromOutcome
 ------------------------------------------------------------------------------}
 type X = Int
 type Y = Int
+type Prob = Rational
 
-data Op = OFirst | OLast
+data Op
+    = OFirst
+    | OLast
+    | OChoices [Prob]
     deriving (Eq, Ord, Show)
 
 -- | Data attached to a 'Tile'.
@@ -81,14 +88,45 @@ renderToken (Close ds)   =
     renderLine d = fromVertices [p2 (0, 0), p2 (-0.5, d)] & strokeLine
 renderToken (Open op ds) =
     scale 0.4 (renderOp op <> (square 1 & fc white))
-    <> mconcat (map (renderLine . fromIntegral . negate) ds)
+    <> mconcat (map renderLine ys)
+    <> mconcat (renderLineAnnotations op ys)
     <> hrule 1
   where
+    ys = map (fromIntegral . negate) ds
+
     renderOp :: Op -> Diagram SVG
     renderOp OFirst = text "∃"
     renderOp OLast  = text "∀"
+    renderOp (OChoices _) =
+        (fromOffsets [r2 (0.33, 0), r2 (-0.6, 0), r2 (0.2, 0.15)]
+            & strokeLine & translate (r2 (0,0.1)))
+        <>
+        (fromOffsets [r2 (-0.33, 0), r2 (0.6, 0), r2 (-0.2, -0.15)]
+            & strokeLine & translate (r2 (0,-0.1)))
 
     renderLine d = fromVertices [p2 (0, 0), p2 (0.5, d)] & strokeLine
+
+    renderLineAnnotations (OChoices ws) ys =
+        zipWith renderLineAnnotation ps ys
+      where
+        ps = map (/ sum ws) ws
+    renderLineAnnotations _ _ = []
+
+    posLineAnnotation p 0 = p2 (0.2, 0.3)
+    posLineAnnotation p d = p2 (0.2, 0.1 + d)
+    renderLineAnnotation p d =
+        position
+            [(posLineAnnotation p d
+            , scale 0.2 (text $ showProb p) & fc teal
+            )]
+
+-- | Show a probability in scientific notation with two digits of precision.
+showProb :: Rational -> String
+showProb r
+    | r >= 0.01 = printf "%.2f" x
+    | otherwise = printf "%.2e\n" x
+  where
+    x = fromRational r :: Double
 
 {-----------------------------------------------------------------------------
     Diagram Layout
@@ -130,8 +168,9 @@ emitColumn x s
     | any (onExpr isSeq)      (foliage s) = ([], expandSeq s)
     | hasIsolatedTwigs s                  = ([], dropIsolatedTwigs s)
     | hasGroupClose s                     = emitGroupClose x s
-    | any (onExpr isParallel) (foliage s) = emitParallel x s
+    | any (onExpr isVertical) (foliage s) = emitParallel x s
     | any (onExpr isVar)      (foliage s) = emitVar x s
+    | otherwise = error "emitColumn: unreachable"
   where
     onExpr p (_, Just t) = p t
     onExpr _ _ = False
@@ -169,20 +208,43 @@ emitParallel :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitParallel x s =
     (map emit $ foliage s, updateFoliage dropit s)
   where
-    dropit (y, Nothing           ) = twig (y, Nothing)
-    dropit (y, Just (Last  exprs)) = close y exprs
-    dropit (y, Just (First exprs)) = close y exprs
-    dropit (y, Just t            ) = twig (y, Just t)
+    dropit (y, Nothing              ) = twig (y, Nothing)
+    dropit (y, Just (Last    exprs )) = close y exprs
+    dropit (y, Just (First   exprs )) = close y exprs
+    dropit (y, Just (Choices wexprs)) = close y (map snd wexprs)
+    dropit (y, Just t               ) = twig (y, Just t)
 
     close y exprs =
         Branch [((y,Nothing), Branch [(e, root) | e <- verticals y exprs])]
     verticals y exprs =
         zipWith (\z t -> (y + z, Just t)) (distances exprs) exprs 
-    distances = init . scanl (+) 0 . map maxParallel
+    distances = init . scanl (+) 0 . map maxVertical
 
-    emit (y, Just (Last  exprs)) = Tile x y $ Open OLast  (distances exprs)
-    emit (y, Just (First exprs)) = Tile x y $ Open OFirst (distances exprs)
-    emit (y, _                 ) = Tile x y Horizontal
+    emit (y, Just (Last    exprs )) =
+        Tile x y $ Open OLast $ distances exprs
+    emit (y, Just (First   exprs )) =
+        Tile x y $ Open OFirst $ distances exprs
+    emit (y, Just (Choices wexprs)) =
+        Tile x y $ Open (OChoices ws) $ distances exprs
+      where (ws, exprs) = unzip wexprs
+    emit (y, _) = Tile x y Horizontal
+
+-- | Outcomes that open a new vertical.
+isVertical :: Term v -> Bool
+isVertical (Last    _) = True
+isVertical (First   _) = True
+isVertical (Choices _) = True
+isVertical _           = False
+
+-- | Maximal number of outcomes that are shown vertically.
+-- Parallel operations are shown vertically, but also 'Choices'.
+maxVertical :: Term v -> Int
+maxVertical (Seq   ts)    = maximum $ map maxVertical ts
+maxVertical (Last  ts)    = sum $ map maxVertical ts
+maxVertical (First ts)    = sum $ map maxVertical ts
+maxVertical (Choices wts) = sum $ map (maxVertical . snd) wts
+maxVertical _             = 1
+
 
 -- | Check whether there is a group of silent foliage that should
 -- be closed.
@@ -320,3 +382,13 @@ example3 =
     (exampleS .>>. exampleS)
     .\/. exampleS
     .\/. (example1 .>>. var "ZQ")
+
+exampleCache :: O
+exampleCache = 
+    choices'
+        [ (95, var "c-hit")
+        , ( 5, var "c-miss" .>>. (net .\/. timeout))
+        ]
+  where
+    net = var "net" .>>. var "main" .>>. var "net"
+    timeout = var "t-out"
