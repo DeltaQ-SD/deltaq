@@ -20,13 +20,15 @@ import DeltaQ.Expr
     ( O
     , Term (..)
     , choices'
+    , isLoc
     , isSeq
     , isVar
+    , loc
     , outcomeFromTerm
     , termFromOutcome
     , var
     )
-import Diagrams.Prelude hiding (First, Last, op)
+import Diagrams.Prelude hiding (First, Last, Loc, op, loc)
 import Diagrams.Backend.SVG
 import Text.Printf
     ( printf
@@ -57,6 +59,7 @@ data Op
 -- | Data attached to a 'Tile'.
 data Token
     = VarT String
+    | Location String
     | Horizontal
     | Close [Y]
     | Open Op [Y]
@@ -79,6 +82,10 @@ renderToken :: Token -> Diagram SVG
 renderToken (VarT s)     =
     scale 0.3 (text s)
     <> (circle 0.44 & lc orange & lw 4 & fc white)
+    <> hrule 1
+renderToken (Location s)     =
+    (scale 0.2 (text s) & fc teal & translate (r2 (0,0.2)))
+    <> (square 0.2 & fc white)
     <> hrule 1
 renderToken Horizontal   = hrule 1
 renderToken (Close ds)   =
@@ -169,6 +176,7 @@ emitColumn x s
     | hasIsolatedTwigs s                  = ([], dropIsolatedTwigs s)
     | hasGroupClose s                     = emitGroupClose x s
     | any (onExpr isVertical) (foliage s) = emitParallel x s
+    | any (onExpr isLoc)      (foliage s) = emitLoc x s
     | any (onExpr isVar)      (foliage s) = emitVar x s
     | otherwise = error "emitColumn: unreachable"
   where
@@ -190,18 +198,27 @@ expandSeq = updateFoliage expand
         -- foldl reorders the sequence appropriately.
     expand edge = twig edge
 
+-- | Emit a column with the next observation locations.
+emitLoc :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
+emitLoc x s =
+    (concatMap emit $ foliage s, updateFoliage dropit s)
+  where
+    dropit (y, Just (Loc _)     ) = twig (y, Nothing)
+    dropit (y, edge)              = twig (y, edge)
+
+    emit (y, Just (Loc s)) = [Tile x y $ Location s]
+    emit (y, _           ) = [Tile x y Horizontal]
+
 -- | Emit a column with the next named items.
 emitVar :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitVar x s =
     (map emit $ foliage s, updateFoliage dropit s)
   where
-    dropit (y, Nothing          ) = twig (y, Nothing)
-    dropit (y, Just (Var _)     ) = twig (y, Nothing)
-    dropit _ = error "emitSeq does not expect non-Var Tiles"
+    dropit (y, Just (Var _)) = twig (y, Nothing)
+    dropit (y, edge        ) = twig (y, edge)
 
-    emit (y, Nothing     ) = Tile x y Horizontal
     emit (y, Just (Var v)) = Tile x y (VarT v)
-    emit _ = error "emitSeq does not expect non-Var Tiles"
+    emit (y, edge        ) = Tile x y Horizontal
 
 -- | Emit a column with the next parallel items.
 emitParallel :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
@@ -384,11 +401,16 @@ example3 =
     .\/. (example1 .>>. var "ZQ")
 
 exampleCache :: O
-exampleCache = 
-    choices'
-        [ (95, var "c-hit")
-        , ( 5, var "c-miss" .>>. (net .\/. timeout))
+exampleCache =
+    loc "read"
+    .>>. choices'
+        [ (95, var "c-hit" .>>. loc "hit")
+        , ( 5, var "c-miss" .>>. loc "miss" .>>. (net .\/. timeout))
         ]
   where
-    net = var "net" .>>. var "main" .>>. var "net"
+    net = var "net"
+        .>>. loc "mread"
+        .>>. var "main"
+        .>>. loc "mreturn"
+        .>>. var "net"
     timeout = var "t-out"

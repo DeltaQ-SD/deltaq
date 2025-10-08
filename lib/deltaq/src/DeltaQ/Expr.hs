@@ -24,6 +24,7 @@ module DeltaQ.Expr
     ( -- * Outcome expressions
       O
     , var
+    , loc
     , substitute
     , choices'
     , toDeltaQ
@@ -33,6 +34,7 @@ module DeltaQ.Expr
     , outcomeFromTerm
     , Term (..)
     , isVar
+    , isLoc
     , isSeq
     , isLast
     , isFirst
@@ -75,6 +77,14 @@ newtype O = O { unO :: Term String }
 -- | Outcome variable, given by a unique name.
 var :: String -> O
 var = O . Var
+
+-- | Observation location, with a label.
+--
+-- Rendered as a box with a label in the outcome diagram.
+-- Put this in sequence with other outcome expressions to highlight
+-- their outcome locations.
+loc :: String -> O
+loc = O . Loc
 
 -- | Substitute all variables by outcome expressions.
 substitute
@@ -131,6 +141,10 @@ data Term v
         -- but with a straight line as graphical representation.
     | Wait Rational
         -- ^ Succeed after waiting for a fixed amount of time.
+    | Loc String
+        -- ^ Outcome location with a label.
+        -- Equivalent to @Wait 0@, but with a labeled box
+        -- as graphical representation.
     | Seq [Term v]
         -- ^ Sequential composition.
     | Last [Term v]
@@ -154,6 +168,7 @@ instance Monad Term where
         go Never      = Never
         go Wait0      = Wait0
         go (Wait t)   = Wait t
+        go (Loc  s)   = Loc s
         go (Seq   xs) = Seq   $ map go xs
         go (Last  xs) = Last  $ map go xs
         go (First xs) = First $ map go xs
@@ -207,6 +222,11 @@ isNormalizedAssoc _ =
 isVar :: Term v -> Bool
 isVar (Var _) = True
 isVar _       = False
+
+-- | Check whether a 'Term' is a 'Loc'.
+isLoc :: Term v -> Bool
+isLoc (Loc _) = True
+isLoc _       = False
 
 -- | Check whether a 'Term' is a 'Seq'.
 isSeq :: Term v -> Bool
@@ -264,6 +284,7 @@ everywhere f = every
     recurse a@Never = a
     recurse a@Wait0 = a
     recurse a@(Wait _) = a
+    recurse a@(Loc  _) = a
     recurse (Seq   xs) = Seq $ map every xs
     recurse (Last  xs) = Last $ map every xs
     recurse (First xs) = First $ map every xs
