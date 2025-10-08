@@ -175,7 +175,7 @@ emitColumn x s
     | any (onExpr isSeq)      (foliage s) = ([], expandSeq s)
     | hasIsolatedTwigs s                  = ([], dropIsolatedTwigs s)
     | hasGroupClose s                     = emitGroupClose x s
-    | any (onExpr isVertical) (foliage s) = emitParallel x s
+    | any (onExpr isVertical) (foliage s) = emitVertical x s
     | any (onExpr isLoc)      (foliage s) = emitLoc x s
     | any (onExpr isVar)      (foliage s) = emitVar x s
     | otherwise = error "emitColumn: unreachable"
@@ -220,9 +220,9 @@ emitVar x s =
     emit (y, Just (Var v)) = Tile x y (VarT v)
     emit (y, edge        ) = Tile x y Horizontal
 
--- | Emit a column with the next parallel items.
-emitParallel :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
-emitParallel x s =
+-- | Emit a column with the next vertical items.
+emitVertical :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
+emitVertical x s =
     (map emit $ foliage s, updateFoliage dropit s)
   where
     dropit (y, Nothing              ) = twig (y, Nothing)
