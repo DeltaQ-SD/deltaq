@@ -57,9 +57,17 @@ data Op
     | OChoices [Prob]
     deriving (Eq, Ord, Show)
 
+-- | Tiles representing predefined outcomes
+data Op0
+    = ONever
+    | OWait0
+    | OWait Rational
+    deriving (Eq, Ord, Show)
+
 -- | Data attached to a 'Tile'.
 data Token
     = VarT String
+    | Outcome Op0
     | Location Description
     | Horizontal
     | Close (Maybe Description) [Y]
@@ -80,38 +88,34 @@ renderTiles = frame 0.1 . position . map renderTile
 
 -- | Render a single 'Token' associated with a 'Tile'.
 renderToken :: Token -> Diagram SVG
-renderToken (VarT s)     =
+renderToken (VarT s) =
     scale 0.3 (text s)
     <> (circle 0.44 & lc orange & lw 4 & fc white)
     <> hrule 1
-renderToken (Location s)     =
+renderToken (Outcome OWait0) =
+    hrule 1
+renderToken (Outcome o) =
+    scale 0.3 (renderOp0Symbol o)
+    <> (circle 0.44 & lc orange & lw 4 & fc white)
+    <> hrule 1
+renderToken (Location s) =
     (scale 0.2 (text s) & fc teal & translate (r2 (0,0.2)))
     <> (square 0.2 & fc white)
     <> hrule 1
-renderToken Horizontal   = hrule 1
-renderToken (Close mlocation ds)   =
+renderToken Horizontal = hrule 1
+renderToken (Close mlocation ds) =
     maybe mempty (renderToken . Location) mlocation
     <> mconcat (map (renderLine . fromIntegral . negate) ds)
     <> hrule 1
   where
     renderLine d = fromVertices [p2 (0, 0), p2 (-0.5, d)] & strokeLine
 renderToken (Open op ds) =
-    scale 0.4 (renderOp op <> (square 1 & fc white))
+    scale 0.4 ((renderOpSymbol op & lw 1.7) <> (square 1 & fc white))
     <> mconcat (map renderLine ys)
     <> mconcat (renderLineAnnotations op ys)
     <> hrule 1
   where
     ys = map (fromIntegral . negate) ds
-
-    renderOp :: Op -> Diagram SVG
-    renderOp OFirst = text "∃"
-    renderOp OLast  = text "∀"
-    renderOp (OChoices _) =
-        (fromOffsets [r2 (0.33, 0), r2 (-0.6, 0), r2 (0.2, 0.15)]
-            & strokeLine & translate (r2 (0,0.1)))
-        <>
-        (fromOffsets [r2 (-0.33, 0), r2 (0.6, 0), r2 (-0.2, -0.15)]
-            & strokeLine & translate (r2 (0,-0.1)))
 
     renderLine d = fromVertices [p2 (0, 0), p2 (0.5, d)] & strokeLine
 
@@ -128,6 +132,33 @@ renderToken (Open op ds) =
             [(posLineAnnotation p d
             , scale 0.2 (text $ showProb p) & fc teal
             )]
+
+-- | Render the symbol that represents a known outcome.
+renderOp0Symbol :: Op0 -> Diagram SVG
+renderOp0Symbol ONever    = text "⊥"
+renderOp0Symbol OWait0    = mempty
+renderOp0Symbol (OWait t) =
+    text $ "wait " <> printf "%.2f" (fromRational t :: Double)
+
+-- | Render the symbol that represents an operation with multiple arguments
+renderOpSymbol :: Op -> Diagram SVG
+renderOpSymbol OFirst =
+    (fromVertices [p2 (-0.35,0.25), p2 (0,0.25), p2 (0,-0.25), p2 (-0.35,-0.25)]
+        & strokeLine & translate (r2 (-0.35/2, 0.25)))
+    <> (fromOffsets [r2 (-0.35,0)] & strokeLine & translate (r2 (0.35/2, 0)))
+renderOpSymbol OLast  =
+    (fromOffsets [r2 (-0.16, 0), r2 (2*0.16, 0)] & strokeLine)
+    <>
+    (((fromOffsets [r2 (-0.25, 0.6)] & strokeLine)
+        <> (fromOffsets [r2 (0.25, 0.6)] & strokeLine))
+        & translate (r2 (0,-0.35))
+    ) & translate (r2 (0, 0.03))
+renderOpSymbol (OChoices _) =
+    (fromOffsets [r2 (0.33, 0), r2 (-0.6, 0), r2 (0.2, 0.15)]
+        & strokeLine & translate (r2 (0,0.1)))
+    <>
+    (fromOffsets [r2 (-0.33, 0), r2 (0.6, 0), r2 (-0.2, -0.15)]
+        & strokeLine & translate (r2 (0,-0.1)))
 
 -- | Show a probability in scientific notation with two digits of precision.
 showProb :: Rational -> String
@@ -182,16 +213,24 @@ layout t = go 0 $ twig (0, Term t Nothing)
 -- | Emit the next column, possible empty.
 emitColumn :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitColumn x s
-    | any (onExpr isSeq)      (foliage s) = ([], expandSeq s)
-    | hasIsolatedTwigs s                  = ([], dropIsolatedTwigs s)
-    | hasGroupClose s                     = emitGroupClose x s
-    | any (onExpr isVertical) (foliage s) = emitVertical x s
-    | any (onExpr isLoc)      (foliage s) = emitLoc x s
-    | any (onExpr isVar)      (foliage s) = emitVar x s
+    | any (onExpr isSeq)        (foliage s) = ([], expandSeq s)
+    | hasIsolatedTwigs s                    = ([], dropIsolatedTwigs s)
+    | hasGroupClose s                       = emitGroupClose x s
+    | any (onExpr isVertical)   (foliage s) = emitVertical x s
+    | any (onExpr isLoc)        (foliage s) = emitLoc x s
+    | any (onExpr isVarOrKnown) (foliage s) = emitVar x s
     | otherwise = error "emitColumn: unreachable"
   where
     onExpr p (_, Term t _) = p t
     onExpr _ _ = False
+
+-- | Check that a given Term is a 'Var' or known constant.
+isVarOrKnown :: Term v -> Bool
+isVarOrKnown (Var _)  = True
+isVarOrKnown Never    = True
+isVarOrKnown Wait0    = True
+isVarOrKnown (Wait _) = True
+isVarOrKnown _ = False
 
 -- | Check that a given 'EdgeData' contains no outcome-related data.
 isEmpty :: EdgeData -> Bool
@@ -231,11 +270,14 @@ emitVar :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitVar x s =
     (map emit $ foliage s, updateFoliage dropit s)
   where
-    dropit (y, Term (Var _) _) = twig (y, Empty)
-    dropit edge                = twig edge
+    dropit (y, Term t _) | isVarOrKnown t = twig (y, Empty)
+    dropit edge                           = twig edge
 
-    emit (y, Term (Var v) _) = Tile x y (VarT v)
-    emit (y, edge          ) = Tile x y Horizontal
+    emit (y, Term (Var v)  _) = Tile x y $ VarT v
+    emit (y, Term Never    _) = Tile x y $ Outcome ONever
+    emit (y, Term Wait0    _) = Tile x y $ Outcome OWait0
+    emit (y, Term (Wait t) _) = Tile x y $ Outcome $ OWait t
+    emit (y, edge           ) = Tile x y Horizontal
 
 -- | Emit a column with the next vertical items.
 emitVertical :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
