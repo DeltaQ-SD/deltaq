@@ -110,7 +110,7 @@ renderToken (Close mlocation ds) =
   where
     renderLine d = fromVertices [p2 (0, 0), p2 (-0.5, d)] & strokeLine
 renderToken (Open op ds) =
-    scale 0.4 (renderOpSymbol op <> (square 1 & fc white))
+    scale 0.4 ((renderOpSymbol op & lw 1.7) <> (square 1 & fc white))
     <> mconcat (map renderLine ys)
     <> mconcat (renderLineAnnotations op ys)
     <> hrule 1
@@ -142,8 +142,17 @@ renderOp0Symbol (OWait t) =
 
 -- | Render the symbol that represents an operation with multiple arguments
 renderOpSymbol :: Op -> Diagram SVG
-renderOpSymbol OFirst = text "∃"
-renderOpSymbol OLast  = text "∀"
+renderOpSymbol OFirst =
+    (fromVertices [p2 (-0.35,0.25), p2 (0,0.25), p2 (0,-0.25), p2 (-0.35,-0.25)]
+        & strokeLine & translate (r2 (-0.35/2, 0.25)))
+    <> (fromOffsets [r2 (-0.35,0)] & strokeLine & translate (r2 (0.35/2, 0)))
+renderOpSymbol OLast  =
+    (fromOffsets [r2 (-0.16, 0), r2 (2*0.16, 0)] & strokeLine)
+    <>
+    (((fromOffsets [r2 (-0.25, 0.6)] & strokeLine)
+        <> (fromOffsets [r2 (0.25, 0.6)] & strokeLine))
+        & translate (r2 (0,-0.35))
+    ) & translate (r2 (0, 0.03))
 renderOpSymbol (OChoices _) =
     (fromOffsets [r2 (0.33, 0), r2 (-0.6, 0), r2 (0.2, 0.15)]
         & strokeLine & translate (r2 (0,0.1)))
