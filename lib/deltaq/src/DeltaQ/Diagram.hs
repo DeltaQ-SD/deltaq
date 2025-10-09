@@ -28,7 +28,7 @@ import DeltaQ.Expr
     , termFromOutcome
     , var
     )
-import Diagrams.Prelude hiding (First, Last, Loc, op, loc)
+import Diagrams.Prelude hiding (Empty, First, Last, Loc, op, loc)
 import Diagrams.Backend.SVG
 import Text.Printf
     ( printf
@@ -49,6 +49,7 @@ renderOutcomeDiagram = renderTiles . layout . termFromOutcome
 type X = Int
 type Y = Int
 type Prob = Rational
+type Description = String
 
 data Op
     = OFirst
@@ -59,9 +60,9 @@ data Op
 -- | Data attached to a 'Tile'.
 data Token
     = VarT String
-    | Location String
+    | Location Description
     | Horizontal
-    | Close [Y]
+    | Close (Maybe Description) [Y]
     | Open Op [Y]
     deriving (Eq, Ord, Show)
 
@@ -88,8 +89,9 @@ renderToken (Location s)     =
     <> (square 0.2 & fc white)
     <> hrule 1
 renderToken Horizontal   = hrule 1
-renderToken (Close ds)   =
-    mconcat (map (renderLine . fromIntegral . negate) ds)
+renderToken (Close mlocation ds)   =
+    maybe mempty (renderToken . Location) mlocation
+    <> mconcat (map (renderLine . fromIntegral . negate) ds)
     <> hrule 1
   where
     renderLine d = fromVertices [p2 (0, 0), p2 (-0.5, d)] & strokeLine
@@ -156,11 +158,19 @@ and the root to the right, like this:
 
 -}
 
-type EdgeData = (Y, Maybe (Term String))
+-- | Outcome-related data that we associate with an edge.
+data EdgeOutcome
+    = Empty
+        -- ^ No outcome is associated with this edge.
+    | Term (Term String) (Maybe Description)
+        -- ^ Term with maybe a description of its ending observation location.
+    deriving (Eq, Ord, Show)
+
+type EdgeData = (Y, EdgeOutcome)
 
 -- | Layout an outcome diagram.
 layout :: Term String -> [Tile]
-layout t = go 0 $ twig (0, Just t)
+layout t = go 0 $ twig (0, Term t Nothing)
   where
     go !x0 s0
         | isRoot s0 = []
@@ -180,68 +190,79 @@ emitColumn x s
     | any (onExpr isVar)      (foliage s) = emitVar x s
     | otherwise = error "emitColumn: unreachable"
   where
-    onExpr p (_, Just t) = p t
+    onExpr p (_, Term t _) = p t
     onExpr _ _ = False
 
--- | Check that a given 'EdgeData' does not contain a Expr.
-isSilent :: EdgeData -> Bool
-isSilent (_, Nothing) = True
-isSilent _ = False
+-- | Check that a given 'EdgeData' contains no outcome-related data.
+isEmpty :: EdgeData -> Bool
+isEmpty (_, Empty) = True
+isEmpty _ = False
 
 -- | Expand all 'Seq' in the 'foliage' as a sequence of twigs.
+--
+-- Merge observation locations that follow after a vertical term
+-- into the term annotation.
 expandSeq :: Shrub EdgeData -> Shrub EdgeData
 expandSeq = updateFoliage expand
   where
-    expand (y, Just (Seq exprs)) =
-        foldl (\s expr -> Branch [((y, Just expr), s)]) root exprs
-        -- Note: The Seq is left-to-right, but the Shrub is right-to-left.
-        -- foldl reorders the sequence appropriately.
+    expand (y, Term (Seq exprs) _) = mkBranches y root exprs
     expand edge = twig edge
+
+    mkBranches y acc [] = acc
+    mkBranches y acc (t:Loc description:ts)
+        | isVertical t =
+            mkBranches y (Branch [((y, Term t (Just description)), acc)]) ts
+    mkBranches y acc (t:ts) =
+        mkBranches y (Branch [((y, Term t Nothing), acc)]) ts
 
 -- | Emit a column with the next observation locations.
 emitLoc :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitLoc x s =
     (concatMap emit $ foliage s, updateFoliage dropit s)
   where
-    dropit (y, Just (Loc _)     ) = twig (y, Nothing)
-    dropit (y, edge)              = twig (y, edge)
+    dropit (y, Term (Loc _) _) = twig (y, Empty)
+    dropit edge                = twig edge
 
-    emit (y, Just (Loc s)) = [Tile x y $ Location s]
-    emit (y, _           ) = [Tile x y Horizontal]
+    emit (y, Term (Loc s) _) = [Tile x y $ Location s]
+    emit (y, _             ) = [Tile x y Horizontal]
 
 -- | Emit a column with the next named items.
 emitVar :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitVar x s =
     (map emit $ foliage s, updateFoliage dropit s)
   where
-    dropit (y, Just (Var _)) = twig (y, Nothing)
-    dropit (y, edge        ) = twig (y, edge)
+    dropit (y, Term (Var _) _) = twig (y, Empty)
+    dropit edge                = twig edge
 
-    emit (y, Just (Var v)) = Tile x y (VarT v)
-    emit (y, edge        ) = Tile x y Horizontal
+    emit (y, Term (Var v) _) = Tile x y (VarT v)
+    emit (y, edge          ) = Tile x y Horizontal
 
 -- | Emit a column with the next vertical items.
 emitVertical :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
 emitVertical x s =
     (map emit $ foliage s, updateFoliage dropit s)
   where
-    dropit (y, Nothing              ) = twig (y, Nothing)
-    dropit (y, Just (Last    exprs )) = close y exprs
-    dropit (y, Just (First   exprs )) = close y exprs
-    dropit (y, Just (Choices wexprs)) = close y (map snd wexprs)
-    dropit (y, Just t               ) = twig (y, Just t)
+    dropit (y, Term (Last    exprs ) ml) = close y ml exprs
+    dropit (y, Term (First   exprs ) ml) = close y ml exprs
+    dropit (y, Term (Choices wexprs) ml) = close y ml (map snd wexprs)
+    dropit edge                         = twig edge
 
-    close y exprs =
-        Branch [((y,Nothing), Branch [(e, root) | e <- verticals y exprs])]
+    mkLocation Nothing  = Empty
+    mkLocation (Just l) = Term (Loc l) Nothing
+    close y ml exprs =
+        Branch [
+          ( (y, mkLocation ml)
+          , Branch [(e, root) | e <- verticals y exprs])
+        ]
     verticals y exprs =
-        zipWith (\z t -> (y + z, Just t)) (distances exprs) exprs 
+        zipWith (\z t -> (y + z, Term t Nothing)) (distances exprs) exprs 
     distances = init . scanl (+) 0 . map maxVertical
 
-    emit (y, Just (Last    exprs )) =
+    emit (y, Term (Last    exprs ) _) =
         Tile x y $ Open OLast $ distances exprs
-    emit (y, Just (First   exprs )) =
+    emit (y, Term (First   exprs ) _) =
         Tile x y $ Open OFirst $ distances exprs
-    emit (y, Just (Choices wexprs)) =
+    emit (y, Term (Choices wexprs) _) =
         Tile x y $ Open (OChoices ws) $ distances exprs
       where (ws, exprs) = unzip wexprs
     emit (y, _) = Tile x y Horizontal
@@ -269,7 +290,7 @@ hasGroupClose :: Shrub EdgeData -> Bool
 hasGroupClose = any isGroupClose . foliageBushes
   where
     isGroupClose (Branch ts) =
-        length ts > 1 && all isSilent (map fst ts)
+        length ts > 1 && all isEmpty (map fst ts)
 
 -- | Check whether there are any foliage edges that
 -- have no expressions and no siblings.
@@ -289,20 +310,38 @@ foliageBushes (Branch ts)
 
 -- | Emit a column that closes all groups that can be closed
 -- at the moment.
+--
+-- Special case: If the next-higher branch is an observation
+-- location with a label, we merge that location into the close.
 emitGroupClose :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
-emitGroupClose _ (Branch []) = ([], Branch [])
-emitGroupClose x (Branch ts)
-    | all isRoot children && all isSilent labels && length children > 1 =
-        ([Tile x y $ Close $ map (subtract y) ys], twig (y, Nothing))
-    | otherwise =
-        let (tiles, children') = unzip $ map (emitGroupClose x) children
-            tiles2 = [ Tile x y2 Horizontal | ((y2, _), Branch []) <- ts ]
-        in  (concat tiles <> tiles2, Branch (zip labels children'))
+emitGroupClose x shrub = goBranch shrub
   where
-    y        = head ys
-    ys       = map fst labels
-    labels   = map fst ts
-    children = map snd ts
+    goBranch (Branch []) = ([], Branch [])
+    goBranch (Branch ts) = (concat tiless, Branch edges)
+      where (tiless, edges) = unzip $ map (uncurry goEdge) ts
+
+    goEdge (y, term) (Branch []) =
+        ( [Tile x y Horizontal]
+        , ((y, term), Branch [])
+        )
+    goEdge (y, term) (Branch ts)
+        | isGroupClose ts =
+            ( [Tile x y $ Close mlocation $ map (subtract y) ys]
+            , ((y, Empty), root)
+            )
+        | otherwise =
+            let (tiles, branch') = goBranch (Branch ts)
+            in  ( tiles
+                , ((y, term), branch')
+                )
+      where
+        mlocation = case term of
+            Term (Loc s) _ -> Just s
+            _ -> Nothing
+        ys = map (fst . fst) ts
+
+    isGroupClose ts
+        = all isRoot (map snd ts) && all isEmpty (map fst ts) && length ts > 1
 
 -- | Drop all foliage edges that have no expressions and have no siblings.
 dropIsolatedTwigs :: Shrub EdgeData -> Shrub EdgeData
@@ -316,7 +355,7 @@ dropIsolatedTwigs (Branch ts)
 
 -- | Check whether a 'Shrub' is a twig without expression.
 isIsolatedTwig :: Shrub EdgeData -> Bool
-isIsolatedTwig (Branch [((_,Nothing), Branch [])]) = True
+isIsolatedTwig (Branch [((_,Empty), Branch [])]) = True
 isIsolatedTwig _ = False
 
 {-----------------------------------------------------------------------------
@@ -405,8 +444,9 @@ exampleCache =
     loc "read"
     .>>. choices'
         [ (95, var "c-hit" .>>. loc "hit")
-        , ( 5, var "c-miss" .>>. loc "miss" .>>. (net .\/. timeout))
+        , ( 5, var "c-miss" .>>. loc "miss" .>>. (net .\/. timeout) .>>. loc "")
         ]
+    .>>. loc "return"
   where
     net = var "net"
         .>>. loc "mread"
