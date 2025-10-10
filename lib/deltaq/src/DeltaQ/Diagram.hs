@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE BangPatterns #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 {-|
 Copyright   : PLWORKZ R&D, 2025
@@ -11,6 +12,14 @@ Render outcome expressions as outcome diagrams.
 module DeltaQ.Diagram
     ( -- * Outcome diagrams
       renderOutcomeDiagram
+    
+    -- * Internal, for testing
+    , Tile (..)
+    , Description
+    , Op (..)
+    , Op0 (..)
+    , Token (..)
+    , layout
     ) where
 
 import DeltaQ.Class
@@ -22,9 +31,7 @@ import DeltaQ.Expr
     , choices'
     , isLoc
     , isSeq
-    , isVar
     , loc
-    , outcomeFromTerm
     , termFromOutcome
     , var
     )
@@ -33,7 +40,6 @@ import Diagrams.Backend.SVG
 import Text.Printf
     ( printf
     )
-
 out :: O -> IO ()
 out =
     renderSVG "xoutcomes.svg" (mkWidth 700)
@@ -119,14 +125,14 @@ renderToken (Open op ds) =
 
     renderLine d = fromVertices [p2 (0, 0), p2 (0.5, d)] & strokeLine
 
-    renderLineAnnotations (OChoices ws) ys =
-        zipWith renderLineAnnotation ps ys
+    renderLineAnnotations (OChoices ws) =
+        zipWith renderLineAnnotation ps
       where
         ps = map (/ sum ws) ws
-    renderLineAnnotations _ _ = []
+    renderLineAnnotations _ = const []
 
-    posLineAnnotation p 0 = p2 (0.2, 0.3)
-    posLineAnnotation p d = p2 (0.2, 0.1 + d)
+    posLineAnnotation _ 0 = p2 (0.2, 0.3)
+    posLineAnnotation _ d = p2 (0.2, 0.1 + d)
     renderLineAnnotation p d =
         position
             [(posLineAnnotation p d
@@ -247,7 +253,7 @@ expandSeq = updateFoliage expand
     expand (y, Term (Seq exprs) _) = mkBranches y root exprs
     expand edge = twig edge
 
-    mkBranches y acc [] = acc
+    mkBranches _ acc [] = acc
     mkBranches y acc (t:Loc description:ts)
         | isVertical t =
             mkBranches y (Branch [((y, Term t (Just description)), acc)]) ts
@@ -262,7 +268,7 @@ emitLoc x s =
     dropit (y, Term (Loc _) _) = twig (y, Empty)
     dropit edge                = twig edge
 
-    emit (y, Term (Loc s) _) = [Tile x y $ Location s]
+    emit (y, Term (Loc l) _) = [Tile x y $ Location l]
     emit (y, _             ) = [Tile x y Horizontal]
 
 -- | Emit a column with the next named items.
@@ -277,7 +283,7 @@ emitVar x s =
     emit (y, Term Never    _) = Tile x y $ Outcome ONever
     emit (y, Term Wait0    _) = Tile x y $ Outcome OWait0
     emit (y, Term (Wait t) _) = Tile x y $ Outcome $ OWait t
-    emit (y, edge           ) = Tile x y Horizontal
+    emit (y, _              ) = Tile x y Horizontal
 
 -- | Emit a column with the next vertical items.
 emitVertical :: X -> Shrub EdgeData -> ([Tile], Shrub EdgeData)
