@@ -126,7 +126,7 @@ span.spaces    { background: white }
 <span class="lineno">  107 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="istickedoff"><span class="decl"><span class="istickedoff">Ord a =&gt; Ord (Eventually a)</span></span></span></span></span></span></span></span></span></span></span></span> where
 <span class="lineno">  108 </span>    <span class="decl"><span class="istickedoff">compare Abandoned Abandoned = EQ</span>
 <span class="lineno">  109 </span><span class="spaces">    </span><span class="istickedoff">compare Abandoned (Occurs _) = GT</span>
-<span class="lineno">  110 </span><span class="spaces">    </span><span class="istickedoff">compare (Occurs _) Abandoned = <span class="nottickedoff">LT</span></span>
+<span class="lineno">  110 </span><span class="spaces">    </span><span class="istickedoff">compare (Occurs _) Abandoned = LT</span>
 <span class="lineno">  111 </span><span class="spaces">    </span><span class="istickedoff">compare (Occurs x) (Occurs y) = compare x y</span></span>
 <span class="lineno">  112 </span>
 <span class="lineno">  113 </span>instance <span class="decl"><span class="nottickedoff">Functor Eventually</span></span> where
