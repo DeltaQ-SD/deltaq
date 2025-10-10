@@ -105,10 +105,11 @@ substitute f (O term) = O $ normalize1Assoc $ term >>= unO . f
 toDeltaQ :: (String -> DQ) -> O -> DQ
 toDeltaQ f (O term) = go term
   where
-    go (Var v) = f v
-    go Never = never
-    go Wait0 = wait 0
+    go (Var v)  = f v
+    go Never    = never
+    go Wait0    = wait 0
     go (Wait t) = wait t
+    go (Loc  _) = wait 0
     go (Seq   xs) = foldr1 (.>>.) $ map go xs
     go (Last  xs) = foldr1 (./\.) $ map go xs
     go (First xs) = foldr1 (.\/.) $ map go xs
@@ -302,6 +303,7 @@ everywhere f = every
 everything :: (r -> r -> r) -> (Term v -> r) -> (Term v -> r)
 everything combine f = recurse
   where
+    recurse x@(Var _)  = f x
     recurse x@Never    = f x
     recurse x@Wait0    = f x
     recurse x@(Wait _) = f x
