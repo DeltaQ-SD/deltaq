@@ -85,6 +85,9 @@ test-suite test
   main-is:            Spec.hs
   other-modules:
     DeltaQ.ClassSpec
+    DeltaQ.DiagramSpec
+    DeltaQ.ExprSpec
+    DeltaQ.Gen.Term
     DeltaQ.MethodsSpec
     DeltaQ.PiecewisePolynomialSpec
 

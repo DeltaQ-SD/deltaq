@@ -42,6 +42,7 @@ module DeltaQ.Expr
     , isChoices
     , maxParallel
     , everywhere
+    , everything
     , isNormalizedAssoc
     , normalizeAssoc
     ) where
@@ -51,6 +52,9 @@ import Control.Monad
     )
 import Control.DeepSeq
     ( NFData
+    )
+import Data.List
+    ( foldl'
     )
 import DeltaQ.Class
     ( Outcome (..)
@@ -101,10 +105,11 @@ substitute f (O term) = O $ normalize1Assoc $ term >>= unO . f
 toDeltaQ :: (String -> DQ) -> O -> DQ
 toDeltaQ f (O term) = go term
   where
-    go (Var v) = f v
-    go Never = never
-    go Wait0 = wait 0
+    go (Var v)  = f v
+    go Never    = never
+    go Wait0    = wait 0
     go (Wait t) = wait t
+    go (Loc  _) = wait 0
     go (Seq   xs) = foldr1 (.>>.) $ map go xs
     go (Last  xs) = foldr1 (./\.) $ map go xs
     go (First xs) = foldr1 (.\/.) $ map go xs
@@ -289,6 +294,28 @@ everywhere f = every
     recurse (Last  xs) = Last $ map every xs
     recurse (First xs) = First $ map every xs
     recurse (Choices wxs) = Choices $ [ (w, every x) | (w, x) <- wxs]
+
+-- | Summarize all nodes; top-down, left-to-right.
+--
+-- See also [Scrap your boilerplate
+-- ](https://www.microsoft.com/en-us/research/wp-content/uploads/2003/01/hmap.pdf)
+-- .
+everything :: (r -> r -> r) -> (Term v -> r) -> (Term v -> r)
+everything combine f = recurse
+  where
+    recurse x@(Var _)  = f x
+    recurse x@Never    = f x
+    recurse x@Wait0    = f x
+    recurse x@(Wait _) = f x
+    recurse x@(Loc  _) = f x
+    recurse x@(Seq   xs) =
+        foldl' combine (f x) $ map recurse xs
+    recurse x@(Last  xs) =
+        foldl' combine (f x) $ map recurse xs
+    recurse x@(First xs) =
+        foldl' combine (f x) $ map recurse xs
+    recurse x@(Choices wxs) =
+        foldl' combine (f x) $ [ recurse y | (_, y) <- wxs]
 
 -- | Normalize a term to \"associative normal form\"
 -- under the assumptions
