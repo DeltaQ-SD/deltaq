@@ -9,7 +9,8 @@ Specifically,
 
     * type classes in "DeltaQ.Class"
 
-        * 'Outcome' for outcomes and their combinations
+        * 'Outcome' for outcomes and their sequential and parallel composition
+        * 'ProbabilisticOutcome' for probabilistic composition of outcomes
         * 'DeltaQ' for probability distribution of completion times
 
     * type class instance in "DeltaQ.PiecewisePolynomial"
@@ -25,6 +26,13 @@ Specifically,
         * 'plotCDFWithQuantiles' for plotting an instance of 'DeltaQ'
         with quantiles highlighted.
 
+    * type class instance in "DeltaQ.Expr"
+
+        * @'O'@ represents an outcome expression, that is a symbolic
+          representation of an outcome.
+    
+    * rendering of outcome expressions in "DeltaQ.Diagram"
+
 -}
 module DeltaQ
     ( -- * Example
@@ -32,12 +40,16 @@ module DeltaQ
 
       -- * Modules
       module DeltaQ.Class
+    , module DeltaQ.Expr
+    , module DeltaQ.Diagram
     , module DeltaQ.Methods
     , module DeltaQ.Plot
     , module DeltaQ.PiecewisePolynomial
     ) where
 
 import DeltaQ.Class
+import DeltaQ.Expr
+import DeltaQ.Diagram
 import DeltaQ.Methods
 import DeltaQ.PiecewisePolynomial
 import DeltaQ.Plot
@@ -110,5 +122,20 @@ is
 > > fromRational (successWithin (hops 5) 2) :: Double
 > 0.9547325102880658
 
+Besides computing delay times numerically with the type 'DQ',
+we can also represent the underlying model __symbolically__
+using the type 'O'.
+For example, here is a diagram that represents a sequence of three hops:
+
+> hop' :: O
+> hop' = choices [(1/3, var "short"), (1/3, var "mid"), (1/3, var "long")]
+>
+> hops' :: O
+> hops' = hop' .>>. hop' .>>. hop'
+>
+> renderedHops :: Diagram SVG
+> renderedHops = renderOutcomeDiagram hops'
+
+<< images/hops.svg >>
 
 -}

@@ -20,6 +20,7 @@ module DeltaQ.Plot
 import DeltaQ.Class
     ( Outcome (Duration)
     , DeltaQ (..)
+    , ProbabilisticOutcome (Probability)
     , Eventually (..)
     , eventually
     , maybeFromEventually

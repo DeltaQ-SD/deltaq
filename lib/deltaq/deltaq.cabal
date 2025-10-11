@@ -5,7 +5,7 @@ name:            deltaq
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.0.2.0
+version:         1.1.0.0
 synopsis:        Framework for ∆Q System Development
 description:
   ∆Q System Development is a paradigm for developing distributed systems
@@ -36,6 +36,7 @@ maintainer:      neil.davies@pnsol.ccom
 extra-doc-files:
   CHANGELOG.md
   README.md
+  images/hops.svg
 
 tested-with:     GHC ==8.10.7 || ==9.6.7 || ==9.10.3
 
@@ -64,6 +65,7 @@ library
     DeltaQ
     DeltaQ.Class
     DeltaQ.Diagram
+    DeltaQ.Diagram.Internal
     DeltaQ.Expr
     DeltaQ.Methods
     DeltaQ.PiecewisePolynomial

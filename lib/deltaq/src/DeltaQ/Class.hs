@@ -17,6 +17,9 @@ module DeltaQ.Class
       -- ** Outcome
       Outcome (..)
 
+    -- ** ProbabilisticOutcome
+    , ProbabilisticOutcome (..)
+
     -- ** DeltaQ
     , Eventually (..)
     , eventually
@@ -30,6 +33,9 @@ module DeltaQ.Class
 
     -- ** Outcome
     -- $properties-outcome
+
+    -- ** ProbabilisticOutcome
+    -- $properties-probabilisticoutcome
 
     -- ** DeltaQ
     -- $properties-deltaq
@@ -88,6 +94,52 @@ class (Ord (Duration o), Num (Duration o)) => Outcome o where
     -- | Infix operator synonym for 'lastToFinish'.
     (./\.) :: o -> o -> o
     (./\.) = lastToFinish
+
+-- | A 'ProbabilisticOutcome' is a discrete probability distribution
+-- of activities that take time.
+--
+-- The 'Outcome' class supports composition of activities
+-- such that all parts of the composite are performed.
+--
+-- In contrast, the 'ProbabilisticOutcome' class also supports
+-- random choice between activities, which means that either
+-- one activity or the other are performed (with given probabilities),
+-- but not both.
+class   ( Ord  (Probability o)
+        , Enum (Probability o)
+        , Num  (Probability o)
+        , Fractional (Probability o)
+        , Outcome o
+        )
+    => ProbabilisticOutcome o
+  where
+    -- | Numerical type representing probabilities in \( [0,1] \).
+    --
+    -- For example 'Double' or 'Rational'.
+    type Probability o
+
+    -- | Left-biased random choice.
+    --
+    -- @choice p@ chooses the left argument with probablity @p@
+    -- and the right argument with probability @(1-p)@.
+    choice :: Probability o -> o -> o -> o
+
+    -- | Random choice between multiple alternatives
+    --
+    -- @choices [(w_1, o_1), (w_2, o_2), …]@ chooses randomly between multiple
+    -- outcomes. The probability @p_i@ for choosing the outcome @o_i@ is
+    -- determined by the weights as @p_i = w_i / (w_1 + w_2 + …)@.
+    --
+    -- Note: The weights @w_i@ have the numeric type @Probability o@,
+    -- but for convenience, and unlike probabilities,
+    -- they are not restricted to the unit interval \( [0,1] \).
+    choices :: [(Probability o, o)] -> o
+    choices [] = never
+    choices wos =
+        foldr (uncurry choice) never
+        $ zipWith (\wtot (w, o) -> (w / wtot, o)) ws wos
+      where
+        ws = scanr1 (+) (map fst wos)
 
 {-----------------------------------------------------------------------------
     Eventually
@@ -152,42 +204,7 @@ maybeFromEventually (Occurs x) = Just x
 --
 -- Specifically, 'DeltaQ' is the probability distribution
 -- of finish times for an outcome.
-class   ( Ord (Probability o)
-        , Enum (Probability o)
-        , Num (Probability o)
-        , Fractional (Probability o)
-        , Outcome o
-        )
-    => DeltaQ o
-  where
-    -- | Numerical type representing probabilities in \( [0,1] \).
-    --
-    -- For example 'Double' or 'Rational'.
-    type Probability o
-
-    -- | Left-biased random choice.
-    --
-    -- @choice p@ chooses the left argument with probablity @p@
-    -- and the right argument with probability @(1-p)@.
-    choice :: Probability o -> o -> o -> o
-
-    -- | Random choice between multiple alternatives
-    --
-    -- @choices [(w_1, o_1), (w_2, o_2), …]@ chooses randomly between multiple
-    -- outcomes. The probability @p_i@ for choosing the outcome @o_i@ is
-    -- determined by the weights as @p_i = w_i / (w_1 + w_2 + …)@.
-    --
-    -- Note: The weights @w_i@ have the numeric type @Probability o@,
-    -- but for convenience, and unlike probabilities,
-    -- they are not restricted to the unit interval \( [0,1] \).
-    choices :: [(Probability o, o)] -> o
-    choices [] = never
-    choices wos =
-        foldr (uncurry choice) never
-        $ zipWith (\wtot (w, o) -> (w / wtot, o)) ws wos
-      where
-        ws = scanr1 (+) (map fst wos)
-
+class (ProbabilisticOutcome o, Outcome o) => DeltaQ o where
     -- | Uniform probability distribution on a time interval.
     uniform :: Duration o -> Duration o -> o
 
@@ -222,8 +239,12 @@ class   ( Ord (Probability o)
     Properties
 ------------------------------------------------------------------------------}
 {-$properties
-All instances of the above type classes are expected to satisfy
+Numerical instances of the above type classes are expected to satisfy
 the following properties.
+
+Symbolic instances, such as a term algebra, typically cannot satisfy
+the following properties, but any normalization of terms should
+be compatible with these properties.
 
 For instances that use approximate arithmetic
 such as floating point arithmetic or fixed precision arithmetic,
@@ -268,7 +289,7 @@ equality may be up to numerical accuracy.
 
 -}
 
-{-$properties-deltaq
+{-$properties-probabilisticoutcome
 
 'choice'
 
@@ -284,6 +305,9 @@ equality may be up to numerical accuracy.
 > choices [] = never
 > choices ((w,o) : wos) = choice p o (choices wos)
 >   where  p = w / (w + sum (map fst wos))
+-}
+
+{-$properties-deltaq
 
 'uniform'
 
