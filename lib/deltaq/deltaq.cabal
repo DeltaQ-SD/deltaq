@@ -36,6 +36,7 @@ maintainer:      neil.davies@pnsol.ccom
 extra-doc-files:
   CHANGELOG.md
   README.md
+  images/hops.svg
 
 tested-with:     GHC ==8.10.7 || ==9.6.7 || ==9.10.3
 

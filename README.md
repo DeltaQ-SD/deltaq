@@ -18,7 +18,7 @@ This repository is structured as follows:
 * `lib/` — Haskell packages
     * `deltaq` — Library for writing outcome expressions and evaluating their performance characteristics.
     * `probability-polynomial` — Library for representing probability distributions on the half-line $[0,+∞)$. Used for the implementation of `deltaq`.
-* `docs/`
+* `doc/`
     — Documentation with worked examples.
 
 # QuickStart

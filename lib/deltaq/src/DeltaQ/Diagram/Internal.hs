@@ -456,6 +456,15 @@ updateFoliage f (Branch bs) = Branch $ concatMap update bs
 {-----------------------------------------------------------------------------
     Example expressions
 ------------------------------------------------------------------------------}
+example0 :: O
+example0 = hops'
+  where
+    hop' :: O
+    hop' = choices [(1/3, var "short"), (1/3, var "mid"), (1/3, var "long")]
+
+    hops' :: O
+    hops' = hop' .>>. hop' .>>. hop'
+
 example1 :: O
 example1 =
     var "AZ"
