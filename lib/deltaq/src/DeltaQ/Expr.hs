@@ -114,7 +114,7 @@ toDeltaQ f (O term) = go term
     go (First xs) = foldr1 (.\/.) $ map go xs
     go (Choices wxs) = choices [ (w, go x) | (w, x) <- wxs ]
 
--- | Outcome expressions are instances of 'Outcome'.
+-- | Outcome expressions can be combined sequentially and in parallel.
 instance Outcome O where
     type Duration O = Rational
 
@@ -124,6 +124,7 @@ instance Outcome O where
     firstToFinish (O x) (O y) = O . normalize1Assoc $ First [x,y]
     lastToFinish  (O x) (O y) = O . normalize1Assoc $ Last [x,y]
 
+-- | Outcome expressions can be combined with random choice.
 instance ProbabilisticOutcome O where
     type Probability O = Rational
 

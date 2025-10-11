@@ -64,6 +64,7 @@ library
     DeltaQ
     DeltaQ.Class
     DeltaQ.Diagram
+    DeltaQ.Diagram.Internal
     DeltaQ.Expr
     DeltaQ.Methods
     DeltaQ.PiecewisePolynomial

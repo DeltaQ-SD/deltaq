@@ -15,7 +15,7 @@ import Prelude
 import Data.List
     ( sort
     )
-import DeltaQ.Diagram
+import DeltaQ.Diagram.Internal
     ( Tile (..)
     , Token (..)
     , layout
