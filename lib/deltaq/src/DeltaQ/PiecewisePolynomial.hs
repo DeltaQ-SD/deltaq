@@ -6,7 +6,7 @@
 {-|
 Copyright   : Predictable Network Solutions Ltd., 2020-2024
 License     : BSD-3-Clause
-Description : Instances via piecewise polynomials.
+Description : Distributions of completion times via piecewise polynomials.
 
 @'DQ'@ is a probability distribution of completion time
 using the numeric type @Rational@.

@@ -4,9 +4,8 @@
 {-|
 Copyright   : PLWORKZ R&D, 2025
 License     : BSD-3-Clause
-Description : Render outcome diagrams.
-
-INTERNAL MODULE. USE "DeltqQ.Diagram" instead!
+Description :
+INTERNAL MODULE. USE "DeltaQ.Diagram" INSTEAD!
 
 Render outcome expressions as outcome diagrams.
 -}

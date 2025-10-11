@@ -8,7 +8,8 @@ Description : Type classes for outcomes and their completion times.
 
 Type classes
 
-* 'Outcome' — outcomes their combinations.
+* 'Outcome' — outcomes and their combinations.
+* 'ProbabilisticOutcome' — outcomes with random choice.
 * 'DeltaQ' — probability distributions of completion times.
 
 -}
