@@ -1,0 +1,379 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-# LANGUAGE DeriveAnyClass #-}
+<span class="lineno">    2 </span>{-# LANGUAGE DeriveGeneric #-}
+<span class="lineno">    3 </span>{-# LANGUAGE DeriveFunctor #-}
+<span class="lineno">    4 </span>{-# LANGUAGE NamedFieldPuns #-}
+<span class="lineno">    5 </span>{-# LANGUAGE TypeFamilies #-}
+<span class="lineno">    6 </span>{-# LANGUAGE TypeOperators #-}
+<span class="lineno">    7 </span>{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+<span class="lineno">    8 </span>
+<span class="lineno">    9 </span>{-|
+<span class="lineno">   10 </span>Copyright   :
+<span class="lineno">   11 </span>    Predictable Network Solutions Ltd., 2020-2024
+<span class="lineno">   12 </span>    PLWORKZ R&amp;D, 2025
+<span class="lineno">   13 </span>License     : BSD-3-Clause
+<span class="lineno">   14 </span>Description : Outcome expressions.
+<span class="lineno">   15 </span>
+<span class="lineno">   16 </span>The type 'O' represents outcome expressions that can be
+<span class="lineno">   17 </span>
+<span class="lineno">   18 </span>* inspected,
+<span class="lineno">   19 </span>* rendered as outcome diagrams, and
+<span class="lineno">   20 </span>* converted to a probability distribution of completion times.
+<span class="lineno">   21 </span>
+<span class="lineno">   22 </span>-}
+<span class="lineno">   23 </span>module DeltaQ.Expr
+<span class="lineno">   24 </span>    ( -- * Outcome expressions
+<span class="lineno">   25 </span>      O
+<span class="lineno">   26 </span>    , var
+<span class="lineno">   27 </span>    , loc
+<span class="lineno">   28 </span>    , substitute
+<span class="lineno">   29 </span>    , toDeltaQ
+<span class="lineno">   30 </span>
+<span class="lineno">   31 </span>    -- * Outcome terms
+<span class="lineno">   32 </span>    , termFromOutcome
+<span class="lineno">   33 </span>    , outcomeFromTerm
+<span class="lineno">   34 </span>    , Term (..)
+<span class="lineno">   35 </span>    , isVar
+<span class="lineno">   36 </span>    , isLoc
+<span class="lineno">   37 </span>    , isSeq
+<span class="lineno">   38 </span>    , isLast
+<span class="lineno">   39 </span>    , isFirst
+<span class="lineno">   40 </span>    , isParallel
+<span class="lineno">   41 </span>    , isChoices
+<span class="lineno">   42 </span>    , maxParallel
+<span class="lineno">   43 </span>    , everywhere
+<span class="lineno">   44 </span>    , everything
+<span class="lineno">   45 </span>    , isNormalizedAssoc
+<span class="lineno">   46 </span>    , normalizeAssoc
+<span class="lineno">   47 </span>    ) where
+<span class="lineno">   48 </span>
+<span class="lineno">   49 </span>import Control.Monad
+<span class="lineno">   50 </span>    ( ap
+<span class="lineno">   51 </span>    )
+<span class="lineno">   52 </span>import Control.DeepSeq
+<span class="lineno">   53 </span>    ( NFData
+<span class="lineno">   54 </span>    )
+<span class="lineno">   55 </span>import Data.List
+<span class="lineno">   56 </span>    ( foldl'
+<span class="lineno">   57 </span>    )
+<span class="lineno">   58 </span>import DeltaQ.Class
+<span class="lineno">   59 </span>    ( Outcome (..)
+<span class="lineno">   60 </span>    , ProbabilisticOutcome (..)
+<span class="lineno">   61 </span>    )
+<span class="lineno">   62 </span>import DeltaQ.PiecewisePolynomial
+<span class="lineno">   63 </span>    ( DQ
+<span class="lineno">   64 </span>    )
+<span class="lineno">   65 </span>import GHC.Generics
+<span class="lineno">   66 </span>    ( Generic
+<span class="lineno">   67 </span>    )
+<span class="lineno">   68 </span>
+<span class="lineno">   69 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   70 </span>    O
+<span class="lineno">   71 </span>------------------------------------------------------------------------------}
+<span class="lineno">   72 </span>-- | Outcome expression.
+<span class="lineno">   73 </span>--
+<span class="lineno">   74 </span>-- This type includes graphical annotations for the rendering
+<span class="lineno">   75 </span>-- as outcome diagram.
+<span class="lineno">   76 </span>newtype O = O { <span class="nottickedoff"><span class="decl"><span class="nottickedoff">unO</span></span></span> :: Term String }
+<span class="lineno">   77 </span>    -- INVARIANT: Terms satisfy 'isNormalizedAssoc'.
+<span class="lineno">   78 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Generic</span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
+<span class="lineno">   79 </span>
+<span class="lineno">   80 </span>-- | Outcome variable, given by a unique name.
+<span class="lineno">   81 </span>var :: String -&gt; O
+<span class="lineno">   82 </span><span class="decl"><span class="nottickedoff">var = O . Var</span></span>
+<span class="lineno">   83 </span>
+<span class="lineno">   84 </span>-- | Observation location, with a label.
+<span class="lineno">   85 </span>--
+<span class="lineno">   86 </span>-- Rendered as a box with a label in the outcome diagram.
+<span class="lineno">   87 </span>-- Put this in sequence with other outcome expressions to highlight
+<span class="lineno">   88 </span>-- their outcome locations.
+<span class="lineno">   89 </span>loc :: String -&gt; O
+<span class="lineno">   90 </span><span class="decl"><span class="nottickedoff">loc = O . Loc</span></span>
+<span class="lineno">   91 </span>
+<span class="lineno">   92 </span>-- | Substitute all variables by outcome expressions.
+<span class="lineno">   93 </span>substitute
+<span class="lineno">   94 </span>    :: (String -&gt; O)
+<span class="lineno">   95 </span>        -- ^ Assignment of variable names to outcome expressions.
+<span class="lineno">   96 </span>    -&gt; O
+<span class="lineno">   97 </span>        -- ^ Outcome expression in which we substitute.
+<span class="lineno">   98 </span>    -&gt; O
+<span class="lineno">   99 </span><span class="decl"><span class="nottickedoff">substitute f (O term) = O $ normalize1Assoc $ term &gt;&gt;= unO . f</span></span>
+<span class="lineno">  100 </span>
+<span class="lineno">  101 </span>-- | Outcome expressions can be mapped to
+<span class="lineno">  102 </span>-- probability distributions of completion times 'DQ',
+<span class="lineno">  103 </span>-- provided that we know how to map 'var'.
+<span class="lineno">  104 </span>toDeltaQ :: (String -&gt; DQ) -&gt; O -&gt; DQ
+<span class="lineno">  105 </span><span class="decl"><span class="nottickedoff">toDeltaQ f (O term) = go term</span>
+<span class="lineno">  106 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
+<span class="lineno">  107 </span><span class="spaces">    </span><span class="nottickedoff">go (Var v)  = f v</span>
+<span class="lineno">  108 </span><span class="spaces">    </span><span class="nottickedoff">go Never    = never</span>
+<span class="lineno">  109 </span><span class="spaces">    </span><span class="nottickedoff">go Wait0    = wait 0</span>
+<span class="lineno">  110 </span><span class="spaces">    </span><span class="nottickedoff">go (Wait t) = wait t</span>
+<span class="lineno">  111 </span><span class="spaces">    </span><span class="nottickedoff">go (Loc  _) = wait 0</span>
+<span class="lineno">  112 </span><span class="spaces">    </span><span class="nottickedoff">go (Seq   xs) = foldr1 (.&gt;&gt;.) $ map go xs</span>
+<span class="lineno">  113 </span><span class="spaces">    </span><span class="nottickedoff">go (Last  xs) = foldr1 (./\.) $ map go xs</span>
+<span class="lineno">  114 </span><span class="spaces">    </span><span class="nottickedoff">go (First xs) = foldr1 (.\/.) $ map go xs</span>
+<span class="lineno">  115 </span><span class="spaces">    </span><span class="nottickedoff">go (Choices wxs) = choices [ (w, go x) | (w, x) &lt;- wxs ]</span></span>
+<span class="lineno">  116 </span>
+<span class="lineno">  117 </span>-- | Outcome expressions can be combined sequentially and in parallel.
+<span class="lineno">  118 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Outcome O</span></span></span></span></span></span> where
+<span class="lineno">  119 </span>    type Duration O = Rational
+<span class="lineno">  120 </span>
+<span class="lineno">  121 </span>    <span class="decl"><span class="nottickedoff">never = O Never</span></span>
+<span class="lineno">  122 </span>    <span class="decl"><span class="nottickedoff">wait = O . Wait</span></span>
+<span class="lineno">  123 </span>    <span class="decl"><span class="nottickedoff">sequentially  (O x) (O y) = O . normalize1Assoc $ Seq [x,y]</span></span>
+<span class="lineno">  124 </span>    <span class="decl"><span class="nottickedoff">firstToFinish (O x) (O y) = O . normalize1Assoc $ First [x,y]</span></span>
+<span class="lineno">  125 </span>    <span class="decl"><span class="nottickedoff">lastToFinish  (O x) (O y) = O . normalize1Assoc $ Last [x,y]</span></span>
+<span class="lineno">  126 </span>
+<span class="lineno">  127 </span>-- | Outcome expressions can be combined with random choice.
+<span class="lineno">  128 </span>instance ProbabilisticOutcome O where
+<span class="lineno">  129 </span>    type Probability O = Rational
+<span class="lineno">  130 </span>
+<span class="lineno">  131 </span>    <span class="decl"><span class="nottickedoff">choice p (O x) (O y) = O $ Choices [(p, x), (1-p, y)]</span></span>
+<span class="lineno">  132 </span>    <span class="decl"><span class="nottickedoff">choices wos = O $ Choices [ (w, x) | (w, O x) &lt;- wos ]</span></span>
+<span class="lineno">  133 </span>
+<span class="lineno">  134 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  135 </span>    Terms
+<span class="lineno">  136 </span>------------------------------------------------------------------------------}
+<span class="lineno">  137 </span>-- | Term representation for outcome expressions.
+<span class="lineno">  138 </span>--
+<span class="lineno">  139 </span>-- Different terms may represent equal outcomes.
+<span class="lineno">  140 </span>data Term v
+<span class="lineno">  141 </span>    = Var v
+<span class="lineno">  142 </span>        -- ^ Variable, to be substituted by a more concrete outcome.
+<span class="lineno">  143 </span>    | Never
+<span class="lineno">  144 </span>        -- ^ Outcome that never finishes.
+<span class="lineno">  145 </span>    | Wait0
+<span class="lineno">  146 </span>        -- ^ Succeed immediately. Equivalent to @Wait 0@,
+<span class="lineno">  147 </span>        -- but with a straight line as graphical representation.
+<span class="lineno">  148 </span>    | Wait Rational
+<span class="lineno">  149 </span>        -- ^ Succeed after waiting for a fixed amount of time.
+<span class="lineno">  150 </span>    | Loc String
+<span class="lineno">  151 </span>        -- ^ Outcome location with a label.
+<span class="lineno">  152 </span>        -- Equivalent to @Wait 0@, but with a labeled box
+<span class="lineno">  153 </span>        -- as graphical representation.
+<span class="lineno">  154 </span>    | Seq [Term v]
+<span class="lineno">  155 </span>        -- ^ Sequential composition.
+<span class="lineno">  156 </span>    | Last [Term v]
+<span class="lineno">  157 </span>        -- ^ Parallel composition, last to finish.
+<span class="lineno">  158 </span>    | First [Term v]
+<span class="lineno">  159 </span>        -- ^ Parallel composiiton, last to finish.
+<span class="lineno">  160 </span>    | Choices [(Rational, Term v)]
+<span class="lineno">  161 </span>        -- ^ Probabilistic choice.
+<span class="lineno">  162 </span>        -- The probabilities are proportional to the given weights.
+<span class="lineno">  163 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Ord</span></span></span></span></span></span></span></span></span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Generic</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Functor</span></span></span></span>, <span class="decl"><span class="nottickedoff">NFData</span></span>)
+<span class="lineno">  164 </span>
+<span class="lineno">  165 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Applicative Term</span></span></span></span></span></span> where
+<span class="lineno">  166 </span>    <span class="decl"><span class="nottickedoff">pure = Var</span></span>
+<span class="lineno">  167 </span>    <span class="decl"><span class="nottickedoff">(&lt;*&gt;) = ap</span></span>
+<span class="lineno">  168 </span>
+<span class="lineno">  169 </span>-- | '(&gt;&gt;=)' is substitution.
+<span class="lineno">  170 </span>instance <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Monad Term</span></span></span></span> where
+<span class="lineno">  171 </span>    <span class="decl"><span class="istickedoff">m &gt;&gt;= g = go m</span>
+<span class="lineno">  172 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  173 </span><span class="spaces">        </span><span class="istickedoff">go (Var v)    = g <span class="nottickedoff">v</span></span>
+<span class="lineno">  174 </span><span class="spaces">        </span><span class="istickedoff">go Never      = Never</span>
+<span class="lineno">  175 </span><span class="spaces">        </span><span class="istickedoff">go Wait0      = Wait0</span>
+<span class="lineno">  176 </span><span class="spaces">        </span><span class="istickedoff">go (Wait t)   = Wait <span class="nottickedoff">t</span></span>
+<span class="lineno">  177 </span><span class="spaces">        </span><span class="istickedoff">go (Loc  s)   = Loc <span class="nottickedoff">s</span></span>
+<span class="lineno">  178 </span><span class="spaces">        </span><span class="istickedoff">go (Seq   xs) = Seq   $ map go xs</span>
+<span class="lineno">  179 </span><span class="spaces">        </span><span class="istickedoff">go (Last  xs) = Last  $ map go xs</span>
+<span class="lineno">  180 </span><span class="spaces">        </span><span class="istickedoff">go (First xs) = First $ map go xs</span>
+<span class="lineno">  181 </span><span class="spaces">        </span><span class="istickedoff">go (Choices wxs) = Choices [ (<span class="nottickedoff">w</span>, go x) | (w, x) &lt;- wxs ]</span></span>
+<span class="lineno">  182 </span>
+<span class="lineno">  183 </span>-- | Inspect an outcome expression 'O' through its 'Term' representation.
+<span class="lineno">  184 </span>--
+<span class="lineno">  185 </span>-- The result 'Term' satisfies 'isNormalizedAssoc'.
+<span class="lineno">  186 </span>termFromOutcome :: O -&gt; Term String
+<span class="lineno">  187 </span><span class="decl"><span class="istickedoff">termFromOutcome (O term) = term</span></span>
+<span class="lineno">  188 </span>
+<span class="lineno">  189 </span>-- | Construct an outcome expression 'O' from an outcome 'Term'.
+<span class="lineno">  190 </span>outcomeFromTerm :: Term String -&gt; O
+<span class="lineno">  191 </span><span class="decl"><span class="istickedoff">outcomeFromTerm = O . normalizeAssoc</span></span>
+<span class="lineno">  192 </span>
+<span class="lineno">  193 </span>-- | Predicate that defines the \&quot;associative normal form\&quot; for a 'Term'.
+<span class="lineno">  194 </span>--
+<span class="lineno">  195 </span>-- Specifically, a 'Term' is said to be in \&quot;associative normal form\&quot;
+<span class="lineno">  196 </span>-- if the arguments to the constructors 'Seq', 'Last', and 'First'
+<span class="lineno">  197 </span>--
+<span class="lineno">  198 </span>-- * are nonempty lists, and
+<span class="lineno">  199 </span>-- * their list elements do not have an outermost constructor of the same
+<span class="lineno">  200 </span>--   kind, i.e. @Seq [Seq …, First …]@ is not allowed because
+<span class="lineno">  201 </span>--   one of the list elements for a 'Seq' constructor
+<span class="lineno">  202 </span>--   is also a 'Seq' constructor.
+<span class="lineno">  203 </span>--
+<span class="lineno">  204 </span>-- and if the argument to the constructor 'Choices'
+<span class="lineno">  205 </span>--
+<span class="lineno">  206 </span>-- * is a nonempty list
+<span class="lineno">  207 </span>--
+<span class="lineno">  208 </span>isNormalizedAssoc ::Term v -&gt; Bool 
+<span class="lineno">  209 </span><span class="decl"><span class="istickedoff">isNormalizedAssoc (Seq xs) =</span>
+<span class="lineno">  210 </span><span class="spaces">    </span><span class="istickedoff">not (null xs)</span>
+<span class="lineno">  211 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; all (not . isSeq) xs</span>
+<span class="lineno">  212 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; all isNormalizedAssoc xs</span>
+<span class="lineno">  213 </span><span class="spaces"></span><span class="istickedoff">isNormalizedAssoc (Last xs) =</span>
+<span class="lineno">  214 </span><span class="spaces">    </span><span class="istickedoff">not (null xs)</span>
+<span class="lineno">  215 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; all (not . isLast) xs</span>
+<span class="lineno">  216 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; all isNormalizedAssoc xs</span>
+<span class="lineno">  217 </span><span class="spaces"></span><span class="istickedoff">isNormalizedAssoc (First xs) =</span>
+<span class="lineno">  218 </span><span class="spaces">    </span><span class="istickedoff">not (null xs)</span>
+<span class="lineno">  219 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; all (not . isFirst) xs</span>
+<span class="lineno">  220 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; all isNormalizedAssoc xs</span>
+<span class="lineno">  221 </span><span class="spaces"></span><span class="istickedoff">isNormalizedAssoc (Choices wxs) =</span>
+<span class="lineno">  222 </span><span class="spaces">    </span><span class="istickedoff">not (null wxs)</span>
+<span class="lineno">  223 </span><span class="spaces">    </span><span class="istickedoff">&amp;&amp; all isNormalizedAssoc (map snd wxs)</span>
+<span class="lineno">  224 </span><span class="spaces"></span><span class="istickedoff">isNormalizedAssoc _ =</span>
+<span class="lineno">  225 </span><span class="spaces">    </span><span class="istickedoff">True</span></span>
+<span class="lineno">  226 </span>
+<span class="lineno">  227 </span>-- | Check whether a 'Term' is a 'Var'.
+<span class="lineno">  228 </span>isVar :: Term v -&gt; Bool
+<span class="lineno">  229 </span><span class="decl"><span class="istickedoff">isVar (Var _) = <span class="nottickedoff">True</span></span>
+<span class="lineno">  230 </span><span class="spaces"></span><span class="istickedoff">isVar _       = False</span></span>
+<span class="lineno">  231 </span>
+<span class="lineno">  232 </span>-- | Check whether a 'Term' is a 'Loc'.
+<span class="lineno">  233 </span>isLoc :: Term v -&gt; Bool
+<span class="lineno">  234 </span><span class="decl"><span class="istickedoff">isLoc (Loc _) = True</span>
+<span class="lineno">  235 </span><span class="spaces"></span><span class="istickedoff">isLoc _       = False</span></span>
+<span class="lineno">  236 </span>
+<span class="lineno">  237 </span>-- | Check whether a 'Term' is a 'Seq'.
+<span class="lineno">  238 </span>isSeq :: Term v -&gt; Bool
+<span class="lineno">  239 </span><span class="decl"><span class="istickedoff">isSeq (Seq _) = True</span>
+<span class="lineno">  240 </span><span class="spaces"></span><span class="istickedoff">isSeq _ = False</span></span>
+<span class="lineno">  241 </span>
+<span class="lineno">  242 </span>-- | Check whether a 'Term' is a 'Last'.
+<span class="lineno">  243 </span>isLast :: Term v -&gt; Bool
+<span class="lineno">  244 </span><span class="decl"><span class="istickedoff">isLast (Last _) = <span class="nottickedoff">True</span></span>
+<span class="lineno">  245 </span><span class="spaces"></span><span class="istickedoff">isLast _ = False</span></span>
+<span class="lineno">  246 </span>
+<span class="lineno">  247 </span>-- | Check whether a 'Term' is a 'First'.
+<span class="lineno">  248 </span>isFirst :: Term v -&gt; Bool
+<span class="lineno">  249 </span><span class="decl"><span class="istickedoff">isFirst (First _) = <span class="nottickedoff">True</span></span>
+<span class="lineno">  250 </span><span class="spaces"></span><span class="istickedoff">isFirst _ = False</span></span>
+<span class="lineno">  251 </span>
+<span class="lineno">  252 </span>-- | Check whether a 'Term' is a 'Choices'.
+<span class="lineno">  253 </span>isChoices :: Term v -&gt; Bool
+<span class="lineno">  254 </span><span class="decl"><span class="nottickedoff">isChoices (Choices _) = True</span>
+<span class="lineno">  255 </span><span class="spaces"></span><span class="nottickedoff">isChoices _ = False</span></span>
+<span class="lineno">  256 </span>
+<span class="lineno">  257 </span>-- | Check whether a 'Term' is a parallel operation,
+<span class="lineno">  258 </span>-- i.e. 'Last' or 'First'.
+<span class="lineno">  259 </span>isParallel :: Term v -&gt; Bool
+<span class="lineno">  260 </span><span class="decl"><span class="nottickedoff">isParallel (First ts) = not (null ts)</span>
+<span class="lineno">  261 </span><span class="spaces"></span><span class="nottickedoff">isParallel (Last  ts) = not (null ts)</span>
+<span class="lineno">  262 </span><span class="spaces"></span><span class="nottickedoff">isParallel _          = False</span></span>
+<span class="lineno">  263 </span>
+<span class="lineno">  264 </span>-- | Maximal number of outcomes that run in parallel.
+<span class="lineno">  265 </span>--
+<span class="lineno">  266 </span>-- * The arguments of 'First' and 'Last' run in parallel.
+<span class="lineno">  267 </span>-- * The arguments of 'Seq' and 'Choices do _not_ run in parallel.
+<span class="lineno">  268 </span>maxParallel :: Term v -&gt; Int
+<span class="lineno">  269 </span><span class="decl"><span class="nottickedoff">maxParallel (Seq   ts)    = maximum $ map maxParallel ts</span>
+<span class="lineno">  270 </span><span class="spaces"></span><span class="nottickedoff">maxParallel (Last  ts)    = sum $ map maxParallel ts</span>
+<span class="lineno">  271 </span><span class="spaces"></span><span class="nottickedoff">maxParallel (First ts)    = sum $ map maxParallel ts</span>
+<span class="lineno">  272 </span><span class="spaces"></span><span class="nottickedoff">maxParallel (Choices wts) = maximum $ map (maxParallel . snd) wts</span>
+<span class="lineno">  273 </span><span class="spaces"></span><span class="nottickedoff">maxParallel _             = 1</span></span>
+<span class="lineno">  274 </span>
+<span class="lineno">  275 </span>-- | Normalize a term to \&quot;associative normal form\&quot;.
+<span class="lineno">  276 </span>normalizeAssoc :: Term v -&gt; Term v
+<span class="lineno">  277 </span><span class="decl"><span class="istickedoff">normalizeAssoc = everywhere normalize1Assoc</span></span>
+<span class="lineno">  278 </span>
+<span class="lineno">  279 </span>-- | Apply a transformation everywhere; bottom-up.
+<span class="lineno">  280 </span>--
+<span class="lineno">  281 </span>-- See also [Scrap your boilerplate
+<span class="lineno">  282 </span>-- ](https://www.microsoft.com/en-us/research/wp-content/uploads/2003/01/hmap.pdf)
+<span class="lineno">  283 </span>-- .
+<span class="lineno">  284 </span>everywhere :: (Term v -&gt; Term v) -&gt; Term v -&gt; Term v
+<span class="lineno">  285 </span><span class="decl"><span class="istickedoff">everywhere f = every</span>
+<span class="lineno">  286 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  287 </span><span class="spaces">    </span><span class="istickedoff">every = f . recurse</span>
+<span class="lineno">  288 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  289 </span><span class="spaces">    </span><span class="istickedoff">recurse a@(Var _) = a</span>
+<span class="lineno">  290 </span><span class="spaces">    </span><span class="istickedoff">recurse a@Never = a</span>
+<span class="lineno">  291 </span><span class="spaces">    </span><span class="istickedoff">recurse a@Wait0 = a</span>
+<span class="lineno">  292 </span><span class="spaces">    </span><span class="istickedoff">recurse a@(Wait _) = a</span>
+<span class="lineno">  293 </span><span class="spaces">    </span><span class="istickedoff">recurse a@(Loc  _) = a</span>
+<span class="lineno">  294 </span><span class="spaces">    </span><span class="istickedoff">recurse (Seq   xs) = Seq $ map every xs</span>
+<span class="lineno">  295 </span><span class="spaces">    </span><span class="istickedoff">recurse (Last  xs) = Last $ map every xs</span>
+<span class="lineno">  296 </span><span class="spaces">    </span><span class="istickedoff">recurse (First xs) = First $ map every xs</span>
+<span class="lineno">  297 </span><span class="spaces">    </span><span class="istickedoff">recurse (Choices wxs) = Choices $ [ (<span class="nottickedoff">w</span>, every x) | (w, x) &lt;- wxs]</span></span>
+<span class="lineno">  298 </span>
+<span class="lineno">  299 </span>-- | Summarize all nodes; top-down, left-to-right.
+<span class="lineno">  300 </span>--
+<span class="lineno">  301 </span>-- See also [Scrap your boilerplate
+<span class="lineno">  302 </span>-- ](https://www.microsoft.com/en-us/research/wp-content/uploads/2003/01/hmap.pdf)
+<span class="lineno">  303 </span>-- .
+<span class="lineno">  304 </span>everything :: (r -&gt; r -&gt; r) -&gt; (Term v -&gt; r) -&gt; (Term v -&gt; r)
+<span class="lineno">  305 </span><span class="decl"><span class="istickedoff">everything combine f = recurse</span>
+<span class="lineno">  306 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  307 </span><span class="spaces">    </span><span class="istickedoff">recurse x@(Var _)  = f x</span>
+<span class="lineno">  308 </span><span class="spaces">    </span><span class="istickedoff">recurse x@Never    = f x</span>
+<span class="lineno">  309 </span><span class="spaces">    </span><span class="istickedoff">recurse x@Wait0    = f x</span>
+<span class="lineno">  310 </span><span class="spaces">    </span><span class="istickedoff">recurse x@(Wait _) = f x</span>
+<span class="lineno">  311 </span><span class="spaces">    </span><span class="istickedoff">recurse x@(Loc  _) = f x</span>
+<span class="lineno">  312 </span><span class="spaces">    </span><span class="istickedoff">recurse x@(Seq   xs) =</span>
+<span class="lineno">  313 </span><span class="spaces">        </span><span class="istickedoff">foldl' combine (f x) $ map recurse xs</span>
+<span class="lineno">  314 </span><span class="spaces">    </span><span class="istickedoff">recurse x@(Last  xs) =</span>
+<span class="lineno">  315 </span><span class="spaces">        </span><span class="istickedoff">foldl' combine (f x) $ map recurse xs</span>
+<span class="lineno">  316 </span><span class="spaces">    </span><span class="istickedoff">recurse x@(First xs) =</span>
+<span class="lineno">  317 </span><span class="spaces">        </span><span class="istickedoff">foldl' combine (f x) $ map recurse xs</span>
+<span class="lineno">  318 </span><span class="spaces">    </span><span class="istickedoff">recurse x@(Choices wxs) =</span>
+<span class="lineno">  319 </span><span class="spaces">        </span><span class="istickedoff">foldl' combine (f x) $ [ recurse y | (_, y) &lt;- wxs]</span></span>
+<span class="lineno">  320 </span>
+<span class="lineno">  321 </span>-- | Normalize a term to \&quot;associative normal form\&quot;
+<span class="lineno">  322 </span>-- under the assumptions
+<span class="lineno">  323 </span>-- that the arguments to the outermost constructor are already normalized.
+<span class="lineno">  324 </span>normalize1Assoc :: Term v -&gt; Term v
+<span class="lineno">  325 </span><span class="decl"><span class="istickedoff">normalize1Assoc = id</span>
+<span class="lineno">  326 </span><span class="spaces">    </span><span class="istickedoff">. normalizeEmpty</span>
+<span class="lineno">  327 </span><span class="spaces">    </span><span class="istickedoff">. normalize1Assoc'</span></span>
+<span class="lineno">  328 </span>
+<span class="lineno">  329 </span>-- | Ensure that the lists in 'Seq', 'Last', 'First'
+<span class="lineno">  330 </span>-- do not contain a term with the same constructor.
+<span class="lineno">  331 </span>normalizeEmpty :: Term v -&gt; Term v
+<span class="lineno">  332 </span><span class="decl"><span class="istickedoff">normalizeEmpty (Seq   []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  333 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Last  []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  334 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (First []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  335 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Choices []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  336 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty x = x</span></span>
+<span class="lineno">  337 </span>
+<span class="lineno">  338 </span>-- | Ensure that the lists in 'Seq', 'Last', 'First'
+<span class="lineno">  339 </span>-- do not contain a term with the same constructor.
+<span class="lineno">  340 </span>normalize1Assoc' :: Term v -&gt; Term v
+<span class="lineno">  341 </span><span class="decl"><span class="istickedoff">normalize1Assoc' (Seq xs) = Seq (concatMap f xs)</span>
+<span class="lineno">  342 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  343 </span><span class="spaces">    </span><span class="istickedoff">f Wait0 = []</span>
+<span class="lineno">  344 </span><span class="spaces">    </span><span class="istickedoff">f (Seq ys) = ys</span>
+<span class="lineno">  345 </span><span class="spaces">    </span><span class="istickedoff">f o = [o]</span>
+<span class="lineno">  346 </span><span class="spaces"></span><span class="istickedoff">normalize1Assoc' (Last xs) = Last (concatMap f xs)</span>
+<span class="lineno">  347 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  348 </span><span class="spaces">    </span><span class="istickedoff">f Wait0 = []</span>
+<span class="lineno">  349 </span><span class="spaces">    </span><span class="istickedoff">f (Last ys) = ys</span>
+<span class="lineno">  350 </span><span class="spaces">    </span><span class="istickedoff">f o = [o]</span>
+<span class="lineno">  351 </span><span class="spaces"></span><span class="istickedoff">normalize1Assoc' (First xs) = First (concatMap f xs)</span>
+<span class="lineno">  352 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  353 </span><span class="spaces">    </span><span class="istickedoff">f Wait0 = []</span>
+<span class="lineno">  354 </span><span class="spaces">    </span><span class="istickedoff">f (First ys) = ys</span>
+<span class="lineno">  355 </span><span class="spaces">    </span><span class="istickedoff">f o = [o]</span>
+<span class="lineno">  356 </span><span class="spaces"></span><span class="istickedoff">normalize1Assoc' o = o</span></span>
+
+</pre>
+</body>
+</html>

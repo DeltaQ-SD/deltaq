@@ -1,0 +1,526 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-# LANGUAGE FlexibleContexts #-}
+<span class="lineno">    2 </span>{-# LANGUAGE BangPatterns #-}
+<span class="lineno">    3 </span>
+<span class="lineno">    4 </span>{-|
+<span class="lineno">    5 </span>Copyright   : PLWORKZ R&amp;D, 2025
+<span class="lineno">    6 </span>License     : BSD-3-Clause
+<span class="lineno">    7 </span>Description : Render outcome diagrams.
+<span class="lineno">    8 </span>
+<span class="lineno">    9 </span>INTERNAL MODULE. USE &quot;DeltqQ.Diagram&quot; instead!
+<span class="lineno">   10 </span>
+<span class="lineno">   11 </span>Render outcome expressions as outcome diagrams.
+<span class="lineno">   12 </span>-}
+<span class="lineno">   13 </span>module DeltaQ.Diagram.Internal where
+<span class="lineno">   14 </span>
+<span class="lineno">   15 </span>import DeltaQ.Class
+<span class="lineno">   16 </span>    ( Outcome (..)
+<span class="lineno">   17 </span>    , ProbabilisticOutcome (..)
+<span class="lineno">   18 </span>    )
+<span class="lineno">   19 </span>import DeltaQ.Expr
+<span class="lineno">   20 </span>    ( O
+<span class="lineno">   21 </span>    , Term (..)
+<span class="lineno">   22 </span>    , isLoc
+<span class="lineno">   23 </span>    , isSeq
+<span class="lineno">   24 </span>    , loc
+<span class="lineno">   25 </span>    , termFromOutcome
+<span class="lineno">   26 </span>    , var
+<span class="lineno">   27 </span>    )
+<span class="lineno">   28 </span>import Diagrams.Prelude hiding (Empty, First, Last, Loc, op, loc)
+<span class="lineno">   29 </span>import Diagrams.Backend.SVG
+<span class="lineno">   30 </span>import Text.Printf
+<span class="lineno">   31 </span>    ( printf
+<span class="lineno">   32 </span>    )
+<span class="lineno">   33 </span>out :: O -&gt; IO ()
+<span class="lineno">   34 </span><span class="decl"><span class="nottickedoff">out =</span>
+<span class="lineno">   35 </span><span class="spaces">    </span><span class="nottickedoff">renderSVG &quot;xoutcomes.svg&quot; (mkWidth 700)</span>
+<span class="lineno">   36 </span><span class="spaces">    </span><span class="nottickedoff">. renderOutcomeDiagram</span></span>
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>-- | Render an outcome expression as an outcome diagram.
+<span class="lineno">   39 </span>renderOutcomeDiagram :: O -&gt; Diagram SVG
+<span class="lineno">   40 </span><span class="decl"><span class="nottickedoff">renderOutcomeDiagram = renderTiles . layout . termFromOutcome</span></span>
+<span class="lineno">   41 </span>
+<span class="lineno">   42 </span>{-----------------------------------------------------------------------------
+<span class="lineno">   43 </span>    Diagram rendering
+<span class="lineno">   44 </span>------------------------------------------------------------------------------}
+<span class="lineno">   45 </span>type X = Int
+<span class="lineno">   46 </span>type Y = Int
+<span class="lineno">   47 </span>type Prob = Rational
+<span class="lineno">   48 </span>type Description = String
+<span class="lineno">   49 </span>
+<span class="lineno">   50 </span>data Op
+<span class="lineno">   51 </span>    = OFirst
+<span class="lineno">   52 </span>    | OLast
+<span class="lineno">   53 </span>    | OChoices [Prob]
+<span class="lineno">   54 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Ord</span></span></span></span></span></span></span></span></span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">   55 </span>
+<span class="lineno">   56 </span>-- | Tiles representing predefined outcomes
+<span class="lineno">   57 </span>data Op0
+<span class="lineno">   58 </span>    = ONever
+<span class="lineno">   59 </span>    | OWait0
+<span class="lineno">   60 </span>    | OWait Rational
+<span class="lineno">   61 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Ord</span></span></span></span></span></span></span></span></span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">   62 </span>
+<span class="lineno">   63 </span>-- | Data attached to a 'Tile'.
+<span class="lineno">   64 </span>data Token
+<span class="lineno">   65 </span>    = VarT String
+<span class="lineno">   66 </span>    | Outcome Op0
+<span class="lineno">   67 </span>    | Location Description
+<span class="lineno">   68 </span>    | Horizontal
+<span class="lineno">   69 </span>    | Close (Maybe Description) [Y]
+<span class="lineno">   70 </span>    | Open Op [Y]
+<span class="lineno">   71 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Ord</span></span></span></span></span></span></span></span></span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">   72 </span>
+<span class="lineno">   73 </span>data Tile = Tile X Y Token
+<span class="lineno">   74 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Ord</span></span></span></span></span></span></span></span></span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">   75 </span>
+<span class="lineno">   76 </span>-- | Render a collection of tiles.
+<span class="lineno">   77 </span>renderTiles :: [Tile] -&gt; Diagram SVG
+<span class="lineno">   78 </span><span class="decl"><span class="nottickedoff">renderTiles = frame 0.1 . position . map renderTile</span>
+<span class="lineno">   79 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
+<span class="lineno">   80 </span><span class="spaces">    </span><span class="nottickedoff">renderTile (Tile x y token) =</span>
+<span class="lineno">   81 </span><span class="spaces">        </span><span class="nottickedoff">( p2 (fromIntegral x, negate $ fromIntegral y)</span>
+<span class="lineno">   82 </span><span class="spaces">        </span><span class="nottickedoff">, renderToken token</span>
+<span class="lineno">   83 </span><span class="spaces">        </span><span class="nottickedoff">)</span></span>
+<span class="lineno">   84 </span>
+<span class="lineno">   85 </span>-- | Render a single 'Token' associated with a 'Tile'.
+<span class="lineno">   86 </span>renderToken :: Token -&gt; Diagram SVG
+<span class="lineno">   87 </span><span class="decl"><span class="nottickedoff">renderToken (VarT s) =</span>
+<span class="lineno">   88 </span><span class="spaces">    </span><span class="nottickedoff">scale 0.3 (text s)</span>
+<span class="lineno">   89 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; (circle 0.44 &amp; lc orange &amp; lw 4 &amp; fc white)</span>
+<span class="lineno">   90 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; hrule 1</span>
+<span class="lineno">   91 </span><span class="spaces"></span><span class="nottickedoff">renderToken (Outcome OWait0) =</span>
+<span class="lineno">   92 </span><span class="spaces">    </span><span class="nottickedoff">hrule 1</span>
+<span class="lineno">   93 </span><span class="spaces"></span><span class="nottickedoff">renderToken (Outcome o) =</span>
+<span class="lineno">   94 </span><span class="spaces">    </span><span class="nottickedoff">scale 0.3 (renderOp0Symbol o)</span>
+<span class="lineno">   95 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; (circle 0.44 &amp; lc orange &amp; lw 4 &amp; fc white)</span>
+<span class="lineno">   96 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; hrule 1</span>
+<span class="lineno">   97 </span><span class="spaces"></span><span class="nottickedoff">renderToken (Location s) =</span>
+<span class="lineno">   98 </span><span class="spaces">    </span><span class="nottickedoff">(scale 0.2 (text s) &amp; fc teal &amp; translate (r2 (0,0.2)))</span>
+<span class="lineno">   99 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; (square 0.2 &amp; fc white)</span>
+<span class="lineno">  100 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; hrule 1</span>
+<span class="lineno">  101 </span><span class="spaces"></span><span class="nottickedoff">renderToken Horizontal = hrule 1</span>
+<span class="lineno">  102 </span><span class="spaces"></span><span class="nottickedoff">renderToken (Close mlocation ds) =</span>
+<span class="lineno">  103 </span><span class="spaces">    </span><span class="nottickedoff">maybe mempty (renderToken . Location) mlocation</span>
+<span class="lineno">  104 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; mconcat (map (renderLine . fromIntegral . negate) ds)</span>
+<span class="lineno">  105 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; hrule 1</span>
+<span class="lineno">  106 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
+<span class="lineno">  107 </span><span class="spaces">    </span><span class="nottickedoff">renderLine d = fromVertices [p2 (0, 0), p2 (-0.5, d)] &amp; strokeLine</span>
+<span class="lineno">  108 </span><span class="spaces"></span><span class="nottickedoff">renderToken (Open op ds) =</span>
+<span class="lineno">  109 </span><span class="spaces">    </span><span class="nottickedoff">scale 0.4 ((renderOpSymbol op &amp; lw 1.7) &lt;&gt; (square 1 &amp; fc white))</span>
+<span class="lineno">  110 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; mconcat (map renderLine ys)</span>
+<span class="lineno">  111 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; mconcat (renderLineAnnotations op ys)</span>
+<span class="lineno">  112 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; hrule 1</span>
+<span class="lineno">  113 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
+<span class="lineno">  114 </span><span class="spaces">    </span><span class="nottickedoff">ys = map (fromIntegral . negate) ds</span>
+<span class="lineno">  115 </span><span class="spaces"></span><span class="nottickedoff"></span>
+<span class="lineno">  116 </span><span class="spaces">    </span><span class="nottickedoff">renderLine d = fromVertices [p2 (0, 0), p2 (0.5, d)] &amp; strokeLine</span>
+<span class="lineno">  117 </span><span class="spaces"></span><span class="nottickedoff"></span>
+<span class="lineno">  118 </span><span class="spaces">    </span><span class="nottickedoff">renderLineAnnotations (OChoices ws) =</span>
+<span class="lineno">  119 </span><span class="spaces">        </span><span class="nottickedoff">zipWith renderLineAnnotation ps</span>
+<span class="lineno">  120 </span><span class="spaces">      </span><span class="nottickedoff">where</span>
+<span class="lineno">  121 </span><span class="spaces">        </span><span class="nottickedoff">ps = map (/ sum ws) ws</span>
+<span class="lineno">  122 </span><span class="spaces">    </span><span class="nottickedoff">renderLineAnnotations _ = const []</span>
+<span class="lineno">  123 </span><span class="spaces"></span><span class="nottickedoff"></span>
+<span class="lineno">  124 </span><span class="spaces">    </span><span class="nottickedoff">posLineAnnotation _ 0 = p2 (0.2, 0.3)</span>
+<span class="lineno">  125 </span><span class="spaces">    </span><span class="nottickedoff">posLineAnnotation _ d = p2 (0.2, 0.1 + d)</span>
+<span class="lineno">  126 </span><span class="spaces">    </span><span class="nottickedoff">renderLineAnnotation p d =</span>
+<span class="lineno">  127 </span><span class="spaces">        </span><span class="nottickedoff">position</span>
+<span class="lineno">  128 </span><span class="spaces">            </span><span class="nottickedoff">[(posLineAnnotation p d</span>
+<span class="lineno">  129 </span><span class="spaces">            </span><span class="nottickedoff">, scale 0.2 (text $ showProb p) &amp; fc teal</span>
+<span class="lineno">  130 </span><span class="spaces">            </span><span class="nottickedoff">)]</span></span>
+<span class="lineno">  131 </span>
+<span class="lineno">  132 </span>-- | Render the symbol that represents a known outcome.
+<span class="lineno">  133 </span>renderOp0Symbol :: Op0 -&gt; Diagram SVG
+<span class="lineno">  134 </span><span class="decl"><span class="nottickedoff">renderOp0Symbol ONever    = text &quot;⊥&quot;</span>
+<span class="lineno">  135 </span><span class="spaces"></span><span class="nottickedoff">renderOp0Symbol OWait0    = mempty</span>
+<span class="lineno">  136 </span><span class="spaces"></span><span class="nottickedoff">renderOp0Symbol (OWait t) =</span>
+<span class="lineno">  137 </span><span class="spaces">    </span><span class="nottickedoff">text $ &quot;wait &quot; &lt;&gt; printf &quot;%.2f&quot; (fromRational t :: Double)</span></span>
+<span class="lineno">  138 </span>
+<span class="lineno">  139 </span>-- | Render the symbol that represents an operation with multiple arguments
+<span class="lineno">  140 </span>renderOpSymbol :: Op -&gt; Diagram SVG
+<span class="lineno">  141 </span><span class="decl"><span class="nottickedoff">renderOpSymbol OFirst =</span>
+<span class="lineno">  142 </span><span class="spaces">    </span><span class="nottickedoff">(fromVertices [p2 (-0.35,0.25), p2 (0,0.25), p2 (0,-0.25), p2 (-0.35,-0.25)]</span>
+<span class="lineno">  143 </span><span class="spaces">        </span><span class="nottickedoff">&amp; strokeLine &amp; translate (r2 (-0.35/2, 0.25)))</span>
+<span class="lineno">  144 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt; (fromOffsets [r2 (-0.35,0)] &amp; strokeLine &amp; translate (r2 (0.35/2, 0)))</span>
+<span class="lineno">  145 </span><span class="spaces"></span><span class="nottickedoff">renderOpSymbol OLast  =</span>
+<span class="lineno">  146 </span><span class="spaces">    </span><span class="nottickedoff">(fromOffsets [r2 (-0.16, 0), r2 (2*0.16, 0)] &amp; strokeLine)</span>
+<span class="lineno">  147 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt;</span>
+<span class="lineno">  148 </span><span class="spaces">    </span><span class="nottickedoff">(((fromOffsets [r2 (-0.25, 0.6)] &amp; strokeLine)</span>
+<span class="lineno">  149 </span><span class="spaces">        </span><span class="nottickedoff">&lt;&gt; (fromOffsets [r2 (0.25, 0.6)] &amp; strokeLine))</span>
+<span class="lineno">  150 </span><span class="spaces">        </span><span class="nottickedoff">&amp; translate (r2 (0,-0.35))</span>
+<span class="lineno">  151 </span><span class="spaces">    </span><span class="nottickedoff">) &amp; translate (r2 (0, 0.03))</span>
+<span class="lineno">  152 </span><span class="spaces"></span><span class="nottickedoff">renderOpSymbol (OChoices _) =</span>
+<span class="lineno">  153 </span><span class="spaces">    </span><span class="nottickedoff">(fromOffsets [r2 (0.33, 0), r2 (-0.6, 0), r2 (0.2, 0.15)]</span>
+<span class="lineno">  154 </span><span class="spaces">        </span><span class="nottickedoff">&amp; strokeLine &amp; translate (r2 (0,0.1)))</span>
+<span class="lineno">  155 </span><span class="spaces">    </span><span class="nottickedoff">&lt;&gt;</span>
+<span class="lineno">  156 </span><span class="spaces">    </span><span class="nottickedoff">(fromOffsets [r2 (-0.33, 0), r2 (0.6, 0), r2 (-0.2, -0.15)]</span>
+<span class="lineno">  157 </span><span class="spaces">        </span><span class="nottickedoff">&amp; strokeLine &amp; translate (r2 (0,-0.1)))</span></span>
+<span class="lineno">  158 </span>
+<span class="lineno">  159 </span>-- | Show a probability in scientific notation with two digits of precision.
+<span class="lineno">  160 </span>showProb :: Rational -&gt; String
+<span class="lineno">  161 </span><span class="decl"><span class="nottickedoff">showProb r</span>
+<span class="lineno">  162 </span><span class="spaces">    </span><span class="nottickedoff">| r &gt;= 0.01 = printf &quot;%.2f&quot; x</span>
+<span class="lineno">  163 </span><span class="spaces">    </span><span class="nottickedoff">| otherwise = printf &quot;%.2e\n&quot; x</span>
+<span class="lineno">  164 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
+<span class="lineno">  165 </span><span class="spaces">    </span><span class="nottickedoff">x = fromRational r :: Double</span></span>
+<span class="lineno">  166 </span>
+<span class="lineno">  167 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  168 </span>    Diagram Layout
+<span class="lineno">  169 </span>------------------------------------------------------------------------------}
+<span class="lineno">  170 </span>{- Note [LayoutComputation]
+<span class="lineno">  171 </span>
+<span class="lineno">  172 </span>In order to compute the layout for an outcome diagram,
+<span class="lineno">  173 </span>we use a data structure called 'Shrub', which is a tree with labels
+<span class="lineno">  174 </span>on the edges (as opposed to on the leaves).
+<span class="lineno">  175 </span>The 'Shrub' represents the data that we still need to layout,
+<span class="lineno">  176 </span>we think of the leaves as being located to the left,
+<span class="lineno">  177 </span>and the root to the right, like this:
+<span class="lineno">  178 </span>
+<span class="lineno">  179 </span> leaf
+<span class="lineno">  180 </span> o----
+<span class="lineno">  181 </span>      \
+<span class="lineno">  182 </span>       o----o----o root
+<span class="lineno">  183 </span>      /
+<span class="lineno">  184 </span> o----
+<span class="lineno">  185 </span>
+<span class="lineno">  186 </span>-}
+<span class="lineno">  187 </span>
+<span class="lineno">  188 </span>-- | Outcome-related data that we associate with an edge.
+<span class="lineno">  189 </span>data EdgeOutcome
+<span class="lineno">  190 </span>    = Empty
+<span class="lineno">  191 </span>        -- ^ No outcome is associated with this edge.
+<span class="lineno">  192 </span>    | Term (Term String) (Maybe Description)
+<span class="lineno">  193 </span>        -- ^ Term with maybe a description of its ending observation location.
+<span class="lineno">  194 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Ord</span></span></span></span></span></span></span></span></span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">  195 </span>
+<span class="lineno">  196 </span>type EdgeData = (Y, EdgeOutcome)
+<span class="lineno">  197 </span>
+<span class="lineno">  198 </span>-- | Layout an outcome diagram.
+<span class="lineno">  199 </span>layout :: Term String -&gt; [Tile]
+<span class="lineno">  200 </span><span class="decl"><span class="istickedoff">layout t = go 0 $ twig (<span class="nottickedoff">0</span>, Term t Nothing)</span>
+<span class="lineno">  201 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  202 </span><span class="spaces">    </span><span class="istickedoff">go !x0 s0</span>
+<span class="lineno">  203 </span><span class="spaces">        </span><span class="istickedoff">| isRoot s0 = []</span>
+<span class="lineno">  204 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = tiles &lt;&gt; go x1 s1</span>
+<span class="lineno">  205 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  206 </span><span class="spaces">        </span><span class="istickedoff">(tiles, s1) = emitColumn <span class="nottickedoff">x0</span> s0</span>
+<span class="lineno">  207 </span><span class="spaces">        </span><span class="istickedoff">x1 = if null tiles then x0 else x0 + 1</span></span>
+<span class="lineno">  208 </span>
+<span class="lineno">  209 </span>-- | Emit the next column, possible empty.
+<span class="lineno">  210 </span>emitColumn :: X -&gt; Shrub EdgeData -&gt; ([Tile], Shrub EdgeData)
+<span class="lineno">  211 </span><span class="decl"><span class="istickedoff">emitColumn x s</span>
+<span class="lineno">  212 </span><span class="spaces">    </span><span class="istickedoff">| any (onExpr isSeq)        (foliage s) = ([], expandSeq s)</span>
+<span class="lineno">  213 </span><span class="spaces">    </span><span class="istickedoff">| hasIsolatedTwigs s                    = ([], dropIsolatedTwigs s)</span>
+<span class="lineno">  214 </span><span class="spaces">    </span><span class="istickedoff">| hasGroupClose s                       = emitGroupClose <span class="nottickedoff">x</span> s</span>
+<span class="lineno">  215 </span><span class="spaces">    </span><span class="istickedoff">| any (onExpr isVertical)   (foliage s) = emitVertical <span class="nottickedoff">x</span> s</span>
+<span class="lineno">  216 </span><span class="spaces">    </span><span class="istickedoff">| any (onExpr isLoc)        (foliage s) = emitLoc <span class="nottickedoff">x</span> s</span>
+<span class="lineno">  217 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">any (onExpr isVarOrKnown) (foliage s)</span> = emitVar <span class="nottickedoff">x</span> s</span>
+<span class="lineno">  218 </span><span class="spaces">    </span><span class="istickedoff">| <span class="nottickedoff">otherwise</span> = <span class="nottickedoff">error &quot;emitColumn: unreachable&quot;</span></span>
+<span class="lineno">  219 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  220 </span><span class="spaces">    </span><span class="istickedoff">onExpr p (_, Term t _) = p t</span>
+<span class="lineno">  221 </span><span class="spaces">    </span><span class="istickedoff">onExpr _ _ = False</span></span>
+<span class="lineno">  222 </span>
+<span class="lineno">  223 </span>-- | Check that a given Term is a 'Var' or known constant.
+<span class="lineno">  224 </span>isVarOrKnown :: Term v -&gt; Bool
+<span class="lineno">  225 </span><span class="decl"><span class="istickedoff">isVarOrKnown (Var _)  = True</span>
+<span class="lineno">  226 </span><span class="spaces"></span><span class="istickedoff">isVarOrKnown Never    = True</span>
+<span class="lineno">  227 </span><span class="spaces"></span><span class="istickedoff">isVarOrKnown Wait0    = True</span>
+<span class="lineno">  228 </span><span class="spaces"></span><span class="istickedoff">isVarOrKnown (Wait _) = True</span>
+<span class="lineno">  229 </span><span class="spaces"></span><span class="istickedoff">isVarOrKnown _ = <span class="nottickedoff">False</span></span></span>
+<span class="lineno">  230 </span>
+<span class="lineno">  231 </span>-- | Check that a given 'EdgeData' contains no outcome-related data.
+<span class="lineno">  232 </span>isEmpty :: EdgeData -&gt; Bool
+<span class="lineno">  233 </span><span class="decl"><span class="istickedoff">isEmpty (_, Empty) = True</span>
+<span class="lineno">  234 </span><span class="spaces"></span><span class="istickedoff">isEmpty _ = False</span></span>
+<span class="lineno">  235 </span>
+<span class="lineno">  236 </span>-- | Expand all 'Seq' in the 'foliage' as a sequence of twigs.
+<span class="lineno">  237 </span>--
+<span class="lineno">  238 </span>-- Merge observation locations that follow after a vertical term
+<span class="lineno">  239 </span>-- into the term annotation.
+<span class="lineno">  240 </span>expandSeq :: Shrub EdgeData -&gt; Shrub EdgeData
+<span class="lineno">  241 </span><span class="decl"><span class="istickedoff">expandSeq = updateFoliage expand</span>
+<span class="lineno">  242 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  243 </span><span class="spaces">    </span><span class="istickedoff">expand (y, Term (Seq exprs) _) = mkBranches <span class="nottickedoff">y</span> root exprs</span>
+<span class="lineno">  244 </span><span class="spaces">    </span><span class="istickedoff">expand edge = twig edge</span>
+<span class="lineno">  245 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  246 </span><span class="spaces">    </span><span class="istickedoff">mkBranches _ acc [] = acc</span>
+<span class="lineno">  247 </span><span class="spaces">    </span><span class="istickedoff">mkBranches y acc (t:Loc description:ts)</span>
+<span class="lineno">  248 </span><span class="spaces">        </span><span class="istickedoff">| <span class="nottickedoff">isVertical t</span> =</span>
+<span class="lineno">  249 </span><span class="spaces">            </span><span class="istickedoff"><span class="nottickedoff">mkBranches y (Branch [((y, Term t (Just description)), acc)]) ts</span></span>
+<span class="lineno">  250 </span><span class="spaces">    </span><span class="istickedoff">mkBranches y acc (t:ts) =</span>
+<span class="lineno">  251 </span><span class="spaces">        </span><span class="istickedoff">mkBranches <span class="nottickedoff">y</span> (Branch [((<span class="nottickedoff">y</span>, Term t Nothing), acc)]) ts</span></span>
+<span class="lineno">  252 </span>
+<span class="lineno">  253 </span>-- | Emit a column with the next observation locations.
+<span class="lineno">  254 </span>emitLoc :: X -&gt; Shrub EdgeData -&gt; ([Tile], Shrub EdgeData)
+<span class="lineno">  255 </span><span class="decl"><span class="istickedoff">emitLoc x s =</span>
+<span class="lineno">  256 </span><span class="spaces">    </span><span class="istickedoff">(concatMap emit $ foliage s, updateFoliage dropit s)</span>
+<span class="lineno">  257 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  258 </span><span class="spaces">    </span><span class="istickedoff">dropit (y, Term (Loc _) _) = twig (<span class="nottickedoff">y</span>, Empty)</span>
+<span class="lineno">  259 </span><span class="spaces">    </span><span class="istickedoff">dropit edge                = twig edge</span>
+<span class="lineno">  260 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  261 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term (Loc l) _) = [Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Location l]</span>
+<span class="lineno">  262 </span><span class="spaces">    </span><span class="istickedoff">emit (y, _             ) = [Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> Horizontal]</span></span>
+<span class="lineno">  263 </span>
+<span class="lineno">  264 </span>-- | Emit a column with the next named items.
+<span class="lineno">  265 </span>emitVar :: X -&gt; Shrub EdgeData -&gt; ([Tile], Shrub EdgeData)
+<span class="lineno">  266 </span><span class="decl"><span class="istickedoff">emitVar x s =</span>
+<span class="lineno">  267 </span><span class="spaces">    </span><span class="istickedoff">(map emit $ foliage s, updateFoliage dropit s)</span>
+<span class="lineno">  268 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  269 </span><span class="spaces">    </span><span class="istickedoff">dropit (y, Term t _) | <span class="tickonlytrue">isVarOrKnown t</span> = twig (<span class="nottickedoff">y</span>, Empty)</span>
+<span class="lineno">  270 </span><span class="spaces">    </span><span class="istickedoff">dropit edge                           = twig edge</span>
+<span class="lineno">  271 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  272 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term (Var v)  _) = Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ VarT v</span>
+<span class="lineno">  273 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term Never    _) = Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Outcome <span class="nottickedoff">ONever</span></span>
+<span class="lineno">  274 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term Wait0    _) = Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Outcome <span class="nottickedoff">OWait0</span></span>
+<span class="lineno">  275 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term (Wait t) _) = Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Outcome $ <span class="nottickedoff">OWait t</span></span>
+<span class="lineno">  276 </span><span class="spaces">    </span><span class="istickedoff">emit (y, _              ) = Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> Horizontal</span></span>
+<span class="lineno">  277 </span>
+<span class="lineno">  278 </span>-- | Emit a column with the next vertical items.
+<span class="lineno">  279 </span>emitVertical :: X -&gt; Shrub EdgeData -&gt; ([Tile], Shrub EdgeData)
+<span class="lineno">  280 </span><span class="decl"><span class="istickedoff">emitVertical x s =</span>
+<span class="lineno">  281 </span><span class="spaces">    </span><span class="istickedoff">(map emit $ foliage s, updateFoliage dropit s)</span>
+<span class="lineno">  282 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  283 </span><span class="spaces">    </span><span class="istickedoff">dropit (y, Term (Last    exprs ) ml) = close <span class="nottickedoff">y</span> ml exprs</span>
+<span class="lineno">  284 </span><span class="spaces">    </span><span class="istickedoff">dropit (y, Term (First   exprs ) ml) = close <span class="nottickedoff">y</span> ml exprs</span>
+<span class="lineno">  285 </span><span class="spaces">    </span><span class="istickedoff">dropit (y, Term (Choices wexprs) ml) = close <span class="nottickedoff">y</span> ml (map snd wexprs)</span>
+<span class="lineno">  286 </span><span class="spaces">    </span><span class="istickedoff">dropit edge                         = twig edge</span>
+<span class="lineno">  287 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  288 </span><span class="spaces">    </span><span class="istickedoff">mkLocation Nothing  = Empty</span>
+<span class="lineno">  289 </span><span class="spaces">    </span><span class="istickedoff">mkLocation (Just l) = <span class="nottickedoff">Term (Loc l) Nothing</span></span>
+<span class="lineno">  290 </span><span class="spaces">    </span><span class="istickedoff">close y ml exprs =</span>
+<span class="lineno">  291 </span><span class="spaces">        </span><span class="istickedoff">Branch [</span>
+<span class="lineno">  292 </span><span class="spaces">          </span><span class="istickedoff">( (<span class="nottickedoff">y</span>, mkLocation ml)</span>
+<span class="lineno">  293 </span><span class="spaces">          </span><span class="istickedoff">, Branch [(e, root) | e &lt;- verticals <span class="nottickedoff">y</span> exprs])</span>
+<span class="lineno">  294 </span><span class="spaces">        </span><span class="istickedoff">]</span>
+<span class="lineno">  295 </span><span class="spaces">    </span><span class="istickedoff">verticals y exprs =</span>
+<span class="lineno">  296 </span><span class="spaces">        </span><span class="istickedoff">zipWith (\z t -&gt; (<span class="nottickedoff">y + z</span>, Term t Nothing)) (distances exprs) exprs </span>
+<span class="lineno">  297 </span><span class="spaces">    </span><span class="istickedoff">distances = init . scanl <span class="nottickedoff">(+)</span> <span class="nottickedoff">0</span> . map <span class="nottickedoff">maxVertical</span></span>
+<span class="lineno">  298 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  299 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term (Last    exprs ) _) =</span>
+<span class="lineno">  300 </span><span class="spaces">        </span><span class="istickedoff">Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Open <span class="nottickedoff">OLast</span> $ <span class="nottickedoff">distances exprs</span></span>
+<span class="lineno">  301 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term (First   exprs ) _) =</span>
+<span class="lineno">  302 </span><span class="spaces">        </span><span class="istickedoff">Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Open <span class="nottickedoff">OFirst</span> $ <span class="nottickedoff">distances exprs</span></span>
+<span class="lineno">  303 </span><span class="spaces">    </span><span class="istickedoff">emit (y, Term (Choices wexprs) _) =</span>
+<span class="lineno">  304 </span><span class="spaces">        </span><span class="istickedoff">Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Open <span class="nottickedoff">(OChoices ws)</span> $ <span class="nottickedoff">distances exprs</span></span>
+<span class="lineno">  305 </span><span class="spaces">      </span><span class="istickedoff">where (ws, exprs) = <span class="nottickedoff">unzip wexprs</span></span>
+<span class="lineno">  306 </span><span class="spaces">    </span><span class="istickedoff">emit (y, _) = Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> Horizontal</span></span>
+<span class="lineno">  307 </span>
+<span class="lineno">  308 </span>-- | Outcomes that open a new vertical.
+<span class="lineno">  309 </span>isVertical :: Term v -&gt; Bool
+<span class="lineno">  310 </span><span class="decl"><span class="istickedoff">isVertical (Last    _) = True</span>
+<span class="lineno">  311 </span><span class="spaces"></span><span class="istickedoff">isVertical (First   _) = True</span>
+<span class="lineno">  312 </span><span class="spaces"></span><span class="istickedoff">isVertical (Choices _) = True</span>
+<span class="lineno">  313 </span><span class="spaces"></span><span class="istickedoff">isVertical _           = False</span></span>
+<span class="lineno">  314 </span>
+<span class="lineno">  315 </span>-- | Maximal number of outcomes that are shown vertically.
+<span class="lineno">  316 </span>-- Parallel operations are shown vertically, but also 'Choices'.
+<span class="lineno">  317 </span>maxVertical :: Term v -&gt; Int
+<span class="lineno">  318 </span><span class="decl"><span class="nottickedoff">maxVertical (Seq   ts)    = maximum $ map maxVertical ts</span>
+<span class="lineno">  319 </span><span class="spaces"></span><span class="nottickedoff">maxVertical (Last  ts)    = sum $ map maxVertical ts</span>
+<span class="lineno">  320 </span><span class="spaces"></span><span class="nottickedoff">maxVertical (First ts)    = sum $ map maxVertical ts</span>
+<span class="lineno">  321 </span><span class="spaces"></span><span class="nottickedoff">maxVertical (Choices wts) = sum $ map (maxVertical . snd) wts</span>
+<span class="lineno">  322 </span><span class="spaces"></span><span class="nottickedoff">maxVertical _             = 1</span></span>
+<span class="lineno">  323 </span>
+<span class="lineno">  324 </span>
+<span class="lineno">  325 </span>-- | Check whether there is a group of silent foliage that should
+<span class="lineno">  326 </span>-- be closed.
+<span class="lineno">  327 </span>hasGroupClose :: Shrub EdgeData -&gt; Bool
+<span class="lineno">  328 </span><span class="decl"><span class="istickedoff">hasGroupClose = any isGroupClose . foliageBushes</span>
+<span class="lineno">  329 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  330 </span><span class="spaces">    </span><span class="istickedoff">isGroupClose (Branch ts) =</span>
+<span class="lineno">  331 </span><span class="spaces">        </span><span class="istickedoff">length ts &gt; 1 &amp;&amp; all isEmpty (map fst ts)</span></span>
+<span class="lineno">  332 </span>
+<span class="lineno">  333 </span>-- | Check whether there are any foliage edges that
+<span class="lineno">  334 </span>-- have no expressions and no siblings.
+<span class="lineno">  335 </span>hasIsolatedTwigs :: Shrub EdgeData -&gt; Bool
+<span class="lineno">  336 </span><span class="decl"><span class="istickedoff">hasIsolatedTwigs = any isIsolatedTwig . foliageBushes</span></span>
+<span class="lineno">  337 </span>
+<span class="lineno">  338 </span>-- | 'foliageBushes' returns the collection of all subtrees
+<span class="lineno">  339 </span>-- that consist only of foliage. (These trees have height 1).
+<span class="lineno">  340 </span>--
+<span class="lineno">  341 </span>-- Trees where the immediate children of a root contain both
+<span class="lineno">  342 </span>-- foliage and non-foliage are not returned here!
+<span class="lineno">  343 </span>foliageBushes :: Shrub a -&gt; [Shrub a]
+<span class="lineno">  344 </span><span class="decl"><span class="istickedoff">foliageBushes (Branch []) = []</span>
+<span class="lineno">  345 </span><span class="spaces"></span><span class="istickedoff">foliageBushes (Branch ts)</span>
+<span class="lineno">  346 </span><span class="spaces">    </span><span class="istickedoff">| all isRoot (map snd ts) = [ Branch ts ]</span>
+<span class="lineno">  347 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span>               = concatMap (foliageBushes . snd) ts</span></span>
+<span class="lineno">  348 </span>
+<span class="lineno">  349 </span>-- | Emit a column that closes all groups that can be closed
+<span class="lineno">  350 </span>-- at the moment.
+<span class="lineno">  351 </span>--
+<span class="lineno">  352 </span>-- Special case: If the next-higher branch is an observation
+<span class="lineno">  353 </span>-- location with a label, we merge that location into the close.
+<span class="lineno">  354 </span>emitGroupClose :: X -&gt; Shrub EdgeData -&gt; ([Tile], Shrub EdgeData)
+<span class="lineno">  355 </span><span class="decl"><span class="istickedoff">emitGroupClose x shrub = goBranch shrub</span>
+<span class="lineno">  356 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  357 </span><span class="spaces">    </span><span class="istickedoff">goBranch (Branch []) = <span class="nottickedoff">([], Branch [])</span></span>
+<span class="lineno">  358 </span><span class="spaces">    </span><span class="istickedoff">goBranch (Branch ts) = (concat tiless, Branch edges)</span>
+<span class="lineno">  359 </span><span class="spaces">      </span><span class="istickedoff">where (tiless, edges) = unzip $ map (uncurry goEdge) ts</span>
+<span class="lineno">  360 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  361 </span><span class="spaces">    </span><span class="istickedoff">goEdge (y, term) (Branch []) =</span>
+<span class="lineno">  362 </span><span class="spaces">        </span><span class="istickedoff">( [Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> Horizontal]</span>
+<span class="lineno">  363 </span><span class="spaces">        </span><span class="istickedoff">, ((<span class="nottickedoff">y</span>, term), Branch [])</span>
+<span class="lineno">  364 </span><span class="spaces">        </span><span class="istickedoff">)</span>
+<span class="lineno">  365 </span><span class="spaces">    </span><span class="istickedoff">goEdge (y, term) (Branch ts)</span>
+<span class="lineno">  366 </span><span class="spaces">        </span><span class="istickedoff">| isGroupClose ts =</span>
+<span class="lineno">  367 </span><span class="spaces">            </span><span class="istickedoff">( [Tile <span class="nottickedoff">x</span> <span class="nottickedoff">y</span> $ Close mlocation $ <span class="nottickedoff">map (subtract y) ys</span>]</span>
+<span class="lineno">  368 </span><span class="spaces">            </span><span class="istickedoff">, ((<span class="nottickedoff">y</span>, Empty), root)</span>
+<span class="lineno">  369 </span><span class="spaces">            </span><span class="istickedoff">)</span>
+<span class="lineno">  370 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> =</span>
+<span class="lineno">  371 </span><span class="spaces">            </span><span class="istickedoff">let (tiles, branch') = goBranch (Branch ts)</span>
+<span class="lineno">  372 </span><span class="spaces">            </span><span class="istickedoff">in  ( tiles</span>
+<span class="lineno">  373 </span><span class="spaces">                </span><span class="istickedoff">, ((<span class="nottickedoff">y</span>, term), branch')</span>
+<span class="lineno">  374 </span><span class="spaces">                </span><span class="istickedoff">)</span>
+<span class="lineno">  375 </span><span class="spaces">      </span><span class="istickedoff">where</span>
+<span class="lineno">  376 </span><span class="spaces">        </span><span class="istickedoff">mlocation = case term of</span>
+<span class="lineno">  377 </span><span class="spaces">            </span><span class="istickedoff">Term (Loc s) _ -&gt; <span class="nottickedoff">Just s</span></span>
+<span class="lineno">  378 </span><span class="spaces">            </span><span class="istickedoff">_ -&gt; Nothing</span>
+<span class="lineno">  379 </span><span class="spaces">        </span><span class="istickedoff"><span class="nottickedoff">ys = map (fst . fst) ts</span></span>
+<span class="lineno">  380 </span><span class="spaces"></span><span class="istickedoff"></span>
+<span class="lineno">  381 </span><span class="spaces">    </span><span class="istickedoff">isGroupClose ts</span>
+<span class="lineno">  382 </span><span class="spaces">        </span><span class="istickedoff">= all isRoot (map snd ts) &amp;&amp; all isEmpty (map fst ts) &amp;&amp; length ts &gt; 1</span></span>
+<span class="lineno">  383 </span>
+<span class="lineno">  384 </span>-- | Drop all foliage edges that have no expressions and have no siblings.
+<span class="lineno">  385 </span>dropIsolatedTwigs :: Shrub EdgeData -&gt; Shrub EdgeData
+<span class="lineno">  386 </span><span class="decl"><span class="istickedoff">dropIsolatedTwigs (Branch []) = Branch []</span>
+<span class="lineno">  387 </span><span class="spaces"></span><span class="istickedoff">dropIsolatedTwigs (Branch ts)</span>
+<span class="lineno">  388 </span><span class="spaces">    </span><span class="istickedoff">| isIsolatedTwig (Branch ts) = Branch []</span>
+<span class="lineno">  389 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = Branch $ zip labels $ map dropIsolatedTwigs children</span>
+<span class="lineno">  390 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  391 </span><span class="spaces">    </span><span class="istickedoff">labels   = map fst ts</span>
+<span class="lineno">  392 </span><span class="spaces">    </span><span class="istickedoff">children = map snd ts</span></span>
+<span class="lineno">  393 </span>
+<span class="lineno">  394 </span>-- | Check whether a 'Shrub' is a twig without expression.
+<span class="lineno">  395 </span>isIsolatedTwig :: Shrub EdgeData -&gt; Bool
+<span class="lineno">  396 </span><span class="decl"><span class="istickedoff">isIsolatedTwig (Branch [((_,Empty), Branch [])]) = True</span>
+<span class="lineno">  397 </span><span class="spaces"></span><span class="istickedoff">isIsolatedTwig _ = False</span></span>
+<span class="lineno">  398 </span>
+<span class="lineno">  399 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  400 </span>    Shrub
+<span class="lineno">  401 </span>    data structure
+<span class="lineno">  402 </span>------------------------------------------------------------------------------}
+<span class="lineno">  403 </span>-- | A 'Shrub' is a rooted tree that has labels (only) on the edges
+<span class="lineno">  404 </span>-- (as opposed to on the leaves).
+<span class="lineno">  405 </span>newtype Shrub a = Branch { <span class="istickedoff"><span class="decl"><span class="istickedoff">unBranch</span></span></span> :: [(a, Shrub a)] }
+<span class="lineno">  406 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Ord</span></span></span></span></span></span></span></span></span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>)
+<span class="lineno">  407 </span>
+<span class="lineno">  408 </span>instance <span class="decl"><span class="nottickedoff">Functor Shrub</span></span> where
+<span class="lineno">  409 </span>    <span class="decl"><span class="nottickedoff">fmap f (Branch bs) = Branch [ (f x, fmap f b) | (x, b) &lt;- bs ]</span></span>
+<span class="lineno">  410 </span>
+<span class="lineno">  411 </span>-- | Test whether a 'Shrub' is an isolated root.
+<span class="lineno">  412 </span>isRoot :: Shrub a -&gt; Bool
+<span class="lineno">  413 </span><span class="decl"><span class="istickedoff">isRoot (Branch []) = True</span>
+<span class="lineno">  414 </span><span class="spaces"></span><span class="istickedoff">isRoot _ = False</span></span>
+<span class="lineno">  415 </span>
+<span class="lineno">  416 </span>-- | The 'Shrub' that is an isolated root.
+<span class="lineno">  417 </span>root :: Shrub a
+<span class="lineno">  418 </span><span class="decl"><span class="istickedoff">root = Branch []</span></span>
+<span class="lineno">  419 </span>
+<span class="lineno">  420 </span>-- | Test whether a 'Shrub' is a single edge.
+<span class="lineno">  421 </span>isTwig :: Shrub a -&gt; Bool
+<span class="lineno">  422 </span><span class="decl"><span class="nottickedoff">isTwig (Branch [(_, b)]) = isRoot b</span>
+<span class="lineno">  423 </span><span class="spaces"></span><span class="nottickedoff">isTwig _ = False</span></span>
+<span class="lineno">  424 </span>
+<span class="lineno">  425 </span>-- | Construct a 'Shrub' with a single edge.
+<span class="lineno">  426 </span>twig :: a -&gt; Shrub a
+<span class="lineno">  427 </span><span class="decl"><span class="istickedoff">twig x = Branch [(x, root)]</span></span>
+<span class="lineno">  428 </span>
+<span class="lineno">  429 </span>-- | The 'foliage' of a 'Shrub' is the collection of
+<span class="lineno">  430 </span>-- edges that end in a leaf.
+<span class="lineno">  431 </span>--
+<span class="lineno">  432 </span>-- This function returns the labels of the foliage of the given 'Shrub'.
+<span class="lineno">  433 </span>foliage :: Shrub a -&gt; [a]
+<span class="lineno">  434 </span><span class="decl"><span class="istickedoff">foliage (Branch []) = <span class="nottickedoff">[]</span></span>
+<span class="lineno">  435 </span><span class="spaces"></span><span class="istickedoff">foliage (Branch bs) = concatMap go bs</span>
+<span class="lineno">  436 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  437 </span><span class="spaces">    </span><span class="istickedoff">go (x, Branch []) = [x]</span>
+<span class="lineno">  438 </span><span class="spaces">    </span><span class="istickedoff">go (_, Branch cs) = concatMap go cs</span></span>
+<span class="lineno">  439 </span>
+<span class="lineno">  440 </span>-- | Replace the foliage by news 'Shrub's.
+<span class="lineno">  441 </span>--
+<span class="lineno">  442 </span>-- Each edge in the foliage is replaced by the new 'Shrub'
+<span class="lineno">  443 </span>-- whose root is attached to the end of the edge that is not a leaf.
+<span class="lineno">  444 </span>--
+<span class="lineno">  445 </span>-- Special cases:
+<span class="lineno">  446 </span>--
+<span class="lineno">  447 </span>-- * If the new 'Shrub' is 'root', the foliage edge will be removed.
+<span class="lineno">  448 </span>-- * If the new 'Shrub' is a 'twig', the foliage edge will get a new label.
+<span class="lineno">  449 </span>updateFoliage :: (a -&gt; Shrub a) -&gt; Shrub a -&gt; Shrub a
+<span class="lineno">  450 </span><span class="decl"><span class="istickedoff">updateFoliage _ (Branch []) = <span class="nottickedoff">Branch []</span></span>
+<span class="lineno">  451 </span><span class="spaces"></span><span class="istickedoff">updateFoliage f (Branch bs) = Branch $ concatMap update bs</span>
+<span class="lineno">  452 </span><span class="spaces">  </span><span class="istickedoff">where</span>
+<span class="lineno">  453 </span><span class="spaces">    </span><span class="istickedoff">update (x, Branch []) = unBranch $ f x</span>
+<span class="lineno">  454 </span><span class="spaces">    </span><span class="istickedoff">update (x, Branch cs) = [(x, Branch $ concatMap update cs)]</span></span>
+<span class="lineno">  455 </span>
+<span class="lineno">  456 </span>{-----------------------------------------------------------------------------
+<span class="lineno">  457 </span>    Example expressions
+<span class="lineno">  458 </span>------------------------------------------------------------------------------}
+<span class="lineno">  459 </span>example0 :: O
+<span class="lineno">  460 </span><span class="decl"><span class="nottickedoff">example0 = hops'</span>
+<span class="lineno">  461 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
+<span class="lineno">  462 </span><span class="spaces">    </span><span class="nottickedoff">hop' :: O</span>
+<span class="lineno">  463 </span><span class="spaces">    </span><span class="nottickedoff">hop' = choices [(1/3, var &quot;short&quot;), (1/3, var &quot;mid&quot;), (1/3, var &quot;long&quot;)]</span>
+<span class="lineno">  464 </span><span class="spaces"></span><span class="nottickedoff"></span>
+<span class="lineno">  465 </span><span class="spaces">    </span><span class="nottickedoff">hops' :: O</span>
+<span class="lineno">  466 </span><span class="spaces">    </span><span class="nottickedoff">hops' = hop' .&gt;&gt;. hop' .&gt;&gt;. hop'</span></span>
+<span class="lineno">  467 </span>
+<span class="lineno">  468 </span>example1 :: O
+<span class="lineno">  469 </span><span class="decl"><span class="nottickedoff">example1 =</span>
+<span class="lineno">  470 </span><span class="spaces">    </span><span class="nottickedoff">var &quot;AZ&quot;</span>
+<span class="lineno">  471 </span><span class="spaces">    </span><span class="nottickedoff">./\. (var &quot;AB&quot; .&gt;&gt;. (var &quot;BZ&quot; .\/. (var &quot;BC&quot; .&gt;&gt;. var &quot;CZ&quot;)))</span></span>
+<span class="lineno">  472 </span>
+<span class="lineno">  473 </span>example2 :: O
+<span class="lineno">  474 </span><span class="decl"><span class="nottickedoff">example2 =</span>
+<span class="lineno">  475 </span><span class="spaces">    </span><span class="nottickedoff">var &quot;AB&quot;</span>
+<span class="lineno">  476 </span><span class="spaces">    </span><span class="nottickedoff">.&gt;&gt;. (var &quot;BX&quot; .\/. (var &quot;BC&quot; .&gt;&gt;. var &quot;CX&quot;))</span>
+<span class="lineno">  477 </span><span class="spaces">    </span><span class="nottickedoff">.&gt;&gt;. var &quot;XY&quot;</span>
+<span class="lineno">  478 </span><span class="spaces">    </span><span class="nottickedoff">.&gt;&gt;. (var &quot;YZ&quot; .\/. (var &quot;YQ&quot; .&gt;&gt;. var &quot;QZ&quot;))</span></span>
+<span class="lineno">  479 </span>
+<span class="lineno">  480 </span>exampleS :: O
+<span class="lineno">  481 </span><span class="decl"><span class="nottickedoff">exampleS = (var &quot;S1&quot; .\/. var &quot;S2&quot;) .&gt;&gt;. var &quot;S3&quot;</span></span>
+<span class="lineno">  482 </span>
+<span class="lineno">  483 </span>example3 :: O
+<span class="lineno">  484 </span><span class="decl"><span class="nottickedoff">example3 =</span>
+<span class="lineno">  485 </span><span class="spaces">    </span><span class="nottickedoff">(exampleS .&gt;&gt;. exampleS)</span>
+<span class="lineno">  486 </span><span class="spaces">    </span><span class="nottickedoff">.\/. exampleS</span>
+<span class="lineno">  487 </span><span class="spaces">    </span><span class="nottickedoff">.\/. (example1 .&gt;&gt;. var &quot;ZQ&quot;)</span></span>
+<span class="lineno">  488 </span>
+<span class="lineno">  489 </span>exampleCache :: O
+<span class="lineno">  490 </span><span class="decl"><span class="nottickedoff">exampleCache =</span>
+<span class="lineno">  491 </span><span class="spaces">    </span><span class="nottickedoff">loc &quot;read&quot;</span>
+<span class="lineno">  492 </span><span class="spaces">    </span><span class="nottickedoff">.&gt;&gt;. choices</span>
+<span class="lineno">  493 </span><span class="spaces">        </span><span class="nottickedoff">[ (95, var &quot;c-hit&quot; .&gt;&gt;. loc &quot;hit&quot;)</span>
+<span class="lineno">  494 </span><span class="spaces">        </span><span class="nottickedoff">, ( 5, var &quot;c-miss&quot; .&gt;&gt;. loc &quot;miss&quot; .&gt;&gt;. (net .\/. timeout) .&gt;&gt;. loc &quot;&quot;)</span>
+<span class="lineno">  495 </span><span class="spaces">        </span><span class="nottickedoff">]</span>
+<span class="lineno">  496 </span><span class="spaces">    </span><span class="nottickedoff">.&gt;&gt;. loc &quot;return&quot;</span>
+<span class="lineno">  497 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
+<span class="lineno">  498 </span><span class="spaces">    </span><span class="nottickedoff">net = var &quot;net&quot;</span>
+<span class="lineno">  499 </span><span class="spaces">        </span><span class="nottickedoff">.&gt;&gt;. loc &quot;mread&quot;</span>
+<span class="lineno">  500 </span><span class="spaces">        </span><span class="nottickedoff">.&gt;&gt;. var &quot;main&quot;</span>
+<span class="lineno">  501 </span><span class="spaces">        </span><span class="nottickedoff">.&gt;&gt;. loc &quot;mreturn&quot;</span>
+<span class="lineno">  502 </span><span class="spaces">        </span><span class="nottickedoff">.&gt;&gt;. var &quot;net&quot;</span>
+<span class="lineno">  503 </span><span class="spaces">    </span><span class="nottickedoff">timeout = var &quot;t-out&quot;</span></span>
+
+</pre>
+</body>
+</html>
