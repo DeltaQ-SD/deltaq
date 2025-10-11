@@ -26,7 +26,6 @@ module DeltaQ.Expr
     , var
     , loc
     , substitute
-    , choices'
     , toDeltaQ
 
     -- * Outcome terms
@@ -58,7 +57,7 @@ import Data.List
     )
 import DeltaQ.Class
     ( Outcome (..)
-    , DeltaQ (..)
+    , ProbabilisticOutcome (..)
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ
@@ -125,10 +124,11 @@ instance Outcome O where
     firstToFinish (O x) (O y) = O . normalize1Assoc $ First [x,y]
     lastToFinish  (O x) (O y) = O . normalize1Assoc $ Last [x,y]
 
--- | Specialization of 'choices' for outcome expressions.
-choices' :: [(Rational, O)] -> O
-choices' wos =
-    outcomeFromTerm $ Choices [ (w, termFromOutcome x) | (w, x) <- wos ]
+instance ProbabilisticOutcome O where
+    type Probability O = Rational
+
+    choice p (O x) (O y) = O $ Choices [(p, x), (1-p, y)]
+    choices wos = O $ Choices [ (w, x) | (w, O x) <- wos ]
 
 {-----------------------------------------------------------------------------
     Terms

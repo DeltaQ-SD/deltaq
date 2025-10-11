@@ -39,6 +39,7 @@ import Data.Maybe
 import DeltaQ.Class
     ( DeltaQ (..)
     , Outcome (..)
+    , ProbabilisticOutcome (..)
     , eventuallyFromMaybe
     )
 import Control.DeepSeq
@@ -133,13 +134,15 @@ instance Outcome DQ where
 
     lastToFinish = onDistribution2 "lastToFinish" (*)
 
-instance DeltaQ DQ where
+instance ProbabilisticOutcome DQ where
     type Probability DQ = Rational
 
     choice p = onDistribution2 "choice" $ \x y ->
         scale p x + scale (1 - p) y
       where
         scale = Piecewise.mapPieces . Poly.scale
+
+instance DeltaQ DQ where
 
     uniform a = DQ . Measure.uniform a
 

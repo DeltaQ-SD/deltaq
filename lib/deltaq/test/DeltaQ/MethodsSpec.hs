@@ -15,6 +15,7 @@ import DeltaQ.Class
     ( Eventually (..)
     , DeltaQ (..)
     , Outcome (..)
+    , ProbabilisticOutcome (..)
     )
 import DeltaQ.PiecewisePolynomial
     ( DQ

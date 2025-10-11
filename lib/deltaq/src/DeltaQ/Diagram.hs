@@ -24,11 +24,11 @@ module DeltaQ.Diagram
 
 import DeltaQ.Class
     ( Outcome (..)
+    , ProbabilisticOutcome (..)
     )
 import DeltaQ.Expr
     ( O
     , Term (..)
-    , choices'
     , isLoc
     , isSeq
     , loc
@@ -490,7 +490,7 @@ example3 =
 exampleCache :: O
 exampleCache =
     loc "read"
-    .>>. choices'
+    .>>. choices
         [ (95, var "c-hit" .>>. loc "hit")
         , ( 5, var "c-miss" .>>. loc "miss" .>>. (net .\/. timeout) .>>. loc "")
         ]
