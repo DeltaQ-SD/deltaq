@@ -264,7 +264,7 @@ span.spaces    { background: white }
 <span class="lineno">  245 </span><span class="spaces"></span><span class="istickedoff"></span>
 <span class="lineno">  246 </span><span class="spaces">    </span><span class="istickedoff">mkBranches _ acc [] = acc</span>
 <span class="lineno">  247 </span><span class="spaces">    </span><span class="istickedoff">mkBranches y acc (t:Loc description:ts)</span>
-<span class="lineno">  248 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">isVertical t</span> =</span>
+<span class="lineno">  248 </span><span class="spaces">        </span><span class="istickedoff">| <span class="nottickedoff">isVertical t</span> =</span>
 <span class="lineno">  249 </span><span class="spaces">            </span><span class="istickedoff"><span class="nottickedoff">mkBranches y (Branch [((y, Term t (Just description)), acc)]) ts</span></span>
 <span class="lineno">  250 </span><span class="spaces">    </span><span class="istickedoff">mkBranches y acc (t:ts) =</span>
 <span class="lineno">  251 </span><span class="spaces">        </span><span class="istickedoff">mkBranches <span class="nottickedoff">y</span> (Branch [((<span class="nottickedoff">y</span>, Term t Nothing), acc)]) ts</span></span>
