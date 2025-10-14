@@ -1,15 +1,15 @@
 # Revision history for `deltaq`
 
-## 1.1.0.0 — to be released
+## 1.1.0.0 — 2025-10-14
 
 ### Added
 
+* Add `DeltaQ.Expr` with a data type `O` that represents outcome expressions.
 * Add `DeltaQ.Diagram` for rendering outcome expressions as diagrams.
-* Add `DeltaQ.Expr` with a data type `O` for outcome expressions.
 
 ### Changed
 
-* Add the new class `ProbabilisticOutcome` and remove its methods
+* Add a new class `ProbabilisticOutcome` and remove its fields
   `Probability`, `choice` and `choices` from the `DeltaQ` class.
 
 ## 1.0.1.0 — 2025-09-26
