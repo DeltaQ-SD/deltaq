@@ -44,6 +44,8 @@ module DeltaQ.Expr
     , everything
     , isNormalizedAssoc
     , normalizeAssoc
+    , isNormalized
+    , normalize
     ) where
 
 import Control.Monad
@@ -54,6 +56,7 @@ import Control.DeepSeq
     )
 import Data.List
     ( foldl'
+    , sort
     )
 import DeltaQ.Class
     ( Outcome (..)
@@ -229,6 +232,11 @@ isVar :: Term v -> Bool
 isVar (Var _) = True
 isVar _       = False
 
+-- | Check whether a 'Term' is 'Never'.
+isNever :: Term v -> Bool
+isNever Never = True
+isNever _ = False
+
 -- | Check whether a 'Term' is a 'Loc'.
 isLoc :: Term v -> Bool
 isLoc (Loc _) = True
@@ -354,3 +362,132 @@ normalize1Assoc' (First xs) = First (concatMap f xs)
     f (First ys) = ys
     f o = [o]
 normalize1Assoc' o = o
+
+isNotBothWait :: Term v -> Term v -> Bool
+isNotBothWait (Wait _) (Wait _) = False
+isNotBothWait _ _ = True
+
+pairsWith :: (a -> a -> b) -> [a] -> [b]
+pairsWith f xs = zipWith f xs (drop 1 xs)
+
+-- | Predicate that defines what it means for a 'Term' to be normalized.
+--
+-- Each 'Term' has a unique normalization.
+isNormalized :: Ord v => Term v -> Bool
+isNormalized Wait0    = False
+isNormalized (Loc _)  = False
+isNormalized (Seq xs) =
+    not (null xs)
+    && all (not . isNever) xs
+    && all (not . isSeq) xs
+    && and (pairsWith isNotBothWait xs)
+    && and (pairsWith (<=) xs)
+    && all isNormalized xs
+isNormalized (Last xs) =
+    not (null xs)
+    && all (not . isNever) xs
+    && all (not . isLast) xs
+    && and (pairsWith isNotBothWait xs)
+    && and (pairsWith (<=) xs)
+    && all isNormalized xs
+isNormalized (First xs) =
+    not (null xs)
+    && all (not . isNever) xs
+    && all (not . isFirst) xs
+    && and (pairsWith isNotBothWait xs)
+    && and (pairsWith (<=) xs)
+    && all isNormalized xs
+isNormalized _ =
+    True
+
+-- | Normalize a term.
+--
+-- 'normalize' will give equal results
+-- if and only if two terms are equal according to the properties.
+--
+-- The strategy for normalization is as follows:
+--
+-- * Associativity of '(.>>.)', '(./\.)', and '(.\/.)' is
+--   enforced by the use of lists in the definition 'Seq', 'Last', 'First'.
+--
+-- * The following properties are handled by 'normalize1'
+--
+--   * Absorption of 'never'
+--   * Combination of 'wait'
+--   * Commutativitiy of '(./\.)', and '(.\/.)'
+--
+normalize :: Ord v => Term v -> Term v
+normalize = everywhere normalize1
+
+-- | Normalize a term under the assumption
+-- that the arguments to the outermost constructor are already normalized.
+normalize1 :: Ord v => Term v -> Term v
+normalize1 = id
+    . normalize1Sym
+    . normalize1Wait
+    . normalize1Never
+    . normalize1AssocNew
+    . normalize1LocWait
+
+-- | Remove superfluous 'Wait0' and 'Loc' constructors.
+normalize1LocWait :: Term v -> Term v
+normalize1LocWait Wait0   = Wait 0
+normalize1LocWait (Loc _) = Wait 0
+normalize1LocWait x = x
+
+-- | Ensure that the lists in 'Seq', 'Last', 'First'
+-- do not contain a term with the same constructor.
+normalize1AssocNew :: Ord v => Term v -> Term v
+normalize1AssocNew (Seq xs) = Seq (concatMap f xs)
+  where
+    f (Seq ys) = ys
+    f o = [o]
+normalize1AssocNew (Last xs) = Last (concatMap f xs)
+  where
+    f (Last ys) = ys
+    f o = [o]
+normalize1AssocNew (First xs) = First (concatMap f xs)
+  where
+    f (First ys) = ys
+    f o = [o]
+normalize1AssocNew o = o
+
+-- | Absorb 'Never'.
+normalize1Never :: Term v -> Term v
+normalize1Never (Seq xs)
+    | any isNever xs = Never
+    | otherwise = Seq xs
+normalize1Never (Last xs)
+    | any isNever xs = Never
+    | otherwise = Last xs
+normalize1Never (First xs) =
+    First $ filter (not . isNever) xs
+normalize1Never o = o
+
+-- | Combine adjacent 'Wait'.
+normalize1Wait :: Term v -> Term v
+normalize1Wait (Seq xs) = Seq (combinePairs f xs)
+  where
+    f (Wait t) (Wait s) = Just $ Wait (t + s)
+    f _ _ = Nothing
+normalize1Wait (Last xs) = Last (combinePairs f xs)
+  where
+    f (Wait t) (Wait s) = Just $ Wait (max t s)
+    f _ _ = Nothing
+normalize1Wait (First xs) = First (combinePairs f xs)
+  where
+    f (Wait t) (Wait s) = Just $ Wait (min t s)
+    f _ _ = Nothing
+normalize1Wait o = o
+
+combinePairs :: (a -> a -> Maybe a) -> [a] -> [a]
+combinePairs f (x:y:xs)
+    | Just z <- f x y = combinePairs f (z:xs)
+    | otherwise = x : combinePairs f (y:xs)
+combinePairs _ xs = xs
+
+-- | Ensure that the lists in 'Last', 'First' are sorted.
+normalize1Sym :: Ord v => Term v -> Term v
+normalize1Sym (Last xs) = Last (sort xs)
+normalize1Sym (First xs) = First (sort xs)
+normalize1Sym o = o
