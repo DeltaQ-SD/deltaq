@@ -85,7 +85,7 @@ var = O . Var
 --
 -- Rendered as a box with a label in the outcome diagram.
 -- Put this in sequence with other outcome expressions to highlight
--- their outcome locations.
+-- their observation locations.
 loc :: String -> O
 loc = O . Loc
 
@@ -98,9 +98,9 @@ substitute
     -> O
 substitute f (O term) = O $ normalize1Assoc $ term >>= unO . f
 
--- | Outcome expressions can be mapped to
+-- | Map an outcome expression 'O' to
 -- probability distributions of completion times 'DQ',
--- provided that we know how to map 'var'.
+-- given a basic mapping from 'var' names to completion times.
 toDeltaQ :: (String -> DQ) -> O -> DQ
 toDeltaQ f (O term) = go term
   where
@@ -156,7 +156,7 @@ data Term v
     | Last [Term v]
         -- ^ Parallel composition, last to finish.
     | First [Term v]
-        -- ^ Parallel composiiton, last to finish.
+        -- ^ Parallel composiiton, first to finish.
     | Choices [(Rational, Term v)]
         -- ^ Probabilistic choice.
         -- The probabilities are proportional to the given weights.
@@ -264,7 +264,7 @@ isParallel _          = False
 -- | Maximal number of outcomes that run in parallel.
 --
 -- * The arguments of 'First' and 'Last' run in parallel.
--- * The arguments of 'Seq' and 'Choices do _not_ run in parallel.
+-- * The arguments of 'Seq' and 'Choices' do __not__ run in parallel.
 maxParallel :: Term v -> Int
 maxParallel (Seq   ts)    = maximum $ map maxParallel ts
 maxParallel (Last  ts)    = sum $ map maxParallel ts

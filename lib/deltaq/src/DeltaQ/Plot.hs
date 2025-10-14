@@ -4,7 +4,7 @@
 {-|
 Copyright   : Predictable Network Solutions Ltd., 2003-2024
 License     : BSD-3-Clause
-Description : Plot 'DeltaQ'.
+Description : Plot distributions of completion times.
 
 Plot instances of 'DeltaQ' using "Graphics.Rendering.Chart".
 -}
