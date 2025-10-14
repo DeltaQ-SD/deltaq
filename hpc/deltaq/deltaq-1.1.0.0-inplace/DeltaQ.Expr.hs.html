@@ -104,7 +104,7 @@ span.spaces    { background: white }
 <span class="lineno">   85 </span>--
 <span class="lineno">   86 </span>-- Rendered as a box with a label in the outcome diagram.
 <span class="lineno">   87 </span>-- Put this in sequence with other outcome expressions to highlight
-<span class="lineno">   88 </span>-- their outcome locations.
+<span class="lineno">   88 </span>-- their observation locations.
 <span class="lineno">   89 </span>loc :: String -&gt; O
 <span class="lineno">   90 </span><span class="decl"><span class="nottickedoff">loc = O . Loc</span></span>
 <span class="lineno">   91 </span>
@@ -117,9 +117,9 @@ span.spaces    { background: white }
 <span class="lineno">   98 </span>    -&gt; O
 <span class="lineno">   99 </span><span class="decl"><span class="nottickedoff">substitute f (O term) = O $ normalize1Assoc $ term &gt;&gt;= unO . f</span></span>
 <span class="lineno">  100 </span>
-<span class="lineno">  101 </span>-- | Outcome expressions can be mapped to
+<span class="lineno">  101 </span>-- | Map an outcome expression 'O' to
 <span class="lineno">  102 </span>-- probability distributions of completion times 'DQ',
-<span class="lineno">  103 </span>-- provided that we know how to map 'var'.
+<span class="lineno">  103 </span>-- given a basic mapping from 'var' names to completion times.
 <span class="lineno">  104 </span>toDeltaQ :: (String -&gt; DQ) -&gt; O -&gt; DQ
 <span class="lineno">  105 </span><span class="decl"><span class="nottickedoff">toDeltaQ f (O term) = go term</span>
 <span class="lineno">  106 </span><span class="spaces">  </span><span class="nottickedoff">where</span>
@@ -175,7 +175,7 @@ span.spaces    { background: white }
 <span class="lineno">  156 </span>    | Last [Term v]
 <span class="lineno">  157 </span>        -- ^ Parallel composition, last to finish.
 <span class="lineno">  158 </span>    | First [Term v]
-<span class="lineno">  159 </span>        -- ^ Parallel composiiton, last to finish.
+<span class="lineno">  159 </span>        -- ^ Parallel composiiton, first to finish.
 <span class="lineno">  160 </span>    | Choices [(Rational, Term v)]
 <span class="lineno">  161 </span>        -- ^ Probabilistic choice.
 <span class="lineno">  162 </span>        -- The probabilities are proportional to the given weights.
@@ -283,7 +283,7 @@ span.spaces    { background: white }
 <span class="lineno">  264 </span>-- | Maximal number of outcomes that run in parallel.
 <span class="lineno">  265 </span>--
 <span class="lineno">  266 </span>-- * The arguments of 'First' and 'Last' run in parallel.
-<span class="lineno">  267 </span>-- * The arguments of 'Seq' and 'Choices do _not_ run in parallel.
+<span class="lineno">  267 </span>-- * The arguments of 'Seq' and 'Choices' do __not__ run in parallel.
 <span class="lineno">  268 </span>maxParallel :: Term v -&gt; Int
 <span class="lineno">  269 </span><span class="decl"><span class="nottickedoff">maxParallel (Seq   ts)    = maximum $ map maxParallel ts</span>
 <span class="lineno">  270 </span><span class="spaces"></span><span class="nottickedoff">maxParallel (Last  ts)    = sum $ map maxParallel ts</span>
@@ -349,8 +349,8 @@ span.spaces    { background: white }
 <span class="lineno">  330 </span>-- do not contain a term with the same constructor.
 <span class="lineno">  331 </span>normalizeEmpty :: Term v -&gt; Term v
 <span class="lineno">  332 </span><span class="decl"><span class="istickedoff">normalizeEmpty (Seq   []) = <span class="nottickedoff">Wait0</span></span>
-<span class="lineno">  333 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Last  []) = Wait0</span>
-<span class="lineno">  334 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (First []) = Wait0</span>
+<span class="lineno">  333 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Last  []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  334 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (First []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  335 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Choices []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  336 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty x = x</span></span>
 <span class="lineno">  337 </span>
