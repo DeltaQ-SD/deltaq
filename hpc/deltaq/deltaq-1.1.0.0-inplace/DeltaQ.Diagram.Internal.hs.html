@@ -263,8 +263,8 @@ span.spaces    { background: white }
 <span class="lineno">  244 </span><span class="spaces"></span><span class="istickedoff"></span>
 <span class="lineno">  245 </span><span class="spaces">    </span><span class="istickedoff">mkBranches _ acc [] = acc</span>
 <span class="lineno">  246 </span><span class="spaces">    </span><span class="istickedoff">mkBranches y acc (t:Loc description:ts)</span>
-<span class="lineno">  247 </span><span class="spaces">        </span><span class="istickedoff">| <span class="tickonlyfalse">isVertical t</span> =</span>
-<span class="lineno">  248 </span><span class="spaces">            </span><span class="istickedoff"><span class="nottickedoff">mkBranches y (Branch [((y, Term t (Just description)), acc)]) ts</span></span>
+<span class="lineno">  247 </span><span class="spaces">        </span><span class="istickedoff">| isVertical t =</span>
+<span class="lineno">  248 </span><span class="spaces">            </span><span class="istickedoff">mkBranches <span class="nottickedoff">y</span> (Branch [((<span class="nottickedoff">y</span>, Term t (Just description)), acc)]) ts</span>
 <span class="lineno">  249 </span><span class="spaces">    </span><span class="istickedoff">mkBranches y acc (t:ts) =</span>
 <span class="lineno">  250 </span><span class="spaces">        </span><span class="istickedoff">mkBranches <span class="nottickedoff">y</span> (Branch [((<span class="nottickedoff">y</span>, Term t Nothing), acc)]) ts</span></span>
 <span class="lineno">  251 </span>
@@ -304,7 +304,7 @@ span.spaces    { background: white }
 <span class="lineno">  285 </span><span class="spaces">    </span><span class="istickedoff">dropit edge                         = twig edge</span>
 <span class="lineno">  286 </span><span class="spaces"></span><span class="istickedoff"></span>
 <span class="lineno">  287 </span><span class="spaces">    </span><span class="istickedoff">mkLocation Nothing  = Empty</span>
-<span class="lineno">  288 </span><span class="spaces">    </span><span class="istickedoff">mkLocation (Just l) = <span class="nottickedoff">Term (Loc l) Nothing</span></span>
+<span class="lineno">  288 </span><span class="spaces">    </span><span class="istickedoff">mkLocation (Just l) = Term (Loc l) <span class="nottickedoff">Nothing</span></span>
 <span class="lineno">  289 </span><span class="spaces">    </span><span class="istickedoff">close y ml exprs =</span>
 <span class="lineno">  290 </span><span class="spaces">        </span><span class="istickedoff">Branch [</span>
 <span class="lineno">  291 </span><span class="spaces">          </span><span class="istickedoff">( (<span class="nottickedoff">y</span>, mkLocation ml)</span>
@@ -392,7 +392,7 @@ span.spaces    { background: white }
 <span class="lineno">  373 </span><span class="spaces">                </span><span class="istickedoff">)</span>
 <span class="lineno">  374 </span><span class="spaces">      </span><span class="istickedoff">where</span>
 <span class="lineno">  375 </span><span class="spaces">        </span><span class="istickedoff">mlocation = case term of</span>
-<span class="lineno">  376 </span><span class="spaces">            </span><span class="istickedoff">Term (Loc s) _ -&gt; <span class="nottickedoff">Just s</span></span>
+<span class="lineno">  376 </span><span class="spaces">            </span><span class="istickedoff">Term (Loc s) _ -&gt; Just s</span>
 <span class="lineno">  377 </span><span class="spaces">            </span><span class="istickedoff">_ -&gt; Nothing</span>
 <span class="lineno">  378 </span><span class="spaces">        </span><span class="istickedoff"><span class="nottickedoff">ys = map (fst . fst) ts</span></span>
 <span class="lineno">  379 </span><span class="spaces"></span><span class="istickedoff"></span>
