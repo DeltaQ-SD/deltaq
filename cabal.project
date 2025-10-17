@@ -1,4 +1,4 @@
-index-state: 2025-07-02T07:56:17Z
+index-state: 2025-10-17T06:40:08Z
 
 packages:
     lib/deltaq/
@@ -11,10 +11,10 @@ tests:
 -- Use `contraints` and `allow-newer` to test against
 -- a new release of a dependency.
 --
-
+--
 -- constraints:
---  , optparse-applicative == 0.19.0.0
---  , QuickCheck == 2.16.0.0
+--   , QuickCheck == 2.17.1.0
 --
 -- allow-newer:
---    *:containers
+--     , *:containers
+--     , *:QuickCheck
