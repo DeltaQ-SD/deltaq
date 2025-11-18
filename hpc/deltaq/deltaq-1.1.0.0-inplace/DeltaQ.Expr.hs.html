@@ -350,7 +350,7 @@ span.spaces    { background: white }
 <span class="lineno">  331 </span>normalizeEmpty :: Term v -&gt; Term v
 <span class="lineno">  332 </span><span class="decl"><span class="istickedoff">normalizeEmpty (Seq   []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  333 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Last  []) = <span class="nottickedoff">Wait0</span></span>
-<span class="lineno">  334 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (First []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  334 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (First []) = Wait0</span>
 <span class="lineno">  335 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Choices []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  336 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty x = x</span></span>
 <span class="lineno">  337 </span>
