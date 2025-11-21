@@ -1,5 +1,18 @@
 # Revision history for `deltaq`
 
+## 1.2.0.0 — 2025-11-21
+
+### Changed
+
+* Add a constructor `Uniform` to the type `Term`.
+* In `DeltaQ.Diagram`:
+  * Draw `⊥` instead of using a unicode font glyph.
+  * Scale variable names to keep them in the orange circle.
+* In `DeltaQ.Plot`: Improve rendering of cumulative distribution functions:
+  * Set upper bound of the *y*-axis to 1.
+  * Remove gap in the plot at the right end of the *x*-axis.
+  * Highlight the success probability when plotting a single distribution.
+
 ## 1.1.0.0 — 2025-10-14
 
 ### Added
