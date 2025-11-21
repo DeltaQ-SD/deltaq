@@ -42,6 +42,13 @@ genWait = do
     NonNegative a <- arbitrary
     pure $ Wait a
 
+-- | Generate a 'uniform'.
+genUniform :: Gen (Term v)
+genUniform = do
+    NonNegative a <- arbitrary
+    NonNegative d <- arbitrary
+    pure $ Uniform a (a + d)
+
 -- | Generate a 'var' with a short name.
 genVar :: Gen v -> Gen (Term v)
 genVar = fmap Var
@@ -53,6 +60,7 @@ genSimpleOutcome genName =
         [ (20, genVar genName)
         , ( 4, genWait)
         , ( 2, pure Wait0)
+        , ( 4, genUniform)
         , ( 4, pure Never)
         , ( 1, pure $ Loc "test")
         ]
