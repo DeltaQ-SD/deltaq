@@ -130,7 +130,10 @@ renderToken (Open op ds) =
 
 -- | Render the symbol that represents a known outcome.
 renderOp0Symbol :: Op0 -> Diagram SVG
-renderOp0Symbol ONever    = text "⊥"
+renderOp0Symbol ONever    =
+    ((fromOffsets [r2 (-0.7,0)] & strokeLine & translate (r2 (0.7/2, -0.35)))
+    <> (fromOffsets [r2 (0,0.7)] & strokeLine & translate (r2 (0, -0.35)))
+    ) & lw 1.3
 renderOp0Symbol OWait0    = mempty
 renderOp0Symbol (OWait t) =
     text $ "wait " <> printf "%.2f" (fromRational t :: Double)
