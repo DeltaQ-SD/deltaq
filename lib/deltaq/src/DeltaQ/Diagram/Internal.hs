@@ -57,6 +57,7 @@ data Op0
     = ONever
     | OWait0
     | OWait Rational
+    | OUniform Rational Rational
     deriving (Eq, Ord, Show)
 
 -- | Data attached to a 'Tile'.
@@ -147,6 +148,11 @@ renderOp0Symbol OWait0    = mempty
 renderOp0Symbol (OWait t) =
     textInWidth 1 $
         "wait " <> printf "%.2f" (fromRational t :: Double)
+renderOp0Symbol (OUniform tl tr) =
+    textInWidth 1 $
+        "uniform "
+            <> printf "%.2f" (fromRational tl :: Double) <> " "
+            <> printf "%.2f" (fromRational tr :: Double)
 
 -- | Render the symbol that represents an operation with multiple arguments
 renderOpSymbol :: Op -> Diagram SVG
@@ -238,6 +244,7 @@ isVarOrKnown (Var _)  = True
 isVarOrKnown Never    = True
 isVarOrKnown Wait0    = True
 isVarOrKnown (Wait _) = True
+isVarOrKnown (Uniform _ _) = True
 isVarOrKnown _ = False
 
 -- | Check that a given 'EdgeData' contains no outcome-related data.
@@ -285,6 +292,7 @@ emitVar x s =
     emit (y, Term Never    _) = Tile x y $ Outcome ONever
     emit (y, Term Wait0    _) = Tile x y $ Outcome OWait0
     emit (y, Term (Wait t) _) = Tile x y $ Outcome $ OWait t
+    emit (y, Term (Uniform tl tr) _) = Tile x y $ Outcome $ OUniform tl tr
     emit (y, _              ) = Tile x y Horizontal
 
 -- | Emit a column with the next vertical items.

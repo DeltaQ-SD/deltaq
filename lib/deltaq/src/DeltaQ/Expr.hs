@@ -57,6 +57,7 @@ import Data.List
     )
 import DeltaQ.Class
     ( Outcome (..)
+    , DeltaQ (..)
     , ProbabilisticOutcome (..)
     )
 import DeltaQ.PiecewisePolynomial
@@ -108,6 +109,7 @@ toDeltaQ f (O term) = go term
     go Never    = never
     go Wait0    = wait 0
     go (Wait t) = wait t
+    go (Uniform tl tr) = uniform tl tr
     go (Loc  _) = wait 0
     go (Seq   xs) = foldr1 (.>>.) $ map go xs
     go (Last  xs) = foldr1 (./\.) $ map go xs
@@ -147,6 +149,9 @@ data Term v
         -- but with a straight line as graphical representation.
     | Wait Rational
         -- ^ Succeed after waiting for a fixed amount of time.
+    | Uniform Rational Rational
+        -- ^ @Uniform l r@ succeeds after an amount of time randomly drawn
+        -- from a uniform probability distribution on the interval $[l,r]$.
     | Loc String
         -- ^ Outcome location with a label.
         -- Equivalent to @Wait 0@, but with a labeled box
@@ -174,6 +179,7 @@ instance Monad Term where
         go Never      = Never
         go Wait0      = Wait0
         go (Wait t)   = Wait t
+        go (Uniform tl tr) = Uniform tl tr
         go (Loc  s)   = Loc s
         go (Seq   xs) = Seq   $ map go xs
         go (Last  xs) = Last  $ map go xs
@@ -290,6 +296,7 @@ everywhere f = every
     recurse a@Never = a
     recurse a@Wait0 = a
     recurse a@(Wait _) = a
+    recurse a@(Uniform _ _) = a
     recurse a@(Loc  _) = a
     recurse (Seq   xs) = Seq $ map every xs
     recurse (Last  xs) = Last $ map every xs
@@ -308,6 +315,7 @@ everything combine f = recurse
     recurse x@Never    = f x
     recurse x@Wait0    = f x
     recurse x@(Wait _) = f x
+    recurse x@(Uniform _ _) = f x
     recurse x@(Loc  _) = f x
     recurse x@(Seq   xs) =
         foldl' combine (f x) $ map recurse xs
