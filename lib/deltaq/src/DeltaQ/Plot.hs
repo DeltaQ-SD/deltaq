@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -28,6 +29,9 @@ import DeltaQ.Class
 import Graphics.Rendering.Chart.Easy
     ( (.=)
     )
+import Text.Printf
+    ( printf
+    )
 
 import qualified Graphics.Rendering.Chart.Easy as G
 
@@ -47,8 +51,12 @@ plotCDF
     => String -- ^ Title
     -> o -- ^ Outcome to plot
     -> G.Layout Double Double
-plotCDF title o =
-    plotCDFs title [("", o)]
+plotCDF title o = G.execEC $ do
+    G.layout_title .= title
+    add_x_axis [o]
+    add_y_axis_cumulative_probability
+    add_line_DeltaQ "" o
+    add_failure_probability o
 
 -- | Plot multiple CDFs in a single plot,
 -- with title.
@@ -65,12 +73,8 @@ plotCDFs
 plotCDFs title namedOutcomes = G.execEC $ do
     G.layout_title .= title
     add_x_axis (map snd namedOutcomes)
-    G.layout_y_axis . G.laxis_title .= "Cumulative Probabilty"
-    mapM_ plotOne namedOutcomes
-  where
-    cv1 = fromRational . toRational
-    cv2 = fromRational . toRational
-    plotOne (t, o) = G.plot $ G.line t [[(cv1 a, cv2 b) | (a, b) <- toXY o]]
+    add_y_axis_cumulative_probability
+    mapM_ (uncurry add_line_DeltaQ) namedOutcomes
 
 -- | Plot the cumulative distribution function (CDF) of a 'DeltaQ',
 -- with title, and annotated with quantiles.
@@ -88,15 +92,72 @@ plotCDFWithQuantiles
 plotCDFWithQuantiles title quantiles o = G.execEC $ do
     G.layout_title .= title
     add_x_axis [o]
-    G.layout_y_axis . G.laxis_title .= "Cumulative Probabilty"
-    G.plot $ G.line "" [[(cv1 a, cv2 b) | (a, b) <- toXY o]]
+    add_y_axis_cumulative_probability
+    add_line_DeltaQ "" o
     mapM_ plotQuantile quantiles
   where
-    cv1 = fromRational . toRational
-    cv2 = fromRational . toRational
     plotQuantile y = case quantile o y of
         Abandoned -> pure ()
-        Occurs x -> G.plot $ pure $ focusOnPoint (cv1 x, cv2 y)
+        Occurs x -> G.plot $ pure $ focusOnPoint (toTime x, toProb y)
+
+-- | Convenient abbreviation for use in this module.
+type PlotDeltaQ o =
+    ( DeltaQ o, Enum (Duration o), Fractional (Duration o)
+      , Real (Duration o), Real (Probability o)
+    )
+
+-- | Add the line graph for a single outcome.
+add_line_DeltaQ
+    :: PlotDeltaQ o => String -> o -> G.EC (G.Layout Double Double) ()
+add_line_DeltaQ name o = G.plot $ do
+    let xys = [(toTime a, toProb b) | (a, b) <- toXY o]
+        x   = fst (last xys)
+        y   = snd (last xys)
+    -- plot line data
+    l <- G.line name [xys]
+    -- add a line to the right end
+    pure $
+        G.plot_lines_limit_values G.#~
+            [ [(G.LValue x, G.LValue y), (G.LMax, G.LValue y)]
+            ]
+        $ l
+
+-- | Add a dotted horizontal line that indicates the failure probability.
+add_failure_probability :: PlotDeltaQ o => o -> G.EC (G.Layout Double Double) ()
+add_failure_probability o = do
+    G.plot $ pure $ G.execEC $ do
+        G.plot_lines_style . G.line_color .= G.opaque G.black
+        G.plot_lines_style . G.line_dashes .= [5, 5]
+        G.plot_lines_limit_values .=
+            [ [(G.LMin, G.LValue y), (G.LValue x, G.LValue y)]
+            ]
+    let extraLabels = [(y, showProb y)]
+    G.layout_y_axis . G.laxis_override .=
+        (\ad -> ad G.& (G.axis_labels G.%~ (<> [extraLabels])))
+  where
+    x = toTime $ eventually 0 id $ deadline o
+    y = toProb $ 1 - failure o
+
+-- | Add a @y@-axis to the plot that corresponds to cumulative probability.
+add_y_axis_cumulative_probability
+    :: G.PlotValue x => G.EC (G.Layout x Double) ()
+add_y_axis_cumulative_probability = do
+    G.layout_y_axis . G.laxis_title .= "Cumulative Probability"
+    G.layout_y_axis . G.laxis_generate .= G.scaledAxis G.def (0,1)
+
+-- | Convert a time to a value on the @x@-axis.
+toTime :: Real x => x -> Double
+toTime = fromRational . toRational
+
+-- | Convert a probability to a value on the @y@-axis.
+toProb :: Real y => y -> Double
+toProb = fromRational . toRational
+
+-- | Show a probability in scientific notation with two digits of precision.
+showProb :: Double -> String
+showProb x
+    | x >= 0.01 = printf "%.2f" x
+    | otherwise = printf "%.2e\n" x
 
 {-----------------------------------------------------------------------------
     Plot
