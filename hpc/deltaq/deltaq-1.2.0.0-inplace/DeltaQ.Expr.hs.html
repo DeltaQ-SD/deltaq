@@ -357,7 +357,7 @@ span.spaces    { background: white }
 <span class="lineno">  338 </span>-- do not contain a term with the same constructor.
 <span class="lineno">  339 </span>normalizeEmpty :: Term v -&gt; Term v
 <span class="lineno">  340 </span><span class="decl"><span class="istickedoff">normalizeEmpty (Seq   []) = <span class="nottickedoff">Wait0</span></span>
-<span class="lineno">  341 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Last  []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  341 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Last  []) = Wait0</span>
 <span class="lineno">  342 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (First []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  343 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Choices []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  344 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty x = x</span></span>
@@ -372,7 +372,7 @@ span.spaces    { background: white }
 <span class="lineno">  353 </span><span class="spaces">    </span><span class="istickedoff">f o = [o]</span>
 <span class="lineno">  354 </span><span class="spaces"></span><span class="istickedoff">normalize1Assoc' (Last xs) = Last (concatMap f xs)</span>
 <span class="lineno">  355 </span><span class="spaces">  </span><span class="istickedoff">where</span>
-<span class="lineno">  356 </span><span class="spaces">    </span><span class="istickedoff">f Wait0 = <span class="nottickedoff">[]</span></span>
+<span class="lineno">  356 </span><span class="spaces">    </span><span class="istickedoff">f Wait0 = []</span>
 <span class="lineno">  357 </span><span class="spaces">    </span><span class="istickedoff">f (Last ys) = ys</span>
 <span class="lineno">  358 </span><span class="spaces">    </span><span class="istickedoff">f o = [o]</span>
 <span class="lineno">  359 </span><span class="spaces"></span><span class="istickedoff">normalize1Assoc' (First xs) = First (concatMap f xs)</span>
