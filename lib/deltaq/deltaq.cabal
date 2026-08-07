@@ -38,7 +38,7 @@ extra-doc-files:
   README.md
   images/hops.svg
 
-tested-with:     GHC ==8.10.7 || ==9.6.7 || ==9.10.3
+tested-with:     GHC ==8.10.7 || ==9.6.7 || ==9.10.3 || ==9.12.2
 
 common warnings
   ghc-options: -Wall
@@ -59,7 +59,7 @@ library
     , lattices                >=2.2      && <2.3
     , probability-polynomial  >=1.0.1    && <1.1
     , diagrams-lib            >=1.4.5    && <1.6
-    , diagrams-svg            >=1.5      && <1.6
+    , diagrams-svg            >=1.5      && <1.7
 
   exposed-modules:
     DeltaQ
