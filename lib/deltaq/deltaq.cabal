@@ -38,7 +38,7 @@ extra-doc-files:
   README.md
   images/hops.svg
 
-tested-with:     GHC ==8.10.7 || ==9.6.7 || ==9.10.3 || ==9.12.2
+tested-with:     GHC ==8.10.7 || ==9.6.7 || ==9.10.3 || ==9.12.4
 
 common warnings
   ghc-options: -Wall
