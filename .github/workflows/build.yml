@@ -29,6 +29,7 @@ jobs:
           - '8.10'
           - '9.6'
           - '9.10'
+          - '9.12'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
