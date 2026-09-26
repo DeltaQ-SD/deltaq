@@ -269,7 +269,7 @@ span.spaces    { background: white }
 <span class="lineno">  250 </span>lineFromTo :: (Eq a, Fractional a) =&gt; (a, a) -&gt; (a, a) -&gt; Poly a
 <span class="lineno">  251 </span><span class="decl"><span class="istickedoff">lineFromTo (x1, y1) (x2, y2)</span>
 <span class="lineno">  252 </span><span class="spaces">    </span><span class="istickedoff">| x1 == x2 = constant y1</span>
-<span class="lineno">  253 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlyfalse">slope == 0</span> = <span class="nottickedoff">constant y1</span></span>
+<span class="lineno">  253 </span><span class="spaces">    </span><span class="istickedoff">| slope == 0 = constant y1</span>
 <span class="lineno">  254 </span><span class="spaces">    </span><span class="istickedoff">| <span class="tickonlytrue">otherwise</span> = fromCoefficients [shift, slope]</span>
 <span class="lineno">  255 </span><span class="spaces">  </span><span class="istickedoff">where</span>
 <span class="lineno">  256 </span><span class="spaces">    </span><span class="istickedoff">-- slope of the linear function</span>
