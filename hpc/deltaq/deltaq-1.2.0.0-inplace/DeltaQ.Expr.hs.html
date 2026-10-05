@@ -356,7 +356,7 @@ span.spaces    { background: white }
 <span class="lineno">  337 </span>-- | Ensure that the lists in 'Seq', 'Last', 'First'
 <span class="lineno">  338 </span>-- do not contain a term with the same constructor.
 <span class="lineno">  339 </span>normalizeEmpty :: Term v -&gt; Term v
-<span class="lineno">  340 </span><span class="decl"><span class="istickedoff">normalizeEmpty (Seq   []) = <span class="nottickedoff">Wait0</span></span>
+<span class="lineno">  340 </span><span class="decl"><span class="istickedoff">normalizeEmpty (Seq   []) = Wait0</span>
 <span class="lineno">  341 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Last  []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  342 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (First []) = <span class="nottickedoff">Wait0</span></span>
 <span class="lineno">  343 </span><span class="spaces"></span><span class="istickedoff">normalizeEmpty (Choices []) = <span class="nottickedoff">Wait0</span></span>
