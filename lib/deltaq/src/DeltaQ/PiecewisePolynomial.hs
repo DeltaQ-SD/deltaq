@@ -26,6 +26,7 @@ module DeltaQ.PiecewisePolynomial
     , moments
     , onConditionOfSuccess
     , timeout
+    , residualTime
 
     -- * Internal
     , complexity
@@ -58,7 +59,9 @@ import Numeric.Polynomial.Simple
 import Numeric.Probability.Moments
     ( Moments (..)
     )
-
+import Numeric.Function.Piecewise.Polynomial
+    { integral
+    }
 import qualified Data.Function.Class as Function
 import qualified Numeric.Function.Piecewise as Piecewise
 import qualified Numeric.Measure.Finite.Mixed as Measure
@@ -337,3 +340,38 @@ timeout dt (DQ m) = (beforeCond, p, afterCond)
     afterCond
         | p == 1 = never
         | otherwise = DQ $ Measure.scale (1/(1-p)) after
+
+{-----------------------------------------------------------------------------
+    Operations
+    Residual Time
+------------------------------------------------------------------------------}
+{- | Considering a probability distribution of completion times of a renewal process, 
+    the residual (equilibrium) distribution is the distribution 
+    of the remaining time until completion, given that we have already waited for some time.
+    Compute this as G(t) = (1/mu) * integral from 0 to t of (1 - F(s)) ds
+    taken from:
+    https://en.wikipedia.org/wiki/Residual_time\#Probability_distribution_of_the_residual_time
+    Note that the input distribution must be a valid probability distribution 
+    (i.e. total probability = 1). 
+    If it has zero mean, then it must be a Dirac distribution at 0; considering limits,
+    the residual time is then also a Dirac distribution at 0.
+-}
+one = constant 1
+
+-- a Piecewise is zero before its first piece, but 1 - F is 1 on [0, x1), 
+-- so add that piece explicitly
+oneFromZero :: (Num a, Ord a) => Piecewise (Poly a) -> Piecewise (Poly a)
+oneFromZero ps@((x, _) : _) | x > 0 = (0, one) : ps
+oneFromZero ps = ps
+
+residualTime :: DQ -> Maybe DQ
+residualTime f
+    | success /= 1 = Nothing
+    | mu == 0      = Just f
+    | otherwise = Measure.fromDistribution g >>= fromPositiveMeasure
+        where
+            (success, moments') = moments f
+            mu = mean moments'
+            df = distribution f  -- unpack the DQ to the piecewise polynomial representation
+            oneMinusF = fromAscPieces $ oneFromZero $ toAscPieces $ mapPieces (one -) df
+            g = mapPieces (Poly.scale (1/mu)) $ integral oneMinusF
