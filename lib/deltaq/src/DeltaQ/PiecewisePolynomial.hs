@@ -24,6 +24,7 @@ module DeltaQ.PiecewisePolynomial
     , meetsQTA
     , Moments (..)
     , moments
+    , onConditionOfSuccess
     , timeout
 
     -- * Internal
@@ -273,6 +274,30 @@ moments (DQ m)
   where
     success = Measure.total m
     conditional = Prob.unsafeFromMeasure $ Measure.scale (1/success) m
+
+{-----------------------------------------------------------------------------
+    Operations
+    Conditional on success
+------------------------------------------------------------------------------}
+-- | Compute the probability (distribution) on the condition
+-- that the outcome completes in a finite amount of time.
+--
+-- Put differently: Rescale the cumulative distribution function
+-- such that the probability of failure becomes zero.
+--
+-- Return 'Nothing' if the outcome never completes, 'Just' otherwise.
+-- 
+-- > onConditionOfSuccess never = Nothing
+-- > ∀x. failure x < 1  ==>  failure (onConditionOfSuccess x) = Just 0
+-- > ∀x. failure x < 1  ==>
+-- >   (snd . moments <$> onConditionOfSuccess x) = Just (snd (moments x))
+onConditionOfSuccess :: DQ -> Maybe DQ
+onConditionOfSuccess (DQ m)
+    | success == 0 = Nothing
+    | otherwise    = Just $ DQ conditional
+  where
+    success = Measure.total m
+    conditional = Measure.scale (1/success) m
 
 {-----------------------------------------------------------------------------
     Operations

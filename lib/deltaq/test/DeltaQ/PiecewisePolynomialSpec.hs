@@ -34,6 +34,7 @@ import DeltaQ.PiecewisePolynomial
     , fromPositiveMeasure
     , meetsQTA
     , moments
+    , onConditionOfSuccess
     , timeout
     )
 import Numeric.Probability.Moments
@@ -465,6 +466,21 @@ specImplementation = do
             \(NonNegative t) ->
                 let ms = Moments{mean = t, variance = 0, skewness = 0, kurtosis = 1}
                 in  moments (wait t)  ===  (1, ms)
+
+    describe "onConditionOfSuccess" $ do
+        it "never" $ withMaxSuccess 1 $ property $
+            onConditionOfSuccess never  ===  Nothing
+
+        it "failure" $ property $
+            \x ->
+                failure x < 1
+                ==> (failure <$> onConditionOfSuccess x)  ===  Just 0
+
+        it "moments" $ property $
+            \x ->
+                failure x < 1
+                ==> (snd . moments <$> onConditionOfSuccess x)
+                    ===  Just (snd (moments x))
 
     describe "timeout" $ do
         it "never" $ property $
