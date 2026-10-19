@@ -359,10 +359,9 @@ timeout dt (DQ m) = (beforeCond, p, afterCond)
 one = constant 1
 
 -- a Piecewise is zero before its first piece, but 1 - F is 1 on [0, x1), 
--- so add that piece explicitly
-oneFromZero :: (Num a, Ord a) => Piecewise (Poly a) -> Piecewise (Poly a)
-oneFromZero ps@((x, _) : _) | x > 0 = (0, one) : ps
-oneFromZero ps = ps
+-- so add that piece explicitly if necessary
+oneFromZero :: (Num a, Ord a) => [(a, Poly a)] -> [(a, Poly a)]
+oneFromZero ps = if (fst . head ps) > 0 then (0, one) : ps else ps
 
 residualTime :: DQ -> Maybe DQ
 residualTime f
@@ -373,5 +372,5 @@ residualTime f
             (success, moments') = moments f
             mu = mean moments'
             df = distribution f  -- unpack the DQ to the piecewise polynomial representation
-            oneMinusF = fromAscPieces $ oneFromZero $ toAscPieces $ mapPieces (one -) df
+            oneMinusF = oneFromZero $ mapPieces (one -) df
             g = mapPieces (Poly.scale (1/mu)) $ integral oneMinusF
