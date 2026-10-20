@@ -60,8 +60,8 @@ import Numeric.Probability.Moments
     ( Moments (..)
     )
 import Numeric.Function.Piecewise.Polynomial
-    { integral
-    }
+    ( integral
+    )
 import qualified Data.Function.Class as Function
 import qualified Numeric.Function.Piecewise as Piecewise
 import qualified Numeric.Measure.Finite.Mixed as Measure
