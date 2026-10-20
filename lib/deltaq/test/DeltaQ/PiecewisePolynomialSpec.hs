@@ -515,8 +515,8 @@ specImplementation = do
             residualTime never  ===  Nothing
 
         it "failure" $ property $
-            \x ->
-                failure x > 0  ==>  residualTime x  ===  Nothing
+            \(Probability p) x ->
+                p < 1  ==>  residualTime (choice p x never)  ===  Nothing
 
         it "success" $ property $
             \x ->
