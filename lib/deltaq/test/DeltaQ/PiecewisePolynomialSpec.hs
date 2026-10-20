@@ -35,6 +35,7 @@ import DeltaQ.PiecewisePolynomial
     , meetsQTA
     , moments
     , onConditionOfSuccess
+    , residualTime
     , timeout
     )
 import Numeric.Probability.Moments
@@ -57,6 +58,7 @@ import Test.QuickCheck
     , arbitrary
     , choose
     , chooseInteger
+    , counterexample
     , frequency
     , getSize
     , mapSize
@@ -507,6 +509,57 @@ specImplementation = do
             \x dt ->
                 let (within, p, after) = timeout dt x
                 in  choice p within (wait dt .>>. after)  ===  x
+                
+    describe "residualTime" $ do
+        it "never" $ withMaxSuccess 1 $ property $
+            residualTime never  ===  Nothing
+
+        it "failure" $ property $
+            \x ->
+                failure x > 0  ==>  residualTime x  ===  Nothing
+
+        it "success" $ property $
+            \x ->
+                failure x == 0
+                ==> (failure <$> residualTime x)  ===  Just 0
+
+        it "wait 0" $ withMaxSuccess 1 $ property $
+            residualTime (wait 0)  ===  Just (wait 0)
+
+        it "wait" $ property $
+            \(Positive t) ->
+                residualTime (wait t)  ===  Just (uniform 0 t)
+
+        -- For a renewal process with inter-event time X and mean mu = E[X],
+        -- the residual time R satisfies E[R^k] = E[X^(k+1)] / ((k+1) * mu).
+        --
+        -- E[X^2] follows exactly from the mean and variance,
+        -- but E[X^3] requires the standard deviation, which 'moments'
+        -- only approximates, so the second moment is compared
+        -- up to a relative tolerance.
+        it "first two moments" $ property $
+            \x ->
+                let (_, Moments{mean = mu, variance = var, skewness = skew}) =
+                        moments x
+                    m2 = var + mu * mu
+                    sigma = sqrt (fromRational var) :: Double
+                    m3 = fromRational skew * sigma ^ (3 :: Int)
+                        + fromRational (3 * mu * var + mu * mu * mu)
+                in  (failure x == 0 && mu > 0) ==>
+                    case residualTime x of
+                        Nothing ->
+                            counterexample "residualTime returned Nothing" False
+                        Just r ->
+                            let (_, Moments{mean = muR, variance = varR}) =
+                                    moments r
+                                expected = m3 / (3 * fromRational mu)
+                                actual = fromRational (varR + muR * muR)
+                            in  muR  ===  m2 / (2 * mu)
+                                .&&. counterexample
+                                    ("E[R^2]: expected " <> show expected
+                                        <> ", got " <> show actual)
+                                    (abs (actual - expected)
+                                        <= 1e-3 * abs expected)
 
     describe "complexity" $ do
         it "grows exponentially with .>>." $ withMaxSuccess 1 $ property $
