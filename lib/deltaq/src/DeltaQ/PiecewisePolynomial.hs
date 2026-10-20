@@ -356,12 +356,6 @@ timeout dt (DQ m) = (beforeCond, p, afterCond)
     If it has zero mean, then it must be a Dirac distribution at 0; considering limits,
     the residual time is then also a Dirac distribution at 0.
 -}
-one = constant 1
-
--- a Piecewise is zero before its first piece, but 1 - F is 1 on [0, x1), 
--- so add that piece explicitly if necessary
-oneFromZero :: (Num a, Ord a) => [(a, Poly a)] -> [(a, Poly a)]
-oneFromZero ps = if (fst . head ps) > 0 then (0, one) : ps else ps
 
 residualTime :: DQ -> Maybe DQ
 residualTime f
@@ -372,5 +366,16 @@ residualTime f
             (success, moments') = moments f
             mu = mean moments'
             df = distribution f  -- unpack the DQ to the piecewise polynomial representation
-            oneMinusF = oneFromZero $ mapPieces (one -) df
-            g = mapPieces (Poly.scale (1/mu)) $ integral oneMinusF
+            oneMinusF =
+                Piecewise.fromAscPieces
+                $ oneFromZero
+                $ Piecewise.toAscPieces
+                $ Piecewise.mapPieces (Poly.constant 1 -) df
+            g = Piecewise.mapPieces (Poly.scale (1/mu)) $ integral oneMinusF
+
+-- a Piecewise is zero before its first piece, but 1 - F is 1 on [0, x1),
+-- so add that piece explicitly if necessary
+oneFromZero :: (Num a, Ord a) => [(a, Poly a)] -> [(a, Poly a)]
+oneFromZero ps@((x, _) : _)
+    | x > 0 = (0, Poly.constant 1) : ps
+oneFromZero ps = ps
