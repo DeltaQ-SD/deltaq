@@ -56,7 +56,6 @@ library
     Numeric.Measure.Probability
     Numeric.Polynomial.Simple
     Numeric.Probability.Moments
-    Numeric.Function.Piecewise.Polynomial
 
 test-suite test
   import:             warnings
