@@ -345,18 +345,26 @@ timeout dt (DQ m) = (beforeCond, p, afterCond)
     Operations
     Residual Time
 ------------------------------------------------------------------------------}
-{- | Considering a probability distribution of completion times of a renewal process, 
-    the residual (equilibrium) distribution is the distribution 
-    of the remaining time until completion, given that we have already waited for some time.
-    Compute this as G(t) = (1/mu) * integral from 0 to t of (1 - F(s)) ds
-    taken from:
-    https://en.wikipedia.org/wiki/Residual_time\#Probability_distribution_of_the_residual_time
+{- |
+    For a renewal process,
+    `residualTime` computes the time needed to wait until the next renewal,
+    given that we have already waited an indefinite/random amount of time.
+
+    The input argument is the probability distribution of completion times
+    of the renewal process.
+    The result is the residual (equilibrium) distribution of waiting times.
+
+    The residual time is computed as
+    $G(t) = (1/mu) * integral from 0 to t of (1 - F(s)) ds$.
+    See also
+    <https://en.wikipedia.org/wiki/Residual_time#Probability_distribution_of_the_residual_time>.
+
     Note that the input distribution must be a valid probability distribution 
-    (i.e. total probability = 1). 
+    (i.e. total probability = 1), otherwise the result is `Nothing`.
+    
     If it has zero mean, then it must be a Dirac distribution at 0; considering limits,
     the residual time is then also a Dirac distribution at 0.
 -}
-
 residualTime :: DQ -> Maybe DQ
 residualTime f
     | success /= 1 = Nothing
