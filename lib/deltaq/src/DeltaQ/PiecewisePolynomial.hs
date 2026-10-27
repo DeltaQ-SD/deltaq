@@ -379,7 +379,19 @@ residualTime f
                 $ oneFromZero
                 $ Piecewise.toAscPieces
                 $ Piecewise.mapPieces (Poly.constant 1 -) df
-            g = Piecewise.mapPieces (Poly.scale (1/mu)) $ integral oneMinusF
+    | success /= 1 = Nothing
+    | mu == 0      = Just f
+    | otherwise    = unsafeFromPositiveMeasure <$> Measure.fromDistribution g
+  where
+    (success, moments') = moments f
+    mu = mean moments'
+    df = distribution f  -- unpack the DQ to the piecewise polynomial representation
+    oneMinusF =
+        Piecewise.fromAscPieces
+        $ oneFromZero
+        $ Piecewise.toAscPieces
+        $ Piecewise.mapPieces (Poly.constant 1 -) df
+    g = Piecewise.mapPieces (Poly.scale (1/mu)) $ integral oneMinusF
 
 -- a Piecewise is zero before its first piece, but 1 - F is 1 on [0, x1),
 -- so add that piece explicitly if necessary
