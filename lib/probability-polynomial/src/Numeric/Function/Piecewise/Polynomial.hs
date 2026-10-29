@@ -1,10 +1,6 @@
 {-|
 Copyright   : Predictable Network Solutions Ltd., 2020-2026
 License     : BSD-3-Clause
-Description : Antiderivative of piecewise polynomials.
-
-Compute the integral of a mixed discrete / continuous function
-where the continuous part is represented in terms of piecewise polynomials.
 Description : Functions specific to piecewise polynomials.
 -}
 module Numeric.Function.Piecewise.Polynomial
