@@ -26,6 +26,7 @@ module DeltaQ.PiecewisePolynomial
     , moments
     , onConditionOfSuccess
     , timeout
+    , residualTime
 
     -- * Internal
     , complexity
@@ -58,7 +59,9 @@ import Numeric.Polynomial.Simple
 import Numeric.Probability.Moments
     ( Moments (..)
     )
-
+import Numeric.Function.Piecewise.Polynomial
+    ( integral
+    )
 import qualified Data.Function.Class as Function
 import qualified Numeric.Function.Piecewise as Piecewise
 import qualified Numeric.Measure.Finite.Mixed as Measure
@@ -337,3 +340,50 @@ timeout dt (DQ m) = (beforeCond, p, afterCond)
     afterCond
         | p == 1 = never
         | otherwise = DQ $ Measure.scale (1/(1-p)) after
+
+{-----------------------------------------------------------------------------
+    Operations
+    Residual Time
+------------------------------------------------------------------------------}
+{- |
+    For a renewal process,
+    `residualTime` computes the time needed to wait until the next renewal,
+    given that we have already waited an indefinite/random amount of time.
+
+    The input argument is the probability distribution of completion times
+    of the renewal process.
+    The result is the residual (equilibrium) distribution of waiting times.
+
+    The residual time is computed as
+    $G(t) = (1/mu) * integral from 0 to t of (1 - F(s)) ds$.
+    See also
+    <https://en.wikipedia.org/wiki/Residual_time#Probability_distribution_of_the_residual_time>.
+
+    Note that the input distribution must be a valid probability distribution 
+    (i.e. total probability = 1), otherwise the result is `Nothing`.
+    
+    If it has zero mean, then it must be a Dirac distribution at 0; considering limits,
+    the residual time is then also a Dirac distribution at 0.
+-}
+residualTime :: DQ -> Maybe DQ
+residualTime f
+    | success /= 1 = Nothing
+    | mu == 0      = Just f
+    | otherwise    = unsafeFromPositiveMeasure <$> Measure.fromDistribution g
+  where
+    (success, moments') = moments f
+    mu = mean moments'
+    df = distribution f  -- unpack the DQ to the piecewise polynomial representation
+    oneMinusF =
+        Piecewise.fromAscPieces
+        $ oneFromZero
+        $ Piecewise.toAscPieces
+        $ Piecewise.mapPieces (Poly.constant 1 -) df
+    g = Piecewise.mapPieces (Poly.scale (1/mu)) $ integral oneMinusF
+
+-- a Piecewise is zero before its first piece, but 1 - F is 1 on [0, x1),
+-- so add that piece explicitly if necessary
+oneFromZero :: (Num a, Ord a) => [(a, Poly a)] -> [(a, Poly a)]
+oneFromZero ps@((x, _) : _)
+    | x > 0 = (0, Poly.constant 1) : ps
+oneFromZero ps = ps
