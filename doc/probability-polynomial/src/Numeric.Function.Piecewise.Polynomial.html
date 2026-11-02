@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">{-|
+Copyright   : Predictable Network Solutions Ltd., 2020-2026
+License     : BSD-3-Clause
+Description : Functions specific to piecewise polynomials.
+-}</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">module</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.Polynomial.html"><span class="hs-identifier">Numeric.Function.Piecewise.Polynomial</span></a></span><span>
+</span><span id="line-7"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- * Operations</span></span><span>
+</span><span id="line-8"></span><span>      </span><span class="annot"><a href="Numeric.Function.Piecewise.Polynomial.html#integral"><span class="hs-identifier">integral</span></a></span><span>
+</span><span id="line-9"></span><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-12"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier">mapAccumL</span></span><span>
+</span><span id="line-13"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html"><span class="hs-identifier">Numeric.Function.Piecewise</span></a></span><span>
+</span><span id="line-15"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier">Piecewise</span></a></span><span>
+</span><span id="line-16"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#fromAscPieces"><span class="hs-identifier">fromAscPieces</span></a></span><span>
+</span><span id="line-17"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier">toAscPieces</span></a></span><span>
+</span><span id="line-18"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Numeric.Polynomial.Simple.html"><span class="hs-identifier">Numeric.Polynomial.Simple</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier">Poly</span></a></span><span>
+</span><span id="line-21"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><a href="Numeric.Polynomial.Simple.html"><span class="hs-identifier">Numeric.Polynomial.Simple</span></a></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">Poly</span></span><span>
+</span><span id="line-24"></span><span>
+</span><span id="line-25"></span><span class="hs-comment">{------------------------------------------------------------------------------
+    Operations
+    Integration
+------------------------------------------------------------------------------}</span><span>
+</span><span id="line-29"></span><span class="annot"><span class="hs-comment">{- | The continuous antiderivative of a piecewise polynomial,
+     taking the value 0 at the start of the first piece.
+-}</span></span><span>
+</span><span id="line-32"></span><span id="local-6989586621679066680"><span class="annot"><a href="Numeric.Function.Piecewise.Polynomial.html#integral"><span class="hs-identifier hs-type">integral</span></a></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Ord</span></span><span> </span><span class="annot"><a href="#local-6989586621679066680"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Fractional</span></span><span> </span><span class="annot"><a href="#local-6989586621679066680"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-glyph">=&gt;</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679066680"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Numeric.Function.Piecewise.html#Piecewise"><span class="hs-identifier hs-type">Piecewise</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Numeric.Polynomial.Simple.html#Poly"><span class="hs-identifier hs-type">Poly</span></a></span><span> </span><span class="annot"><a href="#local-6989586621679066680"><span class="hs-identifier hs-type">a</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-35"></span><span id="integral"><span class="annot"><span class="annottext">integral :: forall a.
+(Ord a, Fractional a) =&gt;
+Piecewise (Poly a) -&gt; Piecewise (Poly a)
+</span><a href="Numeric.Function.Piecewise.Polynomial.html#integral"><span class="hs-identifier hs-var hs-var">integral</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">[(a, Poly a)] -&gt; Piecewise (Poly a)
+[(Domain (Poly a), Poly a)] -&gt; Piecewise (Poly a)
+forall o. Ord (Domain o) =&gt; [(Domain o, o)] -&gt; Piecewise o
+</span><a href="Numeric.Function.Piecewise.html#fromAscPieces"><span class="hs-identifier hs-var">fromAscPieces</span></a></span><span> </span><span class="annot"><span class="annottext">([(a, Poly a)] -&gt; Piecewise (Poly a))
+-&gt; (Piecewise (Poly a) -&gt; [(a, Poly a)])
+-&gt; Piecewise (Poly a)
+-&gt; Piecewise (Poly a)
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Poly a, [(a, Poly a)]) -&gt; [(a, Poly a)]
+forall a b. (a, b) -&gt; b
+</span><span class="hs-identifier hs-var">snd</span></span><span> </span><span class="annot"><span class="annottext">((Poly a, [(a, Poly a)]) -&gt; [(a, Poly a)])
+-&gt; (Piecewise (Poly a) -&gt; (Poly a, [(a, Poly a)]))
+-&gt; Piecewise (Poly a)
+-&gt; [(a, Poly a)]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">(Poly a -&gt; (a, Poly a) -&gt; (Poly a, (a, Poly a)))
+-&gt; Poly a -&gt; [(a, Poly a)] -&gt; (Poly a, [(a, Poly a)])
+forall (t :: * -&gt; *) s a b.
+Traversable t =&gt;
+(s -&gt; a -&gt; (s, b)) -&gt; s -&gt; t a -&gt; (s, t b)
+</span><span class="hs-identifier hs-var">mapAccumL</span></span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; (a, Poly a) -&gt; (Poly a, (a, Poly a))
+forall {a}.
+(Fractional a, Eq a) =&gt;
+Poly a -&gt; (a, Poly a) -&gt; (Poly a, (a, Poly a))
+</span><a href="#local-6989586621679066724"><span class="hs-identifier hs-var">f</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a
+forall a. Num a =&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#zero"><span class="hs-identifier hs-var">Poly.zero</span></a></span><span> </span><span class="annot"><span class="annottext">([(a, Poly a)] -&gt; (Poly a, [(a, Poly a)]))
+-&gt; (Piecewise (Poly a) -&gt; [(a, Poly a)])
+-&gt; Piecewise (Poly a)
+-&gt; (Poly a, [(a, Poly a)])
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">Piecewise (Poly a) -&gt; [(a, Poly a)]
+Piecewise (Poly a) -&gt; [(Domain (Poly a), Poly a)]
+forall o. Ord (Domain o) =&gt; Piecewise o -&gt; [(Domain o, o)]
+</span><a href="Numeric.Function.Piecewise.html#toAscPieces"><span class="hs-identifier hs-var">toAscPieces</span></a></span><span>
+</span><span id="line-36"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-37"></span><span>    </span><span class="hs-comment">-- The accumulator is the antiderivative on the previous piece.</span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-comment">-- Shift the antiderivative on this piece so that it starts</span><span>
+</span><span id="line-39"></span><span>    </span><span class="hs-comment">-- where the previous one ends.</span><span>
+</span><span id="line-40"></span><span>    </span><span id="local-6989586621679066724"><span class="annot"><span class="annottext">f :: Poly a -&gt; (a, Poly a) -&gt; (Poly a, (a, Poly a))
+</span><a href="#local-6989586621679066724"><span class="hs-identifier hs-var hs-var">f</span></a></span></span><span> </span><span id="local-6989586621679066729"><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066729"><span class="hs-identifier hs-var">before</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679066730"><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066730"><span class="hs-identifier hs-var">x</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679066731"><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066731"><span class="hs-identifier hs-var">p</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066732"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066730"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066732"><span class="hs-identifier hs-var">q</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>      </span><span class="hs-keyword">where</span><span>
+</span><span id="line-42"></span><span>        </span><span id="local-6989586621679066736"><span class="annot"><span class="annottext">pp :: Poly a
+</span><a href="#local-6989586621679066736"><span class="hs-identifier hs-var hs-var">pp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; Poly a
+forall a. (Eq a, Fractional a) =&gt; Poly a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#integrate"><span class="hs-identifier hs-var">Poly.integrate</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066731"><span class="hs-identifier hs-var">p</span></a></span><span>
+</span><span id="line-43"></span><span>        </span><span id="local-6989586621679066732"><span class="annot"><span class="annottext">q :: Poly a
+</span><a href="#local-6989586621679066732"><span class="hs-identifier hs-var hs-var">q</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066736"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; Poly a -&gt; Poly a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-operator hs-var">+</span></span><span> </span><span class="annot"><span class="annottext">a -&gt; Poly a
+forall a. a -&gt; Poly a
+</span><a href="Numeric.Polynomial.Simple.html#constant"><span class="hs-identifier hs-var">Poly.constant</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Poly a -&gt; a -&gt; a
+forall a. Num a =&gt; Poly a -&gt; a -&gt; a
+</span><a href="Numeric.Polynomial.Simple.html#eval"><span class="hs-identifier hs-var">Poly.eval</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066729"><span class="hs-identifier hs-var">before</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066730"><span class="hs-identifier hs-var">x</span></a></span><span> </span><span class="annot"><span class="annottext">a -&gt; a -&gt; a
+forall a. Num a =&gt; a -&gt; a -&gt; a
+</span><span class="hs-glyph hs-var">-</span></span><span> </span><span class="annot"><span class="annottext">Poly a -&gt; a -&gt; a
+forall a. Num a =&gt; Poly a -&gt; a -&gt; a
+</span><a href="Numeric.Polynomial.Simple.html#eval"><span class="hs-identifier hs-var">Poly.eval</span></a></span><span> </span><span class="annot"><span class="annottext">Poly a
+</span><a href="#local-6989586621679066736"><span class="hs-identifier hs-var">pp</span></a></span><span> </span><span class="annot"><span class="annottext">a
+</span><a href="#local-6989586621679066730"><span class="hs-identifier hs-var">x</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span></pre></body></html>
