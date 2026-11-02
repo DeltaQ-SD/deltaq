@@ -5,7 +5,7 @@ name:            deltaq
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.2.0.0
+version:         1.2.1.0
 synopsis:        Framework for ∆Q System Development
 description:
   ∆Q System Development is a paradigm for developing distributed systems
@@ -29,10 +29,10 @@ homepage:        https://github.com/DeltaQ-SD/deltaq
 license:         BSD-3-Clause
 license-file:    LICENSE
 copyright:
-  Predictable Network Solutions Ltd., 2003-2025
+  Predictable Network Solutions Ltd., 2003-2026
   PLWORKZ R&D, 2025
 author:          Neil Davies, Heinrich Apfelmus
-maintainer:      neil.davies@pnsol.ccom
+maintainer:      neil.davies@pnsol.com
 extra-doc-files:
   CHANGELOG.md
   README.md
@@ -55,9 +55,9 @@ library
   build-depends:
     , base                    >=4.14.3.0 && <5
     , Chart                   >=1.8      && <2
-    , deepseq                 >=1.4.4.0  && <1.6
+    , deepseq                 >=1.4.4.0  && <1.7
     , lattices                >=2.2      && <2.3
-    , probability-polynomial  >=1.0.1    && <1.1
+    , probability-polynomial  >=1.0.2      && <1.2
     , diagrams-lib            >=1.4.5    && <1.7
     , diagrams-svg            >=1.5      && <1.6
 
@@ -82,7 +82,7 @@ test-suite test
     , deltaq
     , hspec                   >=2.11.0 && <2.12
     , probability-polynomial
-    , QuickCheck              >=2.14   && <2.18
+    , QuickCheck              >=2.14   && <2.19
 
   main-is:            Spec.hs
   other-modules:
