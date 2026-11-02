@@ -50,6 +50,7 @@ library
   exposed-modules:
     Data.Function.Class
     Numeric.Function.Piecewise
+    Numeric.Function.Piecewise.Polynomial
     Numeric.Measure.Discrete
     Numeric.Measure.Finite.Mixed
     Numeric.Measure.Probability
@@ -71,6 +72,7 @@ test-suite test
 
   main-is:            Spec.hs
   other-modules:
+    Numeric.Function.Piecewise.PolynomialSpec
     Numeric.Function.PiecewiseSpec
     Numeric.Measure.DiscreteSpec
     Numeric.Measure.Finite.MixedSpec
