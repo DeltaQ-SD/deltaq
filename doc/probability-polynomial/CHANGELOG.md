@@ -1,5 +1,12 @@
 # Revision history for `probability-polynomial`
 
+## 1.0.2.0 - 2026-11-05
+
+### Added
+
+* New module `Numeric.Function.Piecewise.Polynomial` containing:
+    * Function `integral` to compute the continuous antiderivative of a piecewise polynomial
+
 ## 1.0.1.0 — 2025-09-26
 
 ### Added

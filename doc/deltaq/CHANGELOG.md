@@ -1,5 +1,11 @@
 # Revision history for `deltaq`
 
+## 1.2.1.0 - 2026-11-05
+
+### Added
+
+* Add functions `onConditionOfSuccess` and `residualTime` to `DeltaQ.PiecewisePolynomial`.
+
 ## 1.2.0.0 — 2025-11-21
 
 ### Changed
